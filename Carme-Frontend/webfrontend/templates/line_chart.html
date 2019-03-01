@@ -1,0 +1,36 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>django-chartjs line chart demo</title>
+        <!--[if lte IE 8]>
+            <script src="{% static 'js/excanvas.js' %}"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <h1>ChartJS test</h1>
+        <div class="chart-container" style="position: relative; height:20vh; width:40vw">
+
+        <canvas id="myChart" ></canvas>
+        </div>
+
+        <script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+        <script type="text/javascript">
+            $.get('{% url 'line_chart_json' %}', function(data) {
+                var ctx = $("#myChart").get(0).getContext("2d");
+                new Chart(ctx, {
+                    type: 'line', 
+																				options: { scaleShowLabels: false, 
+																												        scales: {
+																																												          xAxes: [{
+																																																														            display: false
+																																																														}],
+																																												      },
+																				data: data
+                });
+            });
+        </script>
+    </body>
+</html>
+
+

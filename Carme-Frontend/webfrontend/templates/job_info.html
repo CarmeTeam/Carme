@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}Job Info{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+{% if job_details %}
+{% for job in job_details %}
+<div class="main-container">
+<h3>Infos for Job {{ job.SLURM_ID }} - {{ job.jobName }}</h3>
+<table>
+								<tr><td><b>User:</b></td> <td>{{ job.user }}</td><td width=50></td> <td><b>Submit Time:</b></td> <td>{{ job_submit_time }}</td></tr>
+								<tr><td><b>Nodes:</b></td> <td>{{ job_nodes }}: {{job_node_list}}</td><td width=50></td> <td><b>Start Time:</b></td> <td>{{ job_start_time }}</td></td></tr>
+								<tr><td><b>Entry Node:</b></td> <td>{{ job.IP }}</td><td width=50></td> <td><b>Timelimit:</b></td> <td>{{ job_timelimit }}</td></tr> 
+								<tr><td><b>GPUs/Node:</b></td> <td>{{ job.NumGPUs }}</td><td width=50></td> <td><b>CPU Cores/Node:</b></td> <td>{{ job_cores }} | <b>Memory:</b> {{ job_mem}}</td></tr>
+								<tr><td><b>Image:</b></td> <td>{{ job.imageName }}</td><td width=50></td> <td><b>Partition:</b></td> <td>    {{ job_partition }}</td></td></tr> 	
+</table>
+</div>
+<BR>  
+<div class="main-container">
+<table>                                                                                                                                                                                                      
+								<tr> 
+																<td><b>Enter Job:</b></td> 
+																<td><a href="/nb_{{ job.HASH }}/" target="_new"><img src="{% static "jupyter.png" %}" alt="Jupyter" height=40/></A></td>                                       
+																<td><a href="/tb_{{ job.HASH }}/" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="TensorBoard" height=40/></A></td>                                
+								</tr>   
+</table>     
+{% endfor %}                                                                                                                                                                                                 
+{% else %}
+<div class="main-container">
+								<h3> Error: no such job: {{ job.jobName }} </H3>
+							 The job you requested must have been terminated...	
+</div>
+{% endif %}                              
+{% if graph_list %}                                                                                                                                                                                           
+{% for graph in graph_list %} 
+<BR><BR>
+<img src="{% static graph %}" alt="graph"><BR> 
+{% endfor %}
+{% else %}
+<div class="main-container">
+<h3> Error: no graphs for this job.</H3>
+
+</div>
+{% endif %}
+{% endif %}
+</div>
+{% endblock %}
+

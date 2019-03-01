@@ -1,0 +1,54 @@
+<!---
+# ---------------------------------------------- 
+# Carme
+# ----------------------------------------------
+#                                                                                                                                                                                                            
+# see Carme development guide for documentation: 
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM  
+# License: http://open-carme.org/LICENSE.md 
+# Contact: info@open-carme.org
+# ---------------------------------------------
+-->
+
+{% load static %}
+{% if user.is_superuser %}
+<div class="main-container">
+								<h3> CARME Admin tools </h3>
+								<div class="tool-container">
+																<A href="/carme-base/AdminClusterStatus/"><img src="{% static "status.jpg" %}" alt="Jobs" width=60/> Cluster</A> 
+								</div>
+								<div class="tool-container">
+																<A href="/carme-base/AdminJobTable/"><img src="{% static "jobs.jpg" %}" alt="Jobs" width=60/> Jobs</A> 
+								</div>
+								<div class="tool-container">
+																<A href="/wiki/cluster_news/"><img src="{% static "info.jpg" %}" alt="Add Message" width=60/> Edit News</A> 
+								</div>
+								<div class="tool-container">
+																<A href="/admin/" target="_new"><img src="{% static "tools.jpg" %}" alt="Admin Portal" width=60/> Admin Portal</A> 
+								</div>
+								<div class="tool-container">
+																<A href= {{ settings.CARME_FRONTEND_LINK_PROXY }} target="_new"><img src="{% static "proxy.jpg" %}" alt="Proxy" width=60/> Proxy</A> 
+								</div>
+								<div class="tool-container">
+																<A href= {{ settings.CARME_FRONTEND_LINK_MONITOR }}  target="_new"><img src="{% static "performance.jpg" %}" alt="Monitor" width=60/> Monitor</A> 
+								</div>
+								<div class="tool-container">
+																<A href= {{ settings.CARME_FRONTEND_LINK_SWITCH }} target="_new"><img src="{% static "switch.jpg" %}" alt="Switch" width=60/> Switch</A> 
+								</div>
+								<div class="tool-container">
+																<A href= {{ settings.CARME_FRONTEND_LINK_LDAP }} target="_new"><img src="{% static "ldap.jpg" %}" alt="LDAP" width=60/> LDAP</A> 
+								</div>
+								{% if maintenance_mode %}
+								<div class="maintenance-on-container"> 
+																<A href="/carme-base/maintenance-mode/off/"><img src="{% static "settings.jpg" %}" alt="LDAP" width=60/> Maintenance OFF</A>
+								</div>	
+								{%else %}
+								<div class="maintenance-off-container">
+																<A href="/carme-base/maintenance-mode/on/"><img src="{% static "settings.jpg" %}" alt="LDAP" width=60/> Maintenance ON</A>  
+								</div>
+								{% endif %}
+</div>
+
+{% endif %}

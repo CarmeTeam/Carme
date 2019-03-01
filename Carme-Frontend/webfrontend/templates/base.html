@@ -1,0 +1,89 @@
+<!---
+# ---------------------------------------------- 
+# Carme
+# ----------------------------------------------
+# base.html - defining the basic page layout     
+#                                                                                                                                                                                                            
+# see Carme development guide for documentation: 
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM  
+# License: http://open-carme.org/LICENSE.md 
+# Contact: info@open-carme.org
+# ---------------------------------------------
+-->
+
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static "home.css" %}">
+<!DOCTYPE html>
+<html>
+								<head>
+																<script src="{% static "jquery-latest.js" %}"></script>						
+																<meta charset="utf-8">
+																<title>{% block title %}Fraunhofer GPU-Cluster login{% endblock %}</title>
+																<link rel="apple-touch-icon" sizes="57x57" href="{% static "favicon/apple-icon-57x57.png" %}">
+																<link rel="apple-touch-icon" sizes="60x60" href="{% static "favicon/apple-icon-60x60.png" %}">
+																<link rel="apple-touch-icon" sizes="72x72" href="{% static "favicon/apple-icon-72x72.png" %}">
+																<link rel="apple-touch-icon" sizes="76x76" href="{% static "favicon/apple-icon-76x76.png" %}">
+																<link rel="apple-touch-icon" sizes="114x114" href="{% static "favicon/apple-icon-114x114.png" %}">
+																<link rel="apple-touch-icon" sizes="120x120" href="{% static "favicon/apple-icon-120x120.png" %}">
+																<link rel="apple-touch-icon" sizes="144x144" href="{% static "favicon/apple-icon-144x144.png" %}">
+																<link rel="apple-touch-icon" sizes="152x152" href="{% static "favicon/apple-icon-152x152.png" %}">
+																<link rel="apple-touch-icon" sizes="180x180" href="{% static "favicon/apple-icon-180x180.png" %}">
+																<link rel="icon" type="image/png" sizes="192x192"  href="{% static "favicon/android-icon-192x192.png" %}">
+																<link rel="icon" type="image/png" sizes="32x32" href="{% static "favicon/favicon-32x32.png" %}">
+																<link rel="icon" type="image/png" sizes="96x96" href="{% static "favicon/favicon-96x96.png" %}">
+																<link rel="icon" type="image/png" sizes="16x16" href="{% static "favicon/favicon-16x16.png" %}">
+
+								</head>
+								<body bgcolor='white'>
+																<header>
+																								<div class="header-container"> 						
+																																<table border=0>
+																																								<tr>	  
+																																																<td><a href= {{ settings.CARME_FRONTEND_LINK_ORGA_URL }}><img src="{% static settings.CARME_FRONTEND_LOGO_TOP_LEFT %}" alt="logo" width=200/></a></td>	  
+																																																<td width=100%><center><b> {% if settings.CARME_FRONTEND_DEBUG %} <font color="red">DEBUG</font>{% endif %} {{ settings.CARME_FRONTEND_TITLE }}</b></center></td>
+																																																<td><img src="{% static settings.CARME_FRONTEND_LOGO_TOP_RIGHT_1 %}" alt="logo" width=100/></td>
+																																																<td><a href="http://www.bmbf.de"><img src="{% static settings.CARME_FRONTEND_LOGO_TOP_RIGHT_2 %}" alt="logo" width=100/></a></td>	
+																																								</tr>
+																																</table>
+																																<BR>
+																																{% if user.is_authenticated %}
+																																<div class="menue-action-container"> <A href="/"><img src="{% static "home.jpg" %}" alt="home" height=15/></A> </div>&nbsp;
+																																<div class="menue-container">	User: {{ user.username }} 	</div>&nbsp;
+																																<div class="menue-container"> Staff: {{user.is_staff}} </div>&nbsp;
+																																<div class="menue-container"> Admin: {{user.is_superuser}} </div>&nbsp;
+																																<div class="menue-container"> Groups: {% for g in user.ldap_user.group_names %}{{g}} {%endfor%}  </div>&nbsp;
+																																<div class="menue-container"> Session timeout: {{request.session.get_expiry_date}} </div>&nbsp;
+																																<div class="menue-action-container" style="float:right"> <a href="{% url 'logout' %}"><img src="{% static "unplug.jpg" %}" alt="logout" height=15/></a>  </div>
+																																{% else %}
+																																<!--
+																																-->
+																																{% endif %}
+																								</div>
+																</header>
+																<BR>
+																<main>
+																{% block content %}
+																{% endblock %}
+																</main>
+																<footer>
+																								<BR>
+																								<div class="footer-container">
+																																<table width=100%>
+																																								<tr>
+																																																<td style="vertical-align:middle">
+																																																								<b>
+																																																																&nbsp;&nbsp;<A HREF={{ settings.CARME_FRONTEND_LINK_DISCLAIMER }} color="black">DISCLAIMER</A><BR><BR>
+																																																																&nbsp;&nbsp;<A HREF={{ settings.CARME_FRONTEND_LINK_PRIVACY }}>Data privacy statement</A></b><BR><BR>
+																																																&nbsp;&nbsp;{% if CARME_VERSION %}Carme Version: {{ CARME_VERSION }} {%endif%} 
+																																																</td>
+																																																<td  align="right" valign="middle">
+																																																								<a href="http://open-carme.org" data-title="Test Title" target="_blank"><img src="{% static "carme-logo-text.png" %}" alt="carme logo" width=100/></a><br>
+																																																</td>
+																																								</tr>
+																																</table>
+																								</div>
+																</footer>
+								</body>
+</html>

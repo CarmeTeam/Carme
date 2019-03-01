@@ -1,0 +1,12 @@
+CarmeConfig
+
+*~
+*.swp
+
+**/.ipynb_checkpoints/
+*Untitled*.ipynb
+
+InsideContainer/Carme-Messages/99-carme-webfrontend-messages.txt
+
+ldap/carme-ldap-add-random-user.sh
+

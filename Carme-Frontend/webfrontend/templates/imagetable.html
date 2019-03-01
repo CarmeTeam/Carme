@@ -1,0 +1,134 @@
+<!---
+								# ---------------------------------------------- 
+								# Carme
+								# ----------------------------------------------
+								# imagetable.html                                                                                                                                                                     
+								#                                                                                                                                                                                                            
+								# see Carme development guide for documentation: 
+								# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+								#
+								# Copyright 2019 by Fraunhofer ITWM  
+								# License: http://open-carme.org/LICENSE.md 
+								# Contact: info@open-carme.org
+								# ---------------------------------------------
+-->
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Carme Home{% endblock %}
+{% block content %}
+{% include "blocks/java_scripts.html" %}
+
+{% if user.is_staff %}
+<div class="main-container">
+								<h2>Images</h2>
+</div>
+<br>
+<div class="main-container">
+								<H3>Active Images</H3>
+								{% if image_list_active %}
+								Legend: <b>D</b>eactivate image | <b>C</b>lone image | <b>R</b>un image | create <b>S</b>andbox from image
+								<div id="table-wrapper">
+																<div id="table-scroll">
+																								<table class="JobHistTable">
+																																<thead>
+																																								<tr>
+																																																<td width=20%><b>Image</b></td>
+																																																<td width=5%><b>ID</b></td>
+																																																<td width=10%><b>Group</b></td>
+																																																<td width=45%><b>Comments</b></td>
+																																																<td width=5%><b>D</b></td>
+																																																<td width=5%><b>C</b></td>
+																																																<td width=5%><b>R</b></td>
+																																																<td width=5%><b>S</b></td>
+
+																																								</tr>
+																																</thead>
+																																{% for i in image_list_active %}
+																																<tr>
+																																								<td>{{i.image_name}}</td>
+																																								<td>{{i.id}}</td>
+																																								<td>{{i.image_group}}</td>
+																																								<td>{{i.image_comment }}</td>
+																																								<td> <img src="{% static "unplug.jpg" %}" alt="deactivate" height=20/> </td>
+																																								<td> <img src="{% static "copy.jpg" %}" alt="clone" height=20/> </td>
+																																								<td>
+																																																<form action="/carme-base/StartJob/" method="post">{% csrf_token %}
+																																																								<input type="hidden" name="nodes" value="1">
+																																																								<input type="hidden" name="gpus" value="1">
+																																																								<input type="hidden" name="image" value="{{i.image_name}}">
+																																																								<input type="image" src="{% static "play.jpg" %}" alt="run" width=20 />
+																																																</form>
+																																								</td>
+																																								<td> <img src="{% static "box.jpg" %}" alt="sandbox" height=20/> </td>
+																																</tr>
+																																{% endfor %}
+																								</table>
+																</div>
+								</div>
+
+								{% else %}
+								No active images in DB.
+								{% endif %}	
+</div>
+<br>
+<div class="main-container">
+								<H3>Sandbox Images</H3>
+								{% if image_list_sandbox %}
+								Legend: <b>D</b>elete Sandbox | <b>R</b>un sanbox image | <b>C</b>reate image from sandbox 
+								<div id="table-wrapper">
+																<div id="table-scroll">
+																								<table class="JobHistTable">
+																																<thead>
+																																								<tr>
+																																																<td width=20%><b>Image</b></td>
+																																																<td width=5%><b>ID</b></td>
+																																																<td width=10%><b>Group</b></td>
+																																																<td width=45%><b>Comments</b></td>
+																																																<td width=5%><b>D</b></td>
+																																																<td width=5%><b>R</b></td>
+																																																<td width=5%><b>C</b></td>
+
+																																								</tr>
+																																</thead>
+																																{% for i in image_list_sandbox %}
+																																<tr>
+																																								<td>{{i.image_name}}</td>
+																																								<td>{{i.id}}</td>
+																																								<td>{{i.image_group}}</td>
+																																								<td>{{ i.image_comment }}</td>
+																																								<td> <img src="{% static "unplug.jpg" %}" alt="delete" height=20/> </td>
+																																								<td>
+																																																<form action="/carme-base/StartJob/" method="post">{% csrf_token %}
+																																																								<input type="hidden" name="nodes" value="1">
+																																																								<input type="hidden" name="gpus" value="1">
+																																																								<input type="hidden" name="image" value="{{i.image_name}}">
+																																																								<input type="image" src="{% static "play.jpg" %}" alt="run" width=20 />
+																																																</form>
+																																								</td>
+																																								<td> <img src="{% static "box2.jpg" %}" alt="create" height=20/> </td>
+																																</tr>
+																																{% endfor %}
+																								</table>
+																</div>
+								</div>
+
+								{% else %}
+								No active sandox images in DB.
+								{% endif %} 
+
+</div>
+{% if user.is_superuser %}
+<BR>
+{% include "blocks/admin_footer.html" %}
+{% endif %}
+<BR>
+{% include "blocks/footer.html" %}
+
+{% else %}
+<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
+Cluster Access is ristricted to authorized users with at least <b>Staff</b> rights.<BR><BR>
+Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
+{% endif %}
+
+{% endblock %}

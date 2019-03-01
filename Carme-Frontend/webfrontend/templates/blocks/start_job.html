@@ -1,0 +1,36 @@
+<!---
+# ---------------------------------------------- 
+# Carme
+# ----------------------------------------------
+#                                                                                                                                                                                                            
+# see Carme development guide for documentation: 
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM  
+# License: http://open-carme.org/LICENSE.md 
+# Contact: info@open-carme.org
+# ---------------------------------------------
+-->
+
+{% load static %}
+{% if user.is_authenticated %}
+<div>
+								<h3>
+																<img src="{% static "play.jpg" %}" width=30/> 
+																Start new Job:
+								</h3>
+</div>
+<div class="start-job"> 
+								<form action="/carme-base/StartJob/" method="post">
+																{% csrf_token %}
+																{{ start_job_form }}
+																<input type="submit" value="">
+								</form>
+</div> 
+{% else %}
+<h3>{{ settings.CARME_FRONTEND_TITLE }}</h3>
+Cluster Access is ristricted to authorized users.<BR><BR>
+Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
+{% endif %}
+
+

@@ -1,0 +1,30 @@
+<!---
+# ---------------------------------------------- 
+# Carme
+# ----------------------------------------------
+#                                                                                                                                                                                                            
+# see Carme development guide for documentation: 
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM  
+# License: http://open-carme.org/LICENSE.md 
+# Contact: info@open-carme.org
+# ---------------------------------------------
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="login-background">
+								<div class="loginmodal-container">
+																<h2>Login</h2>
+																<form method="post">
+																								{% csrf_token %}
+																								{{ form.as_p }}
+																								<input type="submit" name="login" class="login loginmodal-submit" value="Login">
+																</form>
+								</div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!---
+# ---------------------------------------------- 
+# Carme
+# ----------------------------------------------
+# admin_cluster_status.py                                                                                                                                         
+#                                                                                                                                                                                                            
+# see Carme development guide for documentation: 
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM  
+# License: http://open-carme.org/LICENSE.md 
+# Contact: info@open-carme.org
+# ---------------------------------------------
+-->
+
+{% extends 'base.html' %}
+{% load static %}
+{% load staticfiles %} 
+{% block title %}Carme Home{% endblock %}
+{% block content %}
+
+{% include "blocks/java_scripts.html" %}
+{% if user.is_authenticated %}
+<div class="main-container">
+								<h2>Admin View: Cluster Status</h2>
+
+								{% if user.is_superuser %}
+
+								<div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; max-width: 1024px;">
+																<iframe scrolling="no" src={{ settings.CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR }} style="border: 0px none; margin-left: -1px; height: 580px    ; margin-top: -80px; width: 1024px;">
+																</iframe>
+								</div>
+</div>
+<br>
+
+{% include "blocks/admin_footer.html" %}
+<BR>		
+{% endif %}
+{% include "blocks/footer.html" %}
+{% else %}
+<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
+Cluster Access is ristricted to authorized users.<BR><BR>
+Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
+{% endif %}
+
+{% endblock %}

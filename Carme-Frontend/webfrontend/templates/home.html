@@ -1,0 +1,128 @@
+<!---
+								# ---------------------------------------------- 
+								# Carme
+								# ----------------------------------------------
+								# home.html                                                                                                                                                                      
+								#               
+								# see Carme development guide for documentation: 
+								# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+								#
+								# Copyright 2019 by Fraunhofer ITWM  
+								# License: http://open-carme.org/LICENSE.md 
+								# Contact: info@open-carme.org
+								# ---------------------------------------------
+-->
+
+{% extends 'base.html' %}
+{% load static %}
+{% load staticfiles %} 
+{% block title %}Carme Home{% endblock %}
+{% block content %}
+
+<!-- <meta http-equiv="refresh" content="60" /> -->
+{% if user.is_authenticated %}
+
+{% include "blocks/maintenance.html" %}
+<div class="double-container">
+								<div class="news-container">
+																<div>
+																								<h3>
+																																<img src="{% static "info.jpg" %}" width=30/>
+																																Cluster News
+																								</h3>
+																</div>
+																<div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left">
+																								<iframe scrolling="no" src="/wiki/cluster_news/" style="border: 0px none; margin-left: -20px; height: 450px; margin-top: -250px; width: 400px;" align="left" >                
+																								</iframe>
+																</div>
+								</div>
+								<div class="double-space"></div>
+								<div class="news-container">
+																<div >
+																								<h3>
+																																<img src="{% static "status2.jpg" %}" width=30/> 
+																																Status 
+																								</h3>
+																								<div class="chart-container" style="position: relative; height:15vh; width:20vw"> 							
+																																<canvas id="myChart" ></canvas>
+																								</div> 
+																								<script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script> 
+																								<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+																								<script type="text/javascript"> 
+$.get('{% url 'line_chart_json' %}', function(data) {
+								var ctx = $("#myChart").get(0).getContext("2d");  
+								new Chart(ctx, { 
+																type: 'line', data: data, 
+																options: {
+																								scales: {
+																																xAxes: [{
+																																								ticks: {
+																																																display: true //this will remove only the label
+																																								},
+																																								scaleLabel: { 
+																																																labelString: 'time',
+																																																display: false
+																																								}
+
+																																}],
+																																yAxes: [{
+																																								stacked: true,
+																																								scaleLabel: {
+																																														labelString: '#GPUs (stacked)',
+																																														display: true
+																																								}
+
+																																}]							
+																								},
+																								elements: {
+																																line: {
+																																								tension: 1, // disables bezier curves
+																																								}
+																										        }
+
+																}	
+								});      
+});
+																								</script>   
+																</div>
+
+								</div>
+								<div class="double-space"></div>
+								<div class="news-container">
+																<div > 
+																								<h3> 
+																																<img src="{% static "warning.jpg" %}" width=30/> 
+																																Messages   
+																								</h3> 
+																</div>
+															 <div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left"> 
+																								<iframe scrolling="no" src="/carme-base/Messages/" style="border: 0px none; height: 200px; margin-top: -1px; width: 100%;" align="left" > 
+																								</iframe> 
+																</div>
+
+								</div>           
+</div>
+<BR>
+<div class="main-container">
+
+								{% include "blocks/start_job.html" %} 
+								<div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left"> 
+																<iframe scrolling="no" src="/carme-base/JobTable/" style="border: 0px none; height: {{ jobheight }}px; margin-top: -1px; width: 100%;" align="left" >
+																</iframe> 
+								</div>
+</div>
+<BR>
+{% if user.is_superuser %}
+{% include "blocks/admin_footer.html" %} 
+<BR>  
+{% endif %}
+{% include "blocks/footer.html" %}
+{% else %}
+<div class="main-container">
+								<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
+								Cluster Access is ristricted to authorized users.<BR><BR>
+								Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
+</div>
+{% endif %}
+
+{% endblock %}
