@@ -91,7 +91,7 @@ alias nvidia-smi='nvidia-smi -i $GPUS'
 source ~/.carme/.bash_carme_$SLURM_JOBID
 
 #start multi node severs
-if [ "$GPUS" > 1 ]; then
+if [ "$GPUS" -gt "1" ]; then
 	#DASK
 	DASK_JOB_DIRECTORY="/home/"$USER"/.job-log-dir/dask_job_"$SLURM_JOB_ID"_"$SLURM_JOB_NAME
 	DASK_MASTER=$(hostname)
