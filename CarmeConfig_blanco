@@ -220,8 +220,9 @@ CARME_BUILDNODE_3_IP=""
 CARME_COMPUTENODES_3=""
 #e.g. node10 node11 node12 ... [same hardware as BUILDNODE_3, if not needed leave empty]
 
-CARME_HARDWARE_NUM_GPUS=""32 #EXPORT_TO_FRONTEND
+CARME_HARDWARE_NUM_GPUS=""    #EXPORT_TO_FRONTEND
 #e.g. 100 [this is the total number of GPUs in the Cluster]
+#has to be an integer number!
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -571,6 +572,7 @@ CARME_MATTERMOST_WEBHOCK_2=""
 #System Hardware ---------------------------------------------------------------------------------------------------------------
 CARME_SYSTEM_GPUS_PER_NODE=""                                    #EXPORT_TO_FRONTEND EXPORT_TO_CONTAINER
 #e.g.
+#has to be an integer number!
 
 CARME_SYSTEM_DEFAULT_NETWORK=""                           #EXPORT_TO_CONTAINER
 #this is the interface name of the network connection within the Cluster.
