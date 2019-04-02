@@ -22,7 +22,7 @@ import MySQLdb
 import datetime
 
 import imp
-imp.load_source('CarmeConfig', '/opt/development/CarmeConfig')
+imp.load_source('CarmeConfig', '/opt/Carme/CarmeConfig')
 from CarmeConfig import *
 
 
