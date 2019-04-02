@@ -32,10 +32,10 @@ fi
 echo $CARME_SSL_C $CARME_SSL_ST $CARME_SSL_L $CARME_SSL_O ${CARME_SSL_OU}
 echo "creating certs for user " $1
 openssl genrsa -out $1.key 4096  
-openssl req -new -key $1.key -out $1.csr -days 3650 -subj "/C=$CARME_SSL_C/ST=$CARME_SSL_ST/L=$CARME_SSL_L/O=$CARME_SSL_O/OU=${CARME_SSL_OU}/CN=${1}/emailAddress=$1$CARME_SSL_EMAIL_BASE" -passin pass:"" 
+openssl req -new -key $1.key -out $1.csr -days 3652 -subj "/C=$CARME_SSL_C/ST=$CARME_SSL_ST/L=$CARME_SSL_L/O=$CARME_SSL_O/OU=${CARME_SSL_OU}/CN=${1}/emailAddress=$1$CARME_SSL_EMAIL_BASE" -passin pass:"" 
 
 #NOTE: backend key and cert must be in this directory    
-openssl x509 -req -in $1.csr -CA backend.crt -CAkey backend.key -set_serial 01 -out $1.crt                                                                                                            
+openssl x509 -req -days 3652 -in $1.csr -CA backend.crt -CAkey backend.key -set_serial 01 -out $1.crt                                                                                                            
 chown $1 $1.*
 chmod 700 $1.*
 chgrp $(id -g $1) $1.*
