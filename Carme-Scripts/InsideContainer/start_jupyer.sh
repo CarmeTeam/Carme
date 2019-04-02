@@ -92,7 +92,9 @@ alias nvidia-smi='nvidia-smi -i $GPUS'
 source ~/.carme/.bash_carme_$SLURM_JOBID
 
 #start multi node severs
+echo "GPUS: " $GPUS "${#GPUS}"
 if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
+	echo "Starting DASK"							
 	#DASK
 	DASK_JOB_DIRECTORY="/home/"$USER"/.job-log-dir/dask_job_"$SLURM_JOB_ID"_"$SLURM_JOB_NAME
 	DASK_MASTER=$(hostname)
@@ -171,10 +173,13 @@ if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
 						 env > ~/.ssh/environment #make local env available	
 							echo "staring SSHD on MASTER" $(hostname)
 							/usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key -E ~/.SSHD_log -f $SSHDIR/sshd_config & 
+else
+								echo "NO DASK"
 fi
 
 
 # start tensorboard ----------------------------------------------------------------------------------------------------------------
+echo "Starting Tesorboard on" ${TB_PORT}
 TENSORBOARD_LOG_DIR="${TBDIR}/tensorboard_${SLURM_JOB_ID}"
 mkdir $TENSORBOARD_LOG_DIR
 
@@ -183,6 +188,7 @@ mkdir $TENSORBOARD_LOG_DIR
 
 
 # start theia ----------------------------------------------------------------------------------------------------------------------
+echo "Starting Theia on" $TA_PORT
 THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
 mkdir -p $THEIA_JOB_TMP
 cd /opt/source/carme-theia-ide/
@@ -192,6 +198,7 @@ cd
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
+echo "Starting Jupyter on" $NB_PORT
 /opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
