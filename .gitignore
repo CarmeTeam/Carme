@@ -8,6 +8,7 @@ CarmeConfig.container
 tmp
 *.out
 *.pyc
+maintenance_mode_state.txt
 
 dist_*
 zabbix-graphs/
