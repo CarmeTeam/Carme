@@ -47,8 +47,8 @@ grep CONTAINER CarmeConfig >> CarmeConfig.container
 chmod 700 CarmeConfig.frontend
 chmod 755 CarmeConfig.container
 
-scp CarmeConfig.frontend ${CARME_LOGINNODE_NAME}:${CARME_FRONTEND_PATH}/
-ssh ${CARME_LOGINNODE_NAME} "chown www-data ${CARME_FRONTEND_PATH}/CarmeConfig.frontend; chgrp www-data ${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
+cp CarmeConfig.frontend ${CARME_FRONTEND_PATH}/
+chown www-data:www-data ${CARME_FRONTEND_PATH}/CarmeConfig.frontend
 
 cp CarmeConfig.container ${CARME_SCRIPT_PATH}/../InsideContainer/
 
