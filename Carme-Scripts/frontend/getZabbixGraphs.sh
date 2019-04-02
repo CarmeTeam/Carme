@@ -14,17 +14,23 @@
 # Contact: info@open-carme.org                      
 # ---------------------------------------------   
 
-source ../../CarmeConfig
-
+CLUSTER_DIR="/opt/Carme"
+CONFIG_FILE="CarmeConfig"
 
 SETCOLOR='\033[1;33m'
 NOCOLOR='\033[0m'
 #-----------------------------------------------------------------------------------------------------------------------------------
+if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
+  source $CLUSTER_DIR/$CONFIG_FILE
+else
+  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
+  exit 137
+fi
 
-
-CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE_FINAL="/opt/Carme/Carme-Frontend/static/zabbix-graphs"
 CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE="/opt/zabbix-graphs"
-CARME_NETWORK_BASE="192.168.152."
+if [ ! -d ${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE} ]; then
+  mkdir ${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE}
+fi
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -99,6 +105,6 @@ wget -o tmp -O $CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE/GPU_1_use_${CARME_NETWORK_B
 wget -o tmp -O $CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE/GPU_1_use_${CARME_NETWORK_BASE}25.png ${CARME_NETWORK_BASE}1:8383/chart2.php?graphid=976&period=36000&width=800 
 wget -o tmp -O $CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE/GPU_1_use_${CARME_NETWORK_BASE}26.png ${CARME_NETWORK_BASE}1:8383/chart2.php?graphid=980&period=36000&width=800
 
-sleep 10    #needed but why??
-scp -v ${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE}/* ${CARME_LOGINNODE_NAME}:${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE_FINAL}/
+sleep 10
+cp -v ${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE}/* ${CARME_ZABBIX_GRAPH_PATH}/
 
