@@ -298,7 +298,7 @@ def generateChoices(request):
 
     group = list(request.user.ldap_user.group_names)[0]
     # .order_by('image_name')  # ,image_status__exact="active")
-    image_list = Images.objects.all().filter(image_group__exact=group)
+    image_list = Images.objects.all().filter(image_group__exact=group).filter(image_status__exact="active")
     image_choices = set()
     for i in image_list:
         image_choices.add((i.image_name, i.image_name))
