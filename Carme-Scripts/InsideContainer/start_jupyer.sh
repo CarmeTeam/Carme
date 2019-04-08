@@ -188,14 +188,12 @@ mkdir $TENSORBOARD_LOG_DIR
 
 
 # start theia ----------------------------------------------------------------------------------------------------------------------
-#NOTE: turned off - not working right now
-#echo "Starting Theia on" $TA_PORT
-#THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
-#mkdir -p $THEIA_JOB_TMP
-#cd /opt/source/carme-theia-ide/
-#cd 
-#TMPDIR=$THEIA_JOB_TMP TMP=$THEIA_JOB_TMP TEMP=$THEIA_JOB_TMP node_modules/.bin/theia start /home/${USER} --hostname $IPADDR --port $TA_PORT --startup-timeout -1 &
-#cd
+echo "Starting Theia on" $TA_PORT
+THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
+mkdir -p $THEIA_JOB_TMP
+cd /opt/theia-ide/
+TMPDIR=$THEIA_JOB_TMP TMP=$THEIA_JOB_TMP TEMP=$THEIA_JOB_TMP /opt/anaconda3/bin/node node_modules/.bin/theia start /home/${USER} --hostname $IPADDR --port $TA_PORT --startup-timeout -1 &
+cd
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
