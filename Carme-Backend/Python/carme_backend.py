@@ -252,7 +252,7 @@ class CarmeBackEndService(rpyc.Service):
             	passwd=CARME_DB_PW,  db=CARME_DB_DB)
                                                                                                                                                                   
         cur = db.cursor()
-        sql='select GPUS from `carme-base_slurmjobs` where IP="'+str(IP)+'";' 	
+        sql='select GPUS from `carme-base_slurmjobs` where IP="'+str(IP)+'" and STATUS="running";' 	
 
         try:
             cur.execute(sql)
@@ -265,11 +265,12 @@ class CarmeBackEndService(rpyc.Service):
 
 
         GPUS_used=[]
-        for i in results: 
+        for i in results:
+                print ("used GPU: ", i[0])
                 GPUS_used.append(i[0])
-        print(GPUS_used)
-        print(possible_GPUs)
-        print(numGPUs)
+        print("GPUs used: ",GPUS_used)
+        print("possible GPUs: ",possible_GPUs)
+        print("num GPUs: ",numGPUs)
         res_list=list(set(possible_GPUs)-set(GPUS_used))[0:numGPUs]
         #make string   
         res=""  
@@ -277,8 +278,8 @@ class CarmeBackEndService(rpyc.Service):
         for i in res_list:
                 res+=str(i)+"," 
                     
-        if CARME_BACKEND_DEBUG:
-            print ("Free GPUS: ", res[:-1]) 
+        #if CARME_BACKEND_DEBUG:
+        print ("Free GPUS: ", res[:-1]) 
         return res[:-1]
 
     def exposed_userAlterJobDB(self, IPADDR, HASH, NB_PORT, TB_PORT, SLURM_JOBID, URL, GPUS, DBJOBID ):

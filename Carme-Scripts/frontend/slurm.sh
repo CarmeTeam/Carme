@@ -44,6 +44,7 @@ fi
 #------------------------------------------------------
 
 echo "SLURM CHECK PARAMS" $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT
+
 GPU_DEVICES=$( ${CARME_SCRIPT_PATH}/dist_get_free_gpu_on_host/get_free_gpu_on_host $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT)
 echo "SLURM MASTER GPUS: " $IPADDR $GPUS $GPU_DEVICES
 #------------------------------------------------------
