@@ -65,7 +65,7 @@ def index(request):
     for j in slurm_list:
         if j.status == "running":
             StatUsedGPUs += j.NumGPUs * j.NumNodes
-        else:
+        if j.status == "queued":
             StatQueudGPUs += j.NumGPUs * j.NumNodes 
 
     #StatUsedGPUs = SlurmJobs.objects.all().filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
