@@ -65,7 +65,7 @@ def index(request):
     for j in slurm_list:
         if j.status == "running":
             StatUsedGPUs += j.NumGPUs * j.NumNodes
-        if j.status == "queued":
+        elif j.status == "queued":
             StatQueudGPUs += j.NumGPUs * j.NumNodes 
 
     #StatUsedGPUs = SlurmJobs.objects.all().filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
@@ -509,6 +509,18 @@ def stop_job(request):
             jobName = form.cleaned_data['jobName']
             jobUser = form.cleaned_data['jobUser']
 
+            # delete job from db -> moved to backend
+            #try:
+            #    m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
+            #    print ("delete query: ", jobID, jobName, jobUser)
+            #    print (m[0])
+            #    while m[0]!=0:
+            #        m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
+            #        print ("delete query: ", jobID, jobName, jobUser)
+            #        print (m[0])
+            #except:
+            #    raise Exception("ERROR stopping job [DB]")
+
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
@@ -516,7 +528,7 @@ def stop_job(request):
                 message = "FRONTEND: Error stopping job " + \
                     str(jobName) + " for user " + str(jobUser)
                 db_logger.exception(message)
-                raise Exception("ERROR starting job")
+                raise Exception("ERROR stopping job [backend]")
 
             # NOTE: this part should move to the backend as well
             if jobID > 0:  # job is running
@@ -529,8 +541,6 @@ def stop_job(request):
                     db_logger.exception(message)
                     raise Exception("ERROR removing proxy rule")
 
-            # delete job from db
-            m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
             # meseage and return
             #mess = 'Job '+str(jobID)+' deleted !'
             #messages.success(request, mess)  # add messages
