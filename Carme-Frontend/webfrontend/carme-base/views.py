@@ -50,7 +50,7 @@ def index(request):
     job_list_user = RuningJobs.objects.all().filter(user__exact=current_user)
     job_list = RuningJobs.objects.all()
     slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
-    slurm_list = SlurmJobs.objects.all()
+    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
     jobheight = 120+numjobs*70
     message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
@@ -104,7 +104,7 @@ def admin_job_table(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     current_user = request.user.username
-    slurm_list = SlurmJobs.objects.all()
+    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout")
     numjobs = len(slurm_list)
     jobheight = 120+numjobs*60
     template = loader.get_template('../templates/admin_job_table.html')
