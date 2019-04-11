@@ -77,9 +77,9 @@ if [ ! -d $NBDIR ];then
   mkdir $NBDIR                                                                                                                                                                          
 fi
 
-echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.jupyter/jupyter_notebook_config.py
-echo "c.NotebookApp.token = ''" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.jupyter/jupyter_notebook_config.py 
+echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
+echo "c.NotebookApp.token = ''" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
+echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py 
 #idel job time outs
 #echo "c.MappingKernelManager.cull_idle_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
 #echo "c.NotebookApp.shutdown_no_activity_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
