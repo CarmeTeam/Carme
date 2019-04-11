@@ -13,7 +13,7 @@ NB_PORT=$2
 TB_PORT=$3
 TA_PORT=$4
 USER=$5
-HASH=$6
+MYHASH=$6
 GPUS=$7
 MEM=$8
 
@@ -119,7 +119,7 @@ if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
   	 mkdir $DASK_JOB_DIRECTORY
 	fi             
 
-	dask-scheduler --port $DASK_MASTER_PORT --bokeh-port $DASK_DASHBOARD_PORT --bokeh-prefix=/dd_${HASH} --local-directory ${DASK_SCHEDULER_DIR} & #scheduler output is going to generel job_log
+	dask-scheduler --port $DASK_MASTER_PORT --bokeh-port $DASK_DASHBOARD_PORT --bokeh-prefix=/dd_${MYHASH} --local-directory ${DASK_SCHEDULER_DIR} & #scheduler output is going to generel job_log
 							
 	CUDA_VISIBLE_DEVICES=0 dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_0} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_0} >> $DASK_MASTER_WORKER_OUTPUT_0 &
 							
@@ -179,11 +179,11 @@ fi
 
 
 # start tensorboard ----------------------------------------------------------------------------------------------------------------
-echo "Starting Tesorboard " ${TENSORBOARD_LOG_DIR} ${TB_PORT} ${HASH} 
+echo "Starting Tesorboard " ${TENSORBOARD_LOG_DIR} ${TB_PORT} ${MYHASH} 
 TENSORBOARD_LOG_DIR="${TBDIR}/tensorboard_${SLURM_JOB_ID}"
 mkdir $TENSORBOARD_LOG_DIR
 
-/opt/anaconda3/bin/tensorboard --logdir=${TENSORBOARD_LOG_DIR} --port=${TB_PORT} --path_prefix="/tb_${HASH}" & 
+/opt/anaconda3/bin/tensorboard --logdir=${TENSORBOARD_LOG_DIR} --port=${TB_PORT} --path_prefix="/tb_${MYHASH}" & 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -201,7 +201,7 @@ fi
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-echo "Starting Jupyter on" $NB_PORT
-/opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser 
+echo "Starting Jupyter on" $NB_PORT ${MYHASH} 
+/opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser --config=/home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
