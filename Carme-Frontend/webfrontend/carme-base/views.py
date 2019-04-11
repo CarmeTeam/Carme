@@ -509,17 +509,17 @@ def stop_job(request):
             jobName = form.cleaned_data['jobName']
             jobUser = form.cleaned_data['jobUser']
 
-            # delete job from db
-            try:
-                m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
-                print ("delete query: ", jobID, jobName, jobUser)
-                print (m[0])
-                while m[0]!=0:
-                    m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
-                    print ("delete query: ", jobID, jobName, jobUser)
-                    print (m[0])
-            except:
-                raise Exception("ERROR stopping job [DB]")
+            # delete job from db -> moved to backend
+            #try:
+            #    m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
+            #    print ("delete query: ", jobID, jobName, jobUser)
+            #    print (m[0])
+            #    while m[0]!=0:
+            #        m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
+            #        print ("delete query: ", jobID, jobName, jobUser)
+            #        print (m[0])
+            #except:
+            #    raise Exception("ERROR stopping job [DB]")
 
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
