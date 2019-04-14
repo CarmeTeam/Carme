@@ -37,6 +37,12 @@ import numpy as np
 import re
 
 
+def page_not_found(request):
+    return render(request,'404.html', status=404) 
+
+def error(request):
+    return render(request,'500.html', status=500)
+
 @login_required(login_url='/login') 
 def index(request):
     """ rendering of the website / -> template:home.html
