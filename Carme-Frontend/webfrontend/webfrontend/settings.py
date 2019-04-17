@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django_db_logger',
     'chartjs',
     'mptt',
+    'todo',
     'sekizai',
     'sorl.thumbnail',
     'wiki.apps.WikiConfig',
@@ -298,3 +299,25 @@ SESSION_AUTO_LOGOUT_TIME = 60*60  # logout aufter one hour od inactivity
 # enable time zones
 USE_TZ = True
 TIME_ZONE = 'Europe/Berlin'
+
+# Restrict access to ALL todo lists/views to `is_staff` users.
+# If False or unset, all users can see all views (but more granular permissions are still enforced
+# within views, such as requiring staff for adding and deleting lists).
+TODO_STAFF_ONLY = False
+
+# If you use the "public" ticket filing option, to whom should these tickets be assigned?
+# Must be a valid username in your system. If unset, unassigned tickets go to "Anyone."
+TODO_DEFAULT_ASSIGNEE = 'Team Carme'
+
+# If you use the "public" ticket filing option, to which list should these tickets be saved?
+# Defaults to first list found, which is probably not what you want!
+TODO_DEFAULT_LIST_SLUG = 'tickets'
+
+# If you use the "public" ticket filing option, to which *named URL* should the user be
+# redirected after submitting? (since they can't see the rest of the ticket system).
+# Defaults to "/"
+TODO_PUBLIC_SUBMIT_REDIRECT = '/'
+
+# additionnal classes the comment body should hold
+# adding "text-monospace" makes comment monospace
+TODO_COMMENT_CLASSES = ['class 1','class2']
