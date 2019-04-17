@@ -453,19 +453,21 @@ class CarmeBackEndService(rpyc.Service):
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
 
-        #remove job from db                                                                                                                                                                                        
-        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,                                                                                                                                              
-                passwd=CARME_DB_PW,  db=CARME_DB_DB)                                                                                                                                                               
-                                                                                                                                                                                                                   
-        cur = db.cursor()                                                                                                                                                                                          
-        sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'                                                                                                                                 
-        try:                                                                                                                                                                                                       
-            cur.execute(sql)                                                                                                                                                                                       
-            db.commit()                                                                                                                                                                                            
-        except:                                                                                                                                                                                                    
-            db.rollback()                                                                                                                                                                                          
-            db.close()                                                                                                                                                                                             
-            return "Error: SQL FAIL!"                                                                                                                                                                              
+        #remove job from db
+        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                passwd=CARME_DB_PW,  db=CARME_DB_DB)  
+
+        cur = db.cursor() 
+        sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+
+        try: 
+            cur.execute(sql) 
+            db.commit() 
+        except:
+            db.rollback()  
+            db.close()
+            setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "red")
+            return "Error: SQL FAIL!" 
         db.close()                            
 
         return ret
