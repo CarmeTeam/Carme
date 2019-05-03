@@ -275,7 +275,7 @@ def job_table(request):
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
                 message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "tomato")
-            job.save()
+                job.save()
 
 
 

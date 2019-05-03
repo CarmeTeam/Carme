@@ -372,13 +372,12 @@ class CarmeBackEndService(rpyc.Service):
         try:
             cur.execute(sql) 
             db.commit()
+            db.close()
         except:
             db.rollback()
             db.close()
             return "Error: SQL FAIL!"
-        db.close()           
                                                                                                                                                                                            
-
         return ret                                                          
 
 
@@ -457,19 +456,24 @@ class CarmeBackEndService(rpyc.Service):
         db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)  
 
-        cur = db.cursor() 
+        cur = db.cursor()
         sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+        print(sql)
 
         try: 
-            cur.execute(sql) 
-            db.commit() 
+            deleted = cur.execute(sql)
+            print("try SQL stop: ", deleted)
+            db.commit()
+            cur.close()
+            db.close()
+            print ("SQL stop done")
         except:
-            db.rollback()  
+            print ("SQL ERROR")
+            db.rollback() 
+            cur.close()
             db.close()
             setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "red")
             return "Error: SQL FAIL!" 
-        db.close()                            
-
         return ret
 
     def exposed_SetTrigger(self, jobSlurmID, jobUser, jobName):                              
