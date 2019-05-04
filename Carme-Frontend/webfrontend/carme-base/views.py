@@ -10,6 +10,7 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
+import numpy as np
 from django.http import HttpResponse
 from django.template import loader
 from .models import RuningJobs, CarmeMessages, SlurmJobs, Images, CarmeJobTable, CarmeAssocTable, ClusterStat, GroupResources
@@ -33,7 +34,6 @@ import logging  # django logging module
 from random import randint
 from django.views.generic import TemplateView
 from chartjs.views.lines import BaseLineChartView
-import numpy as np
 import re
 
 
