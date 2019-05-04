@@ -267,10 +267,10 @@ def job_table(request):
         job_slurm = CarmeJobTable.objects.all().filter(
                 id_job__exact=job.SLURM_ID )
         now = int(datetime.datetime.now().timestamp())
-        if len(job_slurm) >0:
+        if (job.status == "running") and (len(job_slurm) >0) and (job_slurm[0].timelimit>0):
             job_timelimit = job_slurm[0].timelimit*60+job_slurm[0].time_start
-            #print (str(job.SLURM_ID), " : ", job_timelimit, " ", now) 
             if now > job_timelimit:
+                print ("TIMEOUT :", str(job.SLURM_ID), " : ", job.status, " : ",job_timelimit, " ", now)
                 job.status = "timeout"
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
