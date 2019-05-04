@@ -175,7 +175,7 @@ alias watch='watch '
 
 #alias for python linking to the anaconda installation
 alias python='/opt/anaconda3/bin/python'
-export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/home/.CarmeScripts/bash/ 
+export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda-9.0/bin/ 
 
 # compress and extract functions
 function carme-archive (){
