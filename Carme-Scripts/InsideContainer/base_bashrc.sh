@@ -158,8 +158,6 @@ if [[ $- = *i* ]];then
   export PS1='[\[\033[01;35m\]\u\[\033[m\]@\[\033[01;32m\]\h\[\033[m\]:\[\033[01;31;1m\]\W\[\033[m\]]\$ '
 fi
 
-#add carme scripts to path                                                                                                                                                                                         
-export PATH=$PATH:/home/.CarmeScripts/bash/
 
 #include job settings
 chmod 700 ~/.carme/.bash_carme_$SLURM_JOBID
@@ -177,7 +175,7 @@ alias watch='watch '
 
 #alias for python linking to the anaconda installation
 alias python='/opt/anaconda3/bin/python'
-export PATH=$PATH:/opt/anaconda3/bin/ 
+export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/home/.CarmeScripts/bash/ 
 
 # compress and extract functions
 function carme-archive (){
