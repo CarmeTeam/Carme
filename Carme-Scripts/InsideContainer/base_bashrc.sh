@@ -166,16 +166,16 @@ chmod 700 ~/.carme/.bash_carme_$SLURM_JOBID
 #terminal welcome message
 [[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
 
-#include user settings
-chmod 700 ~/.bash_aliases 
-[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases
-
 #alias for watch that it works with predefined aliases (trailing space inside the quotation marks needed!!!)
 alias watch='watch '
 
 #alias for python linking to the anaconda installation
 alias python='/opt/anaconda3/bin/python'
 export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda-9.0/bin/ 
+
+#include user settings                                                                                                                                                                                             
+chmod 700 ~/.bash_aliases                                                                                                                                                                                          
+[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases  
 
 # compress and extract functions
 function carme-archive (){
