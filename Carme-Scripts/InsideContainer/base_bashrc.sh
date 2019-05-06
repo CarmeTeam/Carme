@@ -302,3 +302,11 @@ function carme_tensorboard_ls () {
   fi
 }
 
+
+# DASK variables
+export DASK_MASTER=${CARME_MASTER}
+export DASK_MASTER_IP=$(grep -ir "Master running on" ~/.job-log-dir/${SLURM_JOB_ID}-${SLURM_JOB_NAME}.out | awk '{print $4}')
+export DASK_NODES=${CARME_NODES}
+export DASK_MASTER_PORT="8786"
+export DASK_DASHBOARD_PORT="8787"
+
