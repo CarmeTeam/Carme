@@ -80,7 +80,7 @@ export CARME_IMAGE=$SINGULARITY_CONTAINER
 export CARME_BACKEND_SERVER=$CARME_BACKEND_SERVER
 export CARME_BACKEND_PORT=$CARME_BACKEND_PORT    
 export CARME_TENSORBOARD_HOME='/home/$USER/tensorboard'
-alias carme_mpirun='/usr/bin/mpirun -host ${MPI_NODES},${MPI_NODES}, -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp'                                                        
+alias carme_mpirun='/opt/anaconda3/bin/mpirun -host ${MPI_NODES},${MPI_NODES}, -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp' --tag-output                                                       
 alias carme_cuda_version='nvcc --version'
 alias carme_cudnn_version='echo 7'
 alias jupyter_url='echo $JUPYTER_SERVER_URL'
@@ -96,6 +96,8 @@ echo "GPUS: " $GPUS "${#GPUS}"
 if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
 	echo "Starting DASK"							
 	#DASK
+	export LC_ALL=C.UTF-8
+	export LANG=C.UTF-8
 	DASK_JOB_DIRECTORY="/home/"$USER"/.job-log-dir/dask_job_"$SLURM_JOB_ID"_"$SLURM_JOB_NAME
 	DASK_MASTER=$(hostname)
 	DASK_NODES="${CARME_NODES[@]/,/ }"
@@ -119,11 +121,11 @@ if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
   	 mkdir $DASK_JOB_DIRECTORY
 	fi             
 
-	dask-scheduler --port $DASK_MASTER_PORT --bokeh-port $DASK_DASHBOARD_PORT --bokeh-prefix=/dd_${MYHASH} --local-directory ${DASK_SCHEDULER_DIR} & #scheduler output is going to generel job_log
+	/opt/anaconda3/bin/dask-scheduler --port $DASK_MASTER_PORT --bokeh-port $DASK_DASHBOARD_PORT --bokeh-prefix=/dd_${MYHASH} --local-directory ${DASK_SCHEDULER_DIR} & #scheduler output is going to generel job_log
 							
-	CUDA_VISIBLE_DEVICES=0 dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_0} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_0} >> $DASK_MASTER_WORKER_OUTPUT_0 &
+	CUDA_VISIBLE_DEVICES=0 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_0} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_0} >> $DASK_MASTER_WORKER_OUTPUT_0 &
 							
-	CUDA_VISIBLE_DEVICES=1 dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_1} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_1} >> $DASK_MASTER_WORKER_OUTPUT_1 &
+	CUDA_VISIBLE_DEVICES=1 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_1} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_1} >> $DASK_MASTER_WORKER_OUTPUT_1 &
 
 	#SSHD
 	touch ~/.start_sshd
@@ -133,8 +135,8 @@ if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
         mkdir $SSHDIR
     fi
 							rm -rf $SSHDIR/*
-							mkdir /var/run/sshd
-							chmod 0755 /var/run/sshd
+							#mkdir /var/run/sshd
+							#chmod 0755 /var/run/sshd
 							ssh-keygen -t ssh-rsa -N "" -f $SSHDIR/server_key
 				   ssh-keygen -t rsa -N "" -f $SSHDIR/client_key
 				   rm ~/.ssh/authorized_keys

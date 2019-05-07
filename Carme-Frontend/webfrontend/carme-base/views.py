@@ -10,6 +10,7 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
+import numpy as np
 from django.http import HttpResponse
 from django.template import loader
 from .models import RuningJobs, CarmeMessages, SlurmJobs, Images, CarmeJobTable, CarmeAssocTable, ClusterStat, GroupResources
@@ -33,7 +34,6 @@ import logging  # django logging module
 from random import randint
 from django.views.generic import TemplateView
 from chartjs.views.lines import BaseLineChartView
-import numpy as np
 import re
 
 
@@ -267,15 +267,15 @@ def job_table(request):
         job_slurm = CarmeJobTable.objects.all().filter(
                 id_job__exact=job.SLURM_ID )
         now = int(datetime.datetime.now().timestamp())
-        if len(job_slurm) >0:
+        if (job.status == "running") and (len(job_slurm) >0) and (job_slurm[0].timelimit>0):
             job_timelimit = job_slurm[0].timelimit*60+job_slurm[0].time_start
-            #print (str(job.SLURM_ID), " : ", job_timelimit, " ", now) 
             if now > job_timelimit:
+                print ("TIMEOUT :", str(job.SLURM_ID), " : ", job.status, " : ",job_timelimit, " ", now)
                 job.status = "timeout"
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
                 message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "tomato")
-            job.save()
+                job.save()
 
 
 
