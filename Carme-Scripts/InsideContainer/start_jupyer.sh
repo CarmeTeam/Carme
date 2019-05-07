@@ -80,7 +80,7 @@ export CARME_IMAGE=$SINGULARITY_CONTAINER
 export CARME_BACKEND_SERVER=$CARME_BACKEND_SERVER
 export CARME_BACKEND_PORT=$CARME_BACKEND_PORT    
 export CARME_TENSORBOARD_HOME='/home/$USER/tensorboard'
-alias carme_mpirun='/opt/anaconda3/bin/mpirun -host ${MPI_NODES},${MPI_NODES}, -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp'                                                        
+alias carme_mpirun='/opt/anaconda3/bin/mpirun -host ${MPI_NODES},${MPI_NODES}, -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp' --tag-output                                                       
 alias carme_cuda_version='nvcc --version'
 alias carme_cudnn_version='echo 7'
 alias jupyter_url='echo $JUPYTER_SERVER_URL'
