@@ -158,8 +158,6 @@ if [[ $- = *i* ]];then
   export PS1='[\[\033[01;35m\]\u\[\033[m\]@\[\033[01;32m\]\h\[\033[m\]:\[\033[01;31;1m\]\W\[\033[m\]]\$ '
 fi
 
-#add carme scripts to path                                                                                                                                                                                         
-export PATH=$PATH:/home/.CarmeScripts/bash/
 
 #include job settings
 chmod 700 ~/.carme/.bash_carme_$SLURM_JOBID
@@ -168,16 +166,16 @@ chmod 700 ~/.carme/.bash_carme_$SLURM_JOBID
 #terminal welcome message
 [[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
 
-#include user settings
-chmod 700 ~/.bash_aliases 
-[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases
-
 #alias for watch that it works with predefined aliases (trailing space inside the quotation marks needed!!!)
 alias watch='watch '
 
 #alias for python linking to the anaconda installation
 alias python='/opt/anaconda3/bin/python'
-export PATH=$PATH:/opt/anaconda3/bin/ 
+export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda-9.0/bin/ 
+
+#include user settings                                                                                                                                                                                             
+chmod 700 ~/.bash_aliases                                                                                                                                                                                          
+[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases  
 
 # compress and extract functions
 function carme-archive (){
@@ -303,4 +301,12 @@ function carme_tensorboard_ls () {
     echo "Use --help or -h to get more information."
   fi
 }
+
+
+# DASK variables
+export DASK_MASTER=${CARME_MASTER}
+export DASK_MASTER_IP=$(grep -ir "Master running on" ~/.job-log-dir/${SLURM_JOB_ID}-${SLURM_JOB_NAME}.out | awk '{print $4}')
+export DASK_NODES=${CARME_NODES}
+export DASK_MASTER_PORT="8786"
+export DASK_DASHBOARD_PORT="8787"
 

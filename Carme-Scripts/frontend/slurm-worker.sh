@@ -24,8 +24,8 @@ CARME_SCRIPT_PATH=$6
 source ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container   
 
 MOUNTS=${mountstr//[_]/ }
-export HASH=$(sh ${CARME_FRONTEND_SCRIPTS_PATH}/hash.sh)
-URL=https://gpu-cluster.itwm.fraunhofer.de/nb_$HASH
+#export HASH=$(sh ${CARME_FRONTEND_SCRIPTS_PATH}/hash.sh)
+#URL=https://gpu-cluster.itwm.fraunhofer.de/nb_$HASH
 NODES=1 # get from jobDB
 
 IPADDR=$(ip -o -4 addr list ${CARME_SYSTEM_DEFAULT_NETWORK} | awk '{print $4}' | cut -d/ -f1) 

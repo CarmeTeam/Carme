@@ -41,6 +41,8 @@ sleep 10
 source ~/.carme/.bash_carme_$SLURM_JOBID 
 
 #start DASK worker
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
 DASK_JOB_DIRECTORY="/home/"$USER"/.job-log-dir/dask_job_"$SLURM_JOB_ID"_"$SLURM_JOB_NAME
 DASK_MASTER=${CARME_MASTER}
 
@@ -57,15 +59,15 @@ DASK_WORKER_LOCAL_DIR_1=$DASK_JOB_DIRECTORY"/"$DASK_WORKER_NAME_1
 DASK_WORKER_OUTPUT_1=$DASK_JOB_DIRECTORY"/"$DASK_WORKER_LOCAL_DIR"/"$DASK_WORKER_NAME_1".txt"
 DASK_WORKER_OUTPUT_0=$DASK_JOB_DIRECTORY"/"$DASK_WORKER_LOCAL_DIR"/"$DASK_WORKER_NAME_0".txt"
 
-CUDA_VISIBLE_DEVICES=0 dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_WORKER_NAME_0} --local-directory ${DASK_WORKER_LOCAL_DIR_0} >> $DASK_WORKER_OUTPUT_0 &
+CUDA_VISIBLE_DEVICES=0 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_WORKER_NAME_0} --local-directory ${DASK_WORKER_LOCAL_DIR_0} >> $DASK_WORKER_OUTPUT_0 &
 
-CUDA_VISIBLE_DEVICES=1 dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_WORKER_NAME_1} --local-directory ${DASK_WORKER_LOCAL_DIR_1} >> $DASK_WORKER_OUTPUT_1 &
+CUDA_VISIBLE_DEVICES=1 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_WORKER_NAME_1} --local-directory ${DASK_WORKER_LOCAL_DIR_1} >> $DASK_WORKER_OUTPUT_1 &
 
 
 #start SSH server
 if [ "$SLURM_JOB_NUM_NODES" != 1 ]; then  
-       mkdir /var/run/sshd  
-       chmod 0755 /var/run/sshd  
+       #mkdir /var/run/sshd  
+       #chmod 0755 /var/run/sshd  
 							echo "staring SSHD on WORKER" $(hostname) 
        /usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key -E ~/.SSHD_log -f $SSHDIR/sshd_config   
 fi               

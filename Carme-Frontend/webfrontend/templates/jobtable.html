@@ -51,7 +51,7 @@ setTimeout(function(){window.location = window.location}, 3000);
 																																<td>{{ job.imageName }}</td>
 																																<td><div style="border-radius: 5px; background-color: green; padding: 10px 2px;" >{{ job.status }}</div></td>
 																																<td>
-																																{% if job.imageName == 'Base_image' %}
+																																{% if job.imageName == 'Base_image' or job.imageName == 'Scalable_ML' %}
 																																<a href="/ta_{{ job.HASH }}/" data-title="{{job.jobName}}" target="_new"><img src="{% static "theia.jpg" %}" alt="" height=40/></A>
 																																{% endif %}
 																																<a href="/nb_{{ job.HASH }}/" data-title="{{job.jobName}}"  target="_new"><img src="{% static "jupyter.png" %}" alt="" height=40/></A>
