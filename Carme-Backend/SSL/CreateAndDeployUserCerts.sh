@@ -70,7 +70,7 @@ if [ "$RESP" = "y" ]; then
     chown ${CLUSTER_USER}:${CLUSTER_USER_GROUP} ${CLUSTER_USER}.key
     
     # move new certificates to /home/$USER/.carme
-    CERT_STORE="/home/${CLUSTER_USER}/.carme/"
+    CERT_STORE="/home/${CLUSTER_USER}/.carme"
     if [ ! -d ${CERT_STORE} ]; then
       mkdir ${CERT_STORE}
     fi
