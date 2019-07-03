@@ -684,6 +684,9 @@ class LineChartJSONView(BaseLineChartView):
                 StatFreeGPUs
                 ]
 
+    #def get_colors(self):
+        #return [(106,38,189), (106,38,189), (106,38,189), (106,38,189)]
+
 
 line_chart = TemplateView.as_view(template_name='line_chart.html')
 line_chart_json = LineChartJSONView.as_view()
