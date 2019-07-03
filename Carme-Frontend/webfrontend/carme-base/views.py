@@ -683,9 +683,31 @@ class LineChartJSONView(BaseLineChartView):
                 StatQueuedGPUs,
                 StatFreeGPUs
                 ]
-
-    #def get_colors(self):
-        #return [(106,38,189), (106,38,189), (106,38,189), (106,38,189)]
+        
+    def get_datasets(self):
+        datasets = super(LineChartJSONView, self).get_datasets()
+        for dataset in datasets:
+            if dataset["name"]=="free":
+                dataset["backgroundColor"]="rgba(62, 249, 61, 0.5)"
+                dataset["borderColor"]="rgba(62, 249, 61, 1.0)"
+                dataset["pointBackgroundColor"]="rgba(62, 249, 61, 1.0)"
+                dataset["pointBorderColor"]="rgba(0, 125, 0, 1.0)"
+            elif dataset["name"]=="used":
+                dataset["backgroundColor"]="rgba(106, 38, 189, 0.5)"
+                dataset["borderColor"]="rgba(106, 38, 189, 1.0)"
+                dataset["pointBackgroundColor"]="rgba(106, 38, 189, 1.0)"
+                dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
+            elif dataset["name"]=="queued":
+                dataset["backgroundColor"]="rgba(255, 75, 0, 0.5)"
+                dataset["borderColor"]="rgba(255, 75, 0, 1.0)"
+                dataset["pointBackgroundColor"]="rgba(255, 75, 0, 1.0)"
+                dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
+            elif dataset["name"]=="reserved":
+                dataset["backgroundColor"]="rgba(0, 181, 255, 0.5)"
+                dataset["borderColor"]="rgba(0, 181, 255, 1.0)"
+                dataset["pointBackgroundColor"]="rgba(0, 181, 255, 1.0)"
+                dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
+        return datasets
 
 
 line_chart = TemplateView.as_view(template_name='line_chart.html')
