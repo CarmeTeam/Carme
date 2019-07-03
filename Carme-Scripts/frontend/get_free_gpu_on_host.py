@@ -25,7 +25,11 @@ CARME_BACKEND_PORT=sys.argv[4]
 USER=os.environ['USER']
 keyfile="/home/"+USER+"/.carme/"+USER+".key"
 certfile="/home/"+USER+"/.carme/"+USER+".crt"
-
-conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile,certfile=certfile) 
-GPUS=conn.root.exposed_getFreeGpuOnHost(str(IP),int(NUM))
-print (GPUS)
+GPUS="FAIL"
+try:
+    conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile,certfile=certfile) 
+    GPUS=conn.root.exposed_getFreeGpuOnHost(str(IP),int(NUM))
+    print (GPUS)
+except:
+    GPUS="FAIL"
+    print (GPUS)

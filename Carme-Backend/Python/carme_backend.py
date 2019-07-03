@@ -22,7 +22,7 @@ import MySQLdb
 import datetime
 
 import imp
-imp.load_source('CarmeConfig', '/opt/development/CarmeConfig')
+imp.load_source('CarmeConfig', '/opt/Carme/CarmeConfig')
 from CarmeConfig import *
 
 
@@ -252,7 +252,7 @@ class CarmeBackEndService(rpyc.Service):
             	passwd=CARME_DB_PW,  db=CARME_DB_DB)
                                                                                                                                                                   
         cur = db.cursor()
-        sql='select GPUS from `carme-base_slurmjobs` where IP="'+str(IP)+'";' 	
+        sql='select GPUS from `carme-base_slurmjobs` where IP="'+str(IP)+'" and STATUS="running";' 	
 
         try:
             cur.execute(sql)
@@ -265,11 +265,12 @@ class CarmeBackEndService(rpyc.Service):
 
 
         GPUS_used=[]
-        for i in results: 
+        for i in results:
+                print ("used GPU: ", i[0])
                 GPUS_used.append(i[0])
-        print(GPUS_used)
-        print(possible_GPUs)
-        print(numGPUs)
+        print("GPUs used: ",GPUS_used)
+        print("possible GPUs: ",possible_GPUs)
+        print("num GPUs: ",numGPUs)
         res_list=list(set(possible_GPUs)-set(GPUS_used))[0:numGPUs]
         #make string   
         res=""  
@@ -277,8 +278,8 @@ class CarmeBackEndService(rpyc.Service):
         for i in res_list:
                 res+=str(i)+"," 
                     
-        if CARME_BACKEND_DEBUG:
-            print ("Free GPUS: ", res[:-1]) 
+        #if CARME_BACKEND_DEBUG:
+        print ("Free GPUS: ", res[:-1]) 
         return res[:-1]
 
     def exposed_userAlterJobDB(self, IPADDR, HASH, NB_PORT, TB_PORT, SLURM_JOBID, URL, GPUS, DBJOBID ):
@@ -371,13 +372,12 @@ class CarmeBackEndService(rpyc.Service):
         try:
             cur.execute(sql) 
             db.commit()
+            db.close()
         except:
             db.rollback()
             db.close()
             return "Error: SQL FAIL!"
-        db.close()           
                                                                                                                                                                                            
-
         return ret                                                          
 
 
@@ -452,6 +452,28 @@ class CarmeBackEndService(rpyc.Service):
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
 
+        #remove job from db
+        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                passwd=CARME_DB_PW,  db=CARME_DB_DB)  
+
+        cur = db.cursor()
+        sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+        print(sql)
+
+        try: 
+            deleted = cur.execute(sql)
+            print("try SQL stop: ", deleted)
+            db.commit()
+            cur.close()
+            db.close()
+            print ("SQL stop done")
+        except:
+            print ("SQL ERROR")
+            db.rollback() 
+            cur.close()
+            db.close()
+            setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "red")
+            return "Error: SQL FAIL!" 
         return ret
 
     def exposed_SetTrigger(self, jobSlurmID, jobUser, jobName):                              

@@ -23,6 +23,7 @@ CARME_SCRIPT_PATH=$6 #/opt/development/carme-scripts/frontend/
 
 #read user accessable pert of CarmeConfig
 source ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container 
+echo "SLURM CHECK CarmeConfig" ${CARME_VERSION} ${CARME_SYSTEM_DEFAULT_NETWORK}
 MOUNTS=${mountstr//[_]/ }   
 export HASH=$(sh ${CARME_SCRIPT_PATH}/hash.sh) 
 URL=${CARME_URL}/nb_$HASH 
@@ -42,9 +43,10 @@ if [ ! -d $LOGDIR ]; then
 fi
 #------------------------------------------------------
 
+echo "SLURM CHECK PARAMS" $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT
 
 GPU_DEVICES=$( ${CARME_SCRIPT_PATH}/dist_get_free_gpu_on_host/get_free_gpu_on_host $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT)
-echo "MASTER GPUS: " $IPADDR $GPUS $GPU_DEVICES
+echo "SLURM MASTER GPUS: " $IPADDR $GPUS $GPU_DEVICES
 #------------------------------------------------------
 
 
@@ -75,9 +77,9 @@ if [ ! -d $NBDIR ];then
   mkdir $NBDIR                                                                                                                                                                          
 fi
 
-echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.jupyter/jupyter_notebook_config.py
-echo "c.NotebookApp.token = ''" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.jupyter/jupyter_notebook_config.py 
+echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
+echo "c.NotebookApp.token = ''" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
+echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py 
 #idel job time outs
 #echo "c.MappingKernelManager.cull_idle_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
 #echo "c.NotebookApp.shutdown_no_activity_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py

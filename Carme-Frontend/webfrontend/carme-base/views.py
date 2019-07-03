@@ -10,6 +10,7 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
+import numpy as np
 from django.http import HttpResponse
 from django.template import loader
 from .models import RuningJobs, CarmeMessages, SlurmJobs, Images, CarmeJobTable, CarmeAssocTable, ClusterStat, GroupResources
@@ -33,9 +34,14 @@ import logging  # django logging module
 from random import randint
 from django.views.generic import TemplateView
 from chartjs.views.lines import BaseLineChartView
-import numpy as np
 import re
 
+
+def page_not_found(request):
+    return render(request,'404.html', status=404) 
+
+def error(request):
+    return render(request,'500.html', status=500)
 
 @login_required(login_url='/login') 
 def index(request):
@@ -50,7 +56,7 @@ def index(request):
     job_list_user = RuningJobs.objects.all().filter(user__exact=current_user)
     job_list = RuningJobs.objects.all()
     slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
-    slurm_list = SlurmJobs.objects.all()
+    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
     jobheight = 120+numjobs*70
     message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
@@ -65,7 +71,7 @@ def index(request):
     for j in slurm_list:
         if j.status == "running":
             StatUsedGPUs += j.NumGPUs * j.NumNodes
-        else:
+        elif j.status == "queued":
             StatQueudGPUs += j.NumGPUs * j.NumNodes 
 
     #StatUsedGPUs = SlurmJobs.objects.all().filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
@@ -104,7 +110,7 @@ def admin_job_table(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     current_user = request.user.username
-    slurm_list = SlurmJobs.objects.all()
+    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout")
     numjobs = len(slurm_list)
     jobheight = 120+numjobs*60
     template = loader.get_template('../templates/admin_job_table.html')
@@ -261,15 +267,15 @@ def job_table(request):
         job_slurm = CarmeJobTable.objects.all().filter(
                 id_job__exact=job.SLURM_ID )
         now = int(datetime.datetime.now().timestamp())
-        if len(job_slurm) >0:
+        if (job.status == "running") and (len(job_slurm) >0) and (job_slurm[0].timelimit>0):
             job_timelimit = job_slurm[0].timelimit*60+job_slurm[0].time_start
-            #print (str(job.SLURM_ID), " : ", job_timelimit, " ", now) 
             if now > job_timelimit:
+                print ("TIMEOUT :", str(job.SLURM_ID), " : ", job.status, " : ",job_timelimit, " ", now)
                 job.status = "timeout"
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
                 message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "tomato")
-            job.save()
+                job.save()
 
 
 
@@ -298,7 +304,7 @@ def generateChoices(request):
 
     group = list(request.user.ldap_user.group_names)[0]
     # .order_by('image_name')  # ,image_status__exact="active")
-    image_list = Images.objects.all().filter(image_group__exact=group)
+    image_list = Images.objects.all().filter(image_group__exact=group).filter(image_status__exact="active")
     image_choices = set()
     for i in image_list:
         image_choices.add((i.image_name, i.image_name))
@@ -509,6 +515,18 @@ def stop_job(request):
             jobName = form.cleaned_data['jobName']
             jobUser = form.cleaned_data['jobUser']
 
+            # delete job from db -> moved to backend
+            #try:
+            #    m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
+            #    print ("delete query: ", jobID, jobName, jobUser)
+            #    print (m[0])
+            #    while m[0]!=0:
+            #        m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
+            #        print ("delete query: ", jobID, jobName, jobUser)
+            #        print (m[0])
+            #except:
+            #    raise Exception("ERROR stopping job [DB]")
+
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
@@ -516,7 +534,7 @@ def stop_job(request):
                 message = "FRONTEND: Error stopping job " + \
                     str(jobName) + " for user " + str(jobUser)
                 db_logger.exception(message)
-                raise Exception("ERROR starting job")
+                raise Exception("ERROR stopping job [backend]")
 
             # NOTE: this part should move to the backend as well
             if jobID > 0:  # job is running
@@ -529,8 +547,6 @@ def stop_job(request):
                     db_logger.exception(message)
                     raise Exception("ERROR removing proxy rule")
 
-            # delete job from db
-            m = SlurmJobs.objects.filter(SLURM_ID=int(jobID)).delete()
             # meseage and return
             #mess = 'Job '+str(jobID)+' deleted !'
             #messages.success(request, mess)  # add messages
