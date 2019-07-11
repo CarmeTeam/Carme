@@ -14,8 +14,8 @@ import traceback
 import signal
 import sys
 
-sys.path.append('/opt/Carme/Carme-Frontend/webfrontend/')
+sys.path.append('/opt/Carme/Carme-Frontend/Carme-Django/webfrontend/')
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webfrontend.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scripts.settings")
 
 application = get_wsgi_application()
