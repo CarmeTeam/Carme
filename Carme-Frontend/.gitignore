@@ -2,7 +2,7 @@
 *~
 
 # config files
-*.config
+*.conf
 hosts
 
 # Byte-compiled / optimized / DLL files
