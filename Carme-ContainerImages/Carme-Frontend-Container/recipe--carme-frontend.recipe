@@ -1,0 +1,71 @@
+BootStrap: debootstrap
+OSVersion: bionic
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%help
+    If you need any help you should ask the maintainer of this image.
+
+%labels
+    MAINTAINER CC-HPC Fraunhofer ITWM
+
+%files
+    /home/root-back/SOFT/sources-list/sources--18-04.list /etc/apt/sources.list
+
+%post
+    apt update
+    apt -y upgrade
+
+    # base stuff -------------------------------------------------------------------------------------------------------------------
+    # isntall generic linux kernel
+    apt install -y linux-generic
+
+    # install apache and enable apache modules
+    apt install -y apache2 apache2-bin apache2-data apache2-utils libapache2-mod-wsgi-py3
+    a2enmod wsgi
+    a2enmod expires
+    rm /etc/apache2/apache2.conf
+    ln -s /opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/apache2.conf /etc/apache2/apache2.conf
+    rm /etc/apache2/ports.conf
+    ln -s /opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/ports.conf /etc/apache2/ports.conf
+    rm /etc/apache2/sites-enabled/000-default.conf
+    ln -s /opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/002-gpu.conf /etc/apache2/sites-enabled/002-gpu.conf
+
+    # link /etc/hosts /opt/Carme/Carme-Frontend/Carme-Server-Conf/hosts
+    rm /etc/hosts
+    ln -s /opt/Carme/Carme-Frontend/Carme-Server-Conf/hosts /etc/hosts
+
+    # redirect apache logs
+    rm -r /var/log/apache2
+    ln -s /opt/Carme-Apache-Logs /var/log/apache2
+
+    # set timezone
+    apt install -y tzdata
+    ln -snf /usr/share/zoneinfo/Europe/Berlin /etc/localtime     # change to your preferred timezone
+
+    # install basig python libs
+    apt install -y python3-pip libmysqlclient-dev python-dev python3-pyldap libsasl2-dev libldap2-dev libssl-dev
+
+    # django install. note has to be done within sandbox, does not work with recipe!!
+    #pip3 install django django-auth-ldap django-auth-ldap django-bootstrap-themes django-chartjs django-classy-tags django-db-logger django-filter django-js-asset django-logtailer django-maintenance-mode django-material django-material django-mptt django-nyt django-sekizai django-settings-export django-todo django-viewflow django-viewflow mysqlclient numpy rpyc==4.0.2 whitenoise wiki
+
+    # clean-up ---------------------------------------------------------------------------------------------------------------------
+    apt update
+    apt upgrade -y
+    apt autoremove -y 
+    apt clean
+
+    # reconfigure some stuff -------------------------------------------------------------------------------------------------------
+    rm /bin/sh
+    ln -s /bin/bash /bin/sh
+    rm /usr/share/man/man1/sh.1.gz
+    ln -s /usr/share/man/man1/sh.distrib.1.gz /usr/share/man/man1/sh.1.gz
+    chmod -x /usr/bin/nohup
+
+%environment
+    export XDG_RUNTIME_DIR=""
+
+%runscript
+    echo "This is a Singularity container for the Carme Web-Frontend"
+
+%startscript
+/etc/init.d/apache2 start

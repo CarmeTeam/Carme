@@ -24,7 +24,7 @@ from django.urls import reverse_lazy
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 import imp    
-imp.load_source('CarmeConfig', BASE_DIR+'/../CarmeConfig.frontend')
+imp.load_source('CarmeConfig', BASE_DIR+'/../../CarmeConfig.frontend')
 from CarmeConfig import *    
 
 #NOTE: use unified name some time
@@ -83,7 +83,7 @@ MIDDLEWARE = [
     'maintenance_mode.middleware.MaintenanceModeMiddleware',
 ]
 
-ROOT_URLCONF = 'webfrontend.urls'
+ROOT_URLCONF = 'scripts.urls'
 
 TEMPLATES = [
     {
@@ -126,7 +126,7 @@ SETTINGS_EXPORT = [
             ]
 
 
-WSGI_APPLICATION = 'webfrontend.wsgi.application'
+WSGI_APPLICATION = 'scripts.wsgi.application'
 
 
 # Database
@@ -275,7 +275,7 @@ STATICFILES_DIRS = [
     CARME_ZABBIX_GRAPH_PATH,
 ]
 
-STATIC_ROOT = CARME_FRONTEND_PATH+'/static/'
+STATIC_ROOT = CARME_FRONTEND_PATH+'/Carme-Django/static/'
 
 #LOGIN_REDIRECT_URL = 'home'
 LOGIN_REDIRECT_URL = '/'
