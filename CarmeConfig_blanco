@@ -1,42 +1,42 @@
 #-----------------------------------------------------------------------------------------------------------------------------------
 #Carme Global Config File
 #
-# no space between variable=""!!!
+# no space between variable="test"!!!
 #
-# config tools: 
+# config tools:
 # * carme_config_frontend PATH
-# * 
+# *
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------
 #Carme develop -> Things that need to be changed between Carme branches
 #---------------------------------------------------------------------
-CARME_VERSION=""                                       #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
+CARME_VERSION="r0.3"                                       #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
 #stable release: r0.3
 
 CARME_URL=""                 #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
 #e.g. my-carme-cluster.institute.com
 
-#scripts                                                                                                                                                                                  
-CARME_SCRIPT_PATH=""     #EXPORT_TO_FRONTEND
+#scripts 
+CARME_SCRIPT_PATH="/opt/Carme/Carme-Scripts/frontend/"     #EXPORT_TO_FRONTEND
 #default: /opt/Carme/Carme-Scripts/frontend/
 
 #Backend
 CARME_BACKEND_DEBUG=
 #True or False (note: do not use double quotes)
- 
-CARME_BACKEND_PATH=""
+
+CARME_BACKEND_PATH="/opt/Carme/Carme-Backend/"
 #default: /opt/Carme/Carme-Backend/
 
 CARME_BACKEND_SERVER=""                               #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
 #e.g. headnode
 
-CARME_BACKEND_PORT=                                   #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
+CARME_BACKEND_PORT=
 #e.g. 99999 (note: do not use double quotes)
 
-CARME_MESSAGE_PATH=""
-#default: /opt/Carme/Carme-Messages
+CARME_MESSAGE_PATH="/home/.CarmeScripts/Carme-Messages"
+#default: /home/.CarmeScripts/Carme-Messages
 
 #SSL
 CARME_SSL_C=""
@@ -58,12 +58,12 @@ CARME_SSL_EMAIL_BASE=""
 #e.g. @my-carme-cluster.institute.com
 
 #proxy
-CARME_PROXY_PATH=                           #EXPORT_TO_FRONTEND
-#e.g. /opt/Carme/Carme-Proxy/
+CARME_PROXY_PATH=''                           #EXPORT_TO_FRONTEND
+#e.g. '/opt/Carme/Carme-Proxy/'
 
 #mounts
 #WARNING: set scripts mout correct
-CARME_BASE_MOUNTS=            #EXPORT_TO_FRONTEND
+CARME_BASE_MOUNTS=''            #EXPORT_TO_FRONTEND
 #e.g.
 
 #################
@@ -73,13 +73,13 @@ CARME_BASE_MOUNTS=            #EXPORT_TO_FRONTEND
 CARME_FRONTEND_ID=""
 #e.g. unique name for the frontend (needed when running multiple frontends)
 
-CARME_FRONTEND_PATH="" 
+CARME_FRONTEND_PATH="/opt/Carme/Carme-Frontend"
 #default: /opt/Carme/Carme-Frontend
 
 CARME_FRONTEND_DEBUG=
 #True or False (note: do not use double quotes)
 
-CARME_FRONTEND_KEY=""
+CARME_FRONTEND_KEY=''
 #needs to be secret and different for each install
 
 #Admin pannel
@@ -148,7 +148,7 @@ CARME_SANDBOX_PARTITION=""                                          #EXPORT_TO_F
 # group of users that are allowed to create a singularity image you have to add the name of the partition
 # defined here there as well.
 #-----------------------------------------------------------------------------------------------------------------------------------
-            
+
 
 #Carme Infrastructure --------------------------------------------------------------------------------------------------------------
 CARME_HEADNODE_IP=""                               #EXPORT_TO_FRONTEND
@@ -200,7 +200,7 @@ CARME_COMPUTENODES_1=""
 #CARME_COMPUTENODES_3=""
 #e.g. node10 node11 node12 ... [same hardware as BUILDNODE_3, if not needed leave empty]
 
-CARME_HARDWARE_NUM_GPUS=                                    #EXPORT_TO_FRONTEND
+CARME_HARDWARE_NUM_GPUS=
 #e.g. 100 [this is the total number of GPUs in the Cluster]
 #has to be an integer number! (note: do not use double quotes)
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -231,10 +231,10 @@ CARME_NTP_SERVER_IP=""
 
 
 #SLURM -----------------------------------------------------------------------------------------------------------------------------
-CARME_SLURM_SCRIPTS_PATH=""
+CARME_SLURM_SCRIPTS_PATH="/opt/Carme/Carme-Scripts/frontend"
 #default: /opt/Carme/Carme-Scripts/frontend
 
-CARME_SLURM_CONFIG_FILE=""
+CARME_SLURM_CONFIG_FILE="/etc/slurm-llnl/slurm.conf"
 #default: /etc/slurm-llnl/slurm.conf (for Debian based systems)
 
 CARME_SLURM_ControlMachine=""
@@ -277,16 +277,16 @@ CARME_SLURM_AccountingStorageHost=""
 #e.g. headnode IP
 
 CARME_SLURM_SlurmctldDebug=""
-#default value -- debug level from 1 to 7
+#default: 7 -- debug level from 1 to 7
 
 CARME_SLURM_SlurmctldLogFile=""
 #default: /var/log/slurm-llnl/slurmctld.log
 
 CARME_SLURM_SlurmdDebug=""
-#default value -- debug level from 1 to 7
+#default: 7 -- debug level from 1 to 7
 
 CARME_SLURM_SlurmdLogFile=""
-#default: ""
+#default: "/var/log/slurm-llnl/slurmd.log"
 
 # note: if different nodes are used change /opt/Carme/Carme-Scripts/carme-slurm-node-weight-shuffle.sh
 CARME_SLURM_COMPUTENODES_CONFIG_1=""
@@ -359,13 +359,13 @@ CARME_SINGULARITY_PATH=""
 
 
 #Carme Scripts ---------------------------------------------------------------------------------------------------------------------
-CARME_SCRIPTS_PATH=""
+CARME_SCRIPTS_PATH="/opt/Carme/Carme-Scripts"
 #default: /opt/Carme/Carme-Scripts
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #Carme Web-Frontend ----------------------------------------------------------------------------------------------------------------
-CARME_WEB_PATH=""
+CARME_WEB_PATH="/opt/Carme/Carme-Frontend"
 #default: /opt/Carme/Carme-Frontend
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -460,10 +460,11 @@ CARME_LDAP_DEFAULTPASSWD_FOLDER=""
 #e.g. /root/defaultpasswords
 
 CARME_LDAP_PASSWD_LENGTH=""
-#default value
+#default: 20
 
 CARME_LDAP_PASSWD_BASESTRING=""
-# adjust according to the restrictions in your university|institute|company
+#default: a-zA-Z1-9#%+,-./:;!<=>@\^_
+#adjust according to the restrictions in your university|institute|company
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -501,8 +502,8 @@ CARME_ZABBIX_DB_USER=""
 CARME_ZABBIX_DB_PASSWORD=""
 #e.g. zabbixpasswd
 
-CARME_ZABBIX_GRAPH_PATH=""            #EXPORT_TO_FRONTEND
-#default
+CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/static/zabbix-graphs"            #EXPORT_TO_FRONTEND
+#default: /opt/Carme/Carme-Frontend/static/zabbix-graphs
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -544,7 +545,7 @@ CARME_MATTERMOST_WEBHOCK_2="" #note: used to sent information about finished job
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 #System Hardware ---------------------------------------------------------------------------------------------------------------
-CARME_SYSTEM_GPUS_PER_NODE=                                    #EXPORT_TO_FRONTEND EXPORT_TO_CONTAINER
+CARME_SYSTEM_GPUS_PER_NODE=
 #e.g.
 #has to be an integer number! (note: do not use double quotes)
 
