@@ -50,6 +50,6 @@ echo "/home/SSD is a fast local scratch storage. WARMING: everything will be del
 
 #start singularity ------------------------------------
 echo "starting worker on" $IPADDR $GPU_DEVICES  
-singularity exec -B /etc/libibverbs.d $MOUNTS -B /scratch_local/$SLURM_JOBID:/home/SSD $IMAGE /bin/bash /home/.CarmeScripts/start_worker.sh $IPADDR $NB_PORT $TB_PORT $USER $HASH $GPU_DEVICES $MEM 
+newpid singularity exec -B /etc/libibverbs.d $MOUNTS -B /scratch_local/$SLURM_JOBID:/home/SSD $IMAGE /bin/bash /home/.CarmeScripts/start_worker.sh $IPADDR $NB_PORT $TB_PORT $USER $HASH $GPU_DEVICES $MEM 
 #------------------------------------------------------
 

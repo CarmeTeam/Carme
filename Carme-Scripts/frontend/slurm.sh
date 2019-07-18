@@ -118,13 +118,13 @@ fi
 export XDG_RUNTIME_DIR=""
 if [[ $IMAGE = *"scratch_image_build"* ]];then #sandbox image - add own start script
   echo "Sandox Mode" $IMAGE $MOUNTS
-  sudo singularity exec -B /etc/libibverbs.d $MOUNTS --writable $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer_root.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES 
+  newpid sudo singularity exec -B /etc/libibverbs.d $MOUNTS --writable $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer_root.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES 
 else
   echo "starting Master on" $IPADDR $GPU_DEVICES	$MEM
 		if [ $IPADDR != "192.168.152.11" ];then
-          singularity exec -B /etc/libibverbs.d $MOUNTS -B /scratch_local/$SLURM_JOBID:/home/SSD $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES $MEM 
+    newpid singularity exec -B /etc/libibverbs.d $MOUNTS -B /scratch_local/$SLURM_JOBID:/home/SSD $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES $MEM 
 		else
-		  singularity exec -B /etc/libibverbs.d $MOUNTS $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES $MEM 
+		  newpid singularity exec -B /etc/libibverbs.d $MOUNTS $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES $MEM 
 		fi
 fi
 
