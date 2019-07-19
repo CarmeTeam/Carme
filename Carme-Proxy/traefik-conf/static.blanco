@@ -1,0 +1,64 @@
+
+  [frontends.traefik]
+  backend = "traefik"
+  passHostHeader = true
+  basicAuth = ["admin:SECRET_HASH"]
+  [frontends.traefik.headers]
+    [frontends.traefik.routes.route_1]
+    rule = "Host:proxy.CARME_URL"
+
+  [frontends.zabbix]
+  backend = "zabbix"
+  passHostHeader = true
+  [frontends.zabbix.headers]
+    [frontends.zabbix.routes.route_1]
+    rule = "Host:monitor.CARME_URL"
+
+  [frontends.ib]
+  backend = "ib"
+  passHostHeader = true
+  basicAuth = ["admin:SECRET_HASH"]
+  [frontends.ib.headers]
+    [frontends.ib.routes.route_1]
+    rule = "Host:net.CARME_URL"
+
+  [frontends.chat]
+  backend = "chat"
+  passHostHeader = true
+  [frontends.chat.headers]
+    [frontends.chat.routes.route_1]
+    rule = "Host:chat.CARME_URL"
+
+  [frontends.ldap]
+  backend = "ldap"
+  passHostHeader = true
+  basicAuth = ["admin:SECRET_HASH"]
+  [frontends.ldap.headers]
+    [frontends.ldap.routes.route_1]
+    rule = "Host:ldap.CARME_URL"
+
+  [frontends.web]
+  backend = "web"
+    [frontends.web.routes.route_1]
+    rule = "Host:CARME_URL"
+
+[backends]
+  [backends.traefik]
+    [backends.traefik.servers.server1]
+    url = "http://CARME_LOGINNODE_IP:PORT"
+  [backends.zabbix]
+    [backends.zabbix.servers.server1]
+    url = "http://CARME_HEADNODE_IP:PORT"
+  [backends.ib]
+    [backends.ib.servers.server1]
+    url = "http://IB_SWITCH_IP"
+  [backends.chat]
+    [backends.chat.servers.server1]
+    url = "http://CARME_HEADNODE_IP:PORT"
+  [backends.ldap]
+    [backends.ldap.servers.server1]
+    url = "http://CARME_HEADNODE_IP:PORT"
+  [backends.web]
+    [backends.web.servers.server1]
+    url = "http://CARME_LOGINNODE_IP:PORT"
+
