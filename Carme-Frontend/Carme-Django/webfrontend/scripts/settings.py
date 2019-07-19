@@ -221,7 +221,7 @@ AUTH_LDAP_BIND_DN = CARME_LDAP_BIND_DN
 AUTH_LDAP_BIND_PASSWORD = CARME_LDAP_SERVER_PW
 
 
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch("dc=%s,dc=%s".format(CARME_LDAP_DC1,CARME_LDAP_DC2),
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch("dc={},dc={}".format(CARME_LDAP_DC1,CARME_LDAP_DC2),
                                     # GroupOfUniqueNames)"
                                     ldap.SCOPE_SUBTREE, "(objectClass=PosixGroup)"
                                     )
@@ -229,19 +229,19 @@ AUTH_LDAP_GROUP_SEARCH = LDAPSearch("dc=%s,dc=%s".format(CARME_LDAP_DC1,CARME_LD
 AUTH_LDAP_GROUP_TYPE = PosixGroupType()  # GroupOfUniqueNamesType()
 
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    "is_active": ("cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2),
-        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_2,CARME_LDAPINSTANZ_2,CARME_LDAP_DC1,CARME_LDAP_DC2),
-        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_3,CARME_LDAPINSTANZ_3,CARME_LDAP_DC1,CARME_LDAP_DC2),
-        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_4,CARME_LDAPINSTANZ_4,CARME_LDAP_DC1,CARME_LDAP_DC2),
-        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_5,CARME_LDAPINSTANZ_5,CARME_LDAP_DC1,CARME_LDAP_DC2)),
-    "is_staff": ("cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2),),
-    "is_superuser": ("cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2))
+    "is_active": ("cn={},ou={},dc={},dc={}".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn={},ou={},dc={},dc={}".format(CARME_LDAPGROUP_2,CARME_LDAPINSTANZ_2,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn={},ou={},dc={},dc={}".format(CARME_LDAPGROUP_3,CARME_LDAPINSTANZ_3,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn={},ou={},dc={},dc={}".format(CARME_LDAPGROUP_4,CARME_LDAPINSTANZ_4,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn={},ou={},dc={},dc={}".format(CARME_LDAPGROUP_5,CARME_LDAPINSTANZ_5,CARME_LDAP_DC1,CARME_LDAP_DC2)),
+    "is_staff": ("cn={},ou={},dc={},dc={}".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2),),
+    "is_superuser": ("cn={},ou={},dc={},dc={}".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2))
 }
 
 AUTH_LDAP_MIRROR_GROUPS = True
 
 
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=%s,dc=%s".format(CARME_LDAP_DC1,CARME_LDAP_DC2),
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc={},dc={}".format(CARME_LDAP_DC1,CARME_LDAP_DC2),
                                    ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 AUTH_LDAP_USER_ATTR_MAP = {
