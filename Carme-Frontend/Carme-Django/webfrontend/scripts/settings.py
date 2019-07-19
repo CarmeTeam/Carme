@@ -25,7 +25,13 @@ from django.urls import reverse_lazy
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 import imp    
 imp.load_source('CarmeConfig', BASE_DIR+'/../../CarmeConfig.frontend')
-from CarmeConfig import *    
+from CarmeConfig import *
+
+LOAD_CUSTOM_SETTINGS=os.path.isfile(BASE_DIR+'/scripts/custom.py')
+
+if LOAD_CUSTOM_SETTINGS:
+    imp.load_source('custom', BASE_DIR+'/scripts/custom.py')
+    from custom import custom_settings
 
 #NOTE: use unified name some time
 CARME_HEAD_NODE=CARME_HEADNODE_IP
@@ -215,7 +221,7 @@ AUTH_LDAP_BIND_DN = CARME_LDAP_BIND_DN
 AUTH_LDAP_BIND_PASSWORD = CARME_LDAP_SERVER_PW
 
 
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch("dc=carme,dc=local",
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch("dc=%s,dc=%s".format(CARME_LDAP_DC1,CARME_LDAP_DC2),
                                     # GroupOfUniqueNames)"
                                     ldap.SCOPE_SUBTREE, "(objectClass=PosixGroup)"
                                     )
@@ -223,15 +229,19 @@ AUTH_LDAP_GROUP_SEARCH = LDAPSearch("dc=carme,dc=local",
 AUTH_LDAP_GROUP_TYPE = PosixGroupType()  # GroupOfUniqueNamesType()
 
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    "is_active": ("cn=itwm-admin,ou=ITWM,dc=carme,dc=local", "cn=itwm-user,ou=ITWM,dc=carme,dc=local", "cn=itwm-guest,ou=ITWM,dc=carme,dc=local", "cn=dl-student,ou=DL-SCHOOL,dc=carme,dc=local", "cn=dl-teacher,ou=DL-SCHOOL,dc=carme,dc=local", "cn=dl-kurs,ou=DL-SCHOOL,dc=carme,dc=local"),
-    "is_staff": ("cn=itwm-admin,ou=ITWM,dc=carme,dc=local", "cn=dl-teacher,ou=DL-SCHOOL,dc=carme,dc=local"),
-    "is_superuser": ("cn=itwm-admin,ou=ITWM,dc=carme,dc=local")
+    "is_active": ("cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_2,CARME_LDAPINSTANZ_2,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_3,CARME_LDAPINSTANZ_3,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_4,CARME_LDAPINSTANZ_4,CARME_LDAP_DC1,CARME_LDAP_DC2),
+        "cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_5,CARME_LDAPINSTANZ_5,CARME_LDAP_DC1,CARME_LDAP_DC2)),
+    "is_staff": ("cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2),),
+    "is_superuser": ("cn=%s,ou=%s,dc=%s,dc=%s".format(CARME_LDAPGROUP_1,CARME_LDAPINSTANZ_1,CARME_LDAP_DC1,CARME_LDAP_DC2))
 }
 
 AUTH_LDAP_MIRROR_GROUPS = True
 
 
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=carme,dc=local",
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=%s,dc=%s".format(CARME_LDAP_DC1,CARME_LDAP_DC2),
                                    ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 AUTH_LDAP_USER_ATTR_MAP = {
@@ -298,7 +308,7 @@ SESSION_AUTO_LOGOUT_TIME = 60*60  # logout aufter one hour od inactivity
 
 # enable time zones
 USE_TZ = True
-TIME_ZONE = 'Europe/Berlin'
+TIME_ZONE = CARME_TIMEZONE
 
 # Restrict access to ALL todo lists/views to `is_staff` users.
 # If False or unset, all users can see all views (but more granular permissions are still enforced
@@ -321,3 +331,7 @@ TODO_PUBLIC_SUBMIT_REDIRECT = '/'
 # additionnal classes the comment body should hold
 # adding "text-monospace" makes comment monospace
 TODO_COMMENT_CLASSES = ['class 1','class2']
+
+
+if LOAD_CUSTOM_SETTINGS:
+    custom_settings(globals())
