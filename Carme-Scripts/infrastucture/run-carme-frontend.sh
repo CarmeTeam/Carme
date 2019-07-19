@@ -18,14 +18,16 @@ if [ ! $(whoami) = "root" ]; then
     exit 137
 fi
 
-INSTANCE_NAME="carme-frontend"
-APACHE_LOGS_DIR="/opt/Carme-Apache-Logs"
-PROXY_ROUTES="/opt/traefik/routes"
+IMAGE_NAME="carme-frontend"
+INSTANCE_NAME="CarmeFrontend"
+APACHE_LOGS_DIR="/var/log/Carme/Carme-Apache-Logs"
+PROXY_ROUTES="/opt/Carme-Proxy-Routes"
 
 
-if [ -f ${INSTANCE_NAME}.simg ];then
+if [ -f ${IMAGE_NAME}.simg ];then
   if [[ "$1" == "start" ]];then
-    mkdir -p ${APACHE_LOGS_DIR} && singularity instance start -B /opt/Carme/Carme-Frontend:/opt/Carme/Carme-Frontend -B ${APACHE_LOGS_DIR}:/opt/Carme-Apache-Logs -B ${PROXY_ROUTES}:/opt/traefik/routes ${INSTANCE_NAME}.simg ${INSTANCE_NAME}
+    mkdir -p ${APACHE_LOGS_DIR}
+				singularity instance start -B /opt/Carme/Carme-Frontend:/opt/Carme/Carme-Frontend -B ${APACHE_LOGS_DIR}:/opt/Carme-Apache-Logs -B ${PROXY_ROUTES}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
   elif [[ "$1" == "stop" ]];then
     singularity instance stop ${INSTANCE_NAME}
   else
