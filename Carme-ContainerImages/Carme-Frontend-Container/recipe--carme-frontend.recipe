@@ -41,6 +41,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     # set timezone
     apt install -y tzdata
     ln -snf /usr/share/zoneinfo/Europe/Berlin /etc/localtime     # change to your preferred timezone
+    echo "Europe/Berlin" > /etc/timezone
 
     # install basig python libs
     apt install -y python3-pip libmysqlclient-dev python-dev python3-pyldap libsasl2-dev libldap2-dev libssl-dev
