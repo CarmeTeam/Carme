@@ -18,26 +18,33 @@ if [ ! $(whoami) = "root" ]; then
     exit 137
 fi
 
-IMAGE_NAME="carme-frontend"
-INSTANCE_NAME="CarmeFrontend"
-APACHE_LOGS_DIR="/var/log/Carme/Carme-Apache-Logs"
+IMAGE_NAME="carme-proxy"
+INSTANCE_NAME="CarmeProxy"
+PROXY_LOGS_DIR="/var/log/Carme/Carme-Traefik-Logs"
 PROXY_ROUTES="/opt/Carme-Proxy-Routes"
-
+CARME_PROXY="/opt/Carme/Carme-Proxy"
 
 if [ -f ${IMAGE_NAME}.simg ];then
   if [[ "$1" == "start" ]];then
-    mkdir -p ${APACHE_LOGS_DIR}
-				singularity instance start -B /opt/Carme/Carme-Frontend:/opt/Carme/Carme-Frontend -B ${APACHE_LOGS_DIR}:/opt/Carme-Apache-Logs -B ${PROXY_ROUTES}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
+    mkdir -p ${PROXY_LOGS_DIR}
+    mkdir -p ${PROXY_ROUTES}/dynamic
+				chmod 777 ${PROXY_ROUTES}/dynamic
+				chown -R www-data:www-data ${PROXY_ROUTES}
+				chown -R www-data:www-data ${PROXY_LOGS_DIR}
+				if [[ ! -f "${PROXY_ROUTES}/static.toml" ]];then
+      ln -s ${CARME_PROXY}/traefik-conf/static.toml ${PROXY_ROUTES}/static.toml
+				fi
+				singularity instance start -B ${CARME_PROXY}:/opt/Carme/Carme-Proxy -B ${PROXY_LOGS_DIR}:/opt/Carme-Traefik-Logs -B ${PROXY_ROUTES}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
   elif [[ "$1" == "stop" ]];then
     singularity instance stop ${INSTANCE_NAME}
   else
     echo "argument can only be"
-    echo "start == start apache2 for ${INSTANCE_NAME}"
-    echo "stop == stop apache2 for ${INSTANCE_NAME}"
+    echo "start == start traefik for ${INSTANCE_NAME}"
+    echo "stop == stop traefik for ${INSTANCE_NAME}"
   fi
 else
-  echo "This script has to be in the same folder as the Carme frontend image!"
+  echo "This script has to be in the same folder as the Carme proxy image!"
   echo "Please copy this script to this folder. Note that this folder should"
-  echo "be located on the CARME_LOGIN_NODE"
+  echo "be located on the CARME_LOGIN_NODE!"
 fi
 

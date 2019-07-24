@@ -1,0 +1,74 @@
+defaultEntryPoints = ["http", "https"] 
+
+debug = false
+
+[traefikLog]
+  filePath = "/var/log/traefik/traefik.log"
+  format   = "json"
+  logLevel = "ERROR"
+
+[accessLog]
+  filePath = "/var/log/traefik/access.log"
+  logLevel = "ERROR"
+
+[respondingTimeouts]
+  readTimeout = "10s"
+  writeTimeout = "10s"
+  idleTimeout = "360s"
+
+[retry]
+  attempts = 10000
+
+#admin dashboard
+[api]
+  entryPoint = "api"
+  dashboard = true
+
+#allows healthcheck
+[ping]
+  entryPoint = "traefik"
+
+[entryPoints]
+  [entrypoints.api]
+  address="CARME_LOGINNODE_IP:PORT"
+
+  [entryPoints.http]
+    address = "CARME_URL:10080"
+    [entryPoints.http.redirect]
+      entryPoint = "https"
+
+  [entryPoints.https]
+    address = "CARME_URL:10443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+      certFile = "PATH_TO_BASE_CERT_FILE"
+      keyFile = "PATH_TO_BASE_KEY_FILE"
+      
+						[[entryPoints.https.tls.certificates]]
+      certFile = "PATH_TO_CHAT_CERT_FILE"
+      keyFile = "PATH_TO_CHAT_KEY_FILE"
+
+      [[entryPoints.https.tls.certificates]]
+      certFile = "PATH_TO_PROXY_CERT_FILE"
+      keyFile = "PATH_TO_PROXY_KEY_FILE"
+
+      [[entryPoints.https.tls.certificates]]  
+      certFile = "PATH_TO_MONITOR_CERT_FILE"
+      keyFile = "PATH_TO_MONITOR_KEY_FILE"
+
+      [[entryPoints.https.tls.certificates]]  
+      certFile = "PATH_TO_IBSWITCH_CERT_FILE"
+      keyFile = "PATH_TO_IBSWITCH_KEY_FILE"
+
+      [[entryPoints.https.tls.certificates]] 
+      certFile = "PATH_TO_PHPLDDAPADMIN_CERT_FILE"
+      keyFile = "PATH_TO_PHPLDAPADMIN_KEY_FILE"
+
+      [[entryPoints.https.tls.certificates]]   
+      certFile = "PATH_TO_ADMINPORTAL_CERT_FILE"
+      keyFile = "PATH_TO_ADMINPORTAL_KEY_FILE"
+
+[file]
+directory = "/opt/traefik/routes/"
+watch = true
+

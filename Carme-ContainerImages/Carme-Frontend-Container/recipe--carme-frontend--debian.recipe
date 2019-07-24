@@ -1,25 +1,21 @@
 BootStrap: debootstrap
-OSVersion: bionic
-MirrorURL: http://us.archive.ubuntu.com/ubuntu/
-
+OSVersion: stable
+MirrorURL: http://ftp.de.debian.org/debian/
 %help
     If you need any help you should ask the maintainer of this image.
 
 %labels
     MAINTAINER CC-HPC Fraunhofer ITWM
 
-%files
-    /home/root-back/SOFT/sources-list/sources--18-04.list /etc/apt/sources.list
-
 %post
-    apt update
-    apt -y upgrade
+    echo "deb http://ftp.de.debian.org/debian/ stable main contrib non-free" > /etc/apt/sources.list
+    echo "deb-src http://ftp.de.debian.org/debian/ stable main contrib non-free" >> /etc/apt/sources.list
+    echo "deb http://security.debian.org/ stable/updates main contrib non-free" >> /etc/apt/sources.list
+    echo "deb-src http://security.debian.org/ stable/updates main contrib non-free" >> /etc/apt/sources.list
+    echo "deb http://ftp.de.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list
+    echo "deb-src http://ftp.de.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list 
 
     # base stuff -------------------------------------------------------------------------------------------------------------------
-    # isntall generic linux kernel
-    apt install -y linux-generic
-
-    # install apache and enable apache modules
     apt install -y apache2 apache2-bin apache2-data apache2-utils libapache2-mod-wsgi-py3
     a2enmod wsgi
     a2enmod expires
@@ -38,16 +34,13 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     rm -r /var/log/apache2
     ln -s /opt/Carme-Apache-Logs /var/log/apache2
 
+    # install basig python libs
+    apt install -y python3-pip default-libmysqlclient-dev python-dev python3-pyldap libsasl2-dev libldap2-dev libssl-dev
+
     # set timezone
-    apt install -y tzdata
+    rm /etc/localtime
     ln -snf /usr/share/zoneinfo/Europe/Berlin /etc/localtime     # change to your preferred timezone
     echo "Europe/Berlin" > /etc/timezone
-
-    # install basig python libs
-    apt install -y python3-pip libmysqlclient-dev python-dev python3-pyldap libsasl2-dev libldap2-dev libssl-dev
-
-    # django install. note has to be done within sandbox, does not work with recipe!!
-    #pip3 install django django-auth-ldap django-auth-ldap django-bootstrap-themes django-chartjs django-classy-tags django-db-logger django-filter django-js-asset django-logtailer django-maintenance-mode django-material django-material django-mptt django-nyt django-sekizai django-settings-export django-todo django-viewflow django-viewflow mysqlclient numpy rpyc==4.0.2 whitenoise wiki
 
     # clean-up ---------------------------------------------------------------------------------------------------------------------
     apt update
@@ -56,6 +49,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     apt clean
 
     # reconfigure some stuff -------------------------------------------------------------------------------------------------------
+    chmod 1777 /tmp
     rm /bin/sh
     ln -s /bin/bash /bin/sh
     rm /usr/share/man/man1/sh.1.gz
@@ -66,7 +60,8 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     export XDG_RUNTIME_DIR=""
 
 %runscript
-    echo "This is a Singularity container for the Carme Web-Frontend"
+    echo "This is a Singularity container for the Carme Web-Frontend (Debian Version)"
 
 %startscript
 /etc/init.d/apache2 start
+
