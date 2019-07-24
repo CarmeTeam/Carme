@@ -16,6 +16,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
     echo "deb-src http://ftp.de.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list 
 
     # base stuff -------------------------------------------------------------------------------------------------------------------
+    apt install -y sudo
     apt install -y wget
     mkdir /opt/traefik && cd /opt/traefik
     wget https://github.com/containous/traefik/releases/download/v1.7.12/traefik_linux-amd64
@@ -25,6 +26,8 @@ MirrorURL: http://ftp.de.debian.org/debian/
     ln -s /opt/Carme-Traefik-Logs /var/log/traefik
     ln -s /opt/Carme/Carme-Proxy/traefik-conf/traefik.toml /opt/traefik/traefik.toml
     ln -s /opt/Carme/Carme-Proxy/SSL /opt/traefik/SSL
+
+    chown -R www-data:www-data /opt/traefik
 
     # set timezone
     rm /etc/localtime
@@ -52,5 +55,5 @@ MirrorURL: http://ftp.de.debian.org/debian/
     echo "This is a Singularity container for Traefik (Debian Version)"
 
 %startscript
-/opt/traefik/traefik_linux-amd64 --configfile=/opt/traefik/traefik.toml
+sudo -u www-data /opt/traefik/traefik_linux-amd64 --configfile=/opt/traefik/traefik.toml
 

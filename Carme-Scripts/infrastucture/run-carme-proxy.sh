@@ -30,6 +30,7 @@ if [ -f ${IMAGE_NAME}.simg ];then
     mkdir -p ${PROXY_ROUTES}/dynamic
 				chmod 777 ${PROXY_ROUTES}/dynamic
 				chown -R www-data:www-data ${PROXY_ROUTES}
+				chown -R www-data:www-data ${PROXY_LOGS_DIR}
 				if [[ ! -f "${PROXY_ROUTES}/static.toml" ]];then
       ln -s ${CARME_PROXY}/traefik-conf/static.toml ${PROXY_ROUTES}/static.toml
 				fi

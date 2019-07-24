@@ -33,12 +33,12 @@ debug = false
   address="CARME_LOGINNODE_IP:PORT"
 
   [entryPoints.http]
-    address = "CARME_URL:80"
+    address = "CARME_URL:10080"
     [entryPoints.http.redirect]
       entryPoint = "https"
 
   [entryPoints.https]
-    address = "CARME_URL:443"
+    address = "CARME_URL:10443"
     [entryPoints.https.tls]
       [[entryPoints.https.tls.certificates]]
       certFile = "PATH_TO_BASE_CERT_FILE"
