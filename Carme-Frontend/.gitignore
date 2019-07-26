@@ -1,6 +1,13 @@
 # backup files
 *~
 
+# config files
+*.conf
+hosts
+
+# custom python config
+custom.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

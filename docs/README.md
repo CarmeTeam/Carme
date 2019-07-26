@@ -1,28 +1,30 @@
 # *Carme*
-![carme_logo](Images/carme-logo.png)
+![carme_stage](Images/Carme-Stage--dark--symmetric.jpg)
 
 ## HPC meets interactive Data Science and Machine Learning 
 **Carme (/ˈkɑːrmiː/ KAR-mee; Greek: Κάρμη) is a Jupiter moon, also giving the name for a Cluster of Jupiter moons (the carme group).**
 
-Or in our case:
+_or in our case..._
 
-an open source frame work to mange resources for **multiple users** running **interactive jobs (e.g. Jupyter notebooks)** on a **Cluster** of (GPU) compute nodes.
+an open source frame work to mange resources for **multiple users** running **interactive jobs (e.g. Theia-IDE or Jupyter notebooks)** on a **Cluster** of (GPU) compute nodes.
 
-## [Follow us on Twitter](https://twitter.com/open_carme) : #OpenCarme
+## Follow us on Twitter &rarr; [#OpenCarme](https://twitter.com/open_carme)
 
 ## *Carme* Presentations 
-* [Slides from our talk at ISC18 6/18](https://www.researchgate.net/publication/325967129_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
-* [Slides from our talk at LRZ 10/18](https://www.researchgate.net/publication/328161743_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
+* [Slides from our talk at ISC18 06/2018](https://www.researchgate.net/publication/325967129_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
+* [Slides from our talk at LRZ 10/2018](https://www.researchgate.net/publication/328161743_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
+* [Slides from ISC 06/2019](https://www.researchgate.net/publication/334319039_Carme_-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 
-## *Carme* core idea:
+## *Carme* Core Idea
 **Combine established open source ML and DS tools with HPC back-ends**
-* Use containers -> Singularity
-* Use Jupyter Notebooks as main web based GUI-Frontend
-* All web front-end (OS independent, no installation on user side needed)   
-* Use HPC job management and scheduler -> SLURM
-* Use HPC data I/O technology -> ITWM’s BeeGFS  
-* Use HPC maintenance and monitoring tools 
+* uses containers &rarr; Singularity
+* uses Theia-IDE and Jupyter Notebooks as main web based GUI-Frontends
+* completely web front-end based (OS independent, no installation on user side needed)   
+* uses HPC job management and scheduler &rarr; SLURM
+* uses HPC data I/O technologies like ITWM’s BeeGFS  
+* uses HPC maintenance and monitoring tools 
 ![scheme](Images/carme-run.png)
+
 ## Key Features
 * Open source
   * *Carme* uses only opensource components that allow commercial usage
@@ -37,7 +39,7 @@ an open source frame work to mange resources for **multiple users** running **in
   * Resource reservation (calender)
   * Job queues for large jobs and instant interactive access for small jobs   
 * Data Management and I/O
-  * Redundant, global file system (BeeGFS), mounts into container
+  * Redundant, global file system (BeeGFS), mounts directly into container
   * Temporary job FS on local SSDs for max performance (BeeOND) 
 * Web-Interface
  * HTTPS and SSH (if allowed) access via proxy 
@@ -45,14 +47,16 @@ an open source frame work to mange resources for **multiple users** running **in
  
 ## *Carme* Roadmap
 * [x] The *Carme* prototype (beta) is currently up and running on our Cluster 
-* [x] **First public beta realease is here!** -> see GitHub 
-* [ ] First stable release: June 2019 (ISC SuperComputing Conference)
+* [x] 03/2019: **First public beta realease is here!** (see GitHub)
+* [x] 07/2019: Release r0.4 (latest)
+* [ ] Autumn 2019: Release r0.5 
+* [ ] December 2019: Release r1.0 (SuperComputing Conference)
 
 ## *Carme* Documentation
-visit *Carme* documentation project: [doc.open-carme.org](http://doc.open-carme.org)
+Regarding the Documentation visit our *Carme* documentation at [doc.open-carme.org](http://doc.open-carme.org)
 
 ## Who is behind *Carme*?
-* *Carme* is currently developed at the machine learning group of the Fraunhofer Competence Center HPC 
+* *Carme* is currently developed at the machine learning group of the Competence Center for High Performance Computing at Fraunhofer ITWM
 
 [http://itwm.fraunhofer.de/ml](http://itwm.fraunhofer.de/ml)
 
