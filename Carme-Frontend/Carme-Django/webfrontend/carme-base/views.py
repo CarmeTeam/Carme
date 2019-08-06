@@ -248,7 +248,6 @@ def job_table(request):
             [backends.ta_'''+str(job.HASH)+''']
             [backends.ta_'''+str(job.HASH)+'''.servers.server1] 
             url = "http://'''+str(job.IP)+''':'''+str(TA_PORT)+'''"
-
             '''
             f.write(route)
             f.close()
