@@ -46,6 +46,12 @@ fi
 echo "SLURM CHECK PARAMS" $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT
 
 GPU_DEVICES=$( ${CARME_SCRIPT_PATH}/dist_get_free_gpu_on_host/get_free_gpu_on_host $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT)
+if [[ -z "$GPU_DEVICES" ]];then
+  echo "ERROR: available GPUs not set!"
+  echo "ERROR: no free GPUs on node. Job stops!"
+  echo "ERROR: please contact your admin"
+  exit 137
+fi
 echo "SLURM MASTER GPUS: " $IPADDR $GPUS $GPU_DEVICES
 #------------------------------------------------------
 
