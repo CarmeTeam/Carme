@@ -80,7 +80,7 @@ def index(request):
         StatQueudGPUs=0
     if (str(StatUsedGPUs)=="None"):
         StatUsedGPUs=0
-    StatReservedGPUs = 2 #NOTE not implemented yet
+    StatReservedGPUs = 0 #NOTE not implemented yet
     StatFreeGPUs = settings.CARME_HARDWARE_NUM_GPUS - (StatUsedGPUs + StatReservedGPUs)
     timestamp = datetime.datetime.now()
     #check if stats have changed
@@ -206,7 +206,7 @@ def job_table(request):
 
             # write route to proxy
             pfile = str(settings.CARME_PROXY_PATH) + \
-                '/routes/dynamic/'+str(job.SLURM_ID)+".toml"
+                '/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(job.SLURM_ID)+".toml"
             f = open(pfile, 'w')
             route = '''
             [frontends.nb_'''+str(job.HASH)+''']
@@ -256,7 +256,7 @@ def job_table(request):
                 settings.CARME_PROXY_PATH)+'/routes/dummy.toml;touch '+str(settings.CARME_PROXY_PATH)+'/routes/dummy.toml'
             if os.system(com) != 0:
                 message = 'FRONTEND ERROR: Sarting job ' + \
-                    str(job.SLURM_ID)+' failed !'
+                    str(job.SLURM_ID)+'('+str(settings.CARME_FRONTEND_ID)+') failed !'
                 db_logger.exception(message)
                 raise Exception("ERROR trafik job update")
     
@@ -538,7 +538,7 @@ def stop_job(request):
             # NOTE: this part should move to the backend as well
             if jobID > 0:  # job is running
                 # delete
-                com = 'rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(jobID)+'.toml; echo "empty" > '+str(
+                com = 'rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(jobID)+'.toml; echo "empty" > '+str(
                     settings.CARME_PROXY_PATH)+'/routes/dummy.toml'  # systemctl restart proxy'
                 if os.system(com) != 0:
                     message = "FRONTEND: Error deleting route for job " + \
