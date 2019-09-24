@@ -267,7 +267,7 @@ class CarmeBackEndService(rpyc.Service):
         GPUS_used=[]
         for i in results:
                 print ("used GPU: ", i[0])
-                GPUS_used.append(i[0])
+                GPUS_used.extend(i[0].split(","))
         print("GPUs used: ",GPUS_used)
         print("possible GPUs: ",possible_GPUs)
         print("num GPUs: ",numGPUs)
