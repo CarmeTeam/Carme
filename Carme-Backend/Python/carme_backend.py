@@ -354,11 +354,11 @@ class CarmeBackEndService(rpyc.Service):
         if ret == 0:  
             setCarmeLog("BACKEND: Job " + str(jobName) +
                         " terminated by user API.", 20) 
-            setMessage("Terminating job " + str(jobName), str(jobUser), "tomato")
+            setMessage("Terminating job " + str(jobName), str(jobUser), "#00B5FF")
             sendMatterMostMessage(  
                 jobUser, "Job " + str(jobName) + " terminated by user API.")
         else:       
-            setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "red")   
+            setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "#C81464")   
             sendMatterMostMessage( 
                 jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
@@ -412,7 +412,7 @@ class CarmeBackEndService(rpyc.Service):
         if ret == 0:
             sendMatterMostMessage(
                 jobUser, "Job " + str(jobName) + " has been schedued for execution")
-            setMessage("Job " + str(jobName) + " scheduled", str(jobUser), "yellow") 
+            setMessage("Job " + str(jobName) + " scheduled", str(jobUser), "#e8be17") 
         else:
             sendMatterMostMessage(
                 jobUser, "scheduling job " + str(jobName) + " FAILED! - Contact your admin.")
@@ -442,7 +442,7 @@ class CarmeBackEndService(rpyc.Service):
         if ret == 0:
             setCarmeLog("BACKEND: Job " + str(jobName) +
                         " terminated by user.", 20)
-            setMessage("Terminating job " + str(jobName), str(jobUser), "tomato")
+            setMessage("Terminating job " + str(jobName), str(jobUser), "#00B5FF")
             sendMatterMostMessage(
                 jobUser, "Job " + str(jobName) + " terminated by user.")
         else:
@@ -496,7 +496,7 @@ class CarmeBackEndService(rpyc.Service):
         sendMatterMostMessage(                                                                                                                                                                                 
                 jobUser, "Job "+str(jobName)+" (ID: " + str(jobSlurmID) + ") Started!")  
                                                                                                                         
-        setMessage("Starting job " + str(jobName), str(jobUser), "green") 
+        setMessage("Starting job " + str(jobName), str(jobUser), "#64FA3C") 
         
         print ("TRIGGER DONE")  
  

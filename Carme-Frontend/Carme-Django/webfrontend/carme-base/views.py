@@ -273,7 +273,7 @@ def job_table(request):
                 job.status = "timeout"
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-                message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "tomato")
+                message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "#00B5FF")
                 job.save()
 
 
@@ -365,8 +365,8 @@ def start_job(request):
             jobname = re.sub(r'[^a-zA-Z0-9_]', '',user_name)#''.join(e for e in user_name if e.isalnum())
             jobname = jobname + '_' + \
                 ''.join(random.choice(chars) for _ in range(4))
-            if num_nodes > 1:  # current hack to make multi-node jobs axclusive
-                num_gpus = 2
+            #if num_nodes > 1:  # current hack to make multi-node jobs axclusive
+            #    num_gpus = 2
 
             m = SlurmJobs.objects.create(jobName=jobname, imageName=name, NumGPUs=num_gpus, NumNodes=num_nodes,
                                          user=request.user.username, SLURM_ID=(0-random.randint(1, 10000)), frontend=settings.CARME_FRONTEND_ID)
