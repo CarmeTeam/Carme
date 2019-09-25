@@ -66,7 +66,7 @@ def setMessage(message, user, color):
 	user: username
 	color: color of message                                                                                                                                                                        
     """     
-
+    message = datetime.datetime.now().strftime("%d/%m/%Y - %H:%M:%S: ") + message
     db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                          passwd=CARME_DB_PW,  db=CARME_DB_DB)
     cur = db.cursor() 
@@ -354,11 +354,11 @@ class CarmeBackEndService(rpyc.Service):
         if ret == 0:  
             setCarmeLog("BACKEND: Job " + str(jobName) +
                         " terminated by user API.", 20) 
-            setMessage("Terminating job " + str(jobName), str(jobUser), "#00B5FF")
+            setMessage("Terminated Job " + str(jobName), str(jobUser), "#00B5FF")
             sendMatterMostMessage(  
                 jobUser, "Job " + str(jobName) + " terminated by user API.")
         else:       
-            setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "#C81464")   
+            setMessage("ERROR: Terminated Job " + str(jobName), str(jobUser), "#C81464")   
             sendMatterMostMessage( 
                 jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
@@ -412,7 +412,7 @@ class CarmeBackEndService(rpyc.Service):
         if ret == 0:
             sendMatterMostMessage(
                 jobUser, "Job " + str(jobName) + " has been schedued for execution")
-            setMessage("Job " + str(jobName) + " scheduled", str(jobUser), "#e8be17") 
+            setMessage("Scheduled Job " + str(jobName), str(jobUser), "#e8be17") 
         else:
             sendMatterMostMessage(
                 jobUser, "scheduling job " + str(jobName) + " FAILED! - Contact your admin.")
@@ -442,11 +442,11 @@ class CarmeBackEndService(rpyc.Service):
         if ret == 0:
             setCarmeLog("BACKEND: Job " + str(jobName) +
                         " terminated by user.", 20)
-            setMessage("Terminating job " + str(jobName), str(jobUser), "#00B5FF")
+            setMessage("Terminated Job " + str(jobName), str(jobUser), "#00B5FF")
             sendMatterMostMessage(
                 jobUser, "Job " + str(jobName) + " terminated by user.")
         else:
-            setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "red")
+            setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
             sendMatterMostMessage(
                 jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
@@ -472,7 +472,7 @@ class CarmeBackEndService(rpyc.Service):
             db.rollback() 
             cur.close()
             db.close()
-            setMessage("FAILED Terminating job " + str(jobName), str(jobUser), "red")
+            setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
             return "Error: SQL FAIL!" 
         return ret
 
@@ -496,7 +496,7 @@ class CarmeBackEndService(rpyc.Service):
         sendMatterMostMessage(                                                                                                                                                                                 
                 jobUser, "Job "+str(jobName)+" (ID: " + str(jobSlurmID) + ") Started!")  
                                                                                                                         
-        setMessage("Starting job " + str(jobName), str(jobUser), "#64FA3C") 
+        setMessage("Started Job " + str(jobName), str(jobUser), "#64FA3C") 
         
         print ("TRIGGER DONE")  
  

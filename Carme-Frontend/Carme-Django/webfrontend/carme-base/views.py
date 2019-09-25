@@ -58,8 +58,8 @@ def index(request):
     slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
     slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
-    jobheight = 120+numjobs*70
-    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    jobheight = 200+numjobs*70
+    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user).order_by('-id'))[:10] #select only 10 latest messages
     template = loader.get_template('../templates/home.html')
     nodeC, gpuC, imageC = generateChoices(request)
     startForm = StartJobForm(image_choices=imageC,
@@ -112,7 +112,7 @@ def admin_job_table(request):
     current_user = request.user.username
     slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout")
     numjobs = len(slurm_list)
-    jobheight = 120+numjobs*60
+    jobheight = 200+numjobs*60
     template = loader.get_template('../templates/admin_job_table.html')
 
     context = {
@@ -132,7 +132,7 @@ def admin_cluster_status(request):
     current_user = request.user.username
     slurm_list = SlurmJobs.objects.all()
     numjobs = len(slurm_list)
-    jobheight = 120+numjobs*60
+    jobheight = 200+numjobs*60
     template = loader.get_template('../templates/admin_cluster_status.html')
 
     context = {
@@ -282,7 +282,7 @@ def job_table(request):
 
     slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
     numjobs = len(slurm_list_user)
-    jobheight = 120+numjobs*60
+    jobheight = 200+numjobs*60
     template = loader.get_template('../templates/jobtable.html')
     context = {
         'slurm_list_user': slurm_list_user,
@@ -611,7 +611,7 @@ def messages(request):
 
     """
     current_user = request.user.username 
-    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user).order_by('-id'))[:10] #select only 10 latest messages
     template = loader.get_template('../templates/blocks/messages.html')  
     context = {
             'message_list': message_list,
@@ -697,9 +697,9 @@ class LineChartJSONView(BaseLineChartView):
                 dataset["pointBackgroundColor"]="rgba(106, 38, 189, 1.0)"
                 dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
             elif dataset["name"]=="queued":
-                dataset["backgroundColor"]="rgba(255, 75, 0, 0.5)"
-                dataset["borderColor"]="rgba(255, 75, 0, 1.0)"
-                dataset["pointBackgroundColor"]="rgba(255, 75, 0, 1.0)"
+                dataset["backgroundColor"]="rgba(135, 140, 135, 0.5)"
+                dataset["borderColor"]="rgba(135, 140, 135, 1.0)"
+                dataset["pointBackgroundColor"]="rgba(135, 140, 135, 1.0)"
                 dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
             elif dataset["name"]=="reserved":
                 dataset["backgroundColor"]="rgba(0, 181, 255, 0.5)"
