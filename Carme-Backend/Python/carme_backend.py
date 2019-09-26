@@ -381,7 +381,7 @@ class CarmeBackEndService(rpyc.Service):
         return ret                                                          
 
 
-    def exposed_StartJob(self, jobUser, jobID, jobImage, jobMounts, jobPartition, jobNumGPUs, jobNumNodes, jobName):
+    def exposed_StartJob(self, jobUser, jobID, jobImage, jobMounts, jobPartition, jobNumGPUs, jobNumNodes, jobName, jobGPUType):
         """
         Tells the batch-system to schedule a new job
 
@@ -397,6 +397,7 @@ class CarmeBackEndService(rpyc.Service):
             jobNumGPUs: number of GPUs to be used
             jobNumNodes: number of nodes
             jobName: name string (NOTE: must be unique)
+            jobGPUType: type of the GPU we want to use
         """
         if self.user != "frontend":
             setCarmeLog("BACKEND: AUTH FAILED", 40)
@@ -404,7 +405,8 @@ class CarmeBackEndService(rpyc.Service):
 
         print("start job ", CARME_SCRIPT_PATH) 
         com = 'runuser -l '+str(jobUser)+' '+str(CARME_BACKEND_PATH)+'/Bash/submitJob.sh '+str(CARME_SCRIPT_PATH)+' '+str(jobID)+' '+str(
-            jobImage)+' '+str(jobMounts)+' '+str(jobPartition)+' '+str(jobNumGPUs)+' '+str(jobNumNodes)+' '+str(jobName)+' '+str(CARME_SCRIPT_PATH)
+            jobImage)+' '+str(jobMounts)+' '+str(jobPartition)+' '+str(jobNumGPUs)+' '+str(jobNumNodes)+' '+str(jobName)+' '+str(
+            CARME_SCRIPT_PATH)+' '+str(jobGPUType)
         if CARME_BACKEND_DEBUG:
             print (com)
             setCarmeLog("BACKEND: "+str(com), 10)

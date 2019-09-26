@@ -20,21 +20,24 @@ GPUS=$4
 MEM=$5
 CARME_SCRIPT_PATH=$6
 
-#read user accessable pert of CarmeConfig                              
+#read user accessable part of CarmeConfig                              
 source ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container   
-
 MOUNTS=${mountstr//[_]/ }
-#export HASH=$(sh ${CARME_FRONTEND_SCRIPTS_PATH}/hash.sh)
-#URL=https://gpu-cluster.itwm.fraunhofer.de/nb_$HASH
-NODES=1 # get from jobDB
 
-IPADDR=$(ip -o -4 addr list ${CARME_SYSTEM_DEFAULT_NETWORK} | awk '{print $4}' | cut -d/ -f1) 
+IPADDR=$(ip route get ${CARME_GATEWAY} | head -1 | awk '{print $5}' | cut -d/ -f1)
 
 #dummy valuse
 NB_PORT=0
 TB_PORT=0
 
 GPU_DEVICES=$( ${CARME_SCRIPT_PATH}/dist_get_free_gpu_on_host/get_free_gpu_on_host $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT) 
+GPU_DEVICES=${CUDA_VISIBLE_DEVICES}
+if [[ -z "$GPU_DEVICES" ]];then
+  echo "ERROR: WORKER: available GPUs not set!"
+  echo "ERROR: WORKER: no free GPUs on node. Job stops now!"
+  echo "ERROR: please contact your admin."
+  exit 137
+fi
 echo "WORKER GPUS: " $IPADDR $GPUS $GPU_DEVICES
 #GPU_DEVICES='1,0' #mult-node jobs are exclusive!
 

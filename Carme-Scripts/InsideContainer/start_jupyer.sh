@@ -21,19 +21,18 @@ MEM=$8
 source /home/.CarmeScripts/CarmeConfig.container
 
 #debug output
-echo "CARME Version" $CARME_VERSION
-echo "Master running on" $IPADDR
-echo "Master Jupyter Port" $NB_PORT
-echo "Master TB Port" $TB_PORT
-echo "Master GPUs " $GPUS
+echo "MASTER: Theia at ${IPADDR}:${TA_PORT}"
+echo "MASTER: Jupyter at ${IPADDR}:${NB_PORT}"
+echo "MASTER: TensorBoard at ${IPADDR}:${TB_PORT}"
+echo ""
+
 MEM_LIMIT=$(( MEM * 1024 *1024))
-echo "Master starting with mem limit" $MEM_LIMIT
-echo "backend: " $CARME_BACKEND_SERVER $CARME_BACKEND_PORT
+echo "MASTER: Memory Limit ${MEM_LIMIT}B"
+echo ""
 
 #ulimit -d $MEM_LIMIT
 #echo "MASTER: setting data seg size to" $MEM_LIMIT
 
-export CUDA_VISIBLE_DEVICES=$GPUS
 export TBDIR="/home/$USER/tensorboard"
 if [ ! -d $TBDIR ]; then
 								  mkdir $TBDIR  										
@@ -82,7 +81,7 @@ export CARME_BACKEND_PORT=$CARME_BACKEND_PORT
 export CARME_TENSORBOARD_HOME='/home/$USER/tensorboard'
 alias carme_mpirun='/opt/anaconda3/bin/mpirun -host ${MPI_NODES},${MPI_NODES}, -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
 alias carme_cuda_version='nvcc --version'
-alias carme_cudnn_version='echo 7'
+alias carme_cudnn_version='cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1'
 alias jupyter_url='echo $JUPYTER_SERVER_URL'
 alias carme_ssh='ssh -p 2222'
 alias nvidia-smi='nvidia-smi -i $GPUS'
@@ -92,40 +91,38 @@ alias nvidia-smi='nvidia-smi -i $GPUS'
 source ~/.carme/.bash_carme_$SLURM_JOBID
 
 #start multi node severs
-echo "GPUS: " $GPUS "${#GPUS}"
 if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
-	echo "Starting DASK"							
-	#DASK
-	export LC_ALL=C.UTF-8
-	export LANG=C.UTF-8
-	DASK_JOB_DIRECTORY="/home/"$USER"/.job-log-dir/dask_job_"$SLURM_JOB_ID"_"$SLURM_JOB_NAME
-	DASK_MASTER=$(hostname)
-	DASK_NODES="${CARME_NODES[@]/,/ }"
-	DASK_SLAVES="${DASK_NODES[@]/$DASK_MASTER}"
-	DASK_MASTER_IP=$(hostname -i)
-	DASK_MASTER_PORT="8786"
- DASK_DASHBOARD_PORT="8787"
-	DASK_MASTER_WORKER_NAME_1="worker1_"$(hostname)
-	DASK_MASTER_WORKER_NAME_0="worker0_"$(hostname)	#NOTE - this works only if we have exclusive nodes (just like for MPI) 
-	DASK_MASTER_WORKER_LOCAL_DIR_0=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_NAME_0
- DASK_MASTER_WORKER_LOCAL_DIR_1=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_NAME_1
-	DASK_MASTER_WORKER_OUTPUT_1=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_LOCAL_DIR"/"$DASK_MASTER_WORKER_NAME_1".txt"    
-	DASK_MASTER_WORKER_OUTPUT_0=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_LOCAL_DIR"/"$DASK_MASTER_WORKER_NAME_0".txt"
-	DASK_SCHEDULER_DIR=${DASK_JOB_DIRECTORY}"/scheduler"
-	DASK_SCHEDULER_OUTPUT=${DASK_JOB_DIRECTORY}"/"${DASK_SCHEDULER_DIR}"/scheduler_out.txt"	
+#	echo "Starting DASK"
+#	export LC_ALL=C.UTF-8
+#	export LANG=C.UTF-8
+#	DASK_JOB_DIRECTORY="/home/"$USER"/.job-log-dir/dask_job_"$SLURM_JOB_ID"_"$SLURM_JOB_NAME
+#	DASK_MASTER=$(hostname)
+#	DASK_NODES="${CARME_NODES[@]/,/ }"
+#	DASK_SLAVES="${DASK_NODES[@]/$DASK_MASTER}"
+#	DASK_MASTER_IP=$(hostname -i)
+#	DASK_MASTER_PORT="8786"
+# DASK_DASHBOARD_PORT="8787"
+#	DASK_MASTER_WORKER_NAME_1="worker1_"$(hostname)
+#	DASK_MASTER_WORKER_NAME_0="worker0_"$(hostname)	#NOTE - this works only if we have exclusive nodes (just like for MPI) 
+#	DASK_MASTER_WORKER_LOCAL_DIR_0=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_NAME_0
+# DASK_MASTER_WORKER_LOCAL_DIR_1=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_NAME_1
+#	DASK_MASTER_WORKER_OUTPUT_1=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_LOCAL_DIR"/"$DASK_MASTER_WORKER_NAME_1".txt"    
+#	DASK_MASTER_WORKER_OUTPUT_0=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_LOCAL_DIR"/"$DASK_MASTER_WORKER_NAME_0".txt"
+#	DASK_SCHEDULER_DIR=${DASK_JOB_DIRECTORY}"/scheduler"
+#	DASK_SCHEDULER_OUTPUT=${DASK_JOB_DIRECTORY}"/"${DASK_SCHEDULER_DIR}"/scheduler_out.txt"	
        
-	if [ -d $DASK_JOB_DIRECTORY ];then
-  		rm -r $DASK_JOB_DIRECTORY
-  		mkdir $DASK_JOB_DIRECTORY  
-	else
-  	 mkdir $DASK_JOB_DIRECTORY
-	fi             
+#	if [ -d $DASK_JOB_DIRECTORY ];then
+#  		rm -r $DASK_JOB_DIRECTORY
+#  		mkdir $DASK_JOB_DIRECTORY  
+#	else
+#  	 mkdir $DASK_JOB_DIRECTORY
+#	fi             
 
-	/opt/anaconda3/bin/dask-scheduler --port $DASK_MASTER_PORT --bokeh-port $DASK_DASHBOARD_PORT --bokeh-prefix=/dd_${MYHASH} --local-directory ${DASK_SCHEDULER_DIR} & #scheduler output is going to generel job_log
+#	/opt/anaconda3/bin/dask-scheduler --port $DASK_MASTER_PORT --bokeh-port $DASK_DASHBOARD_PORT --bokeh-prefix=/dd_${MYHASH} --local-directory ${DASK_SCHEDULER_DIR} & #scheduler output is going to generel job_log
 							
-	CUDA_VISIBLE_DEVICES=0 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_0} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_0} >> $DASK_MASTER_WORKER_OUTPUT_0 &
+#	CUDA_VISIBLE_DEVICES=0 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_0} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_0} >> $DASK_MASTER_WORKER_OUTPUT_0 &
 							
-	CUDA_VISIBLE_DEVICES=1 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_1} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_1} >> $DASK_MASTER_WORKER_OUTPUT_1 &
+#	CUDA_VISIBLE_DEVICES=1 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_1} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_1} >> $DASK_MASTER_WORKER_OUTPUT_1 &
 
 	#SSHD
 	touch ~/.start_sshd
@@ -175,13 +172,11 @@ if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
 						 env > ~/.ssh/environment #make local env available	
 							echo "staring SSHD on MASTER" $(hostname)
 							/usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key -E ~/.SSHD_log -f $SSHDIR/sshd_config & 
-else
-								echo "NO DASK"
 fi
 
 
 # start tensorboard ----------------------------------------------------------------------------------------------------------------
-echo "Starting Tesorboard " ${TENSORBOARD_LOG_DIR} ${TB_PORT} ${MYHASH} 
+#echo "Starting Tesorboard " ${TENSORBOARD_LOG_DIR} ${TB_PORT} ${MYHASH} 
 TENSORBOARD_LOG_DIR="${TBDIR}/tensorboard_${SLURM_JOB_ID}"
 mkdir $TENSORBOARD_LOG_DIR
 
@@ -192,7 +187,7 @@ mkdir $TENSORBOARD_LOG_DIR
 # start theia ----------------------------------------------------------------------------------------------------------------------
 THEIA_BASE_DIR="/opt/theia-ide/"
 if [ -d ${THEIA_BASE_DIR} ]; then
-  echo "Starting Theia on" $TA_PORT
+  #echo "Starting Theia on" $TA_PORT
   THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
   mkdir -p $THEIA_JOB_TMP
   cd ${THEIA_BASE_DIR}
@@ -203,7 +198,7 @@ fi
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-echo "Starting Jupyter on" $NB_PORT ${MYHASH} 
+#echo "Starting Jupyter on" $NB_PORT ${MYHASH} 
 /opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser --config=/home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py 
 #-----------------------------------------------------------------------------------------------------------------------------------
 

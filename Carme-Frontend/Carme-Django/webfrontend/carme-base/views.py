@@ -61,9 +61,9 @@ def index(request):
     jobheight = 200+numjobs*70
     message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user).order_by('-id'))[:10] #select only 10 latest messages
     template = loader.get_template('../templates/home.html')
-    nodeC, gpuC, imageC = generateChoices(request)
+    nodeC, gpuC, imageC, gpuT = generateChoices(request)
     startForm = StartJobForm(image_choices=imageC,
-                             node_choices=nodeC, gpu_choices=gpuC)
+                             node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
 
     #update Cluster stats
     StatUsedGPUs=0
@@ -318,8 +318,10 @@ def generateChoices(request):
     for i in range(1, group_resources.group_max_gpus_per_node +1):
         gpu_choices.append( (str(i), i) )
 
+    gpu_type = []
+    gpu_type = [(str(i), i) for i in settings.CARME_GPU_TYPE.split(',')]
 
-    return node_choices, gpu_choices, sorted(list(image_choices))
+    return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
 @login_required(login_url='/login')
 def start_job(request):
@@ -335,13 +337,13 @@ def start_job(request):
     group_resources = GroupResources.objects.all().filter(group_name__exact=group)[0]
     partition = group_resources.group_partition
     print (partition)
-    nodeC, gpuC, imageC = generateChoices(request)
+    nodeC, gpuC, imageC, gpuT = generateChoices(request)
 
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
         form = StartJobForm(
-            request.POST, image_choices=imageC, node_choices=nodeC, gpu_choices=gpuC)
+            request.POST, image_choices=imageC, node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
         # check whether it's valid:
         if form.is_valid():
             # get image path and mounts from choices
@@ -367,6 +369,7 @@ def start_job(request):
                 ''.join(random.choice(chars) for _ in range(4))
             #if num_nodes > 1:  # current hack to make multi-node jobs axclusive
             #    num_gpus = 2
+            gpus_type = str(form.cleaned_data['gpu-type'])
 
             m = SlurmJobs.objects.create(jobName=jobname, imageName=name, NumGPUs=num_gpus, NumNodes=num_nodes,
                                          user=request.user.username, SLURM_ID=(0-random.randint(1, 10000)), frontend=settings.CARME_FRONTEND_ID)
@@ -374,7 +377,7 @@ def start_job(request):
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            if conn.root.StartJob(str(request.user.username), str(m.id), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(jobname)) != 0:
+            if conn.root.StartJob(str(request.user.username), str(m.id), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(jobname), str(gpus_type)) != 0:
                 message = "FRONTEND: ERROR queing job " + \
                     str(jobname) + " for user " + str(request.user.username) + \
                     " on " + str(num_nodes) + " nodes"
@@ -389,7 +392,7 @@ def start_job(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         form = StartJobForm(image_choices=imageC,
-                            node_choices=nodeC, gpu_choices=gpuC)
+                            node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
     return render(request, 'jobs.html', {'form': form})
 
 @login_required(login_url='/login')

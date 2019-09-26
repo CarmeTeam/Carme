@@ -29,24 +29,33 @@ NUM_GPUS_PER_NODE=$6
 NUM_NODES=$7
 JOB_NAME=$8
 CARME_SCRIPT_PATH=$9
+GPU_TYPE=${10}
+
 COUNTER=1
 COUNTERLIMIT=1
 
 echo "startJob" $JOB_NAME $NUM_NODES
 #using tasks to get slurm to schedule not more jobs than the num of GPUs
-CORES_PER_GPU=10
+CORES_PER_GPU=8
 MEM_PER_GPU=30
 NTASKS=$((CORES_PER_GPU*NUM_GPUS_PER_NODE))
 WORKER_NODES=$((NUM_NODES-1))
 MEM=$((MEM_PER_GPU*NUM_GPUS_PER_NODE))
+
+if [[ "${GPU_TYPE}" == "default" ]];then
+  SBATCH_PARAMETERS="--partition=${PARTITION} --job-name=${JOB_NAME} --nodes=${NUM_NODES} --ntasks-per-node=${NTASKS} --mem=${MEM}G --gres=gpu:${NUM_GPUS_PER_NODE} --gres-flags=enforce-binding -o ${LOGDIR}/%j-${JOB_NAME}.out -e ${LOGDIR}/%j-${JOB_NAME}.err"
+else
+		SBATCH_PARAMETERS="--partition=${PARTITION} --job-name=${JOB_NAME} --nodes=${NUM_NODES} --ntasks-per-node=${NTASKS} --mem=${MEM}G --gres=gpu:${GPU_TYPE}:${NUM_GPUS_PER_NODE} --gres-flags=enforce-binding -o ${LOGDIR}/%j-${JOB_NAME}.out -e ${LOGDIR}/%j-${JOB_NAME}.err"
+fi
+
 while [ $COUNTER -le $COUNTERLIMIT ]
 do
-								if [ "$NUM_NODES" != 1 ]; then
-																sbatch --partition=$PARTITION --job-name=$JOB_NAME --nodes=$NUM_NODES --ntasks-per-node=$NTASKS --mem=${MEM}G -o $LOGDIR/%j-$JOB_NAME.out -e $LOGDIR/%j-$JOB_NAME.err ${CARME_SCRIPTS_PATH}/slurm-parallel.sh $DBJOBID $IMAGE $MOUNTS $NUM_GPUS_PER_NODE $MEM $CARME_SCRIPT_PATH $NTASKS $WORKER_NODES 
-								else
-																sbatch  --partition=$PARTITION --job-name=$JOB_NAME --nodes=$NUM_NODES --ntasks-per-node=$NTASKS --mem=${MEM}G -o $LOGDIR/%j-$JOB_NAME.out -e $LOGDIR/%j-$JOB_NAME.err ${CARME_SCRIPTS_PATH}/slurm.sh $DBJOBID $IMAGE $MOUNTS $NUM_GPUS_PER_NODE $MEM $CARME_SCRIPT_PATH
-								fi
-        ((COUNTER++))
+  if [ "$NUM_NODES" != 1 ]; then
+		  sbatch ${SBATCH_PARAMETERS} ${CARME_SCRIPTS_PATH}/slurm-parallel.sh ${DBJOBID} ${IMAGE} ${MOUNTS} ${NUM_GPUS_PER_NODE} ${MEM} ${CARME_SCRIPT_PATH} ${NTASKS $WORKER_NODES}
+		else
+				sbatch ${SBATCH_PARAMETERS} ${CARME_SCRIPTS_PATH}/slurm.sh ${DBJOBID} ${IMAGE} ${MOUNTS} ${NUM_GPUS_PER_NODE} ${MEM} ${CARME_SCRIPT_PATH} ${GPU_TYPE}
+		fi
+  ((COUNTER++))
 done
 
 #--time=1440 # = 1 day
