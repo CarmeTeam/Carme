@@ -238,49 +238,6 @@ class CarmeBackEndService(rpyc.Service):
         """
         return self.user
 
-    def exposed_getFreeGpuOnHost(self, IP, numGPUs):
-        """ returns the next n free GPUs on targert host
-
-        # Arguments
-            IP: ip adress of target host
-            numGPUs: number of GPUs to allocate
-        """
-        possible_GPUs=[]
-        for i in range(0,CARME_SYSTEM_GPUS_PER_NODE):
-            possible_GPUs.append(str(i))
-        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-            	passwd=CARME_DB_PW,  db=CARME_DB_DB)
-                                                                                                                                                                  
-        cur = db.cursor()
-        sql='select GPUS from `carme-base_slurmjobs` where IP="'+str(IP)+'" and STATUS="running";' 	
-
-        try:
-            cur.execute(sql)
-            results = cur.fetchall()
-            db.commit() 
-        except: 
-            print("SQL error")
-            db.rollback()   
-        db.close() 
-
-
-        GPUS_used=[]
-        for i in results:
-                print ("used GPU: ", i[0])
-                GPUS_used.extend(i[0].split(","))
-        print("GPUs used: ",GPUS_used)
-        print("possible GPUs: ",possible_GPUs)
-        print("num GPUs: ",numGPUs)
-        res_list=list(set(possible_GPUs)-set(GPUS_used))[0:numGPUs]
-        #make string   
-        res=""  
-                
-        for i in res_list:
-                res+=str(i)+"," 
-                    
-        #if CARME_BACKEND_DEBUG:
-        print ("Free GPUS: ", res[:-1]) 
-        return res[:-1]
 
     def exposed_userAlterJobDB(self, IPADDR, HASH, NB_PORT, TB_PORT, SLURM_JOBID, URL, GPUS, DBJOBID ):
         """ updates job status after it has been started by the scheduler
