@@ -7,7 +7,7 @@ CarmeConfig.container
 *.key
 
 *~
-*.swap
+*.swp
 
 tmp
 
