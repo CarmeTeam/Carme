@@ -20,17 +20,16 @@ MEM=$7
 source /home/.CarmeScripts/CarmeConfig.container  
 
 #debug output
-echo "worker running on" $IPADDR
-echo "worker Jupyter Port" $NB_PORT
-echo "worker TB Port" $TB_PORT
-echo "worker GPUs " $GPUS
 MEM_LIMIT=$(( MEM * 1024 *1024 ))
-echo "WORKER: starting with mem limit" $MEM_LIMIT
+echo "WORKER: Memory Limit ${MEM_LIMIT}B"
+echo ""
 
 #ulimit -d $MEM_LIMIT
 #echo "WORKER: setting data seg size to" $MEM_LIMIT
 
-export TMPDIR=$HOME/tmp
+export TMPDIR=$HOME/carme_tmp
+export TMP=$HOME/carme_tmp
+export TEMP=$HOME/carme_tmp
 
 SSHDIR="/home/$USER/.tmp_ssh"
 
@@ -64,8 +63,6 @@ source ~/.carme/.bash_carme_$SLURM_JOBID
 
 #start SSH server
 if [ "$SLURM_JOB_NUM_NODES" != 1 ]; then  
-       #mkdir /var/run/sshd  
-       #chmod 0755 /var/run/sshd  
-							echo "staring SSHD on WORKER" $(hostname) 
-       /usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key -E ~/.SSHD_log -f $SSHDIR/sshd_config   
+       /usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key -E ~/.SSHD_log -f $SSHDIR/sshd_config
+							echo "WORKER: SSH deamon started on $(hostname)"
 fi

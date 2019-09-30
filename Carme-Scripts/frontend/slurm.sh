@@ -47,7 +47,7 @@ if [ ! -d $LOGDIR ]; then
 fi
 #------------------------------------------------------
 
-echo "Check Parameters:"
+echo "MASTER Parameters:"
 echo "                 - IP: ${IPADDR}"
 echo "                 - Backend-Server: ${CARME_BACKEND_SERVER}:${CARME_BACKEND_PORT}"
 echo "                 - Image: ${IMAGE}"
