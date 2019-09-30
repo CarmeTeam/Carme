@@ -136,7 +136,7 @@ alias watch='watch '
 
 #alias for python linking to the anaconda installation
 #alias python='/opt/anaconda3/bin/python'
-export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda-9.0/bin/ 
+export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/ 
 
 #include user settings 
 chmod 700 ~/.bash_aliases

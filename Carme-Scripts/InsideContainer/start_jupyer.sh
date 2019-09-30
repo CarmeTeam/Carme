@@ -43,7 +43,7 @@ if [ ! -d ~/.carme ]; then
 											mkdir ~/.carme
 fi
 
-MPI_NODES=$(cat ~/.job-log-dir/carme_nodelist_$SLURM_JOBID)
+MPI_NODES=$(cat ~/.job-log-dir/$SLURM_JOBID-nodelist)
 
 #write carme config overwriting user settings
 cat /home/.CarmeScripts/base_bashrc.sh > ~/.bashrc
@@ -81,7 +81,10 @@ export CARME_BACKEND_PORT=$CARME_BACKEND_PORT
 export CARME_TENSORBOARD_HOME='/home/$USER/tensorboard'
 alias carme_mpirun='/opt/anaconda3/bin/mpirun -host ${MPI_NODES},${MPI_NODES}, -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
 alias carme_cuda_version='nvcc --version'
-alias carme_cudnn_version='cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1'
+function carme_cudnn_version () {
+  CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk \'{print $3}\' | cut -d/ -f1)
+		echo $CUDNN_VERSION
+}
 alias jupyter_url='echo $JUPYTER_SERVER_URL'
 alias carme_ssh='ssh -p 2222'
 alias nvidia-smi='nvidia-smi -i $GPUS'
@@ -199,6 +202,6 @@ fi
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
 #echo "Starting Jupyter on" $NB_PORT ${MYHASH} 
-/opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser --config=/home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py 
+/opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser --config=/home/${USER}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py 
 #-----------------------------------------------------------------------------------------------------------------------------------
 

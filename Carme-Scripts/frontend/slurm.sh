@@ -98,9 +98,9 @@ if [ ! -d $NBDIR ];then
   mkdir $NBDIR                                                                                                                                                                          
 fi
 
-echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
-echo "c.NotebookApp.token = ''" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py 
+echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py
+echo "c.NotebookApp.token = ''" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py
+echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py 
 #idel job time outs
 #echo "c.MappingKernelManager.cull_idle_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
 #echo "c.NotebookApp.shutdown_no_activity_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
@@ -108,7 +108,7 @@ echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SL
 
 
 #add job to joblog-file -------------------------------
-echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> /home/${USER}/job_log.dat
+echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> /home/${USER}/.job_log.dat
 #------------------------------------------------------
 
 
@@ -118,7 +118,7 @@ ${CARME_SCRIPT_PATH}/dist_alter_jobDB_entry/alter_jobDB_entry $DBJOBID $URL $SLU
 
 
 #set job nodelist -------------------------------------
-scontrol show hostname $SLURM_JOB_NODELIST | paste -d, -s > $HOME/.job-log-dir/carme_nodelist_$SLURM_JOBID
+scontrol show hostname $SLURM_JOB_NODELIST | paste -d, -s > $HOME/.job-log-dir/${SLURM_JOBID}-nodelist
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
