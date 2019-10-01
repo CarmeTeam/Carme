@@ -62,6 +62,7 @@ setTimeout(function(){window.location = window.location}, 3000);
 																																<a href="/dd_{{ job.HASH }}/status" data-title="{{job.jobName}}"  target="_new"><img src="{% static "dask-logo.svg" %}" alt="" height=40/></A>
 																																</td>
 																																{% endif %} -->
+																																</td>
 																																<td>
 																																								<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}
 																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}"> 	
