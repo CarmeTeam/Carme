@@ -339,8 +339,8 @@ class CarmeBackEndService(rpyc.Service):
             db.rollback()
             db.close()
             return "Error: SQL FAIL!"
-                                                                                                                                                                                           
-        return ret                                                          
+        
+        return ret
 
 
     def exposed_StartJob(self, jobUser, jobID, jobImage, jobMounts, jobPartition, jobNumGPUs, jobNumNodes, jobName, jobGPUType):
@@ -416,6 +416,26 @@ class CarmeBackEndService(rpyc.Service):
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
 
+    def exposed_JobFinished(self, jobName, jobUser):
+        """
+        Tells the batch system to terminate a job
+
+        # NOTE
+            only requests from the compute nodes are exepted
+
+        # Arguments
+            jobName: name string of the job
+            jobUser: username of job owner 
+        """
+        if self.user != "frontend": # TODO replace with compute node user
+            setCarmeLog("BACKEND: AUTH FAILED", 40)
+            return "Auth Failed"
+        if CARME_BACKEND_DEBUG:
+            print("Stop job: ", str(jobName))
+
+        com = 'ssh persephone "echo world"'
+        ret = os.system(com)
+
         #remove job from db
         db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)  
@@ -439,6 +459,8 @@ class CarmeBackEndService(rpyc.Service):
             setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
             return "Error: SQL FAIL!" 
         return ret
+
+
 
     def exposed_SetTrigger(self, jobSlurmID, jobUser, jobName):                              
         """ 
