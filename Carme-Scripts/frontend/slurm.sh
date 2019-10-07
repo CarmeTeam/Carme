@@ -108,7 +108,7 @@ echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SL
 
 
 #add job to joblog-file -------------------------------
-echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> /home/${USER}/.job_log.dat
+echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> /home/${USER}/.job-log.dat
 #------------------------------------------------------
 
 
@@ -153,6 +153,6 @@ THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
 rm -r $THEIA_JOB_TMP
 
 #add log entry "done" ---------------------------------
-sed -i "s/\\($SLURM_JOBID\\)\\(.*$\\)/\\1\\2\t<<DONE>>/" /home/${USER}/job_log.dat
+sed -i "s/\\($SLURM_JOBID\\)\\(.*$\\)/\\1\\2\t<<DONE>>/" /home/${USER}/.job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 
