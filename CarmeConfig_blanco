@@ -12,8 +12,8 @@
 #---------------------------------------------------------------------
 #Carme develop -> Things that need to be changed between Carme branches
 #---------------------------------------------------------------------
-CARME_VERSION="r0.5.0-alpha"                                     #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
-#stable release: r0.4.0
+CARME_VERSION="r0.5.0"                                     #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
+#stable release: r0.5.0
 
 CARME_URL=""                 #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
 #e.g. my-carme-cluster.institute.com
@@ -207,10 +207,10 @@ CARME_HARDWARE_NUM_GPUS=
 #e.g. 100 [this is the total number of GPUs in the Cluster]
 #has to be an integer number! (note: do not use double quotes)
 
-CARME_GPU_TYPE=""                                          #EXPORT_TO_FRONTEND
+CARME_GPU_TYPE=""                              #EXPORT_TO_FRONTEND
 # comma separated list of GPU types. Names have to be the same as defined in SLURM!
 
-CARME_GPU_DEFAULTS=""     #EXPORT_TO_CONTAINER
+CARME_GPU_DEFAULTS=""          #EXPORT_TO_CONTAINER
 # defines the by default allocated CPUs and MEM (in GB) according the GPU types
 # it has to have the following form and be written in quotes:
 # default:CPUs:MEM volta:CPUs:MEM titan:CPUs:MEM
