@@ -37,6 +37,9 @@ from chartjs.views.lines import BaseLineChartView
 import re
 
 
+def calculate_jobheight(numjobs):
+    return 200 + numjobs * 60
+
 def page_not_found(request):
     return render(request,'404.html', status=404) 
 
@@ -58,7 +61,7 @@ def index(request):
     slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
     slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
-    jobheight = 200+numjobs*70
+    jobheight = calculate_jobheight(numjobs) + 10 
     message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user).order_by('-id'))[:10] #select only 10 latest messages
     template = loader.get_template('../templates/home.html')
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
@@ -112,7 +115,7 @@ def admin_job_table(request):
     current_user = request.user.username
     slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout")
     numjobs = len(slurm_list)
-    jobheight = 200+numjobs*60
+    jobheight = calculate_jobheight(numjobs)
     template = loader.get_template('../templates/admin_job_table.html')
 
     context = {
@@ -132,7 +135,7 @@ def admin_cluster_status(request):
     current_user = request.user.username
     slurm_list = SlurmJobs.objects.all()
     numjobs = len(slurm_list)
-    jobheight = 200+numjobs*60
+    jobheight = calculate_jobheight(numjobs)
     template = loader.get_template('../templates/admin_cluster_status.html')
 
     context = {
@@ -282,7 +285,7 @@ def job_table(request):
 
     slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
     numjobs = len(slurm_list_user)
-    jobheight = 200+numjobs*60
+    jobheight = calculate_jobheight(numjobs)
     template = loader.get_template('../templates/jobtable.html')
     context = {
         'slurm_list_user': slurm_list_user,
