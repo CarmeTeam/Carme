@@ -61,7 +61,7 @@ def index(request):
     slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
     slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
-    jobheight = calculate_jobheight(numjobs) + 10 
+    jobheight = calculate_jobheight(numjobs) + numjobs * 10 
     message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user).order_by('-id'))[:10] #select only 10 latest messages
     template = loader.get_template('../templates/home.html')
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
