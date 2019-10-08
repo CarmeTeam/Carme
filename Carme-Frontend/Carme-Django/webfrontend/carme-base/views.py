@@ -318,7 +318,6 @@ def generateChoices(request):
     for i in range(1, group_resources.group_max_gpus_per_node +1):
         gpu_choices.append( (str(i), i) )
 
-    gpu_type = []
     gpu_type = [(str(i), i) for i in settings.CARME_GPU_TYPE.split(',')]
 
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
