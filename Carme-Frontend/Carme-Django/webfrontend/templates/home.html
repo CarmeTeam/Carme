@@ -103,7 +103,7 @@ $.get('{% url 'line_chart_json' %}', function(data) {
 <div class="main-container">
 
 								{% include "blocks/start_job.html" %} 
-								<div id="jobs" style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; "></div>
+								<div id="jobtable" style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; "></div>
 </div>
 <BR>
 {% if user.is_superuser %}
@@ -118,5 +118,33 @@ $.get('{% url 'line_chart_json' %}', function(data) {
 								Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
 </div>
 {% endif %}
+
+<script type="text/javascript">
+if(!$) console.error('jQuery is required!');
+else {
+	function update_content(url, id) {
+		var elem = document.getElementById(id);
+
+		if(!elem) return console.error('No element found to update content!');
+
+		$.get(url, function(data) {
+			var reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
+			var match = reg.exec(data);
+
+			if(!match[1]) return console.error('No match in ajax response to update content!');
+
+			elem.innerHTML = match[1];
+		});
+	}
+
+	update_content('/carme-base/JobTable/', 'jobtable');
+	update_content('/carme-base/Messages/', 'messages');
+
+	setTimeout(function() {
+		update_content('/carme-base/JobTable/', 'jobtable');
+		update_content('/carme-base/Messages/', 'messages');
+	}, 3000);
+}
+</script>
 
 {% endblock %}
