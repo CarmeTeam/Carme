@@ -415,8 +415,27 @@ class CarmeBackEndService(rpyc.Service):
                 jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
+    
+    def exposed_JobProlog(self, jobName, jobUser):
+        """
+        Tells the batch system to terminate a job
 
-    def exposed_JobFinished(self, jobName, jobUser):
+        # NOTE
+            only requests from the compute nodes are exepted
+
+        # Arguments
+            jobName: name string of the job
+            jobUser: username of job owner 
+        """
+        if self.user != "frontend": # TODO replace with compute node user
+            setCarmeLog("BACKEND: AUTH FAILED", 40)
+            return "Auth Failed"
+        if CARME_BACKEND_DEBUG:
+            print("Job prolog: ", str(jobName))
+
+        return 0
+
+    def exposed_JobEpilog(self, jobName, jobUser):
         """
         Tells the batch system to terminate a job
 
