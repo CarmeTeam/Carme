@@ -132,7 +132,7 @@ else {
 			var timeout_match = timeout_reg.exec(data);
 
 			if(timeout_match) {
-				window.location = '/login/?next=/&timeout=1';
+				window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
 				return console.log('timeout!');
 			}
 
