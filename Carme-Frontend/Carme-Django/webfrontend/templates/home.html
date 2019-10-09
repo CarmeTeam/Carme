@@ -128,10 +128,18 @@ else {
 		if(!elem) return console.error('No element found to update content!');
 
 		$.get(url, function(data) {
-			var reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
-			var match = reg.exec(data);
+			var timeout_reg = /Session time out!/gmi;
+			var timeout_match = timeout_reg.exec(data);
 
-			if(!match[1]) return console.error('No match in ajax response to update content!');
+			if(timeout_match) {
+				window.location = '/login/?next=/&timeout=1';
+				return console.log('timeout!');
+			}
+
+			var body_reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
+			var match = body_reg.exec(data);
+
+			if(!match) return console.error('No match in ajax response to update content!');
 
 			elem.innerHTML = match[1];
 		});
@@ -140,7 +148,7 @@ else {
 	update_content('/carme-base/JobTable/', 'jobtable');
 	update_content('/carme-base/Messages/', 'messages');
 
-	setTimeout(function() {
+	setInterval(function() {
 		update_content('/carme-base/JobTable/', 'jobtable');
 		update_content('/carme-base/Messages/', 'messages');
 	}, 3000);
