@@ -95,10 +95,7 @@ $.get('{% url 'line_chart_json' %}', function(data) {
 																																Messages   
 																								</h3> 
 																</div>
-															 <div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left"> 
-																								<iframe scrolling="y" src="/carme-base/Messages/" style="border: 0px none; height: 200px; margin-top: -1px; width: 100%;" align="left" > 
-																								</iframe> 
-																</div>
+															 <div id="messages" style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; "></div>
 
 								</div>           
 </div>
@@ -106,10 +103,7 @@ $.get('{% url 'line_chart_json' %}', function(data) {
 <div class="main-container">
 
 								{% include "blocks/start_job.html" %} 
-								<div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left"> 
-																<iframe scrolling="no" src="/carme-base/JobTable/" style="border: 0px none; height: {{ jobheight }}px; margin-top: -1px; width: 100%;" align="left" >
-																</iframe> 
-								</div>
+								<div id="jobs" style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; "></div>
 </div>
 <BR>
 {% if user.is_superuser %}
