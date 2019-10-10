@@ -34,6 +34,7 @@ setTimeout(function(){window.location = window.location}, 3000);
 																																<td><b>Job-Name</b></td>
 																																<td><b>Slurm-ID</b></td>
 																																<td><b>#(nodes)</b></td>
+																																<td><b>GPU-Type</b></td>
 																																<td><b>#(GPUs)</b></td>
 																																<td><b>IMAGE</b></td>
 																																<td><b>Status</b></td>
@@ -45,9 +46,10 @@ setTimeout(function(){window.location = window.location}, 3000);
 																								{% for job in slurm_list_user %}
 																								<tr valign=middle>
 																																{% if job.status == 'running' %}
-																																<td>{{job.jobName}}</td>
-																																<td>{{job.SLURM_ID}}</td>
+																																<td>{{ job.jobName }}</td>
+																																<td>{{ job.SLURM_ID }}</td>
 																																<td>{{ job.NumNodes }}</td>
+																																<td>{{ job.gpu_type }}</td>
 																																<td>{{ job.NumGPUs }}</td>
 																																<td>{{ job.imageName }}</td>
 																																<td><div style="border-radius: 5px; background-color: green; padding: 10px 2px;" >{{ job.status }}</div></td>
@@ -79,9 +81,10 @@ setTimeout(function(){window.location = window.location}, 3000);
 																																								</form>
 																																</td>
 																																{% else %}
-																																<td>{{job.jobName}}</td>
+																																<td>{{ job.jobName }}</td>
 																																<td>-</td>
 																																<td>{{ job.NumNodes }}</td>
+																																<td>{{ job.gpu_type }}</td>
 																																<td>{{ job.NumGPUs }}</td>
 																																<td>{{ job.imageName }}</td>
 																																<td > <div style="border-radius: 5px; background-color: red; padding: 10px 2px;" >{{ job.status }} </div></td>
