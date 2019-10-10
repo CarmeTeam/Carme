@@ -19,7 +19,7 @@
     <table>
         {% for mes in message_list %}
         <tr>
-                <td><img src="{% static "warning.jpg" %}" alt="Message" width=40/><td>
+                <td><img src="{% static "warning.jpg" %}" alt="Message" style="width:1.1em;"/><td>
                 <td><h2>{{mes.text}}</h2></td>
                 <td>
                         {% if user.is_superuser %}

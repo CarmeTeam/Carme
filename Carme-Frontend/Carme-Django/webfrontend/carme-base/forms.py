@@ -12,6 +12,7 @@
 # ---------------------------------------------
 from django import forms
 from .models import Images
+from django.utils.safestring import mark_safe
 
 """ admin messages
     # NOTE: deprecated
@@ -34,14 +35,17 @@ class StartJobForm(forms.Form):
         image_choices = kwargs.pop('image_choices')
         node_choices = kwargs.pop('node_choices')
         gpu_choices = kwargs.pop('gpu_choices')
+        gpu_type_choices = kwargs.pop('gpu_type_choices')
         super(StartJobForm, self).__init__(*args, **kwargs)
         self.fields["nodes"] = forms.ChoiceField(
-            label='Run on # nodes', choices=node_choices)
+            label=mark_safe('<strong>#(nodes)</strong>'), choices=node_choices)
+        self.fields["gpu-type"] = forms.ChoiceField(
+            label=mark_safe('<strong>GPU-Type</strong>'), choices=gpu_type_choices)
         self.fields["gpus"] = forms.ChoiceField(
-            label='GPUs per node', choices=gpu_choices)
+            label=mark_safe('<strong>GPUs/node</strong>'), choices=gpu_choices)
         self.fields["image"] = forms.ChoiceField(
-            label='Start image', choices=image_choices)
-        self.fields["name"] = forms.CharField(label='Job name')
+            label=mark_safe('<strong>IMAGE</strong>'), choices=image_choices)
+        self.fields["name"] = forms.CharField(label=mark_safe('<strong>Job-Name</strong>'))
         self.fields["name"].initial = str('MyJob')
 
 """ stop jobs

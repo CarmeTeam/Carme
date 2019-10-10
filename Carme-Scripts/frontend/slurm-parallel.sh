@@ -22,6 +22,7 @@ MEM=$5
 CARME_SCRIPT_PATH=$6
 NCPU=$7
 WORKER_NODES=$8
+GPU_TYPE=$9
 
 #read user accessable pert of CarmeConfig                                 
 source ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container      

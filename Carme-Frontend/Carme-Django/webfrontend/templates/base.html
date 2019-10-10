@@ -49,13 +49,13 @@
 																																</table>
 																																<BR>
 																																{% if user.is_authenticated %}
-																																<div class="menue-action-container"> <A href="/"><img src="{% static "home.jpg" %}" alt="home" height=15/></A> </div>&nbsp;
-																																<div class="menue-container">	User: {{ user.username }} 	</div>&nbsp;
-																																<div class="menue-container"> Staff: {{user.is_staff}} </div>&nbsp;
-																																<div class="menue-container"> Admin: {{user.is_superuser}} </div>&nbsp;
-																																<div class="menue-container"> Groups: {% for g in user.ldap_user.group_names %}{{g}} {%endfor%}  </div>&nbsp;
-																																<div class="menue-container"> Session timeout: {{request.session.get_expiry_date}} </div>&nbsp;
-																																<div class="menue-action-container" style="float:right"> <a href="{% url 'logout' %}"><img src="{% static "unplug.jpg" %}" alt="logout" height=15/></a>  </div>
+																																<div class="menue-action-container"> <A href="/"> home <img src="{% static "home.jpg" %}" alt="home" style="width:1em;"/></A> </div>&nbsp;
+																																<div class="menue-container">	<b>user:</b> {{ user.username }} 	</div>&nbsp;
+																																<div class="menue-container"> <b>staff:</b> {{user.is_staff}} </div>&nbsp;
+																																<div class="menue-container"> <b>admin:</b> {{user.is_superuser}} </div>&nbsp;
+																																<div class="menue-container"> <b>group:</b> {% for g in user.ldap_user.group_names %}{{g}} {%endfor%}  </div>&nbsp;
+																																<div class="menue-container"> <b>session timeout:</b> {{request.session.get_expiry_date}} </div>&nbsp;
+																																<div class="menue-action-container" style="float:right"> <a href="{% url 'logout' %}"> logout <img src="{% static "unplug.jpg" %}" alt="logout" style="width:1em;"/></a>  </div>
 																																{% else %}
 																																<!--
 																																-->
@@ -76,7 +76,7 @@
 																																																								<b>
 																																																																&nbsp;&nbsp;<A HREF={{ settings.CARME_FRONTEND_LINK_DISCLAIMER }} color="black">DISCLAIMER</A><BR><BR>
 																																																																&nbsp;&nbsp;<A HREF={{ settings.CARME_FRONTEND_LINK_PRIVACY }}>Data privacy statement</A></b><BR><BR>
-																																																&nbsp;&nbsp;{% if CARME_VERSION %}Carme Version: {{ CARME_VERSION }} {%endif%} 
+																																																&nbsp;&nbsp;{% if CARME_VERSION %}<b>Carme Version</b>: <i>{{ CARME_VERSION }}</i> {%endif%} 
 																																																</td>
 																																																<td  align="right" valign="middle">
 																																																								<a href="http://open-carme.org" data-title="Test Title" target="_blank"><img src="{% static "carme-logo-text.png" %}" alt="carme logo" width=100/></a><br>

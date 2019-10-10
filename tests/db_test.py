@@ -1,6 +1,13 @@
 import MySQLdb 
+import os
+import imp
 
-db = MySQLdb.connect(host="hades",  user="django", passwd="kkER%%nup",  db="test")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+imp.load_source('CarmeConfig', BASE_DIR+'/../CarmeConfig')
+from CarmeConfig import CARME_DB_NODE,CARME_DB_USER,CARME_DB_PW
+
+
+db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER, passwd=CARME_DB_PW,  db="test")
 cur = db.cursor()
 sql = 'select * from Persons'
 cur.execute(sql)
@@ -33,7 +40,7 @@ for i in range (4,20):
 db.close()
 
 print ("close and reopen DB")
-db = MySQLdb.connect(host="hades",  user="django", passwd="kkER%%nup",  db="test")
+db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER, passwd=CARME_DB_PW,  db="test")
 cur = db.cursor()
 sql = 'select * from Persons'
 cur.execute(sql)

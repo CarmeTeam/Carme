@@ -14,24 +14,28 @@
 # ---------------------------------------------   
 
 # external variables ----------------------------------  
-DBJOBID=$1   
+DBJOBID=$1
 IMAGE=$2
-mountstr=$3    
-GPUS=$4   
-MEM=$5                   
-CARME_SCRIPT_PATH=$6 #/opt/development/carme-scripts/frontend/
+mountstr=$3
+GPUS=$4
+MEM=$5
+CARME_SCRIPT_PATH=$6
+GPU_TYPE=$7
 
-#read user accessable pert of CarmeConfig
+#read user accessable part of CarmeConfig
 source ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container 
-echo "SLURM CHECK CarmeConfig" ${CARME_VERSION} ${CARME_SYSTEM_DEFAULT_NETWORK}
+echo "Carme Verison: ${CARME_VERSION}"
+echo ""
+
 MOUNTS=${mountstr//[_]/ }   
 export HASH=$(sh ${CARME_SCRIPT_PATH}/hash.sh) 
 URL=${CARME_URL}/nb_$HASH 
-NODES=1 # get from jobDB   
 
-
-IPADDR=$(ip -o -4 addr list ${CARME_SYSTEM_DEFAULT_NETWORK} | awk '{print $4}' | cut -d/ -f1)
-
+IPADDR=$(ip route get ${CARME_GATEWAY} | head -1 | awk '{print $5}' | cut -d/ -f1)
+if [[ -z $IPADDR ]];then
+  echo "ERROR: IP not set!"
+  exit 137
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 #set variables and environment stuff -----------------------------------------------------------------------------------------------
@@ -43,16 +47,27 @@ if [ ! -d $LOGDIR ]; then
 fi
 #------------------------------------------------------
 
-echo "SLURM CHECK PARAMS" $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT
+echo "MASTER Parameters:"
+echo "                 - IP: ${IPADDR}"
+echo "                 - Backend-Server: ${CARME_BACKEND_SERVER}:${CARME_BACKEND_PORT}"
+echo "                 - Image: ${IMAGE}"
+echo ""
 
-GPU_DEVICES=$( ${CARME_SCRIPT_PATH}/dist_get_free_gpu_on_host/get_free_gpu_on_host $IPADDR $GPUS $CARME_BACKEND_SERVER $CARME_BACKEND_PORT)
-if [[ -z "$GPU_DEVICES" || "$GPU_DEVICES" == "FAIL" ]];then
-  echo "ERROR: available GPUs not set!"
-  echo "ERROR: no free GPUs on node. Job stops!"
-  echo "ERROR: please contact your admin"
+GPU_DEVICES=${CUDA_VISIBLE_DEVICES}
+if [[ -z "$GPU_DEVICES" ]];then
+  echo "ERROR: MASTER: available GPUs not set!"
+  echo "ERROR: MASTER: no free GPUs on node. Job stops!"
+  echo "ERROR: MASTER: please contact your admin."
+		echo ""
   exit 137
 fi
-echo "SLURM MASTER GPUS: " $IPADDR $GPUS $GPU_DEVICES
+
+if [[ "${GPU_TYPE}" == "default" ]];then
+		echo "MASTER GPUS: #(GPUS): ${GPUS}, GPU-Devices: ${GPU_DEVICES}, GPU type not specified"
+else
+		echo "MASTER GPUS: #(GPUs): ${GPUS}, GPU-Devices: ${GPU_DEVICES}, GPU type: ${GPU_TYPE}"
+fi
+echo ""
 #------------------------------------------------------
 
 
@@ -83,9 +98,9 @@ if [ ! -d $NBDIR ];then
   mkdir $NBDIR                                                                                                                                                                          
 fi
 
-echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
-echo "c.NotebookApp.token = ''" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}_jupyter_notebook_config.py 
+echo "c.NotebookApp.disable_check_xsrf = True" > /home/${USER}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py
+echo "c.NotebookApp.token = ''" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py
+echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py 
 #idel job time outs
 #echo "c.MappingKernelManager.cull_idle_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
 #echo "c.NotebookApp.shutdown_no_activity_timeout = 3600" >> /home/${USER}/.jupyter/jupyter_notebook_config.py
@@ -93,7 +108,7 @@ echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /home/${USER}/.job-log-dir/${SL
 
 
 #add job to joblog-file -------------------------------
-echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> /home/${USER}/job_log.dat
+echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> /home/${USER}/.job-log.dat
 #------------------------------------------------------
 
 
@@ -103,7 +118,7 @@ ${CARME_SCRIPT_PATH}/dist_alter_jobDB_entry/alter_jobDB_entry $DBJOBID $URL $SLU
 
 
 #set job nodelist -------------------------------------
-scontrol show hostname $SLURM_JOB_NODELIST | paste -d, -s > $HOME/.job-log-dir/carme_nodelist_$SLURM_JOBID
+scontrol show hostname $SLURM_JOB_NODELIST | paste -d, -s > $HOME/.job-log-dir/${SLURM_JOBID}-nodelist
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -111,11 +126,6 @@ scontrol show hostname $SLURM_JOB_NODELIST | paste -d, -s > $HOME/.job-log-dir/c
 if [ $IPADDR != "192.168.152.11" ];then
   mkdir /scratch_local/$SLURM_JOBID
   echo "/home/SSD is a fast local scratch storage. WARMING: everything will be deleted at the end of this job!" > /scratch_local/$SLURM_JOBID/readme.md
-
-  #rm old job scratch dirs
-  #squeue --noheader --format=%i | sort > /scratch_local/joblist
-  #ls /scratch_local | sort > /scratch_local/dirlist
-  #comm -23 /scratch_local/dirlist /scratch_local/joblist | xargs -i rm -r /scratch_local/{}
 fi
 #-------------------------------------------------------------
 
@@ -126,7 +136,7 @@ if [[ $IMAGE = *"scratch_image_build"* ]];then #sandbox image - add own start sc
   echo "Sandox Mode" $IMAGE $MOUNTS
   newpid sudo singularity exec -B /etc/libibverbs.d $MOUNTS --writable $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer_root.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES 
 else
-  echo "starting Master on" $IPADDR $GPU_DEVICES	$MEM
+  #echo "starting Master on" $IPADDR $GPU_DEVICES	$MEM
 		if [ $IPADDR != "192.168.152.11" ];then
     newpid singularity exec -B /etc/libibverbs.d $MOUNTS -B /scratch_local/$SLURM_JOBID:/home/SSD $IMAGE /bin/bash /home/.CarmeScripts/start_jupyer.sh $IPADDR $NB_PORT $TB_PORT $TA_PORT $USER $HASH $GPU_DEVICES $MEM 
 		else
@@ -142,9 +152,7 @@ rm ${HOME}/.carme/.bash_carme_$SLURM_JOBID
 THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
 rm -r $THEIA_JOB_TMP
 
-
 #add log entry "done" ---------------------------------
-sed -i "s/\\($SLURM_JOBID\\)\\(.*$\\)/\\1\\2\t<<DONE>>/" /home/${USER}/job_log.dat
-
+sed -i "s/\\($SLURM_JOBID\\)\\(.*$\\)/\\1\\2\t<<DONE>>/" /home/${USER}/.job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 
