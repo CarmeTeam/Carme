@@ -87,6 +87,8 @@ else {
 			data : form_data
 		}).fail(function(){
 			console.error('Request to ' + post_url + ' failed. Please try again.');
+		}).always(function() {
+			document.location.reload();
 		});
 	});
 }
