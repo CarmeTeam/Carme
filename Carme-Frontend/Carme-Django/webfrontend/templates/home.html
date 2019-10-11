@@ -157,7 +157,7 @@ else {
 		update_content('/carme-base/Messages/', 'messages');
 	}, 3000);
 
-	$('form.ajax').on('submit', function (event) {
+	$(document).on('submit', 'form.ajax', function (event) {
 		// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
 		event.preventDefault(); //prevent default action
 
