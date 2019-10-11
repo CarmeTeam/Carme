@@ -258,7 +258,7 @@ def job_table(request):
                 raise Exception("ERROR trafik job update")
     
     #check for timeout 
-    slurm_running = SlurmJobs.objects.filter(status__exact="running", frontend__exact=settings.CARME_FRONTEND_ID)
+    slurm_running = SlurmJobs.objects.filter(status__exact="running", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
     for job in slurm_running:
         job_slurm = CarmeJobTable.objects.filter(
                 id_job__exact=job.SLURM_ID )
