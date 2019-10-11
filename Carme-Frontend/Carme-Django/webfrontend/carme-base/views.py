@@ -53,13 +53,13 @@ def index(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     current_user = request.user.username
-    job_list_user = RuningJobs.objects.all().filter(user__exact=current_user)
+    job_list_user = RuningJobs.objects.filter(user__exact=current_user)
     job_list = RuningJobs.objects.all()
-    slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
-    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
+    slurm_list = SlurmJobs.objects.exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
     jobheight = 120+numjobs*70
-    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    message_list = list(CarmeMessages.objects.filter(user__exact=current_user))[-5:] #select only 5 latest messages
     template = loader.get_template('../templates/home.html')
     nodeC, gpuC, imageC = generateChoices(request)
     startForm = StartJobForm(image_choices=imageC,
@@ -74,8 +74,8 @@ def index(request):
         elif j.status == "queued":
             StatQueudGPUs += j.NumGPUs * j.NumNodes 
 
-    #StatUsedGPUs = SlurmJobs.objects.all().filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
-    #StatQueudGPUs = SlurmJobs.objects.all().filter(status__exact="queued").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
+    #StatUsedGPUs = SlurmJobs.objects.filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
+    #StatQueudGPUs = SlurmJobs.objects.filter(status__exact="queued").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
     if (str(StatQueudGPUs)=="None"):
         StatQueudGPUs=0
     if (str(StatUsedGPUs)=="None"):
@@ -110,7 +110,7 @@ def admin_job_table(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     current_user = request.user.username
-    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout")
+    slurm_list = SlurmJobs.objects.exclude(status__exact="timeout")
     numjobs = len(slurm_list)
     jobheight = 120+numjobs*60
     template = loader.get_template('../templates/admin_job_table.html')
@@ -152,8 +152,8 @@ def image_table(request):
 
     current_user = request.user.username
     template = loader.get_template('../templates/imagetable.html')
-    image_list_active = Images.objects.all().filter(image_status__exact="active")
-    image_list_sandbox = Images.objects.all().filter(image_status__exact="sandbox")
+    image_list_active = Images.objects.filter(image_status__exact="active")
+    image_list_sandbox = Images.objects.filter(image_status__exact="sandbox")
     context = {
         'image_list_active': image_list_active,
         'image_list_sandbox': image_list_sandbox,
@@ -173,7 +173,7 @@ def job_table(request):
 
     current_user = request.user.username
     # search for ready slurm jobs
-    slurm_ready = SlurmJobs.objects.all().filter(status__exact="ready", frontend__exact=settings.CARME_FRONTEND_ID)
+    slurm_ready = SlurmJobs.objects.filter(status__exact="ready", frontend__exact=settings.CARME_FRONTEND_ID)
     for job in slurm_ready:
         job.status = "configuring"  # set status to avoid deadlock loop on faield jobs
         job.save()
@@ -262,9 +262,9 @@ def job_table(request):
                 raise Exception("ERROR trafik job update")
     
     #check for timeout 
-    slurm_running = SlurmJobs.objects.all().filter(status__exact="running", frontend__exact=settings.CARME_FRONTEND_ID)
+    slurm_running = SlurmJobs.objects.filter(status__exact="running", frontend__exact=settings.CARME_FRONTEND_ID)
     for job in slurm_running:
-        job_slurm = CarmeJobTable.objects.all().filter(
+        job_slurm = CarmeJobTable.objects.filter(
                 id_job__exact=job.SLURM_ID )
         now = int(datetime.datetime.now().timestamp())
         if (job.status == "running") and (len(job_slurm) >0) and (job_slurm[0].timelimit>0):
@@ -281,7 +281,7 @@ def job_table(request):
 
 
 
-    slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
     numjobs = len(slurm_list_user)
     jobheight = 120+numjobs*60
     template = loader.get_template('../templates/jobtable.html')
@@ -304,12 +304,12 @@ def generateChoices(request):
 
     group = list(request.user.ldap_user.group_names)[0]
     # .order_by('image_name')  # ,image_status__exact="active")
-    image_list = Images.objects.all().filter(image_group__exact=group).filter(image_status__exact="active")
+    image_list = Images.objects.filter(image_group__exact=group).filter(image_status__exact="active")
     image_choices = set()
     for i in image_list:
         image_choices.add((i.image_name, i.image_name))
 
-    group_resources = GroupResources.objects.all().filter(group_name__exact=group)[0]
+    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
    
     node_choices =[]
     for i in range(1, group_resources.group_max_nodes +1):
@@ -333,7 +333,7 @@ def start_job(request):
     db_logger = logging.getLogger('db')
 
     group = list(request.user.ldap_user.group_names)[0]
-    group_resources = GroupResources.objects.all().filter(group_name__exact=group)[0]
+    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
     partition = group_resources.group_partition
     print (partition)
     nodeC, gpuC, imageC = generateChoices(request)
@@ -346,7 +346,7 @@ def start_job(request):
         # check whether it's valid:
         if form.is_valid():
             # get image path and mounts from choices
-            image_db = Images.objects.all().filter(image_group__exact=group,
+            image_db = Images.objects.filter(image_group__exact=group,
                                                    image_name__exact=form.cleaned_data['image'])[0]
             mounts = settings.CARME_BASE_MOUNTS  # set in carme settings
             mounts += str(image_db.image_mounts)
@@ -404,7 +404,7 @@ def job_hist(request):
     group = list(request.user.ldap_user.group_names)[0]
     uID = request.user.ldap_user.attrs['uidNumber'][0]
     template = loader.get_template('../templates/job_hist.html')
-    myjobhist = CarmeJobTable.objects.all().filter(
+    myjobhist = CarmeJobTable.objects.filter(
         state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
 
     # compute total GPU hours
@@ -416,12 +416,12 @@ def job_hist(request):
     job_time = 0
     if (job_time_start and job_time_end):
         job_time = round((job_time_end-job_time_start)/3600)
-    assoc = CarmeAssocTable.objects.all().filter(user__exact=current_user)
+    assoc = CarmeAssocTable.objects.filter(user__exact=current_user)
     partitions = ""
     #for a in assoc:
     #    partitions += str(a.partition)+" "
 
-    group_resources = GroupResources.objects.all().filter(group_name__exact=group)[0]
+    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
 
     context = {
         'myjobhist': myjobhist,
@@ -448,9 +448,9 @@ def job_info(request):
         if form.is_valid():
             template = loader.get_template(
                 '../templates/job_info.html')
-            job_details = SlurmJobs.objects.all().filter(
+            job_details = SlurmJobs.objects.filter(
                 SLURM_ID__exact=form.cleaned_data['jobID'], status__exact="running")
-            job_slurm = CarmeJobTable.objects.all().filter(
+            job_slurm = CarmeJobTable.objects.filter(
                 id_job__exact=form.cleaned_data['jobID'] )
             if len(job_slurm)>0:
                 job_submit_time = datetime.datetime.fromtimestamp(
@@ -612,7 +612,7 @@ def messages(request):
 
     """
     current_user = request.user.username 
-    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    message_list = list(CarmeMessages.objects.filter(user__exact=current_user))[-5:] #select only 5 latest messages
     template = loader.get_template('../templates/blocks/messages.html')  
     context = {
             'message_list': message_list,
