@@ -31,10 +31,7 @@
 																																Cluster News
 																								</h3>
 																</div>
-																<div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left">
-																								<iframe scrolling="no" src="/wiki/cluster_news/" style="border: 0px none; margin-left: -20px; height: 450px; margin-top: -250px; width: 400px;" align="left" >                
-																								</iframe>
-																</div>
+																<div id="news" style="height: 200px; border: 0px solid #D5CC5A; overflow-y: scroll; margin: 15px auto; "></div>
 								</div>
 								<div class="double-space"></div>
 								<div class="news-container">
@@ -132,12 +129,18 @@ else {
 			var timeout_match = timeout_reg.exec(data);
 
 			if(timeout_match) {
-				window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
-				return console.log('timeout!');
+				return window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+			}
+			
+			var content_reg;
+
+			if(id == 'messages' || id == 'jobtable') {
+				content_reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
+			} else if(id == 'news') {
+				content_reg = /<div class="wiki-article">([\S\s]*?)(?:<\/div>)/gmi;
 			}
 
-			var body_reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
-			var match = body_reg.exec(data);
+			var match = content_reg.exec(data);
 
 			if(!match) return console.error('No match in ajax response to update content!');
 
@@ -147,6 +150,7 @@ else {
 
 	update_content('/carme-base/JobTable/', 'jobtable');
 	update_content('/carme-base/Messages/', 'messages');
+	update_content('/wiki/cluster_news/', 'news');
 
 	setInterval(function() {
 		update_content('/carme-base/JobTable/', 'jobtable');
