@@ -43,7 +43,6 @@
 																								<div class="chart-container" style="position: relative; height:15vh; width:20vw"> 							
 																																<canvas id="myChart" ></canvas>
 																								</div> 
-																								<script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script> 
 																								<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
 																								<script type="text/javascript"> 
 $.get('{% url 'line_chart_json' %}', function(data) {
