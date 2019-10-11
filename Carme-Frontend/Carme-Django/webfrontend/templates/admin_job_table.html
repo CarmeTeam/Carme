@@ -88,7 +88,9 @@ else {
 		}).fail(function(){
 			console.error('Request to ' + post_url + ' failed. Please try again.');
 		}).always(function() {
-			document.location.reload();
+			setTimeout(function() {
+				document.location.reload();
+			}, 1000);
 		});
 	});
 }
