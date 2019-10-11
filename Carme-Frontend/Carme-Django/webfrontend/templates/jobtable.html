@@ -64,13 +64,13 @@
 																																{% endif %} -->
 																																</td>
 																																<td>
-																																								<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}
+																																								<form class="ajax" action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}
 																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}"> 	
 																																																<input type="image" src="{% static "info.jpg" %}" alt="" style="width:2.5em;" />
 																																								</form>
 																																</td>
 																																<td>
-																																								<form action="/carme-base/StopJob/" method="post">{% csrf_token %}
+																																								<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}
 																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
 																																																<input type="hidden" name="jobName" value="{{job.jobName}}">
 																																																<input type="hidden" name="jobUser" value="{{job.user}}">
@@ -88,7 +88,7 @@
 																																<td>---</td>
 																																<td>---</td>
 																																<td>
-																																								<form action="/carme-base/StopJob/" method="post">{% csrf_token %}
+																																								<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}
 																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
 																																																<input type="hidden" name="jobName" value="{{job.jobName}}">
 																																																<input type="hidden" name="jobUser" value="{{job.user}}">	
