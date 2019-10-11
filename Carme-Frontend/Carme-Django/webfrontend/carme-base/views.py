@@ -13,7 +13,7 @@
 import numpy as np
 from django.http import HttpResponse
 from django.template import loader
-from .models import RuningJobs, CarmeMessages, SlurmJobs, Images, CarmeJobTable, CarmeAssocTable, ClusterStat, GroupResources
+from .models import CarmeMessages, SlurmJobs, Images, CarmeJobTable, CarmeAssocTable, ClusterStat, GroupResources
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
@@ -53,8 +53,6 @@ def index(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     current_user = request.user.username
-    job_list_user = RuningJobs.objects.filter(user__exact=current_user)
-    job_list = RuningJobs.objects.all()
     slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
     slurm_list = SlurmJobs.objects.exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
@@ -89,8 +87,6 @@ def index(request):
         ClusterStat.objects.create(date=timestamp, free=StatFreeGPUs, used=StatUsedGPUs, reserved=StatReservedGPUs, queued=StatQueudGPUs) 
 
     context = {
-        'job_list_user': job_list_user,
-        'job_list': job_list,
         'slurm_list_user': slurm_list_user,
         'slurm_list': slurm_list,
         'message_list': message_list,
