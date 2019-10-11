@@ -56,7 +56,7 @@
 																																</form>
 																								</td>             											   
 																								<td>
-																																<form action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
+																																<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
 																																								<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
 																																								<input type="hidden" name="jobName" value="{{job.jobName}}">
 																																								<input type="hidden" name="jobUser" value="{{job.user}}">
@@ -70,6 +70,27 @@
 								No jobs.
 								{% endif %}
 </div>
+<script type="text/javascript">
+if(!$) console.error('jQuery is required!');
+else {
+	$(document).on('submit', 'form.ajax', function (event) {
+		// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
+		event.preventDefault(); //prevent default action
+
+		var post_url = $(this).attr("action"); //get form action url
+		var request_method = $(this).attr("method"); //get form GET/POST method
+		var form_data = $(this).serialize(); //Encode form elements for submission
+		
+		$.ajax({
+			url : post_url,
+			type: request_method,
+			data : form_data
+		}).fail(function(){
+			console.error('Request to ' + post_url + ' failed. Please try again.');
+		});
+	});
+}
+</script>
 <BR>
 {% include "blocks/admin_footer.html" %}  
 <BR> 
