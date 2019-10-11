@@ -374,7 +374,7 @@ def start_job(request):
             gpus_type = str(form.cleaned_data['gpu-type'])
 
             m = SlurmJobs.objects.create(jobName=jobname, imageName=name, NumGPUs=num_gpus, NumNodes=num_nodes,
-                                         user=request.user.username, SLURM_ID=(0-random.randint(1, 10000)), frontend=settings.CARME_FRONTEND_ID)
+                                         user=request.user.username, SLURM_ID=(0-random.randint(1, 10000)), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
 
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
