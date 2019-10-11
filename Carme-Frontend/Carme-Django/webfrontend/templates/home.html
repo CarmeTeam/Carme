@@ -156,24 +156,24 @@ else {
 		update_content('/carme-base/JobTable/', 'jobtable');
 		update_content('/carme-base/Messages/', 'messages');
 	}, 3000);
-}
 
-$('form.ajax').on('submit', function (event) {
-	// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
-	event.preventDefault(); //prevent default action
+	$('form.ajax').on('submit', function (event) {
+		// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
+		event.preventDefault(); //prevent default action
 
-	var post_url = $(this).attr("action"); //get form action url
-	var request_method = $(this).attr("method"); //get form GET/POST method
-	var form_data = $(this).serialize(); //Encode form elements for submission
-	
-	$.ajax({
-		url : post_url,
-		type: request_method,
-		data : form_data
-	}).fail(function(){
-		console.error('Request to ' + post_url + ' failed. Please try again.');
+		var post_url = $(this).attr("action"); //get form action url
+		var request_method = $(this).attr("method"); //get form GET/POST method
+		var form_data = $(this).serialize(); //Encode form elements for submission
+		
+		$.ajax({
+			url : post_url,
+			type: request_method,
+			data : form_data
+		}).fail(function(){
+			console.error('Request to ' + post_url + ' failed. Please try again.');
+		});
 	});
-});
+}
 </script>
 
 {% endblock %}
