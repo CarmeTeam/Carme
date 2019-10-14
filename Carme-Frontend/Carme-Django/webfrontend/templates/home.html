@@ -31,10 +31,7 @@
 																																Cluster News
 																								</h3>
 																</div>
-																<div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left">
-																								<iframe scrolling="no" src="/wiki/cluster_news/" style="border: 0px none; margin-left: -20px; height: 450px; margin-top: -250px; width: 400px;" align="left" >                
-																								</iframe>
-																</div>
+																<div id="news" style="height: 200px; border: 0px solid #D5CC5A; overflow-y: scroll; margin: 15px auto; "></div>
 								</div>
 								<div class="double-space"></div>
 								<div class="news-container">
@@ -46,7 +43,6 @@
 																								<div class="chart-container" style="position: relative; height:15vh; width:20vw"> 							
 																																<canvas id="myChart" ></canvas>
 																								</div> 
-																								<script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script> 
 																								<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
 																								<script type="text/javascript"> 
 $.get('{% url 'line_chart_json' %}', function(data) {
@@ -95,10 +91,7 @@ $.get('{% url 'line_chart_json' %}', function(data) {
 																																Messages   
 																								</h3> 
 																</div>
-															 <div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left"> 
-																								<iframe scrolling="y" src="/carme-base/Messages/" style="border: 0px none; height: 200px; margin-top: -1px; width: 100%;" align="left" > 
-																								</iframe> 
-																</div>
+															 <div id="messages" style="height: 200px; border: 0px solid #D5CC5A; overflow-y: scroll; margin: 15px auto; padding: 5px;"></div>
 
 								</div>           
 </div>
@@ -106,10 +99,7 @@ $.get('{% url 'line_chart_json' %}', function(data) {
 <div class="main-container">
 
 								{% include "blocks/start_job.html" %} 
-								<div style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; " align="left"> 
-																<iframe scrolling="no" src="/carme-base/JobTable/" style="border: 0px none; height: {{ jobheight }}px; margin-top: -1px; width: 100%;" align="left" >
-																</iframe> 
-								</div>
+								<div id="jobtable" style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; "></div>
 </div>
 <BR>
 {% if user.is_superuser %}
@@ -124,5 +114,68 @@ $.get('{% url 'line_chart_json' %}', function(data) {
 								Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
 </div>
 {% endif %}
+
+<script type="text/javascript">
+if(!$) console.error('jQuery is required!');
+else {
+	function update_content(url, id) {
+		var elem = document.getElementById(id);
+
+		if(!elem) return console.error('No element found to update content!');
+
+		$.get(url, function(data) {
+			var timeout_reg = /Session time out!/gmi;
+			var timeout_match = timeout_reg.exec(data);
+
+			if(timeout_match) {
+				return window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+			}
+			
+			var content_reg;
+
+			if(id == 'messages' || id == 'jobtable') {
+				content_reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
+			} else if(id == 'news') {
+				content_reg = /<div class="wiki-article">([\S\s]*?)(?:<\/div>)/gmi;
+			}
+
+			var match = content_reg.exec(data);
+
+			if(!match) return console.error('No match in ajax response to update content!');
+
+			elem.innerHTML = match[1];
+		});
+	}
+
+	update_content('/carme-base/JobTable/', 'jobtable');
+	update_content('/carme-base/Messages/', 'messages');
+	update_content('/wiki/cluster_news/', 'news');
+
+	setInterval(function() {
+		update_content('/carme-base/JobTable/', 'jobtable');
+		update_content('/carme-base/Messages/', 'messages');
+	}, 2000);
+
+	$(document).on('submit', 'form.ajax', function (event) {
+		// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
+		event.preventDefault(); //prevent default action
+
+		var post_url = $(this).attr("action"); //get form action url
+		var request_method = $(this).attr("method"); //get form GET/POST method
+		var form_data = $(this).serialize(); //Encode form elements for submission
+		
+		$.ajax({
+			url : post_url,
+			type: request_method,
+			data : form_data
+		}).fail(function(){
+			console.error('Request to ' + post_url + ' failed. Please try again.');
+		}).always(function() {
+			update_content('/carme-base/JobTable/', 'jobtable');
+			update_content('/carme-base/Messages/', 'messages');
+		});
+	});
+}
+</script>
 
 {% endblock %}

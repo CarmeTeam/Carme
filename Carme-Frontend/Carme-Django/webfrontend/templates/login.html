@@ -20,6 +20,7 @@
 <div class="login-background">
 								<div class="loginmodal-container">
 																<h2>Login</h2>
+																<div id="timeout-message" style="display: none; color: red; font-weight: bold;">You have been logged out, because your session has expired!</div>
 																<form method="post">
 																								{% csrf_token %}
 																								{{ form.as_p }}
@@ -27,4 +28,11 @@
 																</form>
 								</div>
 </div>
+
+<script type="text/javascript">
+if(window.location.search.includes('timeout=1')) {
+	var elem = document.getElementById('timeout-message');
+	if(elem) elem.style.display = 'block';
+}
+</script>
 {% endblock %}

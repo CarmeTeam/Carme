@@ -21,7 +21,7 @@
 								</h3>
 </div>
 <div class="start-job"> 
-								<form action="/carme-base/StartJob/" method="post">
+								<form class="ajax" action="/carme-base/StartJob/" method="post">
 																{% csrf_token %}
 																{{ start_job_form }}
 																<input type="submit" value="">
