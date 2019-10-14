@@ -54,7 +54,7 @@ def index(request):
 
     current_user = request.user.username
     slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
-    slurm_list = SlurmJobs.objects.filter(status__exact="running", status__exact="queued") #do not show rime out jobs in admin job-table
+    slurm_list = SlurmJobs.objects.exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
     jobheight = 120+numjobs*70
     message_list = list(CarmeMessages.objects.filter(user__exact=current_user))[-5:] #select only 5 latest messages
