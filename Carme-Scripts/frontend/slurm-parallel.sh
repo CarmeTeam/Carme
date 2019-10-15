@@ -36,8 +36,6 @@ printf "SLURM-NNodes: $NR_PROCS\n"
 printf "SLURM-Nodelist: $SLURM_JOB_NODELIST\n"
 printf "\n"
 
-scontrol show hostname $SLURM_JOB_NODELIST | paste -d, -s > $HOME/.job-log-dir/carme_nodelist_$SLURM_JOBID
-
 for PROC in $(seq 0 $(($NR_PROCS-1)));
 do
         if [ $PROC = "0" ];then
