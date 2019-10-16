@@ -35,12 +35,12 @@ echo ""
 
 export TBDIR="/home/$USER/tensorboard"
 if [ ! -d $TBDIR ]; then
-								  mkdir $TBDIR  										
+  mkdir $TBDIR  										
 fi                       
 
 #Carme aliases and exporte. Get base bachrc from file
 if [ ! -d ~/.carme ]; then
-											mkdir ~/.carme
+  mkdir ~/.carme
 fi
 
 MPI_NODES=$(cat ~/.job-log-dir/$SLURM_JOBID-nodelist)
@@ -79,7 +79,7 @@ export CARME_IMAGE=$SINGULARITY_CONTAINER
 export CARME_BACKEND_SERVER=$CARME_BACKEND_SERVER
 export CARME_BACKEND_PORT=$CARME_BACKEND_PORT    
 export CARME_TENSORBOARD_HOME='/home/$USER/tensorboard'
-alias carme_mpirun='/opt/anaconda3/bin/mpirun -host ${MPI_NODES},${MPI_NODES}, -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
+alias carme_mpirun='/opt/anaconda3/bin/mpirun -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
 alias carme_cuda_version='nvcc --version'
 function carme_cudnn_version () {
   CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1)
@@ -93,88 +93,53 @@ alias nvidia-smi='nvidia-smi -i $GPUS'
 #sourch job bashrc to have exports in jupyterlba
 source ~/.carme/.bash_carme_$SLURM_JOBID
 
-#start multi node severs
-if [ "${#GPUS}" -gt "1" ]; then #hack - needs claen solution then
-#	echo "Starting DASK"
-#	export LC_ALL=C.UTF-8
-#	export LANG=C.UTF-8
-#	DASK_JOB_DIRECTORY="/home/"$USER"/.job-log-dir/dask_job_"$SLURM_JOB_ID"_"$SLURM_JOB_NAME
-#	DASK_MASTER=$(hostname)
-#	DASK_NODES="${CARME_NODES[@]/,/ }"
-#	DASK_SLAVES="${DASK_NODES[@]/$DASK_MASTER}"
-#	DASK_MASTER_IP=$(hostname -i)
-#	DASK_MASTER_PORT="8786"
-# DASK_DASHBOARD_PORT="8787"
-#	DASK_MASTER_WORKER_NAME_1="worker1_"$(hostname)
-#	DASK_MASTER_WORKER_NAME_0="worker0_"$(hostname)	#NOTE - this works only if we have exclusive nodes (just like for MPI) 
-#	DASK_MASTER_WORKER_LOCAL_DIR_0=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_NAME_0
-# DASK_MASTER_WORKER_LOCAL_DIR_1=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_NAME_1
-#	DASK_MASTER_WORKER_OUTPUT_1=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_LOCAL_DIR"/"$DASK_MASTER_WORKER_NAME_1".txt"    
-#	DASK_MASTER_WORKER_OUTPUT_0=$DASK_JOB_DIRECTORY"/"$DASK_MASTER_WORKER_LOCAL_DIR"/"$DASK_MASTER_WORKER_NAME_0".txt"
-#	DASK_SCHEDULER_DIR=${DASK_JOB_DIRECTORY}"/scheduler"
-#	DASK_SCHEDULER_OUTPUT=${DASK_JOB_DIRECTORY}"/"${DASK_SCHEDULER_DIR}"/scheduler_out.txt"	
-       
-#	if [ -d $DASK_JOB_DIRECTORY ];then
-#  		rm -r $DASK_JOB_DIRECTORY
-#  		mkdir $DASK_JOB_DIRECTORY  
-#	else
-#  	 mkdir $DASK_JOB_DIRECTORY
-#	fi             
+#start additional stuff if we have more than one node or more than one GPU
+if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
+  # start SSHD
+  SSHDIR="/home/$USER/.tmp_ssh"
+  mkdir -p $SSHDIR
+  ssh-keygen -t ssh-rsa -N "" -f $SSHDIR/server_key_${SLURM_JOB_ID}
+  ssh-keygen -t rsa -N "" -f $SSHDIR/client_key_${SLURM_JOB_ID}
+  
+		cat $SSHDIR/client_key_${SLURM_JOB_ID}.pub >> ~/.ssh/authorized_keys
+  cat $SSHDIR/client_key_${SLURM_JOB_ID} > ~/.ssh/id_rsa_${SLURM_JOB_ID}
+  chmod 600 ~/.ssh/id_rsa_${SLURM_JOB_ID}
 
-#	/opt/anaconda3/bin/dask-scheduler --port $DASK_MASTER_PORT --bokeh-port $DASK_DASHBOARD_PORT --bokeh-prefix=/dd_${MYHASH} --local-directory ${DASK_SCHEDULER_DIR} & #scheduler output is going to generel job_log
-							
-#	CUDA_VISIBLE_DEVICES=0 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_0} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_0} >> $DASK_MASTER_WORKER_OUTPUT_0 &
-							
-#	CUDA_VISIBLE_DEVICES=1 /opt/anaconda3/bin/dask-worker ${DASK_MASTER_IP}:${DASK_MASTER_PORT} --nthreads 1 --memory-limit 0.40 --name ${DASK_MASTER_WORKER_NAME_1} --local-directory ${DASK_MASTER_WORKER_LOCAL_DIR_1} >> $DASK_MASTER_WORKER_OUTPUT_1 &
+  echo "PermitRootLogin yes" > $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "PubkeyAuthentication yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "ChallengeResponseAuthentication no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "UsePAM no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "X11Forwarding no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "AllowUsers" $USER >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+		chmod 640 $SSHDIR/sshd_config_${SLURM_JOB_ID}
 
-	#SSHD
-	touch ~/.start_sshd
- 
-    SSHDIR="/home/$USER/.tmp_ssh"
-    if [ ! -d $SSHDIR ]; then
-        mkdir $SSHDIR
-    fi
-							rm -rf $SSHDIR/*
-							#mkdir /var/run/sshd
-							#chmod 0755 /var/run/sshd
-							ssh-keygen -t ssh-rsa -N "" -f $SSHDIR/server_key
-				   ssh-keygen -t rsa -N "" -f $SSHDIR/client_key
-				   rm ~/.ssh/authorized_keys
-							rm ~/.ssh/id_rsa
-							cat $SSHDIR/client_key.pub > ~/.ssh/authorized_keys	
-					  cat $SSHDIR/client_key > ~/.ssh/id_rsa
-						 chmod 700 ~/.ssh/id_rsa		
-							echo "PermitRootLogin yes" > $SSHDIR/sshd_config
-							echo "PubkeyAuthentication yes" >> $SSHDIR/sshd_config 
-							echo "ChallengeResponseAuthentication no" >> $SSHDIR/sshd_config 
-							echo "UsePAM no" >> $SSHDIR/sshd_config 
-							echo "X11Forwarding no" >> $SSHDIR/sshd_config 
-							echo "PrintMotd no" >> $SSHDIR/sshd_config 
-							echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config 
-							echo "AllowUsers" $USER >> $SSHDIR/sshd_config #only allow connections by user
-							echo "PermitUserEnvironment yes" >> $SSHDIR/sshd_config #to get the user env
-							rm ~/.ssh/known_hosts #remove to avoid errors due to changing key
-							rm ~/.ssh/config #remove old config
-						 echo "SendEnv LANG LC_*" > ~/.ssh/config #crate user config
-							echo "HashKnownHosts yes" >> ~/.ssh/config
-							echo "GSSAPIAuthentication yes" >> ~/.ssh/config
-							echo "CheckHostIP no" >> ~/.ssh/config
-						 echo "StrictHostKeyChecking no" >> ~/.ssh/config
-							echo "" >> ~/.ssh/config
+  rm ~/.ssh/known_hosts
+  rm ~/.ssh/config
+  
+		echo "SendEnv LANG LC_*" > ~/.ssh/config
+  echo "HashKnownHosts yes" >> ~/.ssh/config
+  echo "GSSAPIAuthentication yes" >> ~/.ssh/config
+  echo "CheckHostIP no" >> ~/.ssh/config
+  echo "StrictHostKeyChecking no" >> ~/.ssh/config
+  echo "" >> ~/.ssh/config
 
-							for i in $CARME_NODES_LIST
-       do
-           echo "Host "$i >> ~/.ssh/config
-           echo "  HostName "$i >> ~/.ssh/config
-											echo "  User $USER" >> ~/.ssh/config
-           echo "  Port 2222" >> ~/.ssh/config #set default port
-           echo "  IdentitiesOnly yes" >> ~/.ssh/config
-           echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
-											echo "" >> ~/.ssh/config
-       done               
-						 env > ~/.ssh/environment #make local env available	
-							echo "staring SSHD on MASTER" $(hostname)
-							/usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key -E ~/.SSHD_log -f $SSHDIR/sshd_config & 
+  for i in $CARME_NODES_LIST;do
+    echo "Host "$i >> ~/.ssh/config
+    echo "  HostName "$i >> ~/.ssh/config
+    echo "  User $USER" >> ~/.ssh/config
+    echo "  Port 2222" >> ~/.ssh/config
+    echo "  IdentitiesOnly yes" >> ~/.ssh/config
+    echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+    echo "" >> ~/.ssh/config
+  done
+  chmod 640 ~/.ssh/config		
+  
+  echo "starting SSHD on MASTER" $(hostname)
+  /usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key_${SLURM_JOB_ID} -E ~/$SSHDIR/sshd_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
+  
+  echo "alias ssh='ssh -i /home/${USER}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ~/.carme/.bash_carme_${SLURM_JOBID}
 fi
 
 
