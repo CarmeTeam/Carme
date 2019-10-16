@@ -61,9 +61,24 @@ if [ $? -eq 0 ]; then
 fi
 
 # delete .bash_carme_$SLURM_JOB_ID
-rm /home/$SLURM_JOB_USER/.carme/.bash_carme_$SLURM_JOB_ID
-rm -r /scratch_local/$SLURM_JOB_ID
-rm -r /home/$SLURM_JOB_USER/tensorboard/tensorboard_$SLURM_JOB_ID
+rm /home/${SLURM_JOB_USER}/.carme/.bash_carme_${SLURM_JOB_ID}
+
+# delete local scratch folder
+rm -r /scratch_local/${SLURM_JOB_ID}
+
+# remove job tensorboard folder
+rm -r /home/${SLURM_JOB_USER}/tensorboard/tensorboard_${SLURM_JOB_ID}
+
+# remove job ssh stuff
+rm /home/${SLURM_JOB_USER}/.tmp_ssh/server_key_${SLURM_JOB_ID}
+rm /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}
+rm /home/${SLURM_JOB_USER}/.ssh/id_rsa_${SLURM_JOB_ID}
+OLD_KEY=$(cat /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub)
+grep -v "${OLD_KEY}" /home/${SLURM_JOB_USER}/.ssh/authorized_keys > /home/${SLURM_JOB_USER}/.ssh/authorized_keys_temp
+mv /home/${SLURM_JOB_USER}/.ssh/authorized_keys_temp /home/${SLURM_JOB_USER}/.ssh/authorized_keys
+rm /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub
+rm /home/${SLURM_JOB_USER}/.tmp_ssh/server_key_${SLURM_JOB_ID}.pub
+rm /home/${SLURM_JOB_USER}/.tmp_ssh/sshd_config_${SLURM_JOB_ID}
 
 exit 0
 
