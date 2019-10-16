@@ -79,6 +79,7 @@ mv /home/${SLURM_JOB_USER}/.ssh/authorized_keys_temp /home/${SLURM_JOB_USER}/.ss
 rm /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub
 rm /home/${SLURM_JOB_USER}/.tmp_ssh/server_key_${SLURM_JOB_ID}.pub
 rm /home/${SLURM_JOB_USER}/.tmp_ssh/sshd_config_${SLURM_JOB_ID}
+rm /home/${SLURM_JOB_USER}/.tmp_ssh/sshd_log_${SLURM_JOB_ID}
 
 exit 0
 

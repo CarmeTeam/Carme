@@ -35,12 +35,12 @@ echo ""
 
 export TBDIR="/home/$USER/tensorboard"
 if [ ! -d $TBDIR ]; then
-								  mkdir $TBDIR  										
+  mkdir $TBDIR  										
 fi                       
 
 #Carme aliases and exporte. Get base bachrc from file
 if [ ! -d ~/.carme ]; then
-											mkdir ~/.carme
+  mkdir ~/.carme
 fi
 
 MPI_NODES=$(cat ~/.job-log-dir/$SLURM_JOBID-nodelist)
@@ -95,49 +95,51 @@ source ~/.carme/.bash_carme_$SLURM_JOBID
 
 #start additional stuff if we have more than one node or more than one GPU
 if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
-	 # start SSHD
-	 touch ~/.start_sshd
+  # start SSHD
   SSHDIR="/home/$USER/.tmp_ssh"
   mkdir -p $SSHDIR
-		ssh-keygen -t ssh-rsa -N "" -f $SSHDIR/server_key_${SLURM_JOB_ID}
-		ssh-keygen -t rsa -N "" -f $SSHDIR/client_key_${SLURM_JOB_ID}
-		#rm ~/.ssh/authorized_keys
-		#rm ~/.ssh/id_rsa
-		cat $SSHDIR/client_key_${SLURM_JOB_ID}.pub > ~/.ssh/authorized_keys
-		cat $SSHDIR/client_key_${SLURM_JOB_ID} > ~/.ssh/id_rsa_${SLURM_JOB_ID}
-		chmod 700 ~/.ssh/id_rsa_${SLURM_JOB_ID}
-		echo "PermitRootLogin yes" > $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "PubkeyAuthentication yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "ChallengeResponseAuthentication no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "UsePAM no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "X11Forwarding no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "AllowUsers" $USER >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		#echo "PermitUserEnvironment yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		rm ~/.ssh/known_hosts
-		rm ~/.ssh/config
-		echo "SendEnv LANG LC_*" > ~/.ssh/config
-		echo "HashKnownHosts yes" >> ~/.ssh/config
-		echo "GSSAPIAuthentication yes" >> ~/.ssh/config
-		echo "CheckHostIP no" >> ~/.ssh/config
-		echo "StrictHostKeyChecking no" >> ~/.ssh/config
-		echo "" >> ~/.ssh/config
+  ssh-keygen -t ssh-rsa -N "" -f $SSHDIR/server_key_${SLURM_JOB_ID}
+  ssh-keygen -t rsa -N "" -f $SSHDIR/client_key_${SLURM_JOB_ID}
+  
+		cat $SSHDIR/client_key_${SLURM_JOB_ID}.pub >> ~/.ssh/authorized_keys
+  cat $SSHDIR/client_key_${SLURM_JOB_ID} > ~/.ssh/id_rsa_${SLURM_JOB_ID}
+  chmod 600 ~/.ssh/id_rsa_${SLURM_JOB_ID}
 
-		for i in $CARME_NODES_LIST;do
+  echo "PermitRootLogin yes" > $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "PubkeyAuthentication yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "ChallengeResponseAuthentication no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "UsePAM no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "X11Forwarding no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "AllowUsers" $USER >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+		chmod 640 $SSHDIR/sshd_config_${SLURM_JOB_ID}
+
+  rm ~/.ssh/known_hosts
+  rm ~/.ssh/config
+  
+		echo "SendEnv LANG LC_*" > ~/.ssh/config
+  echo "HashKnownHosts yes" >> ~/.ssh/config
+  echo "GSSAPIAuthentication yes" >> ~/.ssh/config
+  echo "CheckHostIP no" >> ~/.ssh/config
+  echo "StrictHostKeyChecking no" >> ~/.ssh/config
+  echo "" >> ~/.ssh/config
+
+  for i in $CARME_NODES_LIST;do
     echo "Host "$i >> ~/.ssh/config
     echo "  HostName "$i >> ~/.ssh/config
-				echo "  User $USER" >> ~/.ssh/config
+    echo "  User $USER" >> ~/.ssh/config
     echo "  Port 2222" >> ~/.ssh/config
     echo "  IdentitiesOnly yes" >> ~/.ssh/config
     echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
-				echo "" >> ~/.ssh/config
-  done               
-		#env > ~/.ssh/environment
-		echo "staring SSHD on MASTER" $(hostname)
-		/usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key_${SLURM_JOB_ID} -E ~/.SSHD_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
-
-		echo "alias ssh='ssh -i /home/${USER}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ~/.carme/.bash_carme_${SLURM_JOBID}
+    echo "" >> ~/.ssh/config
+  done
+  chmod 640 ~/.ssh/config		
+  
+  echo "starting SSHD on MASTER" $(hostname)
+  /usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key_${SLURM_JOB_ID} -E ~/$SSHDIR/sshd_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
+  
+  echo "alias ssh='ssh -i /home/${USER}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ~/.carme/.bash_carme_${SLURM_JOBID}
 fi
 
 
