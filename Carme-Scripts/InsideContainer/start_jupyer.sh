@@ -113,6 +113,7 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "AllowUsers" $USER >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+		echo "PermitUserEnvironment yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
 		chmod 640 $SSHDIR/sshd_config_${SLURM_JOB_ID}
 
   rm ~/.ssh/known_hosts
