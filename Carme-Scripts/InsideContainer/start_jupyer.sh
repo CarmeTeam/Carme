@@ -113,6 +113,7 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "AllowUsers" $USER >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+		echo "PermitUserEnvironment yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
 		chmod 640 $SSHDIR/sshd_config_${SLURM_JOB_ID}
 
   rm ~/.ssh/known_hosts
@@ -137,7 +138,7 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   chmod 640 ~/.ssh/config		
   
   echo "starting SSHD on MASTER" $(hostname)
-  /usr/sbin/sshd -p 2222 -D -h ~/.tmp_ssh/server_key_${SLURM_JOB_ID} -E ~/$SSHDIR/sshd_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
+  /usr/sbin/sshd -p 2222 -D -h /home/${USER}/.tmp_ssh/server_key_${SLURM_JOB_ID} -E $SSHDIR/sshd_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
   
   echo "alias ssh='ssh -i /home/${USER}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ~/.carme/.bash_carme_${SLURM_JOBID}
 fi

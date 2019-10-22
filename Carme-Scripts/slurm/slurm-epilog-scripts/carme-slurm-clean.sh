@@ -76,6 +76,8 @@ rm /home/${SLURM_JOB_USER}/.ssh/id_rsa_${SLURM_JOB_ID}
 OLD_KEY=$(cat /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub)
 grep -v "${OLD_KEY}" /home/${SLURM_JOB_USER}/.ssh/authorized_keys > /home/${SLURM_JOB_USER}/.ssh/authorized_keys_temp
 mv /home/${SLURM_JOB_USER}/.ssh/authorized_keys_temp /home/${SLURM_JOB_USER}/.ssh/authorized_keys
+USER_GROUP=$(id -gn ${SLURM_JOB_USER})
+chown ${SLURM_JOB_USER}:${USER_GROUP} /home/${SLURM_JOB_USER}/.ssh/authorized_keys
 rm /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub
 rm /home/${SLURM_JOB_USER}/.tmp_ssh/server_key_${SLURM_JOB_ID}.pub
 rm /home/${SLURM_JOB_USER}/.tmp_ssh/sshd_config_${SLURM_JOB_ID}
