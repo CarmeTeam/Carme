@@ -24,12 +24,21 @@ if [ ! $(whoami) = "root" ]; then
 fi
 
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-    source $CLUSTER_DIR/$CONFIG_FILE
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=${variable_value%#*}
+    variable_value=$(echo "$variable_value" | tr -d '"')
+    echo $variable_value
+  }
 else
-    printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-    exit 137
+  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
+  exit 137
 fi
 
+#-----------------------------------------------------------------------------------------------------------------------------------
+# variables from config
+CARME_MATTERMOST_TRIGGER=$(get_variable CARME_MATTERMOST_TRIGGER $CLUSTER_DIR/${CONFIG_FILE})
+CARME_MATTERMOST_WEBHOCK=$(get_variable CARME_MATTERMOST_WEBHOCK $CLUSTER_DIR/${CONFIG_FILE})
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 KILLLIST=( $(ps axo user:20,stat,ppid,pid,comm | grep -w Sl | awk '$3 == "1" && !/root|daemon|message|sys|who|nvidia|lightdm|zabbix|munge|kern|statd|ntp/ { printf "%-15s %-5s %-7s %-7s %-7s\n", $1, $2, $3, $4, $5 }' | awk '{print $4}') )
