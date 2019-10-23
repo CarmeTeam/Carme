@@ -50,7 +50,7 @@ echo ""
 
 MOUNTS=${mountstr//[_]/ }   
 export HASH=$(sh ${CARME_SCRIPT_PATH}/hash.sh) 
-URL=${CARME_URL}/nb_${HASH }
+URL=${CARME_URL}/nb_${HASH}
 
 IPADDR=$(ip route get ${CARME_GATEWAY} | head -1 | awk '{print $5}' | cut -d/ -f1)
 if [[ -z ${IPADDR} ]];then
