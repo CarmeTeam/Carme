@@ -24,19 +24,45 @@ if [ ! $(whoami) = "root" ]; then
 fi
 
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-    source $CLUSTER_DIR/$CONFIG_FILE
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=${variable_value%#*}
+    variable_value=$(echo "$variable_value" | tr -d '"')
+    echo $variable_value
+  }
+  CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP $CLUSTER_DIR/${CONFIG_FILE})
 else
-    printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-    exit 137
+  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
+  exit 137
 fi
 
 THIS_NODE_IPS=( $(hostname -I) )
 #echo ${THIS_NODE_IPS[@]}
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_SLURM_ControlAddr} " ]]; then
+if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_LDAP_SERVER_IP} " ]]; then
     printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
     exit 137
 fi
 
+#-----------------------------------------------------------------------------------------------------------------------------------
+# needed variables from config
+CARME_LDAPGROUP_1=$(get_variable CARME_LDAPGROUP_1 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_2=$(get_variable CARME_LDAPGROUP_2 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_3=$(get_variable CARME_LDAPGROUP_3 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_4=$(get_variable CARME_LDAPGROUP_4 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_5=$(get_variable CARME_LDAPGROUP_5 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_1=$(get_variable CARME_LDAPGROUP_ID_1 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_2=$(get_variable CARME_LDAPGROUP_ID_2 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_3=$(get_variable CARME_LDAPGROUP_ID_3 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_4=$(get_variable CARME_LDAPGROUP_ID_4 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_5=$(get_variable CARME_LDAPGROUP_ID_5 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPINSTANZ_1=$(get_variable CARME_LDAPINSTANZ_1 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPINSTANZ_2=$(get_variable CARME_LDAPINSTANZ_2 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPINSTANZ_3=$(get_variable CARME_LDAPINSTANZ_3 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPINSTANZ_4=$(get_variable CARME_LDAPINSTANZ_4 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPINSTANZ_5=$(get_variable CARME_LDAPINSTANZ_5 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAP_ADMIN=$(get_variable CARME_LDAP_ADMIN $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAP_DC1=$(get_variable CARME_LDAP_DC1 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAP_DC2=$(get_variable CARME_LDAP_DC2 $CLUSTER_DIR/${CONFIG_FILE})
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 read -p "Do you want to change a user password? [y/N] " RESP
