@@ -24,33 +24,24 @@ NCPU=$7
 WORKER_NODES=$8
 GPU_TYPE=$9
 
-#read user accessable pert of CarmeConfig                                 
-source ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container      
+NR_PROCS=$((${SLURM_NNODES}))
+echo "SLURM-NNodes: ${NR_PROCS}"
+echo "SLURM-Nodelist: ${SLURM_JOB_NODELIST}"
+echo ""
 
-#SRUN="srun --exclusive -N1 -n1"
-# N == Nodes
-# n == CPUs/Cores
-
-NR_PROCS=$(($SLURM_NNODES))
-printf "SLURM-NNodes: $NR_PROCS\n"
-printf "SLURM-Nodelist: $SLURM_JOB_NODELIST\n"
-printf "\n"
-
-for PROC in $(seq 0 $(($NR_PROCS-1)));
-do
-        if [ $PROC = "0" ];then
-            # do something different on the master node
-												echo "MASTER args $@"
-            srun --exclusive -N1 -n1 -c$NCPU ${CARME_SCRIPT_PATH}/slurm.sh "$@" &
-            pids[${PROC}]=$!    #Save PID of this background process
-        else
-												echo "WORKER args $@"
-            srun --exclusive -N$WORKER_NODES -n$WORKER_NODES -c$NCPU ${CARME_SCRIPT_PATH}/slurm-worker.sh "$@" &
-            pids[${PROC}]=$!    #Save PID of this background process
-        fi
+for PROC in $(seq 0 $(($NR_PROCS-1)));do
+  if [ $PROC = "0" ];then
+    echo "MASTER args $@"
+    srun --exclusive -N1 -n1 -c$NCPU ${CARME_SCRIPT_PATH}/slurm.sh "$@" &
+    pids[${PROC}]=$!
+  else
+    echo "WORKER args $@"
+    srun --exclusive -N$WORKER_NODES -n$WORKER_NODES -c$NCPU ${CARME_SCRIPT_PATH}/slurm-worker.sh "$@" &
+    pids[${PROC}]=$!
+  fi
 done
 
-for pid in ${pids[*]};
-do
-    wait ${pid} #Wait on all PIDs, this returns 0 if ANY process fails
+for pid in ${pids[*]};do
+  wait ${pid}
 done
+
