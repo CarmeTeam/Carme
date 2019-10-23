@@ -26,7 +26,13 @@ if [ ! $(whoami) = "root" ]; then
 fi
 
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-    source $CLUSTER_DIR/$CONFIG_FILE
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=${variable_value%#*}
+    variable_value=$(echo "$variable_value" | tr -d '"')
+    echo $variable_value
+  }
+  CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr $CLUSTER_DIR/${CONFIG_FILE})
 else
     printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
     exit 137
@@ -39,6 +45,25 @@ if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_SLURM_ControlAddr} " ]]; then
 fi
 
 #-----------------------------------------------------------------------------------------------------------------------------------
+# load variables from config
+CARME_LDAPGROUP_ID_1=$(get_variable CARME_LDAPGROUP_ID_1 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_2=$(get_variable CARME_LDAPGROUP_ID_2 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_3=$(get_variable CARME_LDAPGROUP_ID_3 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_4=$(get_variable CARME_LDAPGROUP_ID_4 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAPGROUP_ID_5=$(get_variable CARME_LDAPGROUP_ID_5 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_1=$(get_variable CARME_SLURM_ACCOUNT_1 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_SPECS_1=$(get_variable CARME_SLURM_ACCOUNT_SPECS_1 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_2=$(get_variable CARME_SLURM_ACCOUNT_2 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_SPECS_2=$(get_variable CARME_SLURM_ACCOUNT_SPECS_2 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_3=$(get_variable CARME_SLURM_ACCOUNT_3 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_SPECS_3=$(get_variable CARME_SLURM_ACCOUNT_SPECS_3 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_4=$(get_variable CARME_SLURM_ACCOUNT_4 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_SPECS_4=$(get_variable CARME_SLURM_ACCOUNT_SPECS_4 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_5=$(get_variable CARME_SLURM_ACCOUNT_5 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ACCOUNT_SPECS_5=$(get_variable CARME_SLURM_ACCOUNT_SPECS_5 $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 
 read -p "enter ldap-username(s) of new slurm-user(s) [multiple users separated by space] " SLURMUSER_HELPER
 printf "\n"
