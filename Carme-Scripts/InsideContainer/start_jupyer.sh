@@ -17,8 +17,8 @@ GPUS=$7
 MEM=$8
 
 #-----------------------------------------------------------------------------------------------------------------------------------
-# needed variables from ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container
-CONFIG_FILE="${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container"
+# needed variables from /home/.CarmeScripts/CarmeConfig.container
+CONFIG_FILE="/home/.CarmeScripts/CarmeConfig.container"
 if [ -f ${CONFIG_FILE} ];then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
