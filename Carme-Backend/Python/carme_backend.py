@@ -418,18 +418,17 @@ class CarmeBackEndService(rpyc.Service):
     
     def exposed_JobProlog(self, jobName, jobUser):
         """
-        Tells the batch system to terminate a job
-
-        # NOTE
-            only requests from the compute nodes are exepted
+        Tells the backend, that a job is starting
 
         # Arguments
             jobName: name string of the job
             jobUser: username of job owner 
         """
+
         if self.user != "frontend": # TODO replace with compute node user
             setCarmeLog("BACKEND: AUTH FAILED", 40)
             return "Auth Failed"
+        
         if CARME_BACKEND_DEBUG:
             print("Job prolog: ", str(jobName))
 
@@ -437,46 +436,36 @@ class CarmeBackEndService(rpyc.Service):
 
     def exposed_JobEpilog(self, jobName, jobUser):
         """
-        Tells the batch system to terminate a job
-
-        # NOTE
-            only requests from the compute nodes are exepted
+        Tells the backend, that a job was terminated
 
         # Arguments
             jobName: name string of the job
             jobUser: username of job owner 
         """
+
         if self.user != "frontend": # TODO replace with compute node user
             setCarmeLog("BACKEND: AUTH FAILED", 40)
             return "Auth Failed"
+        
         if CARME_BACKEND_DEBUG:
-            print("Stop job: ", str(jobName))
+            print("Job epilog: ", str(jobName))
 
-        com = 'ssh persephone "echo world"'
+        com = 'ssh persephone "rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(jobID)+'.toml; echo "empty" > '+str(
+                    settings.CARME_PROXY_PATH)+'/routes/dummy.toml"'
+        
         ret = os.system(com)
 
-        """
-        # NOTE: this part should move to the backend as well
-            if jobID > 0:  # job is running
-                # delete
-                com = 'rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(jobID)+'.toml; echo "empty" > '+str(
-                    settings.CARME_PROXY_PATH)+'/routes/dummy.toml'  # systemctl restart proxy'
-                if os.system(com) != 0:
-                    message = "FRONTEND: Error deleting route for job " + \
-                        str(jobName) + " for user " + str(jobUser)
-                    db_logger.exception(message)
-                    raise Exception("ERROR removing proxy rule")
-        """
+        if ret != 0:
+            message = "FRONTEND: Error deleting route for job " + \
+                str(jobName) + " for user " + str(jobUser)
+            db_logger.exception(message)
 
-
-
-        #remove job from db
+        # remove job from db
         db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)  
 
         cur = db.cursor()
         sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
-        print(sql)
 
         try: 
             deleted = cur.execute(sql)
