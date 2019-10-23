@@ -52,7 +52,7 @@ echo "Carme Verison: ${CARME_VERSION}"
 echo ""
 
 MOUNTS=${mountstr//[_]/ }   
-export HASH=$(sh ${CARME_SCRIPT_PATH}/hash.sh) 
+export HASH=$(head /dev/urandom | tr -dc a-z0-9 | head -c 30) 
 URL=${CARME_URL}/nb_${HASH}
 
 IPADDR=$(ip route get ${CARME_GATEWAY} | head -1 | awk '{print $5}' | cut -d/ -f1)
