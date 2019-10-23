@@ -26,10 +26,16 @@ if [ ! $(whoami) = "root" ]; then
 fi
 
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-    source $CLUSTER_DIR/$CONFIG_FILE
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=${variable_value%#*}
+    variable_value=$(echo "$variable_value" | tr -d '"')
+    echo $variable_value
+  }
+  CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr $CLUSTER_DIR/${CONFIG_FILE}) 
 else
-    printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-    exit 137
+  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
+  exit 137
 fi
 
 THIS_NODE_IPS=( $(hostname -I) )
