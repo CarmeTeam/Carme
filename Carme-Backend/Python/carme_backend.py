@@ -455,6 +455,21 @@ class CarmeBackEndService(rpyc.Service):
         com = 'ssh persephone "echo world"'
         ret = os.system(com)
 
+        """
+        # NOTE: this part should move to the backend as well
+            if jobID > 0:  # job is running
+                # delete
+                com = 'rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(jobID)+'.toml; echo "empty" > '+str(
+                    settings.CARME_PROXY_PATH)+'/routes/dummy.toml'  # systemctl restart proxy'
+                if os.system(com) != 0:
+                    message = "FRONTEND: Error deleting route for job " + \
+                        str(jobName) + " for user " + str(jobUser)
+                    db_logger.exception(message)
+                    raise Exception("ERROR removing proxy rule")
+        """
+
+
+
         #remove job from db
         db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)  
