@@ -21,4 +21,4 @@ keyfile="/home/"+USER+"/.carme/"+USER+".key"
 certfile="/home/"+USER+"/.carme/"+USER+".crt"   
 
 conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile,certfile=certfile) 
-res=conn.root.exposed_JobFinished(SLURM_JOBID)         
+res=conn.root.exposed_JobProlog(SLURM_JOBID)         
