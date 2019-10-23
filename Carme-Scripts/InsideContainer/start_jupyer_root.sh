@@ -5,16 +5,22 @@ TB_PORT=$3
 USER=$4
 HASH=$5
 GPUS=$6
-export CUDA_VISIBLE_DEVICES=$GPUS
 
-NBDIR="/root/.jupyter"                                                                                                                                                                                   
-if [ ! -d $NBDIR ]; then                                                                                                                                                                                             mkdir $NBDIR
-fi            
-chmod -R 777 /tmp
-echo "c.NotebookApp.disable_check_xsrf = True" > /root/.jupyter/jupyter_notebook_config.py                                                                                                                 
-echo "c.NotebookApp.token = ''" >> /root/.jupyter/jupyter_notebook_config.py                                                                                                                               
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> /root/.jupyter/jupyter_notebook_config.py                                                                                                                 
-echo -e "$SLURM_JOBID\t$(hostname)\t$PWD/slurmjob.sh" >> /root/.job-log.dat 
-/opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser --allow-root &
-/opt/anaconda3/bin/tensorboard tensorboard --logdir="/root/tensorboard" --port=${TB_PORT} --path_prefix="/tb_${HASH}"   
+chmod -R 1777 /tmp
+
+# start theia ----------------------------------------------------------------------------------------------------------------------
+THEIA_BASE_DIR="/opt/theia-ide/"
+if [ -d ${THEIA_BASE_DIR} ]; then
+  THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
+  mkdir -p $THEIA_JOB_TMP
+  cd ${THEIA_BASE_DIR}
+  PATH=/opt/anaconda3/bin/:$PATH TMPDIR=$THEIA_JOB_TMP TMP=$THEIA_JOB_TMP TEMP=$THEIA_JOB_TMP /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname $IPADDR --port $TA_PORT --startup-timeout -1 &
+  cd
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+# start jupyter-lab ----------------------------------------------------------------------------------------------------------------
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py --allow-root
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 
