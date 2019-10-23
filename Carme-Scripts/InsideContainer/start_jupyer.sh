@@ -23,7 +23,7 @@ if [ -f ${CONFIG_FILE} ];then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
     variable_value=${variable_value%#*}
-                                variable_value=${variable_value%#*}
+    variable_value=${variable_value%#*}
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
@@ -55,7 +55,7 @@ mkdir -p $TBDIR
 
 mkdir -p ${HOME}/.carme
 
-MPI_NODES=$(cat ~/.job-log-dir/$SLURM_JOBID-nodelist)
+MPI_NODES=$(cat ~/.job-log-dir/$SLURM_JOB_ID-nodelist)
 
 # write carme config overwriting user settings
 cat /home/.CarmeScripts/base_bashrc.sh > ~/.bashrc
@@ -74,36 +74,36 @@ echo "
 export TMPDIR=${HOME}/carme_tmp
 export TMP=${HOME}/carme_tmp
 export TEMP=${HOME}/carme_tmp
-export CARME_VERSION=$CARME_VERSION
-export CARME_TMP=${HOME}/carme_tmp 
-export CARME_NODES=$MPI_NODES 
-export CARME_MASTER=$SLURMD_NODENAME
-export CARME_JOBID=$SLURM_JOBID
-export CARME_JOB_NAME=$SLURM_JOB_NAME
-export CARME_NUM_NODES=$SLURM_JOB_NUM_NODES
-export CARME_MEM_PER_NODE=$SLURM_MEM_PER_NODE
-export CARME_CPUS_PER_NODE=$SLURM_CPUS_ON_NODE 
-export CARME_GPUS_PER_NODE=$CARME_SYSTEM_GPUS_PER_NODE
-export CARME_GPU_LIST=$CUDA_VISIBLE_DEVICES
-export CARME_ACCOUNT_CLASS=$SLURM_JOB_ACCOUNT
-export CARME_QUEUE=$SLURM_JOB_PARTITION
-export CARME_IMAGE=$SINGULARITY_CONTAINER
-export CARME_BACKEND_SERVER=$CARME_BACKEND_SERVER
-export CARME_BACKEND_PORT=$CARME_BACKEND_PORT    
+export CARME_VERSION=${CARME_VERSION}
+export CARME_TMP=${HOME}/carme_tmp
+export CARME_NODES=${MPI_NODES}
+export CARME_MASTER=${SLURMD_NODENAME}
+export CARME_JOBID=${SLURM_JOB_ID}
+export CARME_JOB_NAME=${SLURM_JOB_NAME}
+export CARME_NUM_NODES=${SLURM_JOB_NUM_NODES}
+export CARME_MEM_PER_NODE=${SLURM_MEM_PER_NODE}
+export CARME_CPUS_PER_NODE=${SLURM_CPUS_ON_NODE}
+export CARME_GPUS_PER_NODE=${CARME_SYSTEM_GPUS_PER_NODE}
+export CARME_GPU_LIST=${CUDA_VISIBLE_DEVICES}
+export CARME_ACCOUNT_CLASS=${SLURM_JOB_ACCOUNT}
+export CARME_QUEUE=${SLURM_JOB_PARTITION}
+export CARME_IMAGE=${SINGULARITY_CONTAINER}
+export CARME_BACKEND_SERVER=${CARME_BACKEND_SERVER}
+export CARME_BACKEND_PORT=${CARME_BACKEND_PORT}    
 export CARME_TENSORBOARD_HOME='${HOME}/tensorboard'
 alias carme_mpirun='/opt/anaconda3/bin/mpirun -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
 alias carme_cuda_version='nvcc --version'
 function carme_cudnn_version () {
   CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1)
-		echo $CUDNN_VERSION
+		echo ${CUDNN_VERSION}
 }
 alias jupyter_url='echo $JUPYTER_SERVER_URL'
 alias carme_ssh='ssh -p 2222'
 alias nvidia-smi='nvidia-smi -i $GPUS'
-" > ${HOME}/.carme/.bash_carme_$SLURM_JOBID
+" > ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
 
 #source job bashrc
-source ${HOME}/.carme/.bash_carme_$SLURM_JOBID
+source ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -154,14 +154,14 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   echo "starting SSHD on MASTER" $(hostname)
   /usr/sbin/sshd -p 2222 -D -h ${HOME}/.tmp_ssh/server_key_${SLURM_JOB_ID} -E $SSHDIR/sshd_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
   
-  echo "alias ssh='ssh -i ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ${HOME}/.carme/.bash_carme_${SLURM_JOBID}
+  echo "alias ssh='ssh -i ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # start tensorboard ----------------------------------------------------------------------------------------------------------------
 TENSORBOARD_LOG_DIR="${TBDIR}/tensorboard_${SLURM_JOB_ID}"
-mkdir $TENSORBOARD_LOG_DIR
+mkdir ${TENSORBOARD_LOG_DIR}
 /opt/anaconda3/bin/tensorboard --logdir=${TENSORBOARD_LOG_DIR} --port=${TB_PORT} --path_prefix="/tb_${MYHASH}" & 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -169,16 +169,16 @@ mkdir $TENSORBOARD_LOG_DIR
 # start theia ----------------------------------------------------------------------------------------------------------------------
 THEIA_BASE_DIR="/opt/theia-ide/"
 if [ -d ${THEIA_BASE_DIR} ]; then
-  THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
-  mkdir -p $THEIA_JOB_TMP
+  THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOB_ID}"_job_tmp"
+  mkdir -p ${THEIA_JOB_TMP}
   cd ${THEIA_BASE_DIR}
-  PATH=/opt/anaconda3/bin/:$PATH TMPDIR=$THEIA_JOB_TMP TMP=$THEIA_JOB_TMP TEMP=$THEIA_JOB_TMP /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname $IPADDR --port $TA_PORT --startup-timeout -1 &
+  PATH=/opt/anaconda3/bin/:${PATH} TMPDIR=${THEIA_JOB_TMP} TMP=${THEIA_JOB_TMP} TEMP=${THEIA_JOB_TMP} /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname ${IPADDR} --port ${TA_PORT} --startup-timeout -1 &
   cd
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-/opt/anaconda3/bin/jupyter lab --ip=$IPADDR --port=$NB_PORT --notebook-dir=/home --no-browser --config=${HOME}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py 
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${HOME}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
