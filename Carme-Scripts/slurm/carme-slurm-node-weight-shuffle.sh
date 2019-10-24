@@ -30,21 +30,14 @@ if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
-  CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr $CLUSTER_DIR/${CONFIG_FILE})
 else
   printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
   exit 137
 fi
 
-THIS_NODE_IPS=( $(hostname -I) )
-#echo ${THIS_NODE_IPS[@]}
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_SLURM_ControlAddr} " ]]; then
-    printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-    exit 137
-fi
-
 #-----------------------------------------------------------------------------------------------------------------------------------
 # variables from config
+CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr $CLUSTER_DIR/${CONFIG_FILE})
 CARME_SLURM_CONFIG_FILE=$(get_variable CARME_SLURM_CONFIG_FILE $CLUSTER_DIR/${CONFIG_FILE})
 CARME_NODES_LIST=$(get_variable CARME_NODES_LIST $CLUSTER_DIR/${CONFIG_FILE})
 CARME_SLURM_BackupController=$(get_variable CARME_SLURM_BackupController $CLUSTER_DIR/${CONFIG_FILE})
@@ -59,6 +52,14 @@ CARME_COMPUTENODES_3=$(get_variable CARME_COMPUTENODES_3 $CLUSTER_DIR/${CONFIG_F
 CARME_COMPUTENODES_LIST_3=$(get_variable CARME_COMPUTENODES_LIST_3 $CLUSTER_DIR/${CONFIG_FILE})
 CARME_BUILDNODE_3=$(get_variable CARME_BUILDNODE_3 $CLUSTER_DIR/${CONFIG_FILE})
 CARME_SLURM_COMPUTENODES_CONFIG_3=$(get_variable CARME_SLURM_COMPUTENODES_CONFIG_3 $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+THIS_NODE_IPS=( $(hostname -I) )
+if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_SLURM_ControlAddr} " ]]; then
+  printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
+  exit 137
+fi
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 read -p "Do you want to shuffle the weights of the compute nodes? [y/N] " RESP

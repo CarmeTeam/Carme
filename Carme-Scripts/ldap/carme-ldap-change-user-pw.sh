@@ -30,21 +30,14 @@ if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
-  CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP $CLUSTER_DIR/${CONFIG_FILE})
 else
   printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
   exit 137
 fi
 
-THIS_NODE_IPS=( $(hostname -I) )
-#echo ${THIS_NODE_IPS[@]}
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_LDAP_SERVER_IP} " ]]; then
-    printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-    exit 137
-fi
-
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from config
+CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP $CLUSTER_DIR/${CONFIG_FILE})
 CARME_LDAPGROUP_1=$(get_variable CARME_LDAPGROUP_1 $CLUSTER_DIR/${CONFIG_FILE})
 CARME_LDAPGROUP_2=$(get_variable CARME_LDAPGROUP_2 $CLUSTER_DIR/${CONFIG_FILE})
 CARME_LDAPGROUP_3=$(get_variable CARME_LDAPGROUP_3 $CLUSTER_DIR/${CONFIG_FILE})
@@ -63,6 +56,14 @@ CARME_LDAPINSTANZ_5=$(get_variable CARME_LDAPINSTANZ_5 $CLUSTER_DIR/${CONFIG_FIL
 CARME_LDAP_ADMIN=$(get_variable CARME_LDAP_ADMIN $CLUSTER_DIR/${CONFIG_FILE})
 CARME_LDAP_DC1=$(get_variable CARME_LDAP_DC1 $CLUSTER_DIR/${CONFIG_FILE})
 CARME_LDAP_DC2=$(get_variable CARME_LDAP_DC2 $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+THIS_NODE_IPS=( $(hostname -I) )
+if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_LDAP_SERVER_IP} " ]]; then
+  printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
+  exit 137
+fi
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 read -p "Do you want to change a user password? [y/N] " RESP

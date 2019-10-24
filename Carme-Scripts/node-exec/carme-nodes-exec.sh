@@ -27,25 +27,27 @@ if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
     variable_value=${variable_value%#*}
+    variable_value=${variable_value%#*}
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
-  CARME_HEADNODE_IP=$(get_variable CARME_HEADNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
 else
   printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
   exit 137
 fi
 
-THIS_NODE_IPS=( $(hostname -I) )
-#echo ${THIS_NODE_IPS[@]}
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_HEADNODE_IP} " ]]; then
-    printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-    exit 137
-fi
-
 #-----------------------------------------------------------------------------------------------------------------------------------
 # variables from config
+CARME_HEADNODE_IP=$(get_variable CARME_HEADNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
 CARME_NODES_LIST=$(get_variable CARME_NODES_LIST $CLUSTER_DIR/${CONFIG_FILE}) 
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+THIS_NODE_IPS=( $(hostname -I) )
+if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_HEADNODE_IP} " ]]; then
+  printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
+  exit 137
+fi
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 read -p "Do you want to execute a command on all compute nodes? [y/N] " RESP

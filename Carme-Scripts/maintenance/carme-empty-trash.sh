@@ -31,21 +31,23 @@ if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
-  CARME_HEADNODE_IP=$(get_variable CARME_HEADNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
 else
   printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
   exit 137
 fi
 
+#-----------------------------------------------------------------------------------------------------------------------------------
+# needed variables from config
+CARME_HEADNODE_IP=$(get_variable CARME_HEADNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 THIS_NODE_IPS=( $(hostname -I) )
-#echo ${THIS_NODE_IPS[@]}
 if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_HEADNODE_IP} " ]]; then
-    printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-    exit 137
+  printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
+  exit 137
 fi
 
 #-----------------------------------------------------------------------------------------------------------------------------------
-
 
 find /home -path "*.local/share/Trash/files" -exec rm -vr "{}" \;
 find /home -path "*.local/share/Trash/info" -exec rm -vr "{}" \;

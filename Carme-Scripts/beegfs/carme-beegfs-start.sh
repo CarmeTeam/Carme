@@ -30,23 +30,24 @@ if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
-  CARME_BEEGFS_MGMTNODE_IP=$(get_variable CARME_BEEGFS_MGMTNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
 else
   printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
   exit 137
 fi
 
-THIS_NODE_IPS=( $(hostname -I) )
-#echo ${THIS_NODE_IPS[@]}
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_BEEGFS_MGMTNODE_IP} " ]]; then
-    printf "${SETCOLOR}this is not the BeeGFS-Mgmt-Node${NOCOLOR}\n"
-    exit 137
-fi
-
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from config
+CARME_BEEGFS_MGMTNODE_IP=$(get_variable CARME_BEEGFS_MGMTNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
 CARME_BEEGFS_METANODES=$(get_variable CARME_BEEGFS_METANODES $CLUSTER_DIR/${CONFIG_FILE})
 CARME_NODES_LIST=$(get_variable CARME_NODES_LIST $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+THIS_NODE_IPS=( $(hostname -I) )
+if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_BEEGFS_MGMTNODE_IP} " ]]; then
+  printf "${SETCOLOR}this is not the BeeGFS-Mgmt-Node${NOCOLOR}\n"
+  exit 137
+fi
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 read -p "Do you want to start BeeGFS? [y/N] " RESP
