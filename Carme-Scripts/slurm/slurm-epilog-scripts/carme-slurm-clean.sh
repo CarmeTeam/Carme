@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #-----------------------------------------------------------------------------------------------------------------------------------
 # This script will kill any user processes on a node when the last
 # SLURM job there ends. For example, if a user directly logs into
@@ -10,13 +10,11 @@
 #SLURM_BIN="/usr/bin/"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
+set -e # stop after error
+set -o pipefail # stop if command in pipe failed
 
 # check if something has to be done ------------------------------------------------------------------------------------------------
-if [ x$SLURM_JOB_USER == "x" ] ; then
-  exit 0
-fi
-
-if [ x$SLURM_JOB_ID == "x" ] ; then
+if [[ -z "${SLURM_JOB_USER}" || -z "${SLURM_JOB_ID}" ]]; then
   exit 0
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -27,61 +25,46 @@ if [ -z "$SYS_UID_MAX" ]; then
   SYS_UID_MAX=999
 fi
 
-if [ $SLURM_JOB_UID -lt $SYS_UID_MAX ] ; then
+if [ $SLURM_JOB_UID -lt $SYS_UID_MAX ]; then
   exit 0
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# determine slurm jobs of this user ------------------------------------------------------------------------------------------------
-job_list=`${SLURM_BIN}squeue --noheader --format=%i --user=$SLURM_JOB_USER --node=localhost`
-
-for job_id in $job_list
-do
-  if [ $job_id -ne $SLURM_JOB_ID ] ; then
-    exit 0
-  fi
-done
 #-----------------------------------------------------------------------------------------------------------------------------------
+# remove stuff in ${HOME} ----------------------------------------------------------------------------------------------------------
 
-
-# purge all remaining processes of this user ---------------------------------------------------------------------------------------
-
-# write message to /var/log/messages
-logger "slurm epilog script: job $SLURM_JOB_ID ($SLURM_JOB_USER) kill all remaining processes"
-
-# try to kill remaining processes with SIGTERM
-pkill -TERM -U $SLURM_JOB_USER
-
-# check if job is still running
-if [ $? -eq 0 ]; then
-  sleep 30s
-  pkill -KILL -U $SLURM_JOB_USER
-  logger "slurm epilog script: job $SLURM_JOB_ID ($SLURM_JOB_USER) had to be killed using SIGKILL - check what is going on"
-fi
+USER_HOME=$(getent passwd ${SLURM_JOB_USER} | cut -d: -f6)
 
 # delete .bash_carme_$SLURM_JOB_ID
-rm /home/${SLURM_JOB_USER}/.carme/.bash_carme_${SLURM_JOB_ID}
+if [[ -f "${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}" ]];then
+  rm ${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
+fi
 
 # delete local scratch folder
-rm -r /scratch_local/${SLURM_JOB_ID}
+if [[ -d "/scratch_local/${SLURM_JOB_ID}" ]];then
+  rm -r /scratch_local/${SLURM_JOB_ID}
+fi
 
 # remove job tensorboard folder
-rm -r /home/${SLURM_JOB_USER}/tensorboard/tensorboard_${SLURM_JOB_ID}
+if [[ -d "${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}" ]];then
+  rm -r ${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}
+fi
 
-# remove job ssh stuff
-rm /home/${SLURM_JOB_USER}/.tmp_ssh/server_key_${SLURM_JOB_ID}
-rm /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}
-rm /home/${SLURM_JOB_USER}/.ssh/id_rsa_${SLURM_JOB_ID}
-OLD_KEY=$(cat /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub)
-grep -v "${OLD_KEY}" /home/${SLURM_JOB_USER}/.ssh/authorized_keys > /home/${SLURM_JOB_USER}/.ssh/authorized_keys_temp
-mv /home/${SLURM_JOB_USER}/.ssh/authorized_keys_temp /home/${SLURM_JOB_USER}/.ssh/authorized_keys
-USER_GROUP=$(id -gn ${SLURM_JOB_USER})
-chown ${SLURM_JOB_USER}:${USER_GROUP} /home/${SLURM_JOB_USER}/.ssh/authorized_keys
-rm /home/${SLURM_JOB_USER}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub
-rm /home/${SLURM_JOB_USER}/.tmp_ssh/server_key_${SLURM_JOB_ID}.pub
-rm /home/${SLURM_JOB_USER}/.tmp_ssh/sshd_config_${SLURM_JOB_ID}
-rm /home/${SLURM_JOB_USER}/.tmp_ssh/sshd_log_${SLURM_JOB_ID}
+# remove theia tmp folder
+if [[ -d "${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp" ]];then
+  rm -r ${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp
+fi
+
+## remove job ssh stuff
+if [[ -f "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" ]];then
+  rm ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+fi
+
+if [[ -d "${USER_HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}" ]];then
+  rm -r ${USER_HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0
 

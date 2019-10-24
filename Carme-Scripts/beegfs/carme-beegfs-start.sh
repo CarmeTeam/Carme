@@ -24,18 +24,31 @@ if [ ! $(whoami) = "root" ]; then
 fi
 
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-    source $CLUSTER_DIR/$CONFIG_FILE
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=${variable_value%#*}
+    variable_value=$(echo "$variable_value" | tr -d '"')
+    echo $variable_value
+  }
 else
-    printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-    exit 137
+  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
+  exit 137
 fi
 
+#-----------------------------------------------------------------------------------------------------------------------------------
+# needed variables from config
+CARME_BEEGFS_MGMTNODE_IP=$(get_variable CARME_BEEGFS_MGMTNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
+CARME_BEEGFS_METANODES=$(get_variable CARME_BEEGFS_METANODES $CLUSTER_DIR/${CONFIG_FILE})
+CARME_NODES_LIST=$(get_variable CARME_NODES_LIST $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 THIS_NODE_IPS=( $(hostname -I) )
-#echo ${THIS_NODE_IPS[@]}
 if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_BEEGFS_MGMTNODE_IP} " ]]; then
-    printf "${SETCOLOR}this is not the BeeGFS-Mgmt-Node${NOCOLOR}\n"
-    exit 137
+  printf "${SETCOLOR}this is not the BeeGFS-Mgmt-Node${NOCOLOR}\n"
+  exit 137
 fi
+
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 read -p "Do you want to start BeeGFS? [y/N] " RESP
 if [ "$RESP" = "y" ]; then

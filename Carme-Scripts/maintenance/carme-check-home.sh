@@ -15,33 +15,39 @@ printf "\n"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 if [ ! "$BASH_VERSION" ]; then
-    printf "${SETCOLOR}This is a bash-script. Please use bash to execute it!${NOCOLOR}\n\n"
-    exit 137
+  printf "${SETCOLOR}This is a bash-script. Please use bash to execute it!${NOCOLOR}\n\n"
+  exit 137
 fi
 
 if [ ! $(whoami) = "root" ]; then
-    printf "${SETCOLOR}you need root privileges to run this script${NOCOLOR}\n\n"
-    exit 137
+  printf "${SETCOLOR}you need root privileges to run this script${NOCOLOR}\n\n"
+  exit 137
 fi
 
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-    source $CLUSTER_DIR/$CONFIG_FILE
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=${variable_value%#*}
+				variable_value=${variable_value%#*} 
+    variable_value=$(echo "$variable_value" | tr -d '"')
+    echo $variable_value
+  }
 else
-    printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-    exit 137
+  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
+  exit 137
 fi
 
 #-----------------------------------------------------------------------------------------------------------------------------------
+# variables from config
+CARME_MATTERMOST_WEBHOCK=$(get_variable CARME_MATTERMOST_WEBHOCK $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 HOST=$(hostname)
-#printf "$HOST\n"
 PAYLOAD="payload={\"text\": \" $HOST : /home is not mounted\"}"
-#printf "$PAYLOAD\n"
 
 if [[ ! $(findmnt -M /home/) ]]; then
-    #printf "not mounted\n"
-    curl -i -X POST --data-urlencode "$PAYLOAD" $CARME_MATTERMOST_WEBHOCK
-    printf "\n"
+  curl -i -X POST --data-urlencode "$PAYLOAD" $CARME_MATTERMOST_WEBHOCK
+  printf "\n"
 fi
 
 
