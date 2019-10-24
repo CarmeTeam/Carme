@@ -32,48 +32,38 @@ fi
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------
-# remove stuff in ${HOME}
+# remove stuff in ${HOME} ----------------------------------------------------------------------------------------------------------
 
 USER_HOME=$(getent passwd ${SLURM_JOB_USER} | cut -d: -f6)
 
 # delete .bash_carme_$SLURM_JOB_ID
-rm ${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
-
-# delete local scratch folder
-rm -r /scratch_local/${SLURM_JOB_ID}
-
-# remove job tensorboard folder
-rm -r ${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}
-
-# remove theia tmp folder
-rm -r ${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp
-
-# remove job ssh stuff
-rm ${USER_HOME}/.tmp_ssh/server_key_${SLURM_JOB_ID}
-rm ${USER_HOME}/.tmp_ssh/client_key_${SLURM_JOB_ID}
-rm ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
-
-OLD_KEY=$(cat ${USER_HOME}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub)
-set +e
-grep -v "${OLD_KEY}" ${USER_HOME}/.ssh/authorized_keys > ${USER_HOME}/.ssh/authorized_keys_temp
-GREP_STATE=$?
-set -e
-
-if [ ${GREP_STATE} -eq 0 ]; then
-  mv ${USER_HOME}/.ssh/authorized_keys_temp ${USER_HOME}/.ssh/authorized_keys
-else
-  rm ${USER_HOME}/.ssh/authorized_keys
-  rm ${USER_HOME}/.ssh/authorized_keys_temp
-  touch ${USER_HOME}/.ssh/authorized_keys
+if [[ -f "${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}" ]];then
+  rm ${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
 fi
 
-USER_GROUP=$(id -gn ${SLURM_JOB_USER})
-chown ${SLURM_JOB_USER}:${USER_GROUP} ${USER_HOME}/.ssh/authorized_keys
+# delete local scratch folder
+if [[ -d "/scratch_local/${SLURM_JOB_ID}" ]];then
+  rm -r /scratch_local/${SLURM_JOB_ID}
+fi
 
-rm ${USER_HOME}/.tmp_ssh/client_key_${SLURM_JOB_ID}.pub
-rm ${USER_HOME}/.tmp_ssh/server_key_${SLURM_JOB_ID}.pub
-rm ${USER_HOME}/.tmp_ssh/sshd_config_${SLURM_JOB_ID}
-rm ${USER_HOME}/.tmp_ssh/sshd_log_${SLURM_JOB_ID}
+# remove job tensorboard folder
+if [[ -d "${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}" ]];then
+  rm -r ${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}
+fi
+
+# remove theia tmp folder
+if [[ -d "${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp" ]];then
+  rm -r ${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp
+fi
+
+## remove job ssh stuff
+if [[ -f "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" ]];then
+  rm ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+fi
+
+if [[ -d "${USER_HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}" ]];then
+  rm -r ${USER_HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0

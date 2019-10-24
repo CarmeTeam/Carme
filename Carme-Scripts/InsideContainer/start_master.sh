@@ -110,19 +110,22 @@ source ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
 #start additional stuff if we have more than one node or more than one GPU ---------------------------------------------------------
 if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   # start SSHD
-  SSHDIR="${HOME}/.tmp_ssh"
+  SSHDIR="${HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}"
   mkdir -p $SSHDIR
   ssh-keygen -t ssh-rsa -N "" -f $SSHDIR/server_key_${SLURM_JOB_ID}
-  ssh-keygen -t rsa -N "" -f $SSHDIR/client_key_${SLURM_JOB_ID}
-  
-		cat $SSHDIR/client_key_${SLURM_JOB_ID}.pub >> ${HOME}/.ssh/authorized_keys
-  cat $SSHDIR/client_key_${SLURM_JOB_ID} > ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
-  chmod 600 ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+  ssh-keygen -t rsa -N "" -f ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+  mv ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub
+  cat ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub >> ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}
 
   echo "PermitRootLogin yes" > $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "PubkeyAuthentication yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "ChallengeResponseAuthentication no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "UsePAM no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "AuthorizedKeysFile ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "LoginGraceTime 30s" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "MaxAuthTries 3" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "ClientAliveInterval 3600" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "ClientAliveCountMax 1" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "X11Forwarding no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
@@ -152,7 +155,7 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   chmod 640 ${HOME}/.ssh/config		
   
   echo "starting SSHD on MASTER" $(hostname)
-  /usr/sbin/sshd -p 2222 -D -h ${HOME}/.tmp_ssh/server_key_${SLURM_JOB_ID} -E $SSHDIR/sshd_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
+  /usr/sbin/sshd -p 2222 -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
   
   echo "alias ssh='ssh -i ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
 fi
