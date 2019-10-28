@@ -188,6 +188,7 @@ a:active {
 								border: 1px solid #006EFF;
 								box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
         color: #006EFF;
+								cursor: pointer;
 }
 
 .maintenance-off-container{
@@ -279,6 +280,7 @@ select {
 select:hover {
 								box-shadow: 0 1px 1px 0 rgba(0,0,0,0.7);
 								border: 1px solid #64C85C;
+								cursor: pointer;
 }
 
 .start-job input[type=submit] {
