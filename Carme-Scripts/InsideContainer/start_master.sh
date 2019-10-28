@@ -117,7 +117,7 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   mv ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub
   cat ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub >> ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}
 
-  echo "PermitRootLogin yes" > $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "PermitRootLogin no" > $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "PubkeyAuthentication yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "ChallengeResponseAuthentication no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "UsePAM no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
@@ -128,15 +128,15 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   echo "ClientAliveCountMax 1" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "X11Forwarding no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "AcceptEnv LANG LC_*" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "AcceptEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
   echo "AllowUsers" $USER >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "PermitUserEnvironment yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
+		echo "PermitUserEnvironment no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
 		chmod 640 $SSHDIR/sshd_config_${SLURM_JOB_ID}
 
   rm ${HOME}/.ssh/known_hosts
   rm ${HOME}/.ssh/config
   
-		echo "SendEnv LANG LC_*" > ${HOME}/.ssh/config
+		echo "SendEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" > ${HOME}/.ssh/config
   echo "HashKnownHosts yes" >> ${HOME}/.ssh/config
   echo "GSSAPIAuthentication yes" >> ${HOME}/.ssh/config
   echo "CheckHostIP no" >> ${HOME}/.ssh/config

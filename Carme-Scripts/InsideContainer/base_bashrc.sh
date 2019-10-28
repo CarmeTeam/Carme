@@ -84,7 +84,7 @@ fi
 
 function carme_canceljob() {
     NUMBERCHECK='^[0-9]+$'
-    if ! [[ $1 =~ $NUMBERCHECK ]];then
+    if ! [[ $1 =~ ${NUMBERCHECK} ]];then
         VALUE=( $(ps ax | grep "$1" | grep -v grep | awk '{ print $1 }') )
         echo "${VALUE[0]}"
         kill ${VALUE[0]}
@@ -125,8 +125,8 @@ fi
 
 
 #include job settings
-chmod 700 ~/.carme/.bash_carme_$SLURM_JOBID
-[[ -f ~/.carme/.bash_carme_$SLURM_JOBID ]] && . ~/.carme/.bash_carme_$SLURM_JOBID
+chmod 700 ~/.carme/.bash_carme_${SLURM_JOB_ID}
+[[ -f ~/.carme/.bash_carme_${SLURM_JOB_ID} ]] && . ~/.carme/.bash_carme_${SLURM_JOB_ID}
 
 #terminal welcome message
 [[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
@@ -166,7 +166,7 @@ function carme-archive (){
     archive_name="${parameter_array[@]:0:1}"
     archive_files=("${parameter_array[@]:1:$parameter_array_length}")
     
-    tar -vczf $archive_name.tar.gz ${archive_files[@]} --remove-files
+    tar -vczf ${archive_name}.tar.gz ${archive_files[@]} --remove-files
   fi
 }
 complete -f -d carme-archive
@@ -174,10 +174,10 @@ complete -f -d carme-archive
 
 function carme-unarchive (){
   archive_name=$1
-  if [[ -z $archive_name ]];then
+  if [[ -z ${archive_name} ]];then
       echo "You did not specify an archive to extract!"
       echo "Use carme-unarchive --help or carme-unarchive -h for more information."
-  elif [ "$archive_name" == "--help"  ] || [ "$archive_name" == "-h" ]; then
+  elif [ "${archive_name}" == "--help"  ] || [ "${archive_name}" == "-h" ]; then
       echo "carme-unarchive extracts a compressed tar-file (tar.gz)"
       echo "in the local folder and then removes the original archive."
       echo ""
@@ -185,7 +185,7 @@ function carme-unarchive (){
       echo "carme-unarchive ARCHIVE-NAME.tar.gz"
   else
   
-    tar -vxzf $archive_name
+    tar -vxzf ${archive_name}
     
     if [ $? != 0 ];then
       echo "extracting $1 failed"
@@ -201,9 +201,9 @@ complete -f carme-unarchive
 function carme_tensorboard_visualize () {
   parameter_array=($@)
   parameter_array_length=${#parameter_array[@]}
-  if [[ "$parameter_array_length" -gt "1" ]];then
+  if [[ "${parameter_array_length}" -gt "1" ]];then
     echo "You can only link one folder, use --help or -h for more information"
-  elif [[ "$parameter_array_length" -le "1" ]];then
+  elif [[ "${parameter_array_length}" -le "1" ]];then
     if [ "${parameter_array[0]}" == "--help"  ] || [ "${parameter_array[0]}" == "-h" ]; then
       echo "With carme_tensorboard_visualize you can add previous results to your running tensorboard."
       echo "You should only add the results you need (and not your entire home folder)!! Per default a"
@@ -232,9 +232,9 @@ complete -d carme_tensorboard_visualize
 function carme_tensorboard_unvisualize () {
   parameter_array=($@)
   parameter_array_length=${#parameter_array[@]}
-  if [[ "$parameter_array_length" -gt "1" ]];then
+  if [[ "${parameter_array_length}" -gt "1" ]];then
     echo "You can only remove one link, use --help or -h for more information"
-  elif [[ "$parameter_array_length" -le "1" ]];then
+  elif [[ "${parameter_array_length}" -le "1" ]];then
     if [ "${parameter_array[0]}" == "--help"  ] || [ "${parameter_array[0]}" == "-h" ]; then
       echo "With carme_tensorboard_unvisualize you can remove results so that they are no longer"
       echo "visible within tensorboard in your runinng job."
@@ -266,12 +266,4 @@ function carme_tensorboard_ls () {
     echo "Use --help or -h to get more information."
   fi
 }
-
-
-# DASK variables
-#export DASK_MASTER=${CARME_MASTER}
-#export DASK_MASTER_IP=$(grep -ir "Master running on" ~/.job-log-dir/${SLURM_JOB_ID}-${SLURM_JOB_NAME}.out | awk '{print $4}')
-#export DASK_NODES=${CARME_NODES}
-#export DASK_MASTER_PORT="8786"
-#export DASK_DASHBOARD_PORT="8787"
 
