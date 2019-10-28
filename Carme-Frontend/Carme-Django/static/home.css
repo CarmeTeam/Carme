@@ -433,29 +433,36 @@ table.JobHistTable {
 								text-align: center;
 								border-collapse: collapse;
 }
+
 table.JobHistTable td, table.JobHistTable th {
-								border: 1px solid #FFFFFF;
+								border: 1px;
 								padding: 3px 4px;
 }
+
 table.JobHistTable tbody td {
 								font-size: 13px;
 }
 
 table.JobHistTable tbody tr {
-        font-size: 13px; 
+        font-size: 13px;
+							 color: black;
+							 border-bottom: 1px solid #C5C5C5;
 }     
 
 table.JobHistTable tbody tr:hover {
-        font-weight: bold;
+								color: black;
+								background-color: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
 }     
 
-table.JobHistTable td:nth-child(even) {
-								background: #EBEBEB;
-}
-
 table.JobHistTable thead {
-								background: #FFFFFF;
-								border-bottom: 1px solid #333333;
+								color: black;
+								background: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
+								border-top: 1px solid #EBEBEB;
+								border-bottom: 1px solid #C5C5C5;
 }
 
 table.JobHistTable thead th {
@@ -489,7 +496,7 @@ table.JobTable {
 }
 
 table.JobTable td, table.JobHistTable th {
-        border: 1px solid #FFFFFF;
+        border: 1px;
         padding: 3px 4px;
 }
 
@@ -498,20 +505,26 @@ table.JobTable tbody td {
 }
 
 table.JobTable tbody tr {
+        color: black;
         font-size: 13px;
+								background: white;
+								border-bottom: 1px solid #C5C5C5;
 }
 
 table.JobTable tbody tr:hover {
-        font-weight: bold;
-}
-
-table.JobTable td:nth-child(even) {
-        background: #EBEBEB;
+								color: black;
+								background-color: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
 }
 
 table.JobTable thead {
-        background: #FFFFFF;
-        border-bottom: 1px solid #333333;
+								color: black;
+        background: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
+								border-top: 1px solid #EBEBEB;
+        border-bottom: 1px solid #C5C5C5;
 }
 
 table.JobTable thead th {
