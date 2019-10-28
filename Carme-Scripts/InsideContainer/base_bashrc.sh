@@ -125,8 +125,8 @@ fi
 
 
 #include job settings
-chmod 700 ~/.carme/.bash_carme_$SLURM_JOBID
-[[ -f ~/.carme/.bash_carme_$SLURM_JOBID ]] && . ~/.carme/.bash_carme_$SLURM_JOBID
+chmod 700 ~/.carme/.bash_carme_$SLURM_JOB_ID
+[[ -f ~/.carme/.bash_carme_$SLURM_JOB_ID ]] && . ~/.carme/.bash_carme_$SLURM_JOB_ID
 
 #terminal welcome message
 [[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
