@@ -537,3 +537,7 @@ table.JobTable tfoot td {
         font-size: 14px;
 }                               
 
+input[type=submit] {
+  cursor: pointer;
+}
+
