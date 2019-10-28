@@ -64,7 +64,7 @@
 																																{% endif %} -->
 																																</td>
 																																<td>
-																																								<form class="ajax" action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}
+																																								<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}
 																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}"> 	
 																																																<input type="image" src="{% static "info.jpg" %}" alt="" style="width:2.5em;" />
 																																								</form>

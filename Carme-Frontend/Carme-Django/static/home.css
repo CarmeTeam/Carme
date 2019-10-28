@@ -1,4 +1,4 @@
-#table-wrapper {
+table-wrapper {
 								position:relative;
 }
 #table-scroll {
@@ -53,7 +53,6 @@ a:active {
 #clip {
 								position: absolute;
 								clip: rect(0, 1000px, 290px, 0);
-								/* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
 }
 
 /****** Footer container *****/
@@ -83,7 +82,7 @@ a:active {
 }                     
 
 .menue-action-container:hover{
-								border: 2px solid #006EFF;
+								border: 1px solid #006EFF;
 								color: #006EFF;
 } 
 
@@ -136,7 +135,7 @@ a:active {
 								display: table; 
 }   
 
-.double-space{                                                                                                                                                                                                 
+.double-space{
 								background-color: #FFFFFF; 
 								margin: 0 auto;
 								width:10px; 
@@ -149,7 +148,7 @@ a:active {
 }
 
 .time-out-container{
-								background-color: red;                                                                                                                                                                                 
+								background-color: red;
 								margin: 0 auto;
 								width:800px;
 								border-radius: 10px;  
@@ -186,9 +185,10 @@ a:active {
 }       
 
 .tool-container:hover{
-								border: 2px solid #006EFF;
-								box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.8);
+								border: 1px solid #006EFF;
+								box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
         color: #006EFF;
+								cursor: pointer;
 }
 
 .maintenance-off-container{
@@ -262,7 +262,7 @@ input:active,
 textarea:hover,
 textarea:active {
 								box-shadow: 0 1px 1px 0 rgba(0,0,0,0.7);   
-								border: 2px solid #64C85C;
+								border: 1px solid #64C85C;
 }
 
 /* Select */
@@ -279,7 +279,8 @@ select {
 
 select:hover {
 								box-shadow: 0 1px 1px 0 rgba(0,0,0,0.7);
-								border: 2px solid #64C85C;
+								border: 1px solid #64C85C;
+								cursor: pointer;
 }
 
 .start-job input[type=submit] {
@@ -300,7 +301,7 @@ select:hover {
 
 
 .set-password input[type=password] {   
-        width: 300px;                                                                                                                                                                      
+        width: 300px;
         font-weight: bold;   
         border: 1px solid black;
         border-radius: 5px;
@@ -308,7 +309,7 @@ select:hover {
         background-color:white; 
 }      
 .set-password input[type=submit] { 
-        font-weight: bold;                                                                                                                                                                            
+        font-weight: bold;
         border: 1px solid black; 
         border-radius: 5px; 
         padding: .5em 2em .5em .5em;
@@ -318,7 +319,7 @@ select:hover {
 
 .set-password input[type=submit]:hover {
         box-shadow: 2 2 2 2 rgba(0,0,0,0.7); 
-								border: 2px solid red;                                                                                                                                                                      
+								border: 1px solid red; 
 }                           
 
 /****** LOGIN MODAL ******/
@@ -379,12 +380,9 @@ select:hover {
 								height: 36px;
 								padding: 0 8px;
 								border-radius: 5px;
-								/* -webkit-user-select: none;
-								user-select: none; */
 }
 
 .loginmodal-submit {
-								/* border: 1px solid #3079ed; */
 								border: 0px;
 								color: #fff;
 								text-shadow: 0 1px rgba(0,0,0,0.1); 
@@ -393,15 +391,12 @@ select:hover {
 								font-family: roboto;
 								font-size: 14px;
 								border-radius: 5px;
-								/* background-image: -webkit-gradient(linear, 0 0, 0 100%,   from(#4d90fe), to(#4787ed)); */
 }
 
 .loginmodal-submit:hover {
-								/* border: 1px solid #2f5bb7; */
 								border: 0px;
 								text-shadow: 0 1px rgba(0,0,0,0.3);
 								background-color: #357ae8;
-								/* background-image: -webkit-gradient(linear, 0 0, 0 100%,   from(#4d90fe), to(#357ae8)); */
 }
 
 .loginmodal-container a {
@@ -433,40 +428,51 @@ select:hover {
 
 /* table ******************************/
 table.JobHistTable {
-								border: 2px solid #FFFFFF;
+								border: 1px solid #FFFFFF;
 								width: 100%;
 								text-align: center;
 								border-collapse: collapse;
 }
+
 table.JobHistTable td, table.JobHistTable th {
-								border: 1px solid #FFFFFF;
+								border: 1px;
 								padding: 3px 4px;
 }
+
 table.JobHistTable tbody td {
 								font-size: 13px;
 }
 
 table.JobHistTable tbody tr {
-        font-size: 13px; 
+        font-size: 13px;
+							 color: black;
+							 border-bottom: 1px solid #C5C5C5;
 }     
 
 table.JobHistTable tbody tr:hover {
-        font-weight: bold;
+								color: black;
+								background-color: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
 }     
-table.JobHistTable td:nth-child(even) {
-								background: #EBEBEB;
-}
+
 table.JobHistTable thead {
-								background: #FFFFFF;
-								border-bottom: 4px solid #333333;
+								color: black;
+								background: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
+								border-top: 1px solid #EBEBEB;
+								border-bottom: 1px solid #C5C5C5;
 }
+
 table.JobHistTable thead th {
 								font-size: 15px;
 								font-weight: bold;
 								color: #333333;
 								text-align: center;
-								border-left: 2px solid #333333;
+								border-left: 1px solid #333333;
 }
+
 table.JobHistTable thead th:first-child {
 								border-left: none;
 }
@@ -475,59 +481,76 @@ table.JobHistTable tfoot {
 								font-size: 14px;
 								font-weight: bold;
 								color: #333333;
-								border-top: 4px solid #333333;
+								border-top: 1px solid #333333;
 }
+
 table.JobHistTable tfoot td {
 								font-size: 14px;
 }
 
-table.JobTable {                                                                                                                                                                                               
-        border: 2px solid #FFFFFF;                                                                                                                                                                                 
-        width: 100%;                                                                                                                                                                                               
-        text-align: center;                                                                                                                                                                                        
-        border-collapse: collapse;                                                                                                                                                                                 
-}                                                                                                                                                                                                                  
-table.JobTable td, table.JobHistTable th {                                                                                                                                                                     
-        border: 1px solid #FFFFFF;                                                                                                                                                                                 
-        padding: 3px 4px;                                                                                                                                                                                          
-}                                                                                                                                                                                                                  
-table.JobTable tbody td {                                                                                                                                                                                      
-        font-size: 13px;                                                                                                                                                                                           
-}                                                                                                                                                                                                                  
-                                                                                                                                                                                                                   
-table.JobTable tbody tr {
-        font-size: 13px;                                                                                                                                                                                           
+table.JobTable {
+        border: 1px solid #FFFFFF;
+        width: 100%;
+        text-align: center;
+        border-collapse: collapse;
 }
 
-table.JobTable tbody tr:hover {                                                                                                                                                                                
-        font-weight: bold;                                                                                                                                                                                         
-}                                                                                                                                                                                                                  
-table.JobTable td:nth-child(even) {                                                                                                                                                                            
-        background: #EBEBEB;                                                                                                                                                                                       
-}                                                                                                                                                                                                                  
-table.JobTable thead {                                                                                                                                                                                         
-        background: #FFFFFF;                                                                                                                                                                                       
-        border-bottom: 4px solid #333333;                                                                                                                                                                          
-}                                                                                                                                                                                                                  
-table.JobTable thead th {                                                                                                                                                                                      
-        font-size: 15px;                                                                                                                                                                                           
-        font-weight: bold;                                                                                                                                                                                         
-        color: #333333;                                                                                                                                                                                            
-        text-align: center;                                                                                                                                                                                        
-        border-left: 2px solid #333333;                                                                                                                                                                            
-}                                                                                                                                                                                                                  
-table.JobTable thead th:first-child {                                                                                                                                                                          
-        border-left: none;                                                                                                                                                                                         
-}                                                                                                                                                                                                                  
-                                                                                                                                                                                                                   
-table.JobTable tfoot {                                                                                                                                                                                         
-        font-size: 14px;                                                                                                                                                                                           
-        font-weight: bold;                                                                                                                                                                                         
-        color: #333333;                                                                                                                                                                                            
-        border-top: 4px solid #333333;                                                                                                                                                                             
-}                                                                                                                                                                                                                  
-table.JobTable tfoot td {                                                                                                                                                                                      
-        font-size: 14px;                                                                                                                                                                                           
+table.JobTable td, table.JobHistTable th {
+        border: 1px;
+        padding: 3px 4px;
+}
+
+table.JobTable tbody td {
+        font-size: 13px;
+}
+
+table.JobTable tbody tr {
+        color: black;
+        font-size: 13px;
+								background: white;
+								border-bottom: 1px solid #C5C5C5;
+}
+
+table.JobTable tbody tr:hover {
+								color: black;
+								background-color: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
+}
+
+table.JobTable thead {
+								color: black;
+        background: #EBEBEB;
+								border-left: 1px solid #EBEBEB;
+								border-right: 1px solid #EBEBEB;
+								border-top: 1px solid #EBEBEB;
+        border-bottom: 1px solid #C5C5C5;
+}
+
+table.JobTable thead th {
+        font-size: 15px;
+        font-weight: bold;
+        color: #333333;
+        text-align: center;
+        border-left: 1px solid #333333;
+}
+
+table.JobTable thead th:first-child {
+        border-left: none;
+}
+
+table.JobTable tfoot {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333333;
+        border-top: 1px solid #333333;
+}
+
+table.JobTable tfoot td {
+        font-size: 14px;
 }                               
 
+input[type=submit] {
+  cursor: pointer;
+}
 
