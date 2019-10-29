@@ -31,8 +31,8 @@ source ~/.carme/.bash_carme_${SLURM_JOB_ID}
 
 # start ssh server if a job has more than one node or mor than one GPU
 if [[ "${SLURM_JOB_NUM_NODES}" -gt "1" || "${#GPUS}" -gt "1" ]]; then
-  SSHDIR="${HOME}/.tmp_ssh"
- 	/usr/sbin/sshd -p 2222 -D -h ${HOME}/.tmp_ssh/server_key_${SLURM_JOB_ID} -E $SSHDIR/sshd_log_${SLURM_JOB_ID} -f $SSHDIR/sshd_config_${SLURM_JOB_ID} &
-		echo "WORKER: SSH deamon started on $(hostname)"
+		SSHDIR="${HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}"
+		echo "WORKER: starting SSHD on WORKER" $(hostname)
+		/usr/sbin/sshd -p 2222 -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
 fi
 
