@@ -6,7 +6,7 @@
 
 _or in our case..._
 
-an open source frame work to mange resources for **multiple users** running **interactive jobs** on a **Cluster** of (GPU) compute nodes.
+an open source framework to manage resources for **multiple users** running **interactive jobs** on a **Cluster** of (GPU) compute nodes.
 
 
 ## **Follow us on Twitter**
@@ -21,7 +21,7 @@ _Selection_
 
 
 ## **Core Idea**
-_Combine established open source ML and DS tools with HPC back-ends_
+_Combine established open source ML and DS tools with HPC backends_
 * uses [Singularity containers](https://sylabs.io)
 * uses [Anaconda environments](https://www.anaconda.com/distribution)
 * uses e.g. [Theia-IDE](https://theia-ide.org) and [JupyterLab](https://github.com/jupyterlab/jupyterlab) as web based GUI-Frontends  
@@ -55,7 +55,7 @@ _Job submission scheme_
   * Temporary job FS on local SSDs for max performance (BeeOND) 
 * **Web-Interface**
   * HTTPS and SSH (if allowed) access via proxy 
-  * Web front-end (management and IDE)   
+  * Web frontend (management and IDE)   
 
  
 ## **Roadmap**
@@ -84,7 +84,7 @@ _NOTE:_ We are open for contributions!
 
 
 ## **Sponsors**
-The development of _Carme_ is finaced by research grants from
+The development of _Carme_ is financed by research grants from
 
 <a href="https://www.bmbf.de"><img src="Images/BMBF.jpeg"></a>
 <a href="https://mwwk.rlp.de"><img src="Images/RLP.jpg"></a>
