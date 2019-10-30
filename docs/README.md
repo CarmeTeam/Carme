@@ -86,6 +86,5 @@ _NOTE:_ We are open for contributions!
 ## **Sponsors**
 The development of _Carme_ is finaced by research grants from
 
-![](Images/BMBF.jpeg )
-![](Images/RLP.jpg )
-
+<a href="https://www.bmbf.de"><img src="Images/BMBF.jpeg"></a>
+<a href="https://mwwk.rlp.de"><img src="Images/RLP.jpg"></a>
