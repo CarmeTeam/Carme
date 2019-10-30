@@ -1,4 +1,3 @@
-# **Carme**
 ![carme_stage](Images/Carme-Stage--dark--symmetric.jpg)
 
 
@@ -7,27 +6,34 @@
 
 _or in our case..._
 
-an open source frame work to mange resources for **multiple users** running **interactive jobs (e.g. Theia-IDE or Jupyter notebooks)** on a **Cluster** of (GPU) compute nodes.
+an open source frame work to mange resources for **multiple users** running **interactive jobs** on a **Cluster** of (GPU) compute nodes.
 
 
-## **Follow us on Twitter** &rarr; [#OpenCarme](https://twitter.com/open_carme)
+## **Follow us on Twitter**
+&rarr; [#OpenCarme](https://twitter.com/open_carme)
 
 
-## **Carme Presentations**
+## **Presentations**
+_Selection_
 * [Slides from our talk at ISC18 06/2018](https://www.researchgate.net/publication/325967129_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 * [Slides from our talk at LRZ 10/2018](https://www.researchgate.net/publication/328161743_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 * [Slides from ISC 06/2019](https://www.researchgate.net/publication/334319039_Carme_-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 
 
-## **Carme Core Idea**
+## **Core Idea**
 _Combine established open source ML and DS tools with HPC back-ends_
-* uses containers &rarr; Singularity
-* uses Theia-IDE and Jupyter Notebooks as main web based GUI-Frontends
-* completely web front-end based (OS independent, no installation on user side needed)   
-* uses HPC job management and scheduler &rarr; SLURM
-* uses HPC data I/O technologies like ITWM’s BeeGFS  
-* uses HPC maintenance and monitoring tools 
-![scheme](Images/carme-run.png)
+* uses [Singularity containers](https://sylabs.io)
+* uses [Anaconda environments](https://www.anaconda.com/distribution)
+* uses e.g. [Theia-IDE](https://theia-ide.org) and [JupyterLab](https://github.com/jupyterlab/jupyterlab) as web based GUI-Frontends  
+  (extension to other GUIs is planed)
+* completely web frontend based  
+  (OS independent, no installation on user side needed)   
+* uses HPC job management and scheduler ([SLURM](https://slurm.schedmd.com))
+* uses HPC data I/O technologies like [Fraunhofer’s BeeGFS](https://www.beegfs.io)
+* uses HPC maintenance and monitoring tools
+
+_Job submission scheme_
+<img src="Images/carme-run.png" width="700">
 
 
 ## **Key Features**
@@ -47,11 +53,11 @@ _Combine established open source ML and DS tools with HPC back-ends_
   * Redundant, global file system (BeeGFS), mounts directly into container
   * Temporary job FS on local SSDs for max performance (BeeOND) 
 * **Web-Interface**
- * HTTPS and SSH (if allowed) access via proxy 
- * Web front-end (management and IDE)   
+  * HTTPS and SSH (if allowed) access via proxy 
+  * Web front-end (management and IDE)   
 
  
-## **Carme Roadmap**
+## **Roadmap**
 * [x] since 04/2018: _Carme prototype_ is up and running on our Cluster 
 * [x] 03/2019: release r0.3.0 (first public release)
 * [x] 07/2019: release r0.4.0
@@ -60,24 +66,25 @@ _Combine established open source ML and DS tools with HPC back-ends_
 * [ ] 02/2020: release r0.7.0 (upcomming)
 
 
-## **Carme Documentation**
-Regarding the Documentation visit our *Carme* documentation at [doc.open-carme.org](http://doc.open-carme.org)
+## **Documentation**
+Visit our documentation at [doc.open-carme.org](http://doc.open-carme.org).
 
 
 ## **Who is behind Carme?**
-_Carme_ is developed at the [machine learning group](http://itwm.fraunhofer.de/ml) of the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de)
+_Carme_ is developed at the [machine learning group](http://itwm.fraunhofer.de/ml) of the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
 
 ![](Images/FhG-ITWM.png)
 
-NOTE: We are open for contributions!
+_NOTE:_ We are open for contributions!
 
 
 ## **Contact**
-info@open-carme.org
+&rarr; info@open-carme.org
 
 
-## Sponsors
-#### The development of *Carme* is finaced by research grants from
+## **Sponsors**
+The development of _Carme_ is finaced by research grants from
 
 ![](Images/BMBF.jpeg )
 ![](Images/RLP.jpg )
+
