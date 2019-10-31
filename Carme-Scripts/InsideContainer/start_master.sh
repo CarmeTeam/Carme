@@ -148,8 +148,6 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
     echo "  HostName "$i >> ${HOME}/.ssh/config
     echo "  User $USER" >> ${HOME}/.ssh/config
     echo "  Port 2222" >> ${HOME}/.ssh/config
-    echo "  IdentitiesOnly yes" >> ${HOME}/.ssh/config
-    echo "  IdentityFile ~/.ssh/id_rsa" >> ${HOME}/.ssh/config
     echo "" >> ${HOME}/.ssh/config
   done
   chmod 640 ${HOME}/.ssh/config		
