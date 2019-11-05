@@ -29,18 +29,22 @@
 								<table class="JobHistTable">
 																<thead>
 																<tr>
-																								<td><b>User  </b></td><td><b>  Job Name  </b></td><td><b>  JobID  </b></td>
-																								<td align="center"><b>  # Nodes  </b></td><td><b>  Master  </b></td>
-																								<td><b>  NB Port </b></td>
-																								<td><b>  GPUs  </b></td><td><b> IMAGE </b></td>
-																								<td><b>  Entry Points </b></td>
-																								<td><b>  Info </b></td>
-																								<td><b>  Stop  </b></td>
+																								<td><b>User</b></td>
+																								<td><b>Job Name</b></td>
+																								<td><b>JobID</b></td>
+																								<td align="center"><b>#(Nodes)</b></td>
+																								<td><b>Master</b></td>
+																								<td><b>GPU Type</b></td>
+																								<td><b>#(GPUs)</b></td>
+																								<td><b>IMAGE</b></td>
+																								<td><b>Entry Points</b></td>
+																								<td><b>Info</b></td>
+																								<td><b>Stop</b></td>
 																</tr>
 																</thead>
 																{% for job in slurm_list %}
 																<tr>
-																								<td>{{job.user}}</td><td align="center">{{job.jobName}}</td><td align="center">{{job.SLURM_ID}}</td><td align="center">{{ job.NumNodes }}</td><td align="center">{{ job.IP }}</td><td align="center">{{ job.NB_PORT}}</td><td align="center">{{ job.NumGPUs }}</td><td>{{ job.imageName }}</td>
+																								<td>{{job.user}}</td><td align="center">{{job.jobName}}</td><td align="center">{{job.SLURM_ID}}</td><td align="center">{{ job.NumNodes }}</td><td align="center">{{ job.IP }}</td><td align="center">{{ job.gpu_type }}</td><td align="center">{{ job.NumGPUs }}</td><td>{{ job.imageName }}</td>
 																								<td>
 																																<a href="/nb_{{ job.HASH }}/" target="_new"><img src="{% static "jupyter.png" %}" alt="Jupyter" height=40/></A>                                                     
 																																<a href="/tb_{{ job.HASH }}/" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="TensorBoard" height=40/></A>  
@@ -52,7 +56,7 @@
 																																</form>
 																								</td>             											   
 																								<td>
-																																<form action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
+																																<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
 																																								<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
 																																								<input type="hidden" name="jobName" value="{{job.jobName}}">
 																																								<input type="hidden" name="jobUser" value="{{job.user}}">
@@ -66,6 +70,31 @@
 								No jobs.
 								{% endif %}
 </div>
+<script type="text/javascript">
+if(!$) console.error('jQuery is required!');
+else {
+	$(document).on('submit', 'form.ajax', function (event) {
+		// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
+		event.preventDefault(); //prevent default action
+
+		var post_url = $(this).attr("action"); //get form action url
+		var request_method = $(this).attr("method"); //get form GET/POST method
+		var form_data = $(this).serialize(); //Encode form elements for submission
+		
+		$.ajax({
+			url : post_url,
+			type: request_method,
+			data : form_data
+		}).fail(function(){
+			console.error('Request to ' + post_url + ' failed. Please try again.');
+		}).always(function() {
+			setTimeout(function() {
+				document.location.reload();
+			}, 1000);
+		});
+	});
+}
+</script>
 <BR>
 {% include "blocks/admin_footer.html" %}  
 <BR> 

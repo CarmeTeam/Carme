@@ -22,25 +22,6 @@ class CarmeMessages(models.Model):
     message = models.CharField(max_length=512, default='message')
     color = models.CharField(max_length=16, default='gray')
 
-""" deprecated
-
-"""
-class RuningJobs(models.Model):
-    UID = models.IntegerField(default=9999999)
-    LDAP_ID = models.IntegerField(default=9999999)
-    user = models.CharField(max_length=64)
-    URL = models.CharField(max_length=512)
-    start = models.DateTimeField('date published')
-    end = models.DateTimeField('date published')
-    NumNodes = models.IntegerField(default=1)
-    NumGPUs = models.IntegerField(default=1)
-    comment = models.CharField(max_length=512, default='link to imge')
-    SLURM_ID = models.IntegerField(default=9999999)
-    status = models.CharField(max_length=64, default='running')
-
-    def __str__(self):
-        return self.URL
-
 """ cluster usage statistics
 
 """
@@ -75,7 +56,8 @@ class SlurmJobs(models.Model):
     GPUS = models.CharField(max_length=64, default='non')
     imageName = models.CharField(max_length=128, default='no image')
     jobName = models.CharField(max_length=128, default='job')
-    frontend = models.CharField(max_length=64, default='main') 
+    frontend = models.CharField(max_length=64, default='main')
+    gpu_type = models.CharField(max_length=64, default='none')
     def __str__(self):
         return self.URL
 

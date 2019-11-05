@@ -21,16 +21,25 @@ SETCOLOR='\033[1;33m'
 NOCOLOR='\033[0m'
 #-----------------------------------------------------------------------------------------------------------------------------------
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-  source $CLUSTER_DIR/$CONFIG_FILE
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=${variable_value%#*}
+    variable_value=$(echo "$variable_value" | tr -d '"')
+    echo $variable_value
+  }
 else
   printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
   exit 137
 fi
 
+#-----------------------------------------------------------------------------------------------------------------------------------
+# needed variables
+CARME_NETWORK_BASE=$(get_variable CARME_NETWORK_BASE $CLUSTER_DIR/${CONFIG_FILE})
+CARME_ZABBIX_GRAPH_PATH=$(get_variable CARME_ZABBIX_GRAPH_PATH $CLUSTER_DIR/${CONFIG_FILE})
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE="/opt/zabbix-graphs"
-if [ ! -d ${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE} ]; then
-  mkdir ${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE}
-fi
+mkdir -p ${CARME_FRONTEND_ZABBIX_GRAPHS_STORAGE}
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 

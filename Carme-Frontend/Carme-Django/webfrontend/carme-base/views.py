@@ -13,7 +13,7 @@
 import numpy as np
 from django.http import HttpResponse
 from django.template import loader
-from .models import RuningJobs, CarmeMessages, SlurmJobs, Images, CarmeJobTable, CarmeAssocTable, ClusterStat, GroupResources
+from .models import CarmeMessages, SlurmJobs, Images, CarmeJobTable, CarmeAssocTable, ClusterStat, GroupResources
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
@@ -37,6 +37,9 @@ from chartjs.views.lines import BaseLineChartView
 import re
 
 
+def calculate_jobheight(numjobs):
+    return 200 + numjobs * 60
+
 def page_not_found(request):
     return render(request,'404.html', status=404) 
 
@@ -53,17 +56,15 @@ def index(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     current_user = request.user.username
-    job_list_user = RuningJobs.objects.all().filter(user__exact=current_user)
-    job_list = RuningJobs.objects.all()
-    slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
-    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
+    slurm_list = SlurmJobs.objects.exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
-    jobheight = 120+numjobs*70
-    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    jobheight = calculate_jobheight(numjobs) + numjobs * 10
+    message_list = list(CarmeMessages.objects.filter(user__exact=current_user))[-5:] #select only 5 latest messages
     template = loader.get_template('../templates/home.html')
-    nodeC, gpuC, imageC = generateChoices(request)
+    nodeC, gpuC, imageC, gpuT = generateChoices(request)
     startForm = StartJobForm(image_choices=imageC,
-                             node_choices=nodeC, gpu_choices=gpuC)
+                             node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
 
     #update Cluster stats
     StatUsedGPUs=0
@@ -74,13 +75,13 @@ def index(request):
         elif j.status == "queued":
             StatQueudGPUs += j.NumGPUs * j.NumNodes 
 
-    #StatUsedGPUs = SlurmJobs.objects.all().filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
-    #StatQueudGPUs = SlurmJobs.objects.all().filter(status__exact="queued").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
+    #StatUsedGPUs = SlurmJobs.objects.filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
+    #StatQueudGPUs = SlurmJobs.objects.filter(status__exact="queued").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
     if (str(StatQueudGPUs)=="None"):
         StatQueudGPUs=0
     if (str(StatUsedGPUs)=="None"):
         StatUsedGPUs=0
-    StatReservedGPUs = 2 #NOTE not implemented yet
+    StatReservedGPUs = 0 #NOTE not implemented yet
     StatFreeGPUs = settings.CARME_HARDWARE_NUM_GPUS - (StatUsedGPUs + StatReservedGPUs)
     timestamp = datetime.datetime.now()
     #check if stats have changed
@@ -89,8 +90,6 @@ def index(request):
         ClusterStat.objects.create(date=timestamp, free=StatFreeGPUs, used=StatUsedGPUs, reserved=StatReservedGPUs, queued=StatQueudGPUs) 
 
     context = {
-        'job_list_user': job_list_user,
-        'job_list': job_list,
         'slurm_list_user': slurm_list_user,
         'slurm_list': slurm_list,
         'message_list': message_list,
@@ -110,9 +109,9 @@ def admin_job_table(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     current_user = request.user.username
-    slurm_list = SlurmJobs.objects.all().exclude(status__exact="timeout")
+    slurm_list = SlurmJobs.objects.exclude(status__exact="timeout")
     numjobs = len(slurm_list)
-    jobheight = 120+numjobs*60
+    jobheight = calculate_jobheight(numjobs)
     template = loader.get_template('../templates/admin_job_table.html')
 
     context = {
@@ -132,7 +131,7 @@ def admin_cluster_status(request):
     current_user = request.user.username
     slurm_list = SlurmJobs.objects.all()
     numjobs = len(slurm_list)
-    jobheight = 120+numjobs*60
+    jobheight = calculate_jobheight(numjobs)
     template = loader.get_template('../templates/admin_cluster_status.html')
 
     context = {
@@ -152,8 +151,8 @@ def image_table(request):
 
     current_user = request.user.username
     template = loader.get_template('../templates/imagetable.html')
-    image_list_active = Images.objects.all().filter(image_status__exact="active")
-    image_list_sandbox = Images.objects.all().filter(image_status__exact="sandbox")
+    image_list_active = Images.objects.filter(image_status__exact="active")
+    image_list_sandbox = Images.objects.filter(image_status__exact="sandbox")
     context = {
         'image_list_active': image_list_active,
         'image_list_sandbox': image_list_sandbox,
@@ -173,7 +172,7 @@ def job_table(request):
 
     current_user = request.user.username
     # search for ready slurm jobs
-    slurm_ready = SlurmJobs.objects.all().filter(status__exact="ready", frontend__exact=settings.CARME_FRONTEND_ID)
+    slurm_ready = SlurmJobs.objects.filter(status__exact="ready", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
     for job in slurm_ready:
         job.status = "configuring"  # set status to avoid deadlock loop on faield jobs
         job.save()
@@ -206,7 +205,7 @@ def job_table(request):
 
             # write route to proxy
             pfile = str(settings.CARME_PROXY_PATH) + \
-                '/routes/dynamic/'+str(job.SLURM_ID)+".toml"
+                '/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(job.SLURM_ID)+".toml"
             f = open(pfile, 'w')
             route = '''
             [frontends.nb_'''+str(job.HASH)+''']
@@ -248,7 +247,6 @@ def job_table(request):
             [backends.ta_'''+str(job.HASH)+''']
             [backends.ta_'''+str(job.HASH)+'''.servers.server1] 
             url = "http://'''+str(job.IP)+''':'''+str(TA_PORT)+'''"
-
             '''
             f.write(route)
             f.close()
@@ -257,14 +255,14 @@ def job_table(request):
                 settings.CARME_PROXY_PATH)+'/routes/dummy.toml;touch '+str(settings.CARME_PROXY_PATH)+'/routes/dummy.toml'
             if os.system(com) != 0:
                 message = 'FRONTEND ERROR: Sarting job ' + \
-                    str(job.SLURM_ID)+' failed !'
+                    str(job.SLURM_ID)+'('+str(settings.CARME_FRONTEND_ID)+') failed !'
                 db_logger.exception(message)
                 raise Exception("ERROR trafik job update")
     
     #check for timeout 
-    slurm_running = SlurmJobs.objects.all().filter(status__exact="running", frontend__exact=settings.CARME_FRONTEND_ID)
+    slurm_running = SlurmJobs.objects.filter(status__exact="running", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
     for job in slurm_running:
-        job_slurm = CarmeJobTable.objects.all().filter(
+        job_slurm = CarmeJobTable.objects.filter(
                 id_job__exact=job.SLURM_ID )
         now = int(datetime.datetime.now().timestamp())
         if (job.status == "running") and (len(job_slurm) >0) and (job_slurm[0].timelimit>0):
@@ -274,16 +272,16 @@ def job_table(request):
                 job.status = "timeout"
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-                message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "tomato")
+                message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "#00B5FF")
                 job.save()
 
 
 
 
 
-    slurm_list_user = SlurmJobs.objects.all().filter(user__exact=current_user)
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
     numjobs = len(slurm_list_user)
-    jobheight = 120+numjobs*60
+    jobheight = calculate_jobheight(numjobs)
     template = loader.get_template('../templates/jobtable.html')
     context = {
         'slurm_list_user': slurm_list_user,
@@ -304,12 +302,12 @@ def generateChoices(request):
 
     group = list(request.user.ldap_user.group_names)[0]
     # .order_by('image_name')  # ,image_status__exact="active")
-    image_list = Images.objects.all().filter(image_group__exact=group).filter(image_status__exact="active")
+    image_list = Images.objects.filter(image_group__exact=group, image_status__exact="active")
     image_choices = set()
     for i in image_list:
         image_choices.add((i.image_name, i.image_name))
 
-    group_resources = GroupResources.objects.all().filter(group_name__exact=group)[0]
+    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
    
     node_choices =[]
     for i in range(1, group_resources.group_max_nodes +1):
@@ -319,8 +317,9 @@ def generateChoices(request):
     for i in range(1, group_resources.group_max_gpus_per_node +1):
         gpu_choices.append( (str(i), i) )
 
+    gpu_type = [(str(i), i) for i in settings.CARME_GPU_TYPE.split(',')]
 
-    return node_choices, gpu_choices, sorted(list(image_choices))
+    return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
 @login_required(login_url='/login')
 def start_job(request):
@@ -333,20 +332,20 @@ def start_job(request):
     db_logger = logging.getLogger('db')
 
     group = list(request.user.ldap_user.group_names)[0]
-    group_resources = GroupResources.objects.all().filter(group_name__exact=group)[0]
+    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
     partition = group_resources.group_partition
     print (partition)
-    nodeC, gpuC, imageC = generateChoices(request)
+    nodeC, gpuC, imageC, gpuT = generateChoices(request)
 
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
         form = StartJobForm(
-            request.POST, image_choices=imageC, node_choices=nodeC, gpu_choices=gpuC)
+            request.POST, image_choices=imageC, node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
         # check whether it's valid:
         if form.is_valid():
             # get image path and mounts from choices
-            image_db = Images.objects.all().filter(image_group__exact=group,
+            image_db = Images.objects.filter(image_group__exact=group,
                                                    image_name__exact=form.cleaned_data['image'])[0]
             mounts = settings.CARME_BASE_MOUNTS  # set in carme settings
             mounts += str(image_db.image_mounts)
@@ -366,16 +365,17 @@ def start_job(request):
             jobname = re.sub(r'[^a-zA-Z0-9_]', '',user_name)#''.join(e for e in user_name if e.isalnum())
             jobname = jobname + '_' + \
                 ''.join(random.choice(chars) for _ in range(4))
-            if num_nodes > 1:  # current hack to make multi-node jobs axclusive
-                num_gpus = 2
+            #if num_nodes > 1:  # current hack to make multi-node jobs axclusive
+            #    num_gpus = 2
+            gpus_type = str(form.cleaned_data['gpu-type'])
 
             m = SlurmJobs.objects.create(jobName=jobname, imageName=name, NumGPUs=num_gpus, NumNodes=num_nodes,
-                                         user=request.user.username, SLURM_ID=(0-random.randint(1, 10000)), frontend=settings.CARME_FRONTEND_ID)
+                                         user=request.user.username, SLURM_ID=(0-random.randint(1, 10000)), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
 
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            if conn.root.StartJob(str(request.user.username), str(m.id), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(jobname)) != 0:
+            if conn.root.StartJob(str(request.user.username), str(m.id), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(jobname), str(gpus_type)) != 0:
                 message = "FRONTEND: ERROR queing job " + \
                     str(jobname) + " for user " + str(request.user.username) + \
                     " on " + str(num_nodes) + " nodes"
@@ -390,7 +390,7 @@ def start_job(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         form = StartJobForm(image_choices=imageC,
-                            node_choices=nodeC, gpu_choices=gpuC)
+                            node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
     return render(request, 'jobs.html', {'form': form})
 
 @login_required(login_url='/login')
@@ -404,7 +404,7 @@ def job_hist(request):
     group = list(request.user.ldap_user.group_names)[0]
     uID = request.user.ldap_user.attrs['uidNumber'][0]
     template = loader.get_template('../templates/job_hist.html')
-    myjobhist = CarmeJobTable.objects.all().filter(
+    myjobhist = CarmeJobTable.objects.filter(
         state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
 
     # compute total GPU hours
@@ -416,12 +416,12 @@ def job_hist(request):
     job_time = 0
     if (job_time_start and job_time_end):
         job_time = round((job_time_end-job_time_start)/3600)
-    assoc = CarmeAssocTable.objects.all().filter(user__exact=current_user)
+    assoc = CarmeAssocTable.objects.filter(user__exact=current_user)
     partitions = ""
     #for a in assoc:
     #    partitions += str(a.partition)+" "
 
-    group_resources = GroupResources.objects.all().filter(group_name__exact=group)[0]
+    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
 
     context = {
         'myjobhist': myjobhist,
@@ -448,9 +448,9 @@ def job_info(request):
         if form.is_valid():
             template = loader.get_template(
                 '../templates/job_info.html')
-            job_details = SlurmJobs.objects.all().filter(
+            job_details = SlurmJobs.objects.filter(
                 SLURM_ID__exact=form.cleaned_data['jobID'], status__exact="running")
-            job_slurm = CarmeJobTable.objects.all().filter(
+            job_slurm = CarmeJobTable.objects.filter(
                 id_job__exact=form.cleaned_data['jobID'] )
             if len(job_slurm)>0:
                 job_submit_time = datetime.datetime.fromtimestamp(
@@ -539,7 +539,7 @@ def stop_job(request):
             # NOTE: this part should move to the backend as well
             if jobID > 0:  # job is running
                 # delete
-                com = 'rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(jobID)+'.toml; echo "empty" > '+str(
+                com = 'rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(jobID)+'.toml; echo "empty" > '+str(
                     settings.CARME_PROXY_PATH)+'/routes/dummy.toml'  # systemctl restart proxy'
                 if os.system(com) != 0:
                     message = "FRONTEND: Error deleting route for job " + \
@@ -612,7 +612,7 @@ def messages(request):
 
     """
     current_user = request.user.username 
-    message_list = list(CarmeMessages.objects.all().filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    message_list = list(CarmeMessages.objects.filter(user__exact=current_user))[-5:] #select only 5 latest messages
     template = loader.get_template('../templates/blocks/messages.html')  
     context = {
             'message_list': message_list,
@@ -698,9 +698,9 @@ class LineChartJSONView(BaseLineChartView):
                 dataset["pointBackgroundColor"]="rgba(106, 38, 189, 1.0)"
                 dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
             elif dataset["name"]=="queued":
-                dataset["backgroundColor"]="rgba(255, 75, 0, 0.5)"
-                dataset["borderColor"]="rgba(255, 75, 0, 1.0)"
-                dataset["pointBackgroundColor"]="rgba(255, 75, 0, 1.0)"
+                dataset["backgroundColor"]="rgba(135, 140, 135, 0.5)"
+                dataset["borderColor"]="rgba(135, 140, 135, 1.0)"
+                dataset["pointBackgroundColor"]="rgba(135, 140, 135, 1.0)"
                 dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
             elif dataset["name"]=="reserved":
                 dataset["backgroundColor"]="rgba(0, 181, 255, 0.5)"

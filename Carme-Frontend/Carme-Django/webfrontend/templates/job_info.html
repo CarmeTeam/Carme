@@ -15,7 +15,8 @@
 								<tr><td><b>User:</b></td> <td>{{ job.user }}</td><td width=50></td> <td><b>Submit Time:</b></td> <td>{{ job_submit_time }}</td></tr>
 								<tr><td><b>Nodes:</b></td> <td>{{ job_nodes }}: {{job_node_list}}</td><td width=50></td> <td><b>Start Time:</b></td> <td>{{ job_start_time }}</td></td></tr>
 								<tr><td><b>Entry Node:</b></td> <td>{{ job.IP }}</td><td width=50></td> <td><b>Timelimit:</b></td> <td>{{ job_timelimit }}</td></tr> 
-								<tr><td><b>GPUs/Node:</b></td> <td>{{ job.NumGPUs }}</td><td width=50></td> <td><b>CPU Cores/Node:</b></td> <td>{{ job_cores }} | <b>Memory:</b> {{ job_mem}}</td></tr>
+								<tr><td><b>CPU Cores/Node:</b></td> <td>{{ job_cores }}</td><td width=50></td> <td><b>Memory:</b></td> <td>{{ job_mem}}</td></tr>
+								<tr><td><b>GPU-Type:</b></td> <td>{{ job.gpu_type }}</td><td width=50></td> <td><b>GPUs/Node:</b></td> <td>{{ job.NumGPUs }}</td></tr>
 								<tr><td><b>Image:</b></td> <td>{{ job.imageName }}</td><td width=50></td> <td><b>Partition:</b></td> <td>    {{ job_partition }}</td></td></tr> 	
 </table>
 </div>

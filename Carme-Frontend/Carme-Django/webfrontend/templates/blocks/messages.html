@@ -14,15 +14,9 @@
 {% load static %}
 <HTML>
 								<head>                
-																<script type="text/javascript"> 
-																setTimeout(function(){window.location = window.location}, 3000);   
-																</script>  
 																<link rel="stylesheet" type="text/css" href="{% static "home.css" %}">  
 								</head>                
 								<Body>
-
-																<link rel="stylesheet" type="text/css" href="{% static "home.css" %}"> 
-
 																{% if message_list %}
 																{% for message in message_list %}
 																<div style="width=300px; background-color: {{ message.color }}; border-radius: 5px; box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7); padding: 5px 10px;  text-align: left; margin-top: 5px ">
