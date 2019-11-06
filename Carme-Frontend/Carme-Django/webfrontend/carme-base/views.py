@@ -60,7 +60,7 @@ def index(request):
     slurm_list = SlurmJobs.objects.exclude(status__exact="timeout") #do not show rime out jobs in admin job-table
     numjobs = len(slurm_list_user)
     jobheight = calculate_jobheight(numjobs) + numjobs * 10
-    message_list = list(CarmeMessages.objects.filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    message_list = list(CarmeMessages.objects.filter(user__exact=current_user).order_by('-id'))[:10] #select only 10 latest messages
     template = loader.get_template('../templates/home.html')
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
     startForm = StartJobForm(image_choices=imageC,
@@ -75,8 +75,6 @@ def index(request):
         elif j.status == "queued":
             StatQueudGPUs += j.NumGPUs * j.NumNodes 
 
-    #StatUsedGPUs = SlurmJobs.objects.filter(status__exact="running").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
-    #StatQueudGPUs = SlurmJobs.objects.filter(status__exact="queued").aggregate(Sum('NumGPUs'))['NumGPUs__sum']
     if (str(StatQueudGPUs)=="None"):
         StatQueudGPUs=0
     if (str(StatUsedGPUs)=="None"):
@@ -611,8 +609,8 @@ def messages(request):
     """ generate list of user messages 
 
     """
-    current_user = request.user.username 
-    message_list = list(CarmeMessages.objects.filter(user__exact=current_user))[-5:] #select only 5 latest messages
+    current_user = request.user.username
+    message_list = list(CarmeMessages.objects.filter(user__exact=current_user).order_by('-id'))[:10] #select only 10 latest messages
     template = loader.get_template('../templates/blocks/messages.html')  
     context = {
             'message_list': message_list,
