@@ -21,10 +21,6 @@ MEM_LIMIT=$(( MEM * 1024 *1024 ))
 echo "WORKER: Memory Limit ${MEM_LIMIT}KB"
 echo ""
 
-export TMPDIR=$HOME/carme_tmp
-export TMP=$HOME/carme_tmp
-export TEMP=$HOME/carme_tmp
-
 # wait until master is up and running
 sleep 10
 source ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/bash_${SLURM_JOB_ID}
