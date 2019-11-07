@@ -55,7 +55,8 @@ mkdir -p $TBDIR
 
 mkdir -p ${HOME}/.carme
 
-OUTFILE=${HOME}"/.job-log-dir/"${SLURM_JOB_ID}"-"${SLURM_JOB_NAME}".out"
+LOGDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
+OUTFILE=${LOGDIR}"/"${SLURM_JOB_ID}"-"${SLURM_JOB_NAME}".out"
 NODELIST=$(grep --color=never -Po "^NODELIST: \K.*" "${OUTFILE}")
 
 # write carme config overwriting user settings
@@ -181,6 +182,6 @@ fi
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${HOME}/.job-log-dir/${SLURM_JOBID}-jupyter_notebook_config.py 
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${LOGDIR}/${SLURM_JOBID}-jupyter_notebook_config.py 
 #-----------------------------------------------------------------------------------------------------------------------------------
 

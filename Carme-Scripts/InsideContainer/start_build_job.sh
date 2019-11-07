@@ -20,7 +20,8 @@ fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py --allow-root
+LOGDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${LOGDIR}/${SLURM_JOB_ID}-jupyter_notebook_config.py --allow-root
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

@@ -26,7 +26,7 @@ function get_variable () {
 CARME_SCRIPTS_PATH=$1
 CONFIG_FILE="${CARME_SCRIPTS_PATH}/../InsideContainer/CarmeConfig.container"
 
-LOGDIR="/home/$USER/.job-log-dir"
+LOGDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
 mkdir -p $LOGDIR
 
 DBJOBID=$2

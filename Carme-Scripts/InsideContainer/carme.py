@@ -13,15 +13,6 @@ CARME_BACKEND_PORT=os.environ['CARME_BACKEND_PORT']
 
 """
 
-
-def getDASK_Master():
-    """ get DASK scheduler IP:Port
-    
-    """
-    bash="grep -ir 'Master running on' ~/.job-log-dir/${SLURM_JOB_ID}-${SLURM_JOB_NAME}.out | awk '{print $4}' "
-    res = subprocess.check_output(bash,shell=True,universal_newlines=True)
-    return str(res.rstrip())+":8786"
-    
 def getHomePath():
     """ get the user home directory
 

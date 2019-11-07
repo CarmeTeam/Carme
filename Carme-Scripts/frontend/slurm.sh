@@ -76,11 +76,6 @@ fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 #set variables and environment stuff -----------------------------------------------------------------------------------------------
 
-#check if log directory exists -----------------------------------------------------------------------------------------------------
-LOGDIR="${HOME}/.job-log-dir"
-mkdir -p ${LOGDIR}
-#-----------------------------------------------------------------------------------------------------------------------------------
-
 echo "MASTER Parameters:"
 echo "                 - IP: ${IPADDR}"
 echo "                 - Backend-Server: ${CARME_BACKEND_SERVER}:${CARME_BACKEND_PORT}"
@@ -127,14 +122,16 @@ mkdir -p ${CARME_TMP}
 #set jupyter parameters and settings -----------------------------------------------------------------------------------------------
 NBDIR="${HOME}/.jupyter" 
 mkdir -p ${NBDIR}
-echo "c.NotebookApp.disable_check_xsrf = True" > ${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py
-echo "c.NotebookApp.token = ''" >> ${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py 
+STOREDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
+echo "c.NotebookApp.disable_check_xsrf = True" > ${STOREDIR}/${SLURM_JOB_ID}-jupyter_notebook_config.py
+echo "c.NotebookApp.token = ''" >> ${STOREDIR}/${SLURM_JOB_ID}-jupyter_notebook_config.py
+echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${STOREDIR}/${SLURM_JOB_ID}-jupyter_notebook_config.py 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #add job to joblog-file ------------------------------------------------------------------------------------------------------------
-echo -e "${SLURM_JOB_ID}\t${SLURM_JOB_NAME}\t$(hostname)\t${NODELIST}\t${STARTTIME}\t${ENDTIME}" >> ${HOME}/.job-log.dat
+LOGDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
+echo -e "${SLURM_JOB_ID}\t${SLURM_JOB_NAME}\t$(hostname)\t${NODELIST}\t${STARTTIME}\t${ENDTIME}" >> ${LOGDIR}/job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

@@ -40,8 +40,8 @@ for PATHS in /home/*;do
     done
 
     #find and delete job logs that are older than 14 days
-    find /home/${NAMES}/.job-log-dir/* -mtime +14 -type f -delete
-    find /home/${NAMES}/.job-log-dir/* -mtime +14 -type d -delete 
+				find /home/${NAMES}/.local/share/carme/job-log-dir-$(date +"%Y")/* -mtime +14 -type f -delete
+				find /home/${NAMES}/.local/share/carme/job-log-dir-$(date +"%Y")/* -mtime +14 -type d -delete 
 
   fi
 done
