@@ -114,9 +114,9 @@ source ${STOREDIR}/bash_${SLURM_JOB_ID}
 #start additional stuff if we have more than one node or more than one GPU ---------------------------------------------------------
 if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   # start SSHD
-  SSHDIR="${HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}"
-  mkdir -p $SSHDIR
-  ssh-keygen -t ssh-rsa -N "" -f $SSHDIR/server_key_${SLURM_JOB_ID}
+  SSHDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/ssh_"${SLURM_JOB_ID}
+  mkdir -p ${SSHDIR}
+  ssh-keygen -t ssh-rsa -N "" -f ${SSHDIR}/server_key_${SLURM_JOB_ID}
   ssh-keygen -t rsa -N "" -f ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
   mv ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub
   cat ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub >> ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}
