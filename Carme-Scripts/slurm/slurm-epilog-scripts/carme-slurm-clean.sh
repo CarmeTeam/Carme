@@ -37,8 +37,8 @@ fi
 USER_HOME=$(getent passwd ${SLURM_JOB_USER} | cut -d: -f6)
 
 # remove job specific stuff
-if [[ -f "${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}" ]];then
-  rm ${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
+if [[ -d "${USER_HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}" ]];then
+  rm -r ${USER_HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}
 fi
 
 if [[ -f "${USER_HOME}/.local/share/carme/job-log-dir-$(date +"%Y")/${SLURM_JOB_ID}-jupyter_notebook_config.py" ]];then

@@ -53,7 +53,8 @@ echo ""
 export TBDIR="${HOME}/tensorboard"
 mkdir -p $TBDIR
 
-mkdir -p ${HOME}/.carme
+STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
+mkdir -p ${STOREDIR}
 
 LOGDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
 OUTFILE=${LOGDIR}"/"${SLURM_JOB_ID}"-"${SLURM_JOB_NAME}".out"
@@ -102,10 +103,11 @@ function carme_cudnn_version () {
 alias jupyter_url='echo $JUPYTER_SERVER_URL'
 alias carme_ssh='ssh -p 2222'
 alias nvidia-smi='nvidia-smi -i $GPUS'
-" > ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
+" > ${STOREDIR}/bash_${SLURM_JOB_ID}
+
 
 #source job bashrc
-source ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
+source ${STOREDIR}/bash_${SLURM_JOB_ID}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -157,7 +159,7 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   echo "starting SSHD on MASTER" $(hostname)
   /usr/sbin/sshd -p 2222 -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
   
-  echo "alias ssh='ssh -i ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ${HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
+  echo "alias ssh='ssh -i ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ${STOREDIR}/bash_${SLURM_JOB_ID}
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 

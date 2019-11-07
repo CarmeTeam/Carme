@@ -125,8 +125,9 @@ fi
 
 
 #include job settings
-chmod 700 ~/.carme/.bash_carme_${SLURM_JOB_ID}
-[[ -f ~/.carme/.bash_carme_${SLURM_JOB_ID} ]] && . ~/.carme/.bash_carme_${SLURM_JOB_ID}
+if [[ -f ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/bash_${SLURM_JOB_ID} ]];then
+  . ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/bash_${SLURM_JOB_ID}
+fi
 
 #terminal welcome message
 [[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
