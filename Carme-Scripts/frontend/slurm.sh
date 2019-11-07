@@ -122,10 +122,14 @@ mkdir -p ${CARME_TMP}
 #set jupyter parameters and settings -----------------------------------------------------------------------------------------------
 NBDIR="${HOME}/.jupyter" 
 mkdir -p ${NBDIR}
-STOREDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
-echo "c.NotebookApp.disable_check_xsrf = True" > ${STOREDIR}/${SLURM_JOB_ID}-jupyter_notebook_config.py
-echo "c.NotebookApp.token = ''" >> ${STOREDIR}/${SLURM_JOB_ID}-jupyter_notebook_config.py
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${STOREDIR}/${SLURM_JOB_ID}-jupyter_notebook_config.py 
+
+STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
+mkdir -p ${STOREDIR}
+
+JUPYTER_CONFIG="jupyter_notebook_config-"${SLURM_JOB_ID}".py"
+echo "c.NotebookApp.disable_check_xsrf = True" > ${STOREDIR}/${JUPYTER_CONFIG}
+echo "c.NotebookApp.token = ''" >> ${STOREDIR}/${JUPYTER_CONFIG}
+echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${STOREDIR}/${JUPYTER_CONFIG}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

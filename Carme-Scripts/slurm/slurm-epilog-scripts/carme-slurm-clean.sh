@@ -41,10 +41,6 @@ if [[ -d "${USER_HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}" ]];then
   rm -r ${USER_HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}
 fi
 
-if [[ -f "${USER_HOME}/.local/share/carme/job-log-dir-$(date +"%Y")/${SLURM_JOB_ID}-jupyter_notebook_config.py" ]];then
-  rm ${USER_HOME}/.local/share/carme/job-log-dir-$(date +"%Y")/${SLURM_JOB_ID}-jupyter_notebook_config.py
-fi
-
 # delete local scratch folder
 if [[ -d "/scratch_local/${SLURM_JOB_ID}" ]];then
   rm -r /scratch_local/${SLURM_JOB_ID}
