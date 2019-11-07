@@ -32,7 +32,7 @@ if [ -f ${CONFIG_FILE} ];then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
     variable_value=${variable_value%#*}
-				variable_value=${variable_value%#*}
+    variable_value=${variable_value%#*}
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
@@ -49,6 +49,16 @@ CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT ${CONFIG_FILE})
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 echo "Carme Verison: ${CARME_VERSION}"
+echo ""
+
+NODELIST=$(scontrol show hostname ${SLURM_JOB_NODELIST})
+echo "NODELIST: ${NODELIST}"
+echo ""
+
+STARTTIME=$(squeue -h -j ${SLURM_JOB_ID} -o "%.20S")
+ENDTIME=$(squeue -h -j ${SLURM_JOB_ID} -o "%.20e")
+echo "STARTTIME: ${STARTTIME}"
+echo "ENDTIME: ${ENDTIME}"
 echo ""
 
 MOUNTS=${mountstr//[_]/ }   
@@ -124,17 +134,12 @@ echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${HOME}/.job-log-dir/${SLURM_JO
 
 
 #add job to joblog-file ------------------------------------------------------------------------------------------------------------
-echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> ${HOME}/.job-log.dat
+echo -e "${SLURM_JOB_ID}\t${SLURM_JOB_NAME}\t$(hostname)\t${NODELIST}\t${STARTTIME}\t${ENDTIME}" >> ${HOME}/.job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #register job with frontend db -----------------------------------------------------------------------------------------------------
 ${CARME_SCRIPT_PATH}/dist_alter_jobDB_entry/alter_jobDB_entry ${DBJOBID} ${URL} ${SLURM_JOB_ID} ${HASH} ${IPADDR} ${NB_PORT} ${TB_PORT} ${GPU_DEVICES} ${CARME_BACKEND_SERVER} ${CARME_BACKEND_PORT}
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-#set job nodelist ------------------------------------------------------------------------------------------------------------------
-scontrol show hostname ${SLURM_JOB_NODELIST} | paste -d, -s > ${HOME}/.job-log-dir/${SLURM_JOB_ID}-nodelist
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -158,11 +163,5 @@ else
 		  newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
 		fi
 fi
-
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-#add log entry "done" --------------------------------------------------------------------------------------------------------------
-sed -i "s/\\(${SLURM_JOB_ID}\\)\\(.*$\\)/\\1\\2\t<<DONE>>/" ${HOME}/.job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 

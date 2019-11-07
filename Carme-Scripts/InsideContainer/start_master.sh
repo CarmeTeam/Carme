@@ -55,7 +55,8 @@ mkdir -p $TBDIR
 
 mkdir -p ${HOME}/.carme
 
-MPI_NODES=$(cat ~/.job-log-dir/$SLURM_JOB_ID-nodelist)
+OUTFILE=${HOME}"/.job-log-dir/"${SLURM_JOB_ID}"-"${SLURM_JOB_NAME}".out"
+NODELIST=$(grep --color=never -Po "^NODELIST: \K.*" "${OUTFILE}")
 
 # write carme config overwriting user settings
 cat /home/.CarmeScripts/base_bashrc.sh > ~/.bashrc
@@ -76,7 +77,7 @@ export TMP=${HOME}/carme_tmp
 export TEMP=${HOME}/carme_tmp
 export CARME_VERSION=${CARME_VERSION}
 export CARME_TMP=${HOME}/carme_tmp
-export CARME_NODES=${MPI_NODES}
+export CARME_NODES=${NODELIST}
 export CARME_MASTER=${SLURMD_NODENAME}
 export CARME_JOBID=${SLURM_JOB_ID}
 export CARME_JOB_NAME=${SLURM_JOB_NAME}
