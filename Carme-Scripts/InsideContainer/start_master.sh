@@ -7,14 +7,14 @@
 # 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-IPADDR=$1
-NB_PORT=$2
-TB_PORT=$3
-TA_PORT=$4
-USER=$5
-MYHASH=$6
-GPUS=$7
-MEM=$8
+IPADDR=${1}
+NB_PORT=${2}
+TB_PORT=${3}
+TA_PORT=${4}
+USER=${5}
+MYHASH=${6}
+GPUS=${7}
+MEM=${8}
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from /home/.CarmeScripts/CarmeConfig.container
@@ -24,8 +24,8 @@ if [ -f ${CONFIG_FILE} ];then
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
     variable_value=${variable_value%#*}
     variable_value=${variable_value%#*}
-    variable_value=$(echo "$variable_value" | tr -d '"')
-    echo $variable_value
+    variable_value=$(echo "${variable_value}" | tr -d '"')
+    echo ${variable_value}
   }
 else
   echo "${CONFIG_FILE} not found!"
@@ -51,7 +51,7 @@ echo ""
 
 # Carme specific/needed aliases and exports ----------------------------------------------------------------------------------------
 export TBDIR="${HOME}/tensorboard"
-mkdir -p $TBDIR
+mkdir -p ${TBDIR}
 
 STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
 mkdir -p ${STOREDIR}
@@ -100,9 +100,9 @@ function carme_cudnn_version () {
   CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1)
 		echo ${CUDNN_VERSION}
 }
-alias jupyter_url='echo $JUPYTER_SERVER_URL'
+alias jupyter_url='echo ${JUPYTER_SERVER_URL}'
 alias carme_ssh='ssh -p 2222'
-alias nvidia-smi='nvidia-smi -i $GPUS'
+alias nvidia-smi='nvidia-smi -i ${GPUS}'
 " > ${STOREDIR}/bash_${SLURM_JOB_ID}
 
 
@@ -112,7 +112,7 @@ source ${STOREDIR}/bash_${SLURM_JOB_ID}
 
 
 #start additional stuff if we have more than one node or more than one GPU ---------------------------------------------------------
-if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
+if [[ "${SLURM_JOB_NUM_NODES}" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   # start SSHD
   SSHDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/ssh_"${SLURM_JOB_ID}
   mkdir -p ${SSHDIR}
@@ -121,21 +121,21 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   mv ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub
   cat ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub >> ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}
 
-  echo "PermitRootLogin no" > $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "PubkeyAuthentication yes" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "ChallengeResponseAuthentication no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "UsePAM no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "AuthorizedKeysFile ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "LoginGraceTime 30s" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "MaxAuthTries 3" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "ClientAliveInterval 3600" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "ClientAliveCountMax 1" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "X11Forwarding no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "PrintMotd no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "AcceptEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-  echo "AllowUsers" $USER >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		echo "PermitUserEnvironment no" >> $SSHDIR/sshd_config_${SLURM_JOB_ID}
-		chmod 640 $SSHDIR/sshd_config_${SLURM_JOB_ID}
+  echo "PermitRootLogin no" > ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "PubkeyAuthentication yes" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "ChallengeResponseAuthentication no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "UsePAM no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "AuthorizedKeysFile ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "LoginGraceTime 30s" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "MaxAuthTries 3" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "ClientAliveInterval 3600" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "ClientAliveCountMax 1" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "X11Forwarding no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "PrintMotd no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "AcceptEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "AllowUsers" ${USER} >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+		echo "PermitUserEnvironment no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+		chmod 640 ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
 
   rm ${HOME}/.ssh/known_hosts
   rm ${HOME}/.ssh/config
@@ -147,10 +147,10 @@ if [[ "$SLURM_JOB_NUM_NODES" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   echo "StrictHostKeyChecking no" >> ${HOME}/.ssh/config
   echo "" >> ${HOME}/.ssh/config
 
-  for i in $CARME_NODES_LIST;do
+  for i in ${CARME_NODES_LIST};do
     echo "Host "$i >> ${HOME}/.ssh/config
     echo "  HostName "$i >> ${HOME}/.ssh/config
-    echo "  User $USER" >> ${HOME}/.ssh/config
+    echo "  User ${USER}" >> ${HOME}/.ssh/config
     echo "  Port 2222" >> ${HOME}/.ssh/config
     echo "" >> ${HOME}/.ssh/config
   done
