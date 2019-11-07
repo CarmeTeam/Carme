@@ -194,7 +194,6 @@ EOF
     # create home
     mkdir -v /home/$LDAPUSER
     cp -vr /etc/skel/. /home/$LDAPUSER
-			 mkdir -v /home/$LDAPUSER/carme_tmp
 			 mkdir -v /home/$LDAPUSER/.carme
 			 mkdir -v /home/$LDAPUSER/.ssh	
     chown -v -R $NEXTUID:$GROUPID /home/$LDAPUSER

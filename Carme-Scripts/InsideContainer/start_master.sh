@@ -74,11 +74,8 @@ echo "
 echo "
 ###---CARME CONFIG--###
 ### do not edit below - will be overritten by Carme
-export TMPDIR=${HOME}/carme_tmp
-export TMP=${HOME}/carme_tmp
-export TEMP=${HOME}/carme_tmp
 export CARME_VERSION=${CARME_VERSION}
-export CARME_TMP=${HOME}/carme_tmp
+export CARME_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
 export CARME_NODES=${NODELIST}
 export CARME_MASTER=${SLURMD_NODENAME}
 export CARME_JOBID=${SLURM_JOB_ID}
@@ -174,7 +171,7 @@ mkdir ${TENSORBOARD_LOG_DIR}
 # start theia ----------------------------------------------------------------------------------------------------------------------
 THEIA_BASE_DIR="/opt/theia-ide/"
 if [ -d ${THEIA_BASE_DIR} ]; then
-  THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOB_ID}"_job_tmp"
+  THEIA_JOB_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
   mkdir -p ${THEIA_JOB_TMP}
   cd ${THEIA_BASE_DIR}
   PATH=/opt/anaconda3/bin/:${PATH} TMPDIR=${THEIA_JOB_TMP} TMP=${THEIA_JOB_TMP} TEMP=${THEIA_JOB_TMP} /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname ${IPADDR} --port ${TA_PORT} --startup-timeout -1 &

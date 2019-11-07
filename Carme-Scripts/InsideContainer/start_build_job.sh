@@ -11,7 +11,7 @@ chmod -R 1777 /tmp
 # start theia ----------------------------------------------------------------------------------------------------------------------
 THEIA_BASE_DIR="/opt/theia-ide/"
 if [ -d ${THEIA_BASE_DIR} ]; then
-  THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
+  THEIA_JOB_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
   mkdir -p $THEIA_JOB_TMP
   cd ${THEIA_BASE_DIR}
   PATH=/opt/anaconda3/bin/:$PATH TMPDIR=$THEIA_JOB_TMP TMP=$THEIA_JOB_TMP TEMP=$THEIA_JOB_TMP /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname $IPADDR --port $TA_PORT --startup-timeout -1 &

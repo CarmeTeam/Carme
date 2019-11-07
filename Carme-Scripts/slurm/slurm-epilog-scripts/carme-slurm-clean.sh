@@ -51,19 +51,10 @@ if [[ -d "${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}" ]];then
   rm -r ${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}
 fi
 
-# remove theia tmp folder
-if [[ -d "${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp" ]];then
-  rm -r ${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp
-fi
-
 # remove job ssh stuff
 if [[ -f "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" ]];then
   rm ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
 fi
-
-#if [[ -d "${USER_HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}" ]];then
-#  rm -r ${USER_HOME}/.carme/tmp_ssh_${SLURM_JOB_ID}
-#fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0
