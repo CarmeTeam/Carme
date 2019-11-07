@@ -36,9 +36,13 @@ fi
 
 USER_HOME=$(getent passwd ${SLURM_JOB_USER} | cut -d: -f6)
 
-# delete .bash_carme_$SLURM_JOB_ID
+# remove job specific stuff
 if [[ -f "${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}" ]];then
   rm ${USER_HOME}/.carme/.bash_carme_${SLURM_JOB_ID}
+fi
+
+if [[ -f "${USER_HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py" ]];then
+   rm ${USER_HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py
 fi
 
 # delete local scratch folder
@@ -56,7 +60,7 @@ if [[ -d "${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp" ]];then
   rm -r ${USER_HOME}/carme_tmp/${SLURM_JOB_ID}_job_tmp
 fi
 
-## remove job ssh stuff
+# remove job ssh stuff
 if [[ -f "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" ]];then
   rm ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
 fi
