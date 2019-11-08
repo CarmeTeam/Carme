@@ -69,8 +69,9 @@ if [ "$RESP" = "y" ]; then
     chown ${CLUSTER_USER}:${CLUSTER_USER_GROUP} ${CLUSTER_USER}.csr
     chown ${CLUSTER_USER}:${CLUSTER_USER_GROUP} ${CLUSTER_USER}.key
     
-    # move new certificates to /home/$USER/.carme
-    CERT_STORE="/home/${CLUSTER_USER}/.carme"
+    # move new certificates to /home/$USER/.config/carme
+    USER_HOME=$(getent passwd ${CLUSTER_USER} | cut -d: -f6)
+    CERT_STORE=${USER_HOME}"/.config/carme"
     if [ ! -d ${CERT_STORE} ]; then
       mkdir ${CERT_STORE}
     fi

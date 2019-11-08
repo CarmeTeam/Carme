@@ -22,8 +22,9 @@ CARME_BACKEND_SERVER=sys.argv[9]
 CARME_BACKEND_PORT=sys.argv[10] 
 
 USER=os.environ['USER']
-keyfile="/home/"+USER+"/.carme/"+USER+".key" 
-certfile="/home/"+USER+"/.carme/"+USER+".crt" 
+USER_HOME=os.environ['HOME']
+keyfile=USER_HOME+"/.config/carme/"+USER+".key" 
+certfile=USER_HOME+"/.config/carme/"+USER+".crt" 
 
 conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile,certfile=certfile)
 res=conn.root.exposed_userAlterJobDB(IPADDR, HASH, NB_PORT, TB_PORT, SLURM_JOBID, URL, GPUS, DBJOBID )
