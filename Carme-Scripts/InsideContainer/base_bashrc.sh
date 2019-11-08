@@ -116,8 +116,6 @@ function carme_canceljob() {
 
 export LANG=en_US.utf8
 
-#export TMOUT=1800
-
 # redefine prompt and its color (can be overwritten in .bash_aliases)
 if [[ $- = *i* ]];then
   export PS1='[\[\033[01;35m\]\u\[\033[m\]@\[\033[01;32m\]\h\[\033[m\]:\[\033[01;31;1m\]\W\[\033[m\]]\$ '
@@ -136,12 +134,10 @@ fi
 alias watch='watch '
 
 #alias for python linking to the anaconda installation
-#alias python='/opt/anaconda3/bin/python'
 export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/ 
 
 #include user settings 
-chmod 700 ~/.bash_aliases
-[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases  
+[[ -f ${HOME}/.bash_aliases ]] && . ~/.bash_aliases  
 
 # compress and extract functions
 function carme-archive (){
