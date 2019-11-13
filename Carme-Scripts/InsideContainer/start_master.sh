@@ -15,9 +15,10 @@ USER=${5}
 MYHASH=${6}
 GPUS=${7}
 MEM=${8}
+GPUS_PER_NODE=${9}
 
 #-----------------------------------------------------------------------------------------------------------------------------------
-# needed variables from /home/.CarmeScripts/CarmeConfig.container
+# source needed variables from /home/.CarmeScripts/CarmeConfig.container
 CONFIG_FILE="/home/.CarmeScripts/CarmeConfig.container"
 if [ -f ${CONFIG_FILE} ];then
   function get_variable () {
@@ -33,7 +34,6 @@ else
 fi
 
 CARME_VERSION=$(get_variable CARME_VERSION ${CONFIG_FILE})
-CARME_SYSTEM_GPUS_PER_NODE=$(get_variable CARME_SYSTEM_GPUS_PER_NODE ${CONFIG_FILE})
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT ${CONFIG_FILE})
 CARME_NODES_LIST=$(get_variable CARME_NODES_LIST ${CONFIG_FILE})
@@ -56,13 +56,14 @@ mkdir -p ${TBDIR}
 STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
 mkdir -p ${STOREDIR}
 
-LOGDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
+LOGDIR=${HOME}"/.local/share/carme/job-log-dir"
 OUTFILE=${LOGDIR}"/"${SLURM_JOB_ID}"-"${SLURM_JOB_NAME}".out"
 NODELIST=$(grep --color=never -Po "^NODELIST: \K.*" "${OUTFILE}")
 
-# write carme config overwriting user settings
+# write default bashrc to ${HOME}/.bashrc
 cat /home/.CarmeScripts/base_bashrc.sh > ~/.bashrc
 
+# overwrite ${HOME}/.bash_profile to source ${HOME}/.bashrc
 echo "
 #
 # ${HOME}/.bash_profile
@@ -71,6 +72,10 @@ echo "
 
 " > ${HOME}/.bash_profile
 
+# write conda base environment to file
+/opt/anaconda3/bin/conda list >> ${STOREDIR}/conda_base.txt
+
+# create ${STOREDIR}/bash_${SLURM_JOB_ID}
 echo "
 ###---CARME CONFIG--###
 ### do not edit below - will be overritten by Carme
@@ -83,7 +88,7 @@ export CARME_JOB_NAME=${SLURM_JOB_NAME}
 export CARME_NUM_NODES=${SLURM_JOB_NUM_NODES}
 export CARME_MEM_PER_NODE=${SLURM_MEM_PER_NODE}
 export CARME_CPUS_PER_NODE=${SLURM_CPUS_ON_NODE}
-export CARME_GPUS_PER_NODE=${CARME_SYSTEM_GPUS_PER_NODE}
+export CARME_GPUS_PER_NODE=${GPUS_PER_NODE}
 export CARME_GPU_LIST=${CUDA_VISIBLE_DEVICES}
 export CARME_ACCOUNT_CLASS=${SLURM_JOB_ACCOUNT}
 export CARME_QUEUE=${SLURM_JOB_PARTITION}
@@ -91,12 +96,28 @@ export CARME_IMAGE=${SINGULARITY_CONTAINER}
 export CARME_BACKEND_SERVER=${CARME_BACKEND_SERVER}
 export CARME_BACKEND_PORT=${CARME_BACKEND_PORT}    
 export CARME_TENSORBOARD_HOME='${HOME}/tensorboard'
+
 alias carme_mpirun='/opt/anaconda3/bin/mpirun -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
-alias carme_cuda_version='nvcc --version'
-function carme_cudnn_version () {
+
+function CARME_TENSORFLOW_VERSION () {
+  TF_VERSION=$(grep "tensorflow-gpu" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
+  echo ${TF_VERSION}
+}
+
+function CARME_PYTORCH_VERSION () {
+  PT_VERSION=$(grep "pytorch" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
+}
+
+function CARME_CUDA_VERSION () {
+  CUDA_VERSION=$(nvcc --version  | grep release | awk '{print $6}')
+  echo ${CUDA_VERSION}
+}
+
+function CARME_CUDNN_VERSION () {
   CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1)
 		echo ${CUDNN_VERSION}
 }
+
 alias jupyter_url='echo ${JUPYTER_SERVER_URL}'
 alias carme_ssh='ssh -p 2222'
 alias nvidia-smi='nvidia-smi -i ${GPUS}'

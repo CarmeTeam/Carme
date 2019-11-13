@@ -128,7 +128,7 @@ echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${STOREDIR}/${JUPYTER_CONFIG}
 
 
 #add job to joblog-file ------------------------------------------------------------------------------------------------------------
-LOGDIR=${HOME}"/.local/share/carme/job-log-dir-"$(date +"%Y")
+LOGDIR=${HOME}"/.local/share/carme/job-log-dir"
 echo -e "${SLURM_JOB_ID}\t${SLURM_JOB_NAME}\t$(hostname)\t${NODELIST}\t${STARTTIME}\t${ENDTIME}" >> ${LOGDIR}/job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -153,9 +153,9 @@ if [[ ${IMAGE} = *"scratch_image_build"* ]];then #sandbox image - add own start 
   newpid sudo singularity exec -B /etc/libibverbs.d ${MOUNTS} --writable ${IMAGE} /bin/bash /home/.CarmeScripts/start_build_job.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES}
 else
 		if [ ${IPADDR} != "192.168.152.11" ];then
-    newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
+    newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
 		else
-		  newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
+		  newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
 		fi
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
