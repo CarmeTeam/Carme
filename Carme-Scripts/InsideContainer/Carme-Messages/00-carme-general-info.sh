@@ -29,10 +29,11 @@ echo "End-Time:   $(grep $CARME_JOBID .local/share/carme/job-log-dir/job-log.dat
 echo ""
 
 # print base ennv information
-if [[ -f "${HOME}/conda_base.txt" ]];then
+STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
+if [[ -f "${STOREDIR}/conda_base.txt" ]];then
   echo -e "\033[1mBase Environment -----------------------------\033[0m"
-  echo "TensorFlow: $(grep "tensorflow-gpu" ${HOME}/conda_base.txt | awk '{ print $2 }')"
-  echo "PyTorch:    $(grep "pytorch" ${HOME}/conda_base.txt | awk '{ print $2 }')"
+  echo "TensorFlow: $(grep "tensorflow-gpu" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')"
+  echo "PyTorch:    $(grep "pytorch" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')"
   echo ""
 fi
 
