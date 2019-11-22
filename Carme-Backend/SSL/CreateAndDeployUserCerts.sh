@@ -71,7 +71,7 @@ if [ "$RESP" = "y" ]; then
     
     # move new certificates to /home/$USER/.config/carme
     USER_HOME=$(getent passwd ${CLUSTER_USER} | cut -d: -f6)
-    CERT_STORE=${USER_HOME}"/.config/carme"
+    CERT_STORE="${USER_HOME}/.config/carme"
     if [ ! -d ${CERT_STORE} ]; then
       mkdir ${CERT_STORE}
     fi
