@@ -69,10 +69,13 @@ alias l='ls -CF'
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 
+#-----------------------------------------------------------------------------------------------------------------------------------
 # alias definitions ----------------------------------------------------------------------------------------------------------------
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
+
+# add bash completion --------------------------------------------------------------------------------------------------------------
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
@@ -80,8 +83,15 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+# ----------------------------------------------------------------------------------------------------------------------------------
 
 
+# add user specific bash settings --------------------------------------------------------------------------------------------------
+[[ -f ${HOME}/.bash_aliases ]] && . ${HOME}/.bash_aliases
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define cancel function -----------------------------------------------------------------------------------------------------------
 function carme_canceljob() {
     NUMBERCHECK='^[0-9]+$'
     if ! [[ $1 =~ ${NUMBERCHECK} ]];then
@@ -113,36 +123,39 @@ function carme_canceljob() {
         fi
     fi
 }
+#-----------------------------------------------------------------------------------------------------------------------------------
 
+
+# set LANG to english --------------------------------------------------------------------------------------------------------------
 export LANG=en_US.utf8
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-#export TMOUT=1800
 
-# redefine prompt and its color (can be overwritten in .bash_aliases)
+# redefine prompt and its color (can be overwritten in .bash_aliases) --------------------------------------------------------------
 if [[ $- = *i* ]];then
   export PS1='[\[\033[01;35m\]\u\[\033[m\]@\[\033[01;32m\]\h\[\033[m\]:\[\033[01;31;1m\]\W\[\033[m\]]\$ '
 fi
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#include job settings
-chmod 700 ~/.carme/.bash_carme_${SLURM_JOB_ID}
-[[ -f ~/.carme/.bash_carme_${SLURM_JOB_ID} ]] && . ~/.carme/.bash_carme_${SLURM_JOB_ID}
+# include job specific bash settings ------------------------------------------------------------------------------------------------
+if [[ -f ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/bash_${SLURM_JOB_ID} ]];then
+  . ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/bash_${SLURM_JOB_ID}
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-#terminal welcome message
+
+# add terminal welcome message -----------------------------------------------------------------------------------------------------
 [[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-#alias for watch that it works with predefined aliases (trailing space inside the quotation marks needed!!!)
-alias watch='watch '
 
-#alias for python linking to the anaconda installation
-#alias python='/opt/anaconda3/bin/python'
-export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/ 
+# modify $PATH ---------------------------------------------------------------------------------------------------------------------
+export PATH=$PATH:/opt/anaconda3/bin/:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-#include user settings 
-chmod 700 ~/.bash_aliases
-[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases  
 
-# compress and extract functions
+# compress and extract functions ---------------------------------------------------------------------------------------------------
 function carme-archive (){
   parameter_array=($@)
   parameter_array_length=${#parameter_array[@]}
@@ -195,9 +208,10 @@ function carme-unarchive (){
   fi
 }
 complete -f carme-unarchive
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# add and remove results to tensorboard
+# add and remove results to tensorboard --------------------------------------------------------------------------------------------
 function carme_tensorboard_visualize () {
   parameter_array=($@)
   parameter_array_length=${#parameter_array[@]}
@@ -266,4 +280,23 @@ function carme_tensorboard_ls () {
     echo "Use --help or -h to get more information."
   fi
 }
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# make anaconda environment visible for users --------------------------------------------------------------------------------------
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/anaconda3/etc/profile.d/conda.sh" ]; then
+        . "/opt/anaconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/anaconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+#-----------------------------------------------------------------------------------------------------------------------------------
 
