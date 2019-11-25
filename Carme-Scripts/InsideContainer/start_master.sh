@@ -202,6 +202,11 @@ fi
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py &
 #-----------------------------------------------------------------------------------------------------------------------------------
+
+while true
+do
+  continue
+done
 
