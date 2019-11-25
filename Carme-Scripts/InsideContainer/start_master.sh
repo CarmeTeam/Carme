@@ -97,29 +97,7 @@ export CARME_BACKEND_SERVER=${CARME_BACKEND_SERVER}
 export CARME_BACKEND_PORT=${CARME_BACKEND_PORT}    
 export CARME_TENSORBOARD_HOME='${HOME}/tensorboard'
 
-alias carme_mpirun='/opt/anaconda3/bin/mpirun -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
-
-function CARME_TENSORFLOW_VERSION () {
-  TF_VERSION=$(grep "tensorflow-gpu" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
-  echo ${TF_VERSION}
-}
-
-function CARME_PYTORCH_VERSION () {
-  PT_VERSION=$(grep "pytorch" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
-}
-
-function CARME_CUDA_VERSION () {
-  CUDA_VERSION=$(nvcc --version  | grep release | awk '{print $6}')
-  echo ${CUDA_VERSION}
-}
-
-function CARME_CUDNN_VERSION () {
-  CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1)
-		echo ${CUDNN_VERSION}
-}
-
 alias jupyter_url='echo ${JUPYTER_SERVER_URL}'
-alias carme_ssh='ssh -p 2222'
 alias nvidia-smi='nvidia-smi -i ${GPUS}'
 " > ${STOREDIR}/bash_${SLURM_JOB_ID}
 
