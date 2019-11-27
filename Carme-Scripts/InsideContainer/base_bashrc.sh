@@ -11,14 +11,8 @@
 if [[ $- = *i* ]];then
   export PS1='[\[\033[01;35m\]\u\[\033[m\]@\[\033[01;32m\]\h\[\033[m\]:\[\033[01;31;1m\]\W\[\033[m\]]\$ '
 else
-  export PS1='[\u@\h \W]\$ '
+  export PS1='[\u@\h:\W]\$ '
 fi
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# modify terminal language settings ------------------------------------------------------------------------------------------------
-export LANG=en_US.utf8
-export LC_MESSAGES=POSIX
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -35,25 +29,12 @@ HISTFILESIZE=2000
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# enable color support of ls and *grep ---------------------------------------------------------------------------------------------
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-
-
 # add bash completion --------------------------------------------------------------------------------------------------------------
-#if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-#fi
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+elif [ -f /etc/bash_completion ]; then
+  . /etc/bash_completion
+fi
 # ----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -73,9 +54,6 @@ fi
 
 # add terminal welcome message
 [[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
-
-# add CARME-Scripts and CUDA to $PATH
-export PATH=$PATH:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
