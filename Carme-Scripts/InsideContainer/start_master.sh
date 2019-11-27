@@ -77,8 +77,7 @@ echo "
 
 # create ${STOREDIR}/bash_${SLURM_JOB_ID}
 echo "
-###---CARME CONFIG--###
-### do not edit below - will be overritten by Carme
+# CARME specific exports -----------------------------------------------------------------------------------------------------------
 export CARME_VERSION=${CARME_VERSION}
 export CARME_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
 export CARME_NODES=${NODELIST}
@@ -96,9 +95,26 @@ export CARME_IMAGE=${SINGULARITY_CONTAINER}
 export CARME_BACKEND_SERVER=${CARME_BACKEND_SERVER}
 export CARME_BACKEND_PORT=${CARME_BACKEND_PORT}    
 export CARME_TENSORBOARD_HOME='${HOME}/tensorboard'
+export PATH=$PATH:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-alias jupyter_url='echo ${JUPYTER_SERVER_URL}'
+
+# general exports ------------------------------------------------------------------------------------------------------------------
+# modify terminal language settings
+export LANG=en_US.utf8
+export LC_MESSAGES=POSIX
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define aliases -------------------------------------------------------------------------------------------------------------------
 alias nvidia-smi='nvidia-smi -i ${GPUS}'
+alias ls='ls --group-directories-first --color'
+alias la='ls -lahv'
+alias ld='ls -av'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+#-----------------------------------------------------------------------------------------------------------------------------------
 " > ${STOREDIR}/bash_${SLURM_JOB_ID}
 
 
