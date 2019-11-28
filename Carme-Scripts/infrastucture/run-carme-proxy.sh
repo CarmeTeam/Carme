@@ -21,22 +21,23 @@ fi
 IMAGE_NAME="carme-proxy"
 INSTANCE_NAME="CarmeProxy"
 PROXY_LOGS_DIR="/var/log/Carme/Carme-Traefik-Logs"
-PROXY_ROUTES="/opt/Carme-Proxy-Routes"
-CARME_PROXY="/opt/Carme/Carme-Proxy"
+PROXY_ROUTES_DIR="/opt/Carme-Proxy-Routes"
+CARME_PROXY_DIR="/opt/Carme/Carme-Proxy"
 
 if [ -f ${IMAGE_NAME}.simg ];then
   if [[ "$1" == "start" ]];then
     mkdir -p ${PROXY_LOGS_DIR}
-    mkdir -p ${PROXY_ROUTES}/dynamic
-				chmod 777 ${PROXY_ROUTES}/dynamic
-				chown -R www-data:www-data ${PROXY_ROUTES}
+    mkdir -p ${PROXY_ROUTES_DIR}/dynamic
+				chmod 777 ${PROXY_ROUTES_DIR}/dynamic
+				chown -R www-data:www-data ${PROXY_ROUTES_DIR}
 				chown -R www-data:www-data ${PROXY_LOGS_DIR}
-				if [[ ! -f "${PROXY_ROUTES}/static.toml" ]];then
-      ln -s ${CARME_PROXY}/traefik-conf/static.toml ${PROXY_ROUTES}/static.toml
+				if [[ ! -f "${PROXY_ROUTES_DIR}/static.toml" ]];then
+      ln -s ${CARME_PROXY_DIR}/traefik-conf/static.toml ${PROXY_ROUTES_DIR}/static.toml
 				fi
-				singularity instance start -B ${CARME_PROXY}:/opt/Carme/Carme-Proxy -B ${PROXY_LOGS_DIR}:/opt/Carme-Traefik-Logs -B ${PROXY_ROUTES}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
+				singularity instance start -B ${CARME_PROXY_DIR}:/opt/Carme/Carme-Proxy -B ${PROXY_LOGS_DIR}:/opt/Carme-Traefik-Logs -B ${PROXY_ROUTES_DIR}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
   elif [[ "$1" == "stop" ]];then
     singularity instance stop ${INSTANCE_NAME}
+				sleep 10
   else
     echo "argument can only be"
     echo "start == start traefik for ${INSTANCE_NAME}"

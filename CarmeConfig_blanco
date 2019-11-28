@@ -12,7 +12,7 @@
 #---------------------------------------------------------------------
 #Carme develop -> Things that need to be changed between Carme branches
 #---------------------------------------------------------------------
-CARME_VERSION="r0.5.0"                                     #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
+CARME_VERSION="r0.6.0 beta"                                     #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
 #stable release: r0.5.0
 
 CARME_URL=""                 #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
@@ -179,7 +179,7 @@ CARME_NODES_LIST=""                     #EXPORT_TO_CONTAINER
 CARME_BUILDNODE_1=""
 #e.g. build01
 
-CARME_BUILDNODE_1_IP=""
+CARME_BUILDNODE_1_IP=""                 #EXPORT_TO_CONTAINER
 #e.g. 123.456.789.10
 
 CARME_COMPUTENODES_1=""

@@ -19,9 +19,14 @@ if [ -d ${THEIA_BASE_DIR} ]; then
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
+
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
 STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
-/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py --allow-root
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py --allow-root &
 #-----------------------------------------------------------------------------------------------------------------------------------
 
+
+# wait until the job is done -------------------------------------------------------------------------------------------------------
+wait
+#-----------------------------------------------------------------------------------------------------------------------------------
 

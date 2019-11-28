@@ -77,8 +77,7 @@ echo "
 
 # create ${STOREDIR}/bash_${SLURM_JOB_ID}
 echo "
-###---CARME CONFIG--###
-### do not edit below - will be overritten by Carme
+# CARME specific exports -----------------------------------------------------------------------------------------------------------
 export CARME_VERSION=${CARME_VERSION}
 export CARME_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
 export CARME_NODES=${NODELIST}
@@ -96,31 +95,26 @@ export CARME_IMAGE=${SINGULARITY_CONTAINER}
 export CARME_BACKEND_SERVER=${CARME_BACKEND_SERVER}
 export CARME_BACKEND_PORT=${CARME_BACKEND_PORT}    
 export CARME_TENSORBOARD_HOME='${HOME}/tensorboard'
+export PATH=$PATH:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-alias carme_mpirun='/opt/anaconda3/bin/mpirun -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output'
 
-function CARME_TENSORFLOW_VERSION () {
-  TF_VERSION=$(grep "tensorflow-gpu" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
-  echo ${TF_VERSION}
-}
+# general exports ------------------------------------------------------------------------------------------------------------------
+# modify terminal language settings
+export LANG=en_US.utf8
+export LC_MESSAGES=POSIX
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-function CARME_PYTORCH_VERSION () {
-  PT_VERSION=$(grep "pytorch" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
-}
 
-function CARME_CUDA_VERSION () {
-  CUDA_VERSION=$(nvcc --version  | grep release | awk '{print $6}')
-  echo ${CUDA_VERSION}
-}
-
-function CARME_CUDNN_VERSION () {
-  CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1)
-		echo ${CUDNN_VERSION}
-}
-
-alias jupyter_url='echo ${JUPYTER_SERVER_URL}'
-alias carme_ssh='ssh -p 2222'
+# define aliases -------------------------------------------------------------------------------------------------------------------
 alias nvidia-smi='nvidia-smi -i ${GPUS}'
+alias ls='ls --group-directories-first --color'
+alias la='ls -lahv'
+alias ld='ls -av'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+#-----------------------------------------------------------------------------------------------------------------------------------
 " > ${STOREDIR}/bash_${SLURM_JOB_ID}
 
 
@@ -202,6 +196,11 @@ fi
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py &
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# wait until the job is done -------------------------------------------------------------------------------------------------------
+wait
 #-----------------------------------------------------------------------------------------------------------------------------------
 
