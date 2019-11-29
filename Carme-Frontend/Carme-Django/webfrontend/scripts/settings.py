@@ -22,9 +22,9 @@ from django.urls import reverse_lazy
 # Carme config
 #######################               
 
+from importlib.machinery import SourceFileLoader
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-import imp    
-imp.load_source('CarmeConfig', BASE_DIR+'/../../CarmeConfig.frontend')
+SourceFileLoader('CarmeConfig', BASE_DIR+'/../../CarmeConfig.frontend').load_module()
 from CarmeConfig import *
 
 LOAD_CUSTOM_SETTINGS=os.path.isfile(BASE_DIR+'/scripts/custom.py')
