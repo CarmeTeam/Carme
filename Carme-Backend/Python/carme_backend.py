@@ -21,9 +21,14 @@ from ldap3 import *
 import MySQLdb
 import datetime
 
-import imp
-imp.load_source('CarmeConfig', '/opt/Carme/CarmeConfig')
-from CarmeConfig import *
+# import needed variables from CarmeConfig
+from importlib.machinery import SourceFileLoader
+SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig').load_module()
+from CarmeConfig import CARME_MATTERMOST_PATH, CARME_MATTERMOST_COMMAND, CARME_MATTERMOST_WEBHOCK_2
+from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
+from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
+from CarmeConfig import CARME_SCRIPT_PATH
+from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
 
 
 # to be replace by reading Carme Config
@@ -496,8 +501,8 @@ class CarmeBackEndService(rpyc.Service):
         try:
             # define an unsecure LDAP server, requesting info on DSE and schema
             s = Server(CARME_LDAP_SERVER_IP, get_info=ALL)
-            c = Connection(s, user='cn=admin,dc=carme,dc=local',
-                           password=CARME_LDAP_SERVER_PW)
+            LDAP_ADMIN_USER='cn='+str(CARME_LDAP_ADMIN)+',dc='+str(CARME_LDAP_DC1)+',dc='+str(CARME_LDAP_DC2)
+            c = Connection(s, user=LDAP_ADMIN_USER, password=CARME_LDAP_SERVER_PW)
             c.bind()
             c.modify(user, {'userPassword': [(MODIFY_REPLACE, password)]})
             c.unbind()
