@@ -30,8 +30,9 @@ if [ -f ${IMAGE_NAME}.simg ];then
     mkdir -p ${APACHE_LOGS_DIR}
 				singularity instance start -B ${CARME_FRONTEND_DIR}:/opt/Carme/Carme-Frontend -B ${APACHE_LOGS_DIR}:/opt/Carme-Apache-Logs -B ${PROXY_ROUTES_DIR}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
   elif [[ "$1" == "stop" ]];then
+    FRONTEND_PID=$(singularity instance list | grep "${INSTANCE_NAME}\s" | awk '{print $2}')
     singularity instance stop ${INSTANCE_NAME}
-				sleep 10
+				tail --pid=${FRONTEND_PID} -f /dev/null
   else
     echo "argument can only be"
     echo "start == start apache2 for ${INSTANCE_NAME}"

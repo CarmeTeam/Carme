@@ -36,8 +36,9 @@ if [ -f ${IMAGE_NAME}.simg ];then
 				fi
 				singularity instance start -B ${CARME_PROXY_DIR}:/opt/Carme/Carme-Proxy -B ${PROXY_LOGS_DIR}:/opt/Carme-Traefik-Logs -B ${PROXY_ROUTES_DIR}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
   elif [[ "$1" == "stop" ]];then
+    PROXY_PID=$(singularity instance list | grep "${INSTANCE_NAME}\s" | awk '{print $2}')
     singularity instance stop ${INSTANCE_NAME}
-				sleep 10
+				tail --pid=${PROXY_PID} -f /dev/null
   else
     echo "argument can only be"
     echo "start == start traefik for ${INSTANCE_NAME}"
