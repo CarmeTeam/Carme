@@ -52,7 +52,7 @@ CARME_BUILDNODE_1_IP=$(get_variable CARME_BUILDNODE_1_IP ${CONFIG_FILE})
 echo "Carme Verison: ${CARME_VERSION}"
 echo ""
 
-NODELIST=$(scontrol show hostname ${SLURM_JOB_NODELIST})
+NODELIST=$(scontrol show hostname ${SLURM_JOB_NODELIST} | paste -d, -s)
 echo "NODELIST: ${NODELIST}"
 echo ""
 
