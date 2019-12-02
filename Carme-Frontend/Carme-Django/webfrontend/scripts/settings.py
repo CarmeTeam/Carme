@@ -30,7 +30,7 @@ from CarmeConfigFrontend import *
 LOAD_CUSTOM_SETTINGS=os.path.isfile(BASE_DIR+'/scripts/custom.py')
 
 if LOAD_CUSTOM_SETTINGS:
-    imp.load_source('custom', BASE_DIR+'/scripts/custom.py')
+    SourceFileLoader('custom', BASE_DIR+'/scripts/custom.py').load_module()
     from custom import custom_settings
 
 #NOTE: use unified name some time
