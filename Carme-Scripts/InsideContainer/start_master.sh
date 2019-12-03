@@ -95,7 +95,7 @@ export CARME_IMAGE=${SINGULARITY_CONTAINER}
 export CARME_BACKEND_SERVER=${CARME_BACKEND_SERVER}
 export CARME_BACKEND_PORT=${CARME_BACKEND_PORT}    
 export CARME_TENSORBOARD_HOME='${HOME}/tensorboard'
-export PATH=$PATH:/home/.CarmeScripts/bash/:/opt/cuda/cuda_9/bin/
+export PATH=\${PATH}:/home/.CarmeScripts/bash/
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
