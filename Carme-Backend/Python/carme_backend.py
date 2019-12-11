@@ -27,8 +27,9 @@ SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig').load_module()
 from CarmeConfig import CARME_MATTERMOST_PATH, CARME_MATTERMOST_COMMAND, CARME_MATTERMOST_WEBHOCK_2
 from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
 from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
-from CarmeConfig import CARME_SCRIPT_PATH
+from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH
 from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
+from CarmeConfig import CARME_FRONTEND_ID, CARME_URL
 
 
 # to be replace by reading Carme Config
@@ -431,6 +432,94 @@ class CarmeBackEndService(rpyc.Service):
         
         if CARME_BACKEND_DEBUG:
             print("Job prolog: ", str(jobID))
+
+        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                passwd=CARME_DB_PW,  db=CARME_DB_DB)
+
+        cur = db.cursor()
+
+        # set job status to running
+        sql = 'UPDATE `carme-base_slurmjobs` SET status = "running" WHERE SLURM_ID = %s AND user = %s AND frontend = %s;'
+        
+        try:
+            cur.execute(sql, (jobID, jobUser, CARME_FRONTEND_ID, ))
+            db.commit()
+        except:
+            db.rollback()
+            db.close()
+            return "Error: SQL FAIL!"
+
+        # select actual job info
+        sql = 'SELECT SLURM_ID, user, jobName, status, HASH, IP, NB_PORT, TB_PORT FROM `carme-base_slurmjobs` WHERE SLURM_ID = %s AND user = %s AND frontend = %s;'
+        job = None
+
+        try:
+            cur.execute(sql, (jobID, jobUser, CARME_FRONTEND_ID, ))
+            job = dict(zip(cur.column_names, cur.fetchone()))
+            db.close()
+        except:
+            db.close()
+            return "Error: SQL FAIL!"
+
+        # dirty theia port hack
+        TA_PORT = job['TB_PORT'] + 10
+
+        remotefile = str(CARME_PROXY_PATH) + \
+            '/routes/dynamic/' + str(CARME_FRONTEND_ID) + "-" + str(SLURM_ID) + ".toml"
+
+        route = '''
+        [frontends.nb_'''+str(job['HASH'])+''']
+        backend = "nb_'''+str(job['HASH'])+'''"
+        passHostHeader = true
+        [frontends.nb_'''+str(job['HASH'])+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/nb_'''+str(job['HASH'])+'''"
+
+        [backends.nb_'''+str(job['HASH'])+''']
+        [backends.nb_'''+str(job['HASH'])+'''.servers.server1]
+        url = "http://'''+str(job['IP'])+''':'''+str(job['NB_PORT'])+'''"
+
+        [frontends.tb_'''+str(job['HASH'])+''']
+        backend = "tb_'''+str(job['HASH'])+'''"
+        entrypoints = ["https"]
+        [frontends.tb_'''+str(job['HASH'])+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/tb_'''+str(job['HASH'])+'''"
+
+        [backends.tb_'''+str(job['HASH'])+''']
+        [backends.tb_'''+str(job['HASH'])+'''.servers.server1]
+        url = "http://'''+str(job['IP'])+''':'''+str(job['TB_PORT'])+'''"
+
+        [frontends.dd_'''+str(job['HASH'])+''']
+        backend = "dd_'''+str(job['HASH'])+'''"
+        entrypoints = ["https"]
+        [frontends.dd_'''+str(job['HASH'])+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/dd_'''+str(job['HASH'])+'''"
+        
+        [backends.dd_'''+str(job['HASH'])+''']
+        [backends.dd_'''+str(job['HASH'])+'''.servers.server1]
+        url = "http://'''+str(job['IP'])+''':8787"   
+
+        [frontends.ta_'''+str(job['HASH'])+'''] 
+        backend = "ta_'''+str(job['HASH'])+'''"
+        entrypoints = ["https"]
+        [frontends.ta_'''+str(job['HASH'])+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefixStrip:/ta_'''+str(job['HASH'])+'''"
+        
+        [backends.ta_'''+str(job['HASH'])+''']
+        [backends.ta_'''+str(job['HASH'])+'''.servers.server1] 
+        url = "http://'''+str(job['IP'])+''':'''+str(TA_PORT)+'''"
+        '''
+        
+        # escape double quotes for ssh
+        route = route.replace('"', '\\"')
+
+        com = 'ssh persephone \'echo "' + route + '" > ' + remotefile + '\''
+        
+        ret = os.system(com)
+
+        if ret != 0:
+            message = "FRONTEND: Error creating route for job " + \
+                str(jobID) + " for user " + str(jobUser)
+            db_logger.exception(message)
 
         return 0
 
