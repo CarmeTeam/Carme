@@ -421,7 +421,7 @@ class CarmeBackEndService(rpyc.Service):
         Tells the backend, that a job is starting
 
         # Arguments
-            jobName: name string of the job
+            jobID: id of the job
             jobUser: username of job owner 
         """
 
@@ -430,7 +430,7 @@ class CarmeBackEndService(rpyc.Service):
             return "Auth Failed"
         
         if CARME_BACKEND_DEBUG:
-            print("Job prolog: ", str(jobName))
+            print("Job prolog: ", str(jobID))
 
         return 0
 
@@ -439,7 +439,7 @@ class CarmeBackEndService(rpyc.Service):
         Tells the backend, that a job was terminated
 
         # Arguments
-            jobName: name string of the job
+            jobID: id of the job
             jobUser: username of job owner 
         """
 
@@ -448,7 +448,7 @@ class CarmeBackEndService(rpyc.Service):
             return "Auth Failed"
         
         if CARME_BACKEND_DEBUG:
-            print("Job epilog: ", str(jobName))
+            print("Job epilog: ", str(jobID))
 
         com = 'ssh persephone "rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(jobID)+'.toml; echo "empty" > '+str(
                     settings.CARME_PROXY_PATH)+'/routes/dummy.toml"'
@@ -457,7 +457,7 @@ class CarmeBackEndService(rpyc.Service):
 
         if ret != 0:
             message = "FRONTEND: Error deleting route for job " + \
-                str(jobName) + " for user " + str(jobUser)
+                str(jobID) + " for user " + str(jobUser)
             db_logger.exception(message)
 
         # remove job from db
@@ -465,7 +465,7 @@ class CarmeBackEndService(rpyc.Service):
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)  
 
         cur = db.cursor()
-        sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+        sql='delete from `carme-base_slurmjobs` where SLURM_ID="'+str(jobID)+'";'
 
         try: 
             deleted = cur.execute(sql)
@@ -479,7 +479,7 @@ class CarmeBackEndService(rpyc.Service):
             db.rollback() 
             cur.close()
             db.close()
-            setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
+            setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
             return "Error: SQL FAIL!" 
         return ret
 
