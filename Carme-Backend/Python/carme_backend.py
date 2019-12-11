@@ -29,7 +29,7 @@ from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
 from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
 from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH
 from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
-from CarmeConfig import CARME_FRONTEND_ID, CARME_URL
+from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME
 
 
 # to be replace by reading Carme Config
@@ -430,8 +430,8 @@ class CarmeBackEndService(rpyc.Service):
             setCarmeLog("BACKEND: AUTH FAILED", 40)
             return "Auth Failed"
         
-        if CARME_BACKEND_DEBUG:
-            print("Job prolog: ", str(jobID))
+        #if CARME_BACKEND_DEBUG:
+        print("Job prolog: ", str(jobID))
 
         db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)
@@ -511,7 +511,7 @@ class CarmeBackEndService(rpyc.Service):
         # escape double quotes for ssh
         route = route.replace('"', '\\"')
 
-        com = 'ssh persephone \'echo "' + route + '" > ' + remotefile + '\''
+        com = 'ssh root@' + CARME_LOGINNODE_NAME + ' \'echo "' + route + '" > ' + remotefile + '\''
         
         ret = os.system(com)
 
@@ -538,7 +538,7 @@ class CarmeBackEndService(rpyc.Service):
         if CARME_BACKEND_DEBUG:
             print("Job epilog: ", str(jobID))
 
-        com = 'ssh persephone "rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
+        com = 'ssh ' + CARME_LOGINNODE_NAME + '"rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
         
         ret = os.system(com)
 
