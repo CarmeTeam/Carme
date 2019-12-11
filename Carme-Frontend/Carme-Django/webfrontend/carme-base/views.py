@@ -170,7 +170,7 @@ def job_table(request):
 
     current_user = request.user.username
     # search for ready slurm jobs
-    """slurm_ready = SlurmJobs.objects.filter(status__exact="ready", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
+    slurm_ready = SlurmJobs.objects.filter(status__exact="ready", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
     for job in slurm_ready:
         job.status = "configuring"  # set status to avoid deadlock loop on faield jobs
         job.save()
@@ -255,7 +255,7 @@ def job_table(request):
                 message = 'FRONTEND ERROR: Sarting job ' + \
                     str(job.SLURM_ID)+'('+str(settings.CARME_FRONTEND_ID)+') failed !'
                 db_logger.exception(message)
-                raise Exception("ERROR trafik job update")"""
+                raise Exception("ERROR trafik job update")
     
     #check for timeout 
     slurm_running = SlurmJobs.objects.filter(status__exact="running", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
