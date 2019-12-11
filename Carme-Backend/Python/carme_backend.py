@@ -464,8 +464,7 @@ class CarmeBackEndService(rpyc.Service):
         # dirty theia port hack
         TA_PORT = job['TB_PORT'] + 10
 
-        remotefile = str(CARME_PROXY_PATH) + \
-            '/routes/dynamic/' + str(CARME_FRONTEND_ID) + "-" + str(SLURM_ID) + ".toml"
+        remotefile = '/opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + "-" + str(SLURM_ID) + ".toml"
 
         route = '''
         [frontends.nb_'''+str(job['HASH'])+''']
@@ -539,8 +538,7 @@ class CarmeBackEndService(rpyc.Service):
         if CARME_BACKEND_DEBUG:
             print("Job epilog: ", str(jobID))
 
-        com = 'ssh persephone "rm '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(jobID)+'.toml; echo "empty" > '+str(
-                    settings.CARME_PROXY_PATH)+'/routes/dummy.toml"'
+        com = 'ssh persephone "rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
         
         ret = os.system(com)
 
