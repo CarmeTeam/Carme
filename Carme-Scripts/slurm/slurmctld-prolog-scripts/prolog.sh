@@ -17,9 +17,13 @@ function get_variable () {
 CONFIG_FILE="/opt/Carme/CarmeConfig"
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT ${CONFIG_FILE})
+CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH ${CONFIG_FILE})
 # ----------------------------------------------------------------------------------------------------------------------------------
 
 
 # call notify_job_prolog -----------------------------------------------------------------------------------------------------------
-python notify_job_prolog.py SLURM_JOB_ID SLURM_JOB_USER CARME_BACKEND_SERVER CARME_BACKEND_PORT
+python3 ${CARME_SCRIPTS_PATH}/backend/notify_job_prolog.py SLURM_JOB_ID SLURM_JOB_USER CARME_BACKEND_SERVER CARME_BACKEND_PORT
 # ----------------------------------------------------------------------------------------------------------------------------------
+
+exit 0
+
