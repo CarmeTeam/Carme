@@ -416,7 +416,7 @@ class CarmeBackEndService(rpyc.Service):
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
     
-    def exposed_JobProlog(self, jobName, jobUser):
+    def exposed_JobProlog(self, jobID, jobUser):
         """
         Tells the backend, that a job is starting
 
@@ -434,7 +434,7 @@ class CarmeBackEndService(rpyc.Service):
 
         return 0
 
-    def exposed_JobEpilog(self, jobName, jobUser):
+    def exposed_JobEpilog(self, jobID, jobUser):
         """
         Tells the backend, that a job was terminated
 
