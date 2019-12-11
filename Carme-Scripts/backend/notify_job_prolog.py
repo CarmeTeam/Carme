@@ -19,4 +19,4 @@ keyfile = "/home/" + SLURM_JOB_USER + "/.carme/" + SLURM_JOB_USER + ".key"
 certfile = "/home/" + SLURM_JOB_USER + "/.carme/" + SLURM_JOB_USER + ".crt"
 
 conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile, certfile=certfile)
-res = conn.root.exposed_JobProlog(SLURM_JOB_ID)
+res = conn.root.exposed_JobProlog(SLURM_JOB_ID, SLURM_JOB_USER)
