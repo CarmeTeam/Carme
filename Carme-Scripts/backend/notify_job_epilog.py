@@ -7,10 +7,8 @@
 # Copyright (C) 2019 by Philipp Reusch (ITWM)
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-import imp
 import sys
 import rpyc
-import os
 
 SLURM_JOB_ID = sys.argv[1]
 SLURM_JOB_USER = sys.argv[2]
