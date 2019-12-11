@@ -429,7 +429,7 @@ class CarmeBackEndService(rpyc.Service):
         #if CARME_BACKEND_DEBUG:
         print("Job prolog: ", str(jobID))
 
-        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+        """db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)
 
         cur = db.cursor()
@@ -519,7 +519,7 @@ class CarmeBackEndService(rpyc.Service):
         if ret != 0:
             message = "FRONTEND: Error creating route for job " + \
                 str(jobID) + " for user " + str(jobUser)
-            db_logger.exception(message)
+            db_logger.exception(message)"""
 
         return 0
 
