@@ -1,24 +1,24 @@
 #!/usr/bin/python
+
 #-----------------------------------------------------------------------------------------------------------------------------------
-# notifies to the head node that the job has finished execution
+# notifies to the head node that the job has started execution
 #
-# usage: python notify_job_finished.py SLURM_JOBID CARME_BACKEND_SERVER CARME_BACKEND_PORT
-# Copyright (C) 2018 by Janis Keuper (ITWM)
+# usage: python notify_job_prolog.py SLURM_JOB_ID SLURM_JOB_USER CARME_BACKEND_SERVER CARME_BACKEND_PORT
+# Copyright (C) 2019 by Philipp Reusch (ITWM)
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 import imp
-import sys    
-import rpyc  
-import os  
-                                                                                                                                                                                                        
-SLURM_JOBID=sys.argv[1]  
-CARME_BACKEND_SERVER=sys.argv[2]
-CARME_BACKEND_PORT=sys.argv[3]  
+import sys
+import rpyc
+import os
 
-# TODO: DONT do this as a user! 
-USER=os.environ['USER']
-keyfile="/home/"+USER+"/.carme/"+USER+".key"
-certfile="/home/"+USER+"/.carme/"+USER+".crt"   
+SLURM_JOB_ID = sys.argv[1]
+SLURM_JOB_USER = sys.argv[2]
+CARME_BACKEND_SERVER = sys.argv[3]
+CARME_BACKEND_PORT = sys.argv[4]
 
-conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile,certfile=certfile) 
-res=conn.root.exposed_JobProlog(SLURM_JOBID)         
+keyfile = "/home/" + SLURM_JOB_USER + "/.carme/" + SLURM_JOB_USER + ".key"
+certfile = "/home/" + SLURM_JOB_USER + "/.carme/" + SLURM_JOB_USER + ".crt"
+
+conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile, certfile=certfile)
+res = conn.root.exposed_JobProlog(SLURM_JOB_ID)
