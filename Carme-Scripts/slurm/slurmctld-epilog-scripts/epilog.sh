@@ -4,6 +4,8 @@
 # notify carme about the job epilog
 #
 
+export PATH=${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # define function to get variables from CarmeConfig --------------------------------------------------------------------------------
 function get_variable () {
   variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
@@ -14,7 +16,7 @@ function get_variable () {
 }
 
 # source needed variables
-CONFIG_FILE="/opt/Carme/CarmeConfig"
+CONFIG_FILE="/opt/Carme/CarmeConfig.backend"
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT ${CONFIG_FILE})
 CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH ${CONFIG_FILE})
@@ -26,4 +28,3 @@ python3 ${CARME_SCRIPTS_PATH}/backend/notify_job_epilog.py ${SLURM_JOB_ID} ${SLU
 # ----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0
-
