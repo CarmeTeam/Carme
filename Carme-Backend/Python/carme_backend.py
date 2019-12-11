@@ -425,10 +425,6 @@ class CarmeBackEndService(rpyc.Service):
             jobID: id of the job
             jobUser: username of job owner 
         """
-
-        if self.user != "frontend": # TODO replace with compute node user
-            setCarmeLog("BACKEND: AUTH FAILED", 40)
-            return "Auth Failed"
         
         #if CARME_BACKEND_DEBUG:
         print("Job prolog: ", str(jobID))
@@ -439,73 +435,78 @@ class CarmeBackEndService(rpyc.Service):
         cur = db.cursor()
 
         # set job status to running
-        sql = 'UPDATE `carme-base_slurmjobs` SET status = "running" WHERE SLURM_ID = %s AND user = %s AND frontend = %s;'
+        sql = 'UPDATE `carme-base_slurmjobs` SET status = "running" WHERE SLURM_ID = "' + jobID + '" AND user = "' + jobUser + '" AND frontend = "' + CARME_FRONTEND_ID + '";'
         
         try:
-            cur.execute(sql, (jobID, jobUser, CARME_FRONTEND_ID, ))
+            cur.execute(sql)
             db.commit()
         except:
             db.rollback()
             db.close()
-            return "Error: SQL FAIL!"
+            return "Error: SQL FAIL! " + sql
 
         # select actual job info
-        sql = 'SELECT SLURM_ID, user, jobName, status, HASH, IP, NB_PORT, TB_PORT FROM `carme-base_slurmjobs` WHERE SLURM_ID = %s AND user = %s AND frontend = %s;'
+        sql = 'SELECT HASH, IP, NB_PORT, TB_PORT FROM `carme-base_slurmjobs` WHERE SLURM_ID = "' + jobID + '" AND user = "' + jobUser + '" AND frontend = "' + CARME_FRONTEND_ID + '";' 
         job = None
 
         try:
-            cur.execute(sql, (jobID, jobUser, CARME_FRONTEND_ID, ))
-            job = dict(zip(cur.column_names, cur.fetchone()))
+            cur.execute(sql)
+            job = cur.fetchone()
             db.close()
         except:
             db.close()
-            return "Error: SQL FAIL!"
+            return "Error: SQL FAIL! " + sql
+
+        HASH = job[0]
+        IP = job[1]
+        NB_PORT = job[2]
+        TB_PORT = job[3]
 
         # dirty theia port hack
-        TA_PORT = job['TB_PORT'] + 10
+        TA_PORT = TB_PORT + 10
 
-        remotefile = '/opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + "-" + str(SLURM_ID) + ".toml"
+        remotefile = '/opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + "-" + str(jobID) + ".toml"
 
         route = '''
-        [frontends.nb_'''+str(job['HASH'])+''']
-        backend = "nb_'''+str(job['HASH'])+'''"
+        [frontends.nb_'''+str(HASH)+''']
+        backend = "nb_'''+str(HASH)+'''"
         passHostHeader = true
-        [frontends.nb_'''+str(job['HASH'])+'''.routes.route_1]
-        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/nb_'''+str(job['HASH'])+'''"
+        [frontends.nb_'''+str(HASH)+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/nb_'''+str(HASH)+'''"
 
-        [backends.nb_'''+str(job['HASH'])+''']
-        [backends.nb_'''+str(job['HASH'])+'''.servers.server1]
-        url = "http://'''+str(job['IP'])+''':'''+str(job['NB_PORT'])+'''"
+        [backends.nb_'''+str(HASH)+''']
+        [backends.nb_'''+str(HASH)+'''.servers.server1]
+        url = "http://'''+str(IP)+''':'''+str(NB_PORT)+'''"
 
-        [frontends.tb_'''+str(job['HASH'])+''']
-        backend = "tb_'''+str(job['HASH'])+'''"
+        [frontends.tb_'''+str(HASH)+''']
+        backend = "tb_'''+str(HASH)+'''"
         entrypoints = ["https"]
-        [frontends.tb_'''+str(job['HASH'])+'''.routes.route_1]
-        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/tb_'''+str(job['HASH'])+'''"
+        [frontends.tb_'''+str(HASH)+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/tb_'''+str(HASH)+'''"
 
-        [backends.tb_'''+str(job['HASH'])+''']
-        [backends.tb_'''+str(job['HASH'])+'''.servers.server1]
-        url = "http://'''+str(job['IP'])+''':'''+str(job['TB_PORT'])+'''"
+        [backends.tb_'''+str(HASH)+''']
+        [backends.tb_'''+str(HASH)+'''.servers.server1]
+        url = "http://'''+str(IP)+''':'''+str(TB_PORT)+'''"
 
-        [frontends.dd_'''+str(job['HASH'])+''']
-        backend = "dd_'''+str(job['HASH'])+'''"
+        [frontends.dd_'''+str(HASH)+''']
+        backend = "dd_'''+str(HASH)+'''"
         entrypoints = ["https"]
-        [frontends.dd_'''+str(job['HASH'])+'''.routes.route_1]
-        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/dd_'''+str(job['HASH'])+'''"
+        [frontends.dd_'''+str(HASH)+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefix:/dd_'''+str(HASH)+'''"
         
-        [backends.dd_'''+str(job['HASH'])+''']
-        [backends.dd_'''+str(job['HASH'])+'''.servers.server1]
-        url = "http://'''+str(job['IP'])+''':8787"   
+        [backends.dd_'''+str(HASH)+''']
+        [backends.dd_'''+str(HASH)+'''.servers.server1]
+        url = "http://'''+str(IP)+''':8787"   
 
-        [frontends.ta_'''+str(job['HASH'])+'''] 
-        backend = "ta_'''+str(job['HASH'])+'''"
+        [frontends.ta_'''+str(HASH)+'''] 
+        backend = "ta_'''+str(HASH)+'''"
         entrypoints = ["https"]
-        [frontends.ta_'''+str(job['HASH'])+'''.routes.route_1]
-        rule = "Host:'''+str(CARME_URL)+''';PathPrefixStrip:/ta_'''+str(job['HASH'])+'''"
+        [frontends.ta_'''+str(HASH)+'''.routes.route_1]
+        rule = "Host:'''+str(CARME_URL)+''';PathPrefixStrip:/ta_'''+str(HASH)+'''"
         
-        [backends.ta_'''+str(job['HASH'])+''']
-        [backends.ta_'''+str(job['HASH'])+'''.servers.server1] 
-        url = "http://'''+str(job['IP'])+''':'''+str(TA_PORT)+'''"
+        [backends.ta_'''+str(HASH)+''']
+        [backends.ta_'''+str(HASH)+'''.servers.server1] 
+        url = "http://'''+str(IP)+''':'''+str(TA_PORT)+'''"
         '''
         
         # escape double quotes for ssh
@@ -531,10 +532,6 @@ class CarmeBackEndService(rpyc.Service):
             jobUser: username of job owner 
         """
 
-        if self.user != "frontend": # TODO replace with compute node user
-            setCarmeLog("BACKEND: AUTH FAILED", 40)
-            return "Auth Failed"
-        
         if CARME_BACKEND_DEBUG:
             print("Job epilog: ", str(jobID))
 

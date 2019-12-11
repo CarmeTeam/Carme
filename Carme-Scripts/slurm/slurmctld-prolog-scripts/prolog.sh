@@ -4,6 +4,9 @@
 # notify carme about the job prolog
 #
 
+export PATH=${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+logger $PATH
+
 # define function to get variables from CarmeConfig --------------------------------------------------------------------------------
 function get_variable () {
   variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
@@ -14,15 +17,16 @@ function get_variable () {
 }
 
 # source needed variables
-CONFIG_FILE="/opt/Carme/CarmeConfig"
+CONFIG_FILE="/opt/Carme/CarmeConfig.backend"
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT ${CONFIG_FILE})
 CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH ${CONFIG_FILE})
 # ----------------------------------------------------------------------------------------------------------------------------------
 
+logger ${CARME_SCRIPTS_PATH} ${SLURM_JOB_ID} ${SLURM_JOB_USER} ${CARME_BACKEND_SERVER} ${CARME_BACKEND_PORT}
 
 # call notify_job_prolog -----------------------------------------------------------------------------------------------------------
-python3 ${CARME_SCRIPTS_PATH}/backend/notify_job_prolog.py SLURM_JOB_ID SLURM_JOB_USER CARME_BACKEND_SERVER CARME_BACKEND_PORT
+/usr/bin/python3 ${CARME_SCRIPTS_PATH}/backend/notify_job_prolog.py ${SLURM_JOB_ID} ${SLURM_JOB_USER} ${CARME_BACKEND_SERVER} ${CARME_BACKEND_PORT} > /tmp/notify.out
 # ----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0

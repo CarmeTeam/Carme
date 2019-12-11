@@ -22,7 +22,7 @@ CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH ${CONFIG_FILE})
 
 
 # call notify_job_epilog -----------------------------------------------------------------------------------------------------------
-python3 ${CARME_SCRIPTS_PATH}/backend/notify_job_epilog.py SLURM_JOB_ID SLURM_JOB_USER CARME_BACKEND_SERVER CARME_BACKEND_PORT
+python3 ${CARME_SCRIPTS_PATH}/backend/notify_job_epilog.py ${SLURM_JOB_ID} ${SLURM_JOB_USER} ${CARME_BACKEND_SERVER} ${CARME_BACKEND_PORT}
 # ----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0
