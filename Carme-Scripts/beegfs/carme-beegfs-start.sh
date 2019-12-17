@@ -40,6 +40,7 @@ fi
 CARME_BEEGFS_MGMTNODE_IP=$(get_variable CARME_BEEGFS_MGMTNODE_IP $CLUSTER_DIR/${CONFIG_FILE})
 CARME_BEEGFS_METANODES=$(get_variable CARME_BEEGFS_METANODES $CLUSTER_DIR/${CONFIG_FILE})
 CARME_NODES_LIST=$(get_variable CARME_NODES_LIST $CLUSTER_DIR/${CONFIG_FILE})
+CARME_BEEGFS_STORAGENODES=$(get_variable CARME_BEEGFS_STORAGENODES $CLUSTER_DIR/${CONFIG_FILE})
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 THIS_NODE_IPS=( $(hostname -I) )
@@ -84,7 +85,7 @@ if [ "$RESP" = "y" ]; then
     #printf "${SETCOLOR}$(hostname)${NOCOLOR}\n"
     #systemctl start beegfs-storage && systemctl --no-pager -l status beegfs-storage
 
-    for HOSTS in $CARME_NODES_LIST; do
+    for HOSTS in ${CARME_BEEGFS_STORAGENODES}; do
         printf "\n${SETCOLOR}--------------------${NOCOLOR}\n" 
         printf "${SETCOLOR}${HOSTS}${NOCOLOR}\n"
         ssh root@${HOSTS} -X -t "systemctl start beegfs-storage && systemctl --no-pager -l status beegfs-storage"
