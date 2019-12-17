@@ -535,7 +535,7 @@ class CarmeBackEndService(rpyc.Service):
         if CARME_BACKEND_DEBUG:
             print("Job epilog: ", str(jobID))
 
-        com = 'ssh ' + CARME_LOGINNODE_NAME + '"rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
+        com = 'ssh ' + CARME_LOGINNODE_NAME + ' "rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
         
         ret = os.system(com)
 
