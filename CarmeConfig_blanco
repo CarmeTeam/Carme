@@ -12,17 +12,17 @@
 #---------------------------------------------------------------------
 #Carme develop -> Things that need to be changed between Carme branches
 #---------------------------------------------------------------------
-CARME_VERSION="r0.6.0 beta"                                     #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
+CARME_VERSION="r0.6.0 beta"
 #stable release: r0.5.0
 
-CARME_URL=""                 #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
+CARME_URL=""
 #e.g. my-carme-cluster.institute.com
 
-CARME_TIMEZONE=""                             #EXPORT_TO_FRONTEND
+CARME_TIMEZONE=""
 #e.g. Europe/Berlin
 
 #scripts 
-CARME_SCRIPT_PATH="/opt/Carme/Carme-Scripts/frontend/"     #EXPORT_TO_FRONTEND
+CARME_SCRIPT_PATH="/opt/Carme/Carme-Scripts/frontend/"
 #default: /opt/Carme/Carme-Scripts/frontend/
 
 #Backend
@@ -32,7 +32,7 @@ CARME_BACKEND_DEBUG=
 CARME_BACKEND_PATH="/opt/Carme/Carme-Backend/"
 #default: /opt/Carme/Carme-Backend/
 
-CARME_BACKEND_SERVER=""                               #EXPORT_TO_FRONTEND #EXPORT_TO_CONTAINER
+CARME_BACKEND_SERVER=""
 #e.g. headnode
 
 CARME_BACKEND_PORT=
@@ -61,12 +61,12 @@ CARME_SSL_EMAIL_BASE=""
 #e.g. @my-carme-cluster.institute.com
 
 #proxy
-CARME_PROXY_PATH=''                           #EXPORT_TO_FRONTEND
+CARME_PROXY_PATH=''
 #e.g. '/opt/Carme/Carme-Proxy/'
 
 #mounts
 #WARNING: set scripts mout correct
-CARME_BASE_MOUNTS=''            #EXPORT_TO_FRONTEND
+CARME_BASE_MOUNTS=''
 #e.g.
 
 #################
@@ -86,13 +86,13 @@ CARME_FRONTEND_KEY=''
 #needs to be secret and different for each install
 
 #Admin pannel
-CARME_ADMIN_HEADER=""                                #EXPORT_TO_FRONTEND
+CARME_ADMIN_HEADER=""
 #e.g.
 
-CARME_ADMIN_SITE_NAME=""                      #EXPORT_TO_FRONTEND
+CARME_ADMIN_SITE_NAME=""
 #e.g.
 
-CARME_ADMIN_SITE_INDEX=""      #EXPORT_TO_FRONTEND
+CARME_ADMIN_SITE_INDEX=""
 #e.g.
 
 
@@ -121,7 +121,7 @@ CARME_FRONTEND_LINK_PRIVACY=""
 CARME_FRONTEND_LINK_ORGA_URL=""
 #link to your university|department|institute|company
 
-CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR=""       #EXPORT_TO_FRONTEND
+CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR=""
 #e.g.
 
 
@@ -142,10 +142,10 @@ CARME_FRONTEND_TITLE=""
 #e.g.
 
 #sandbox
-CARME_SANDBOX_MOUNT=""       #EXPORT_TO_FRONTEND
+CARME_SANDBOX_MOUNT=""
 #e.g.
 
-CARME_SANDBOX_PARTITION=""                                          #EXPORT_TO_FRONTEND
+CARME_SANDBOX_PARTITION=""
 # Note that this is a partition|queue that has to be defined in you batchsystem (e.g. SLURM). If you define in
 # CARME_SLURM_ACCOUNT_SPECS_x (see section SLURM) partitions a user is allowed to use and there is a specific
 # group of users that are allowed to create a singularity image you have to add the name of the partition
@@ -154,10 +154,10 @@ CARME_SANDBOX_PARTITION=""                                          #EXPORT_TO_F
 
 
 #Carme Infrastructure --------------------------------------------------------------------------------------------------------------
-CARME_HEADNODE_IP=""                               #EXPORT_TO_FRONTEND
+CARME_HEADNODE_IP=""
 #e.g. 123.456.789.1
 
-CARME_HEADNODE_NAME=""                                     #EXPORT_TO_FRONTEND
+CARME_HEADNODE_NAME=""
 #e.g. headnode
 
 CARME_HEADNODEBACKUP_IP=""
@@ -166,20 +166,20 @@ CARME_HEADNODEBACKUP_IP=""
 CARME_HEADNODEBACKUP_NAME=""
 #e.g. headnode2 [if not needed leave empty]
 
-CARME_LOGINNODE_IP=""                              #EXPORT_TO_FRONTEND
+CARME_LOGINNODE_IP=""
 #e.g. 123.456.789.3
 
-CARME_LOGINNODE_NAME=""                               #EXPORT_TO_FRONTEND
+CARME_LOGINNODE_NAME=""
 #e.g. login
 
-CARME_NODES_LIST=""                     #EXPORT_TO_CONTAINER
+CARME_NODES_LIST=""
 #e.g. node01 node02 node03 ... [this contains ALL compute AND build nodes]
 
 # note: if different nodes are used change /opt/Carme/Carme-Scripts/carme-slurm-node-weight-shuffle.sh
 CARME_BUILDNODE_1=""
 #e.g. build01
 
-CARME_BUILDNODE_1_IP=""                 #EXPORT_TO_CONTAINER
+CARME_BUILDNODE_1_IP=""
 #e.g. 123.456.789.10
 
 CARME_COMPUTENODES_1=""
@@ -207,10 +207,10 @@ CARME_HARDWARE_NUM_GPUS=
 #e.g. 100 [this is the total number of GPUs in the Cluster]
 #has to be an integer number! (note: do not use double quotes)
 
-CARME_GPU_TYPE=""                              #EXPORT_TO_FRONTEND
+CARME_GPU_TYPE=""
 # comma separated list of GPU types. Names have to be the same as defined in SLURM!
 
-CARME_GPU_DEFAULTS=""          #EXPORT_TO_CONTAINER
+CARME_GPU_DEFAULTS=""
 # defines the by default allocated CPUs and MEM (in GB) according the GPU types
 # it has to have the following form and be written in quotes:
 # default:CPUs:MEM volta:CPUs:MEM titan:CPUs:MEM
@@ -230,7 +230,7 @@ CARME_IPMAX=""
 CARME_SUBNET_MASK=""
 #e.g. 255.255.255.0
 
-CARME_GATEWAY=""                         #EXPORT_TO_CONTAINER
+CARME_GATEWAY=""
 #e.g. 123.456.789.3
 
 CARME_NTP_SERVER_NAME=""
@@ -382,89 +382,89 @@ CARME_WEB_PATH="/opt/Carme/Carme-Frontend"
 
 
 #Database Backend ------------------------------------------------------------------------------------------------------------------
-CARME_DB_PORT=""                                            #EXPORT_TO_FRONTEND
+CARME_DB_PORT=""
 #e.g. mysql-default-port
  
-CARME_DB_NODE=""                                           #EXPORT_TO_FRONTEND
+CARME_DB_NODE=""
 #e.g. headnode
 
-CARME_DB_USER=""                                          #EXPORT_TO_FRONTEND
+CARME_DB_USER=""
 #e.g. backend-user
 
-CARME_DB_PW=""                                         #EXPORT_TO_FRONTEND
+CARME_DB_PW=""
 #e.g.
 
-CARME_DB_DB=""                                       #EXPORT_TO_FRONTEND
+CARME_DB_DB=""
 #e.g. data base name
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #LDAP ------------------------------------------------------------------------------------------------------------------------------
-CARME_LDAP_DC1=""                                          #EXPORT_TO_FRONTEND
+CARME_LDAP_DC1=""
 #e.g. my-server
 
-CARME_LDAP_DC2=""                                          #EXPORT_TO_FRONTEND
+CARME_LDAP_DC2=""
 #e.g. local
 
-CARME_LDAP_URI=""                          #EXPORT_TO_FRONTEND
+CARME_LDAP_URI=""
 #e.g. ldap:///123.456.789.1
 
-CARME_LDAP_ADMIN=""                                        #EXPORT_TO_FRONTEND
+CARME_LDAP_ADMIN=""
 #e.g. admin
 
-CARME_LDAP_SERVER_IP=""                            #EXPORT_TO_FRONTEND
+CARME_LDAP_SERVER_IP=""
 #e.g. 123.456.789.180
 
-CARME_LDAP_SERVER_PW=""                               #EXPORT_TO_FRONTEND
+CARME_LDAP_SERVER_PW=""
 #the password choosen for the LDAP DB
 
-CARME_LDAP_BIND_DN=""                 #EXPORT_TO_FRONTEND
+CARME_LDAP_BIND_DN=""
 #combination of CARME_LDAP_ADMIN,CARME_LDAP_DC1 and CARME_LDAP_DC2
 
 # note: if you need more or less groups edit /opt/Carme/Carme-Scripts/carme-ldap-add-user.sh
-CARME_LDAPGROUP_1=""                                  #EXPORT_TO_FRONTEND
+CARME_LDAPGROUP_1=""
 #e.g. physics-admin
 
 CARME_LDAPGROUP_ID_1=""
 #e.g. 900
 
-CARME_LDAPINSTANZ_1=""                                      #EXPORT_TO_FRONTEND
+CARME_LDAPINSTANZ_1=""
 #e.g. PHYSICS
 
-CARME_LDAPGROUP_2=""                                   #EXPORT_TO_FRONTEND
+CARME_LDAPGROUP_2=""
 #e.g. physics-user
 
 CARME_LDAPGROUP_ID_2=""
 #e.g. 901
 
-CARME_LDAPINSTANZ_2=""                                      #EXPORT_TO_FRONTEND
+CARME_LDAPINSTANZ_2=""
 #e.g. PHYSICS
 
-CARME_LDAPGROUP_3=""                                  #EXPORT_TO_FRONTEND
+CARME_LDAPGROUP_3=""
 #e.g. bio-user
 
 CARME_LDAPGROUP_ID_3=""
 #e.g. 902
 
-CARME_LDAPINSTANZ_3=""                                 #EXPORT_TO_FRONTEND
+CARME_LDAPINSTANZ_3=""
 #e.g. BIOLOGY
 
-CARME_LDAPGROUP_4=""                                  #EXPORT_TO_FRONTEND
+CARME_LDAPGROUP_4=""
 #e.g. math-user
 
 CARME_LDAPGROUP_ID_4=""
 #e.g. 903
 
-CARME_LDAPINSTANZ_4=""                                 #EXPORT_TO_FRONTEND
+CARME_LDAPINSTANZ_4=""
 #e.g. MATH
 
-CARME_LDAPGROUP_5=""                                  #EXPORT_TO_FRONTEND
+CARME_LDAPGROUP_5=""
 #e.g. inf-user
 
 CARME_LDAPGROUP_ID_5=""
 #e.g. 904
 
-CARME_LDAPINSTANZ_5=""                                      #EXPORT_TO_FRONTEND
+CARME_LDAPINSTANZ_5=""
 #e.g. INF
 
 CARME_LDAP_DEFAULTPASSWD_FOLDER=""
@@ -513,7 +513,7 @@ CARME_ZABBIX_DB_USER=""
 CARME_ZABBIX_DB_PASSWORD=""
 #e.g. zabbixpasswd
 
-CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/Carme-Django/static/zabbix-graphs"            #EXPORT_TO_FRONTEND
+CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/Carme-Django/static/zabbix-graphs"
 #default: /opt/Carme/Carme-Frontend/static/zabbix-graphs
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -543,14 +543,16 @@ CARME_MATTERMOST_DB_PASSWORD=""
 CARME_MATTERMOST_EMAIL_BASE=""
 #e.g. mymail.com
 
-CARME_MATTERMOST_DEFAULT_TEAM=""    #note: do not use uppercases
+CARME_MATTERMOST_DEFAULT_TEAM=""
+#note: do not use uppercases
 #e.g. myteam [do not use uppercases]
 
 CARME_MATTERMOST_WEBHOCK=""
 #e.g. https://mattermost.my-cluster.my-server.com/hooks/HASH generate in mattermost
 #(needed in /opt/Carme/Carme-Scripts/maintenance/carme-find-ghost-jobs-notify.sh)
 
-CARME_MATTERMOST_WEBHOCK_2="" #note: used to sent information about finished jobs
+CARME_MATTERMOST_WEBHOCK_2=""
+#note: used to sent information about finished jobs
 #e.g. https://mattermost.my-cluster.my-server.com/hooks/HASH generate in mattermost
 #(needed in /opt/Carme/Carme-Backend/carme_backend.py)
 #-----------------------------------------------------------------------------------------------------------------------------------
