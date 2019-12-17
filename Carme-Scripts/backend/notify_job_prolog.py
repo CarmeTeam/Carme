@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 # notifies to the head node that the job has started execution
