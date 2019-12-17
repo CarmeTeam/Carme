@@ -27,8 +27,9 @@ SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig').load_module()
 from CarmeConfig import CARME_MATTERMOST_PATH, CARME_MATTERMOST_COMMAND, CARME_MATTERMOST_WEBHOCK_2
 from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
 from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
-from CarmeConfig import CARME_SCRIPT_PATH
+from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH
 from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
+from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME
 
 
 # to be replace by reading Carme Config
@@ -339,8 +340,8 @@ class CarmeBackEndService(rpyc.Service):
             db.rollback()
             db.close()
             return "Error: SQL FAIL!"
-                                                                                                                                                                                           
-        return ret                                                          
+        
+        return ret
 
 
     def exposed_StartJob(self, jobUser, jobID, jobImage, jobMounts, jobPartition, jobNumGPUs, jobNumNodes, jobName, jobGPUType):
@@ -415,14 +416,46 @@ class CarmeBackEndService(rpyc.Service):
                 jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
+    
+    def exposed_JobProlog(self, jobID, jobUser):
+        """
+        Tells the backend, that a job is starting
 
-        #remove job from db
+        # Arguments
+            jobID: id of the job
+            jobUser: username of job owner 
+        """
+        
+        print("Job prolog: ", str(jobID))
+
+        return 0
+
+    def exposed_JobEpilog(self, jobID, jobUser):
+        """
+        Tells the backend, that a job was terminated
+
+        # Arguments
+            jobID: id of the job
+            jobUser: username of job owner 
+        """
+
+        print("Job epilog: ", str(jobID))
+
+        com = 'ssh ' + CARME_LOGINNODE_NAME + ' "rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
+        
+        ret = os.system(com)
+
+        if ret != 0:
+            message = "FRONTEND: Error deleting route for job " + \
+                str(jobID) + " for user " + str(jobUser)
+            db_logger.exception(message)
+
+        # remove job from db
         db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)  
 
         cur = db.cursor()
-        sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
-        print(sql)
+        sql='delete from `carme-base_slurmjobs` where SLURM_ID="'+str(jobID)+'";'
 
         try: 
             deleted = cur.execute(sql)
@@ -436,9 +469,11 @@ class CarmeBackEndService(rpyc.Service):
             db.rollback() 
             cur.close()
             db.close()
-            setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
+            setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
             return "Error: SQL FAIL!" 
         return ret
+
+
 
     def exposed_SetTrigger(self, jobSlurmID, jobUser, jobName):                              
         """ 
