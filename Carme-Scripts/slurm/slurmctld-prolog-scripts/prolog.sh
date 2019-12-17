@@ -4,6 +4,9 @@
 # notify carme about the job prolog
 #
 
+set -e # stop after error
+set -o pipefail # stop if command in pipe failed
+
 export PATH=${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # define function to get variables from CarmeConfig --------------------------------------------------------------------------------
