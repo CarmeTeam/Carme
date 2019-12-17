@@ -10,9 +10,15 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
+
+import os
 from django.db import models
 from datetime import datetime
-from datetime import datetime
+from importlib.machinery import SourceFileLoader
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SourceFileLoader('CarmeConfigFrontend', BASE_DIR + '/../../../CarmeConfig.frontend').load_module()
+from CarmeConfigFrontend import CARME_SLURM_ClusterName
 
 """ User Messages
 
@@ -161,7 +167,7 @@ class CarmeJobTable(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'carme_job_table'
+        db_table = str(CARME_SLURM_ClusterName) + '_job_table'
         unique_together = (('id_job', 'id_assoc', 'time_submit'),)
 
 
@@ -197,5 +203,5 @@ class CarmeAssocTable(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'carme_assoc_table'
+        db_table = str(CARME_SLURM_ClusterName) + '_assoc_table'
         unique_together = (('user', 'acct', 'partition'),)
