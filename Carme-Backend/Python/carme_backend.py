@@ -426,7 +426,6 @@ class CarmeBackEndService(rpyc.Service):
             jobUser: username of job owner 
         """
         
-        #if CARME_BACKEND_DEBUG:
         print("Job prolog: ", str(jobID))
 
         """db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
@@ -532,8 +531,7 @@ class CarmeBackEndService(rpyc.Service):
             jobUser: username of job owner 
         """
 
-        if CARME_BACKEND_DEBUG:
-            print("Job epilog: ", str(jobID))
+        print("Job epilog: ", str(jobID))
 
         com = 'ssh ' + CARME_LOGINNODE_NAME + ' "rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
         
