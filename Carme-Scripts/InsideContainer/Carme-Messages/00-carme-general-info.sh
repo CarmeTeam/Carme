@@ -25,7 +25,7 @@ fi
 if [[ ! -z ${CARME_GPU_LIST} ]];then
   echo "GPU-ID(s):    ${CARME_GPU_LIST}"
 fi
-echo "End-Time:   $(grep $CARME_JOBID .local/share/carme/job-log-dir/job-log.dat | awk '{print $6}')"
+echo "End-Time:   $(grep "^${CARME_JOBID}[[:space:]]${CARME_JOB_NAME}" .local/share/carme/job-log-dir/job-log.dat | awk '{print $6}')"
 echo ""
 
 # print base ennv information
