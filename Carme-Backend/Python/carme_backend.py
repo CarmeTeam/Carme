@@ -470,7 +470,8 @@ class CarmeBackEndService(rpyc.Service):
             cur.close()
             db.close()
             setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
-            return "Error: SQL FAIL!" 
+            return 150
+
         return ret
 
 
