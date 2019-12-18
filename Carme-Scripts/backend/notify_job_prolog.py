@@ -10,6 +10,8 @@
 import sys
 import rpyc
 
+ec = 137
+
 SLURM_JOB_ID = sys.argv[1]
 SLURM_JOB_USER = sys.argv[2]
 CARME_BACKEND_SERVER = sys.argv[3]
@@ -22,3 +24,8 @@ conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfil
 res = conn.root.exposed_JobProlog(SLURM_JOB_ID, SLURM_JOB_USER)
 
 print("notify_job_prolog:", res)
+
+if isinstance(res, int):
+  ec = res
+
+sys.exit(ec)
