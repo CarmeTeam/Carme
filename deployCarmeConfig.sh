@@ -20,7 +20,7 @@ NOCOLOR='\033[0m'
 
 CONFIG_PATH="/opt/Carme"
 CONFIG_FILE="${CONFIG_PATH}/CarmeConfig"
-VARIABLES_CONFIG_FILE="/opt/variables.conf"
+VARIABLES_CONFIG_FILE="${CONFIG_PATH}/variables.conf"
 TODAY=$(date "+%d-%m-%Y")
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -61,7 +61,6 @@ CARME_SCRIPT_PATH=$(get_variable CARME_SCRIPT_PATH ${CONFIG_FILE})
 
 
 # source the variables that have to be imported from /opt/Carme/CarmeConfig --------------------------------------------------------
-VARIABLES_CONFIG_FILE="/opt/variables.conf"
 FRONTEND_VARIABLES=$(get_variable FRONTEND_VARIABLES ${VARIABLES_CONFIG_FILE})
 CONTAINER_VARIABLES=$(get_variable CONTAINER_VARIABLES ${VARIABLES_CONFIG_FILE})
 BACKEND_VARIABLES=$(get_variable BACKEND_VARIABLES ${VARIABLES_CONFIG_FILE})
