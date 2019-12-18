@@ -54,6 +54,9 @@ mkdir -p ${TBDIR}
 STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
 mkdir -p ${STOREDIR}
 
+JOB_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
+mkdir -p ${JOB_TMP}
+
 LOGDIR=${HOME}"/.local/share/carme/job-log-dir"
 OUTFILE=${LOGDIR}"/"${SLURM_JOB_ID}"-"${SLURM_JOB_NAME}".out"
 NODELIST=$(grep --color=never -Po "^NODELIST: \K.*" "${OUTFILE}")
@@ -94,6 +97,9 @@ export CARME_BACKEND_SERVER=${CARME_BACKEND_SERVER}
 export CARME_BACKEND_PORT=${CARME_BACKEND_PORT}    
 export CARME_TENSORBOARD_HOME='${HOME}/tensorboard'
 export PATH=\${PATH}:/home/.CarmeScripts/bash/
+export TMPDIR=${JOB_TMP}
+export TMP=${JOB_TMP}
+export TEMP=${JOB_TMP}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -184,10 +190,8 @@ mkdir ${TENSORBOARD_LOG_DIR}
 # start theia ----------------------------------------------------------------------------------------------------------------------
 THEIA_BASE_DIR="/opt/theia-ide/"
 if [ -d ${THEIA_BASE_DIR} ]; then
-  THEIA_JOB_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
-  mkdir -p ${THEIA_JOB_TMP}
   cd ${THEIA_BASE_DIR}
-  PATH=/opt/anaconda3/bin/:${PATH} TMPDIR=${THEIA_JOB_TMP} TMP=${THEIA_JOB_TMP} TEMP=${THEIA_JOB_TMP} /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname ${IPADDR} --port ${TA_PORT} --startup-timeout -1 &
+  PATH=/opt/anaconda3/bin/:${PATH} TMPDIR=${JOB_TMP} TMP=${JOB_TMP} TEMP=${JOB_TMP} /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname ${IPADDR} --port ${TA_PORT} --startup-timeout -1 &
   cd
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
