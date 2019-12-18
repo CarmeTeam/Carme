@@ -12,8 +12,6 @@ export PATH=${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # define function to get variables from CarmeConfig --------------------------------------------------------------------------------
 function get_variable () {
   variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-  variable_value=${variable_value%#*}
-  variable_value=${variable_value%#*}
   variable_value=$(echo "$variable_value" | tr -d '"')
   echo $variable_value
 }

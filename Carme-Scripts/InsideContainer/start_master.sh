@@ -23,8 +23,6 @@ CONFIG_FILE="/home/.CarmeScripts/CarmeConfig.container"
 if [ -f ${CONFIG_FILE} ];then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-    variable_value=${variable_value%#*}
-    variable_value=${variable_value%#*}
     variable_value=$(echo "${variable_value}" | tr -d '"')
     echo ${variable_value}
   }
