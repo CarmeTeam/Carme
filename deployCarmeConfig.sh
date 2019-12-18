@@ -83,7 +83,7 @@ echo "
 " > CarmeConfig.frontend
 
 for VARIABLE in ${FRONTEND_VARIABLES};do
-  grep "${VARIABLE}=" ${CONFIG_FILE} >> CarmeConfig.frontend
+  grep "^${VARIABLE}=" ${CONFIG_FILE} >> CarmeConfig.frontend
 done
 
 chmod 600 CarmeConfig.frontend
@@ -118,7 +118,7 @@ echo "
 " > CarmeConfig.container     
 
 for VARIABLE in ${CONTAINER_VARIABLES};do
-  grep "${VARIABLE}=" ${CONFIG_FILE} >> CarmeConfig.container
+  grep "^${VARIABLE}=" ${CONFIG_FILE} >> CarmeConfig.container
 done
 
 chmod 644 CarmeConfig.container
@@ -152,7 +152,7 @@ echo "
 " > ${CONFIG_PATH}/CarmeConfig.backend
 
 for VARIABLE in ${BACKEND_VARIABLES};do
-  grep "${VARIABLE}=" ${CONFIG_FILE} >> ${CONFIG_PATH}/CarmeConfig.backend
+  grep "^${VARIABLE}=" ${CONFIG_FILE} >> ${CONFIG_PATH}/CarmeConfig.backend
 done
 
 chmod 644 ${CONFIG_PATH}/CarmeConfig.backend
