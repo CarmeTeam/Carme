@@ -71,6 +71,12 @@ BACKEND_VARIABLES=$(get_variable BACKEND_VARIABLES ${VARIABLES_CONFIG_FILE})
 # collect variables needed in the frontend -----------------------------------------------------------------------------------------
 echo "collect variables needed in the webfrontend"
 
+if [[ -f "${CARME_FRONTEND_PATH}/CarmeConfig.frontend" ]];then
+  mv ${CARME_FRONTEND_PATH}/CarmeConfig.frontend ${CARME_FRONTEND_PATH}/CarmeConfig.frontend_old
+  echo "-- previous CarmeConfig.frontend stored in CarmeConfig.frontend_old --"
+  echo ""
+fi
+
 echo "
 #-----------------------------------------------------------------------------------------------------------------------------------
 # Carme Frontend Config
@@ -106,6 +112,12 @@ fi
 # collect variables needed inside the containers -----------------------------------------------------------------------------------
 echo "collect variables needed inside the containers"
 
+if [[ -f "${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container" ]];then
+  mv ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container ${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container_old
+  echo "-- previous CarmeConfig.container stored in CarmeConfig.container_old --"
+  echo ""
+fi
+
 echo "
 #-----------------------------------------------------------------------------------------------------------------------------------
 # Carme Container Config
@@ -139,6 +151,12 @@ fi
 
 # collect variables needed in the backend ------------------------------------------------------------------------------------------
 echo "collect variables needed in the backend"
+
+if [[ -f "${CONFIG_PATH}/CarmeConfig.backend" ]];then
+  mv ${CONFIG_PATH}/CarmeConfig.backend ${CONFIG_PATH}/CarmeConfig.backend_old
+  echo "-- previous CarmeConfig.backend stored in CarmeConfig.backend_old --"
+  echo ""
+fi
 
 echo "
 #-----------------------------------------------------------------------------------------------------------------------------------
