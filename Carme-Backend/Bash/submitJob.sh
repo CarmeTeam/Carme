@@ -84,6 +84,12 @@ do
   else
 				sbatch ${SBATCH_PARAMETERS} ${CARME_SCRIPTS_PATH}/slurm.sh ${DBJOBID} ${IMAGE} ${MOUNTS} ${NUM_GPUS_PER_NODE} ${MEM} ${CARME_SCRIPT_PATH} ${GPU_TYPE}
 		fi
+
+  if [ "$?" != 0 ]; then
+    echo "sbatch failed with exit code ${SBATCH_EC}"
+    exit 137
+  fi
+
   ((COUNTER++))
 done
 
