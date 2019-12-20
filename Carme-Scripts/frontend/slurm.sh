@@ -31,8 +31,6 @@ CONFIG_FILE="${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container"
 if [ -f ${CONFIG_FILE} ];then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-    variable_value=${variable_value%#*}
-				variable_value=${variable_value%#*}
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
@@ -46,9 +44,20 @@ CARME_URL=$(get_variable CARME_URL ${CONFIG_FILE})
 CARME_GATEWAY=$(get_variable CARME_GATEWAY ${CONFIG_FILE})
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT ${CONFIG_FILE})
+CARME_BUILDNODE_1_IP=$(get_variable CARME_BUILDNODE_1_IP ${CONFIG_FILE})
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 echo "Carme Verison: ${CARME_VERSION}"
+echo ""
+
+NODELIST=$(scontrol show hostname ${SLURM_JOB_NODELIST} | paste -d, -s)
+echo "NODELIST: ${NODELIST}"
+echo ""
+
+STARTTIME=$(squeue -h -j ${SLURM_JOB_ID} -o "%.20S")
+ENDTIME=$(squeue -h -j ${SLURM_JOB_ID} -o "%.20e")
+echo "STARTTIME: ${STARTTIME}"
+echo "ENDTIME: ${ENDTIME}"
 echo ""
 
 MOUNTS=${mountstr//[_]/ }   
@@ -65,11 +74,6 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 #set variables and environment stuff -----------------------------------------------------------------------------------------------
-
-#check if log directory exists -----------------------------------------------------------------------------------------------------
-LOGDIR="${HOME}/.job-log-dir"
-mkdir -p ${LOGDIR}
-#-----------------------------------------------------------------------------------------------------------------------------------
 
 echo "MASTER Parameters:"
 echo "                 - IP: ${IPADDR}"
@@ -108,23 +112,23 @@ cd ${HOME}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#check if carme_tmp exists ---------------------------------------------------------------------------------------------------------
-CARME_TMP=${HOME}"/carme_tmp/"
-mkdir -p ${CARME_TMP}
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 #set jupyter parameters and settings -----------------------------------------------------------------------------------------------
 NBDIR="${HOME}/.jupyter" 
 mkdir -p ${NBDIR}
-echo "c.NotebookApp.disable_check_xsrf = True" > ${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py
-echo "c.NotebookApp.token = ''" >> ${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py
-echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py 
+
+STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
+mkdir -p ${STOREDIR}
+
+JUPYTER_CONFIG="jupyter_notebook_config-"${SLURM_JOB_ID}".py"
+echo "c.NotebookApp.disable_check_xsrf = True" > ${STOREDIR}/${JUPYTER_CONFIG}
+echo "c.NotebookApp.token = ''" >> ${STOREDIR}/${JUPYTER_CONFIG}
+echo "c.NotebookApp.base_url = '/nb_${HASH}'" >> ${STOREDIR}/${JUPYTER_CONFIG}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #add job to joblog-file ------------------------------------------------------------------------------------------------------------
-echo -e "${SLURM_JOBID}\t${SLURM_JOB_NAME}\t$(hostname)\t${PWD}/slurmjob.sh" >> ${HOME}/.job-log.dat
+LOGDIR=${HOME}"/.local/share/carme/job-log-dir"
+echo -e "${SLURM_JOB_ID}\t${SLURM_JOB_NAME}\t$(hostname)\t${NODELIST}\t${STARTTIME}\t${ENDTIME}" >> ${LOGDIR}/job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -133,13 +137,8 @@ ${CARME_SCRIPT_PATH}/dist_alter_jobDB_entry/alter_jobDB_entry ${DBJOBID} ${URL} 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#set job nodelist ------------------------------------------------------------------------------------------------------------------
-scontrol show hostname ${SLURM_JOB_NODELIST} | paste -d, -s > ${HOME}/.job-log-dir/${SLURM_JOB_ID}-nodelist
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 #crate SSD scratch folder-----------------------------------------------------------------------------------------------------------
-if [ ${IPADDR} != "192.168.152.11" ];then
+if [ ${IPADDR} != "${CARME_BUILDNODE_1_IP}" ];then
   mkdir /scratch_local/${SLURM_JOB_ID}
   echo "/home/SSD is a fast local scratch storage. WARMING: everything will be deleted at the end of this job!" > /scratch_local/${SLURM_JOB_ID}/readme.md
 fi
@@ -152,17 +151,11 @@ if [[ ${IMAGE} = *"scratch_image_build"* ]];then #sandbox image - add own start 
   echo "Sandox Mode" ${IMAGE} ${MOUNTS}
   newpid sudo singularity exec -B /etc/libibverbs.d ${MOUNTS} --writable ${IMAGE} /bin/bash /home/.CarmeScripts/start_build_job.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES}
 else
-		if [ ${IPADDR} != "192.168.152.11" ];then
-    newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
+		if [ ${IPADDR} != "${CARME_BUILDNODE_1_IP}" ];then
+    newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
 		else
-		  newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
+		  newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
 		fi
 fi
-
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-#add log entry "done" --------------------------------------------------------------------------------------------------------------
-sed -i "s/\\(${SLURM_JOB_ID}\\)\\(.*$\\)/\\1\\2\t<<DONE>>/" ${HOME}/.job-log.dat
 #-----------------------------------------------------------------------------------------------------------------------------------
 

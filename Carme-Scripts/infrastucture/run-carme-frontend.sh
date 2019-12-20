@@ -21,15 +21,18 @@ fi
 IMAGE_NAME="carme-frontend"
 INSTANCE_NAME="CarmeFrontend"
 APACHE_LOGS_DIR="/var/log/Carme/Carme-Apache-Logs"
-PROXY_ROUTES="/opt/Carme-Proxy-Routes"
+PROXY_ROUTES_DIR="/opt/Carme-Proxy-Routes"
+CARME_FRONTEND_DIR="/opt/Carme/Carme-Frontend"
 
 
 if [ -f ${IMAGE_NAME}.simg ];then
   if [[ "$1" == "start" ]];then
     mkdir -p ${APACHE_LOGS_DIR}
-				singularity instance start -B /opt/Carme/Carme-Frontend:/opt/Carme/Carme-Frontend -B ${APACHE_LOGS_DIR}:/opt/Carme-Apache-Logs -B ${PROXY_ROUTES}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
+				singularity instance start -B ${CARME_FRONTEND_DIR}:/opt/Carme/Carme-Frontend -B ${APACHE_LOGS_DIR}:/opt/Carme-Apache-Logs -B ${PROXY_ROUTES_DIR}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
   elif [[ "$1" == "stop" ]];then
+    FRONTEND_PID=$(singularity instance list | grep "${INSTANCE_NAME}\s" | awk '{print $2}')
     singularity instance stop ${INSTANCE_NAME}
+				tail --pid=${FRONTEND_PID} -f /dev/null
   else
     echo "argument can only be"
     echo "start == start apache2 for ${INSTANCE_NAME}"

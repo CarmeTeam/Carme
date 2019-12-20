@@ -26,7 +26,6 @@ fi
 if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-    variable_value=${variable_value%#*}
     variable_value=$(echo "$variable_value" | tr -d '"')
     echo $variable_value
   }
@@ -194,9 +193,9 @@ EOF
     # create home
     mkdir -v /home/$LDAPUSER
     cp -vr /etc/skel/. /home/$LDAPUSER
-			 mkdir -v /home/$LDAPUSER/carme_tmp
-			 mkdir -v /home/$LDAPUSER/.carme
-			 mkdir -v /home/$LDAPUSER/.ssh	
+			 mkdir -vp /home/$LDAPUSER/.config/carme
+    mkdir -vp /home/$LDAPUSER/.local/share/carme
+			 mkdir -vp /home/$LDAPUSER/.ssh	
     chown -v -R $NEXTUID:$GROUPID /home/$LDAPUSER
 
 

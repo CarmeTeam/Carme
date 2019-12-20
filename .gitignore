@@ -1,6 +1,7 @@
 CarmeConfig
-CarmeConfig.frontend
-CarmeConfig.container
+CarmeConfig.frontend*
+CarmeConfig.container*
+CarmeConfig.backend*
 
 *.crt
 *.csr

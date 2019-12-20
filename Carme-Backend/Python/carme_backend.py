@@ -21,9 +21,15 @@ from ldap3 import *
 import MySQLdb
 import datetime
 
-import imp
-imp.load_source('CarmeConfig', '/opt/Carme/CarmeConfig')
-from CarmeConfig import *
+# import needed variables from CarmeConfig
+from importlib.machinery import SourceFileLoader
+SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig').load_module()
+from CarmeConfig import CARME_MATTERMOST_PATH, CARME_MATTERMOST_COMMAND, CARME_MATTERMOST_WEBHOCK_2
+from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
+from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
+from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH
+from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
+from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME
 
 
 # to be replace by reading Carme Config
@@ -334,8 +340,8 @@ class CarmeBackEndService(rpyc.Service):
             db.rollback()
             db.close()
             return "Error: SQL FAIL!"
-                                                                                                                                                                                           
-        return ret                                                          
+        
+        return ret
 
 
     def exposed_StartJob(self, jobUser, jobID, jobImage, jobMounts, jobPartition, jobNumGPUs, jobNumNodes, jobName, jobGPUType):
@@ -356,25 +362,51 @@ class CarmeBackEndService(rpyc.Service):
             jobName: name string (NOTE: must be unique)
             jobGPUType: type of the GPU we want to use
         """
+        
         if self.user != "frontend":
             setCarmeLog("BACKEND: AUTH FAILED", 40)
             return "Auth Failed"
 
         print("start job ", CARME_SCRIPT_PATH) 
+        
         com = 'runuser -l '+str(jobUser)+' '+str(CARME_BACKEND_PATH)+'/Bash/submitJob.sh '+str(CARME_SCRIPT_PATH)+' '+str(jobID)+' '+str(
             jobImage)+' '+str(jobMounts)+' '+str(jobPartition)+' '+str(jobNumGPUs)+' '+str(jobNumNodes)+' '+str(jobName)+' '+str(
             CARME_SCRIPT_PATH)+' '+str(jobGPUType)
+        
         if CARME_BACKEND_DEBUG:
             print (com)
             setCarmeLog("BACKEND: "+str(com), 10)
+        
         ret = os.system(com)
+        
         if ret == 0:
             sendMatterMostMessage(
                 jobUser, "Job " + str(jobName) + " has been schedued for execution")
-            setMessage("Scheduled Job " + str(jobName), str(jobUser), "#e8be17") 
+            setMessage("Scheduled Job " + str(jobName), str(jobUser), "#e8be17")
+            
         else:
-            sendMatterMostMessage(
-                jobUser, "scheduling job " + str(jobName) + " FAILED! - Contact your admin.")
+            # remove job from db
+            db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                    passwd=CARME_DB_PW,  db=CARME_DB_DB)  
+            cur = db.cursor()
+            sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+            
+            try: 
+                deleted = cur.execute(sql)
+                print("try SQL stop: ", deleted)
+                db.commit()
+                cur.close()
+                db.close()
+                print ("SQL stop done")
+            except:
+                print ("SQL ERROR")
+                db.rollback() 
+                cur.close()
+                db.close()
+                setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
+                return 150
+            
+            setMessage("scheduling job " + str(jobName) + " FAILED! - Contact your admin.", str(jobUser), "red")
             sendMatterMostMessage("admin", "scheduling job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
         return ret
@@ -410,14 +442,46 @@ class CarmeBackEndService(rpyc.Service):
                 jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
             sendMatterMostMessage("admin", "terminating job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
+    
+    def exposed_JobProlog(self, jobID, jobUser):
+        """
+        Tells the backend, that a job is starting
 
-        #remove job from db
+        # Arguments
+            jobID: id of the job
+            jobUser: username of job owner 
+        """
+        
+        print("Job prolog: ", str(jobID))
+
+        return 0
+
+    def exposed_JobEpilog(self, jobID, jobUser):
+        """
+        Tells the backend, that a job was terminated
+
+        # Arguments
+            jobID: id of the job
+            jobUser: username of job owner 
+        """
+
+        print("Job epilog: ", str(jobID))
+
+        com = 'ssh ' + CARME_LOGINNODE_NAME + ' "rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
+        
+        ret = os.system(com)
+
+        if ret != 0:
+            message = "FRONTEND: Error deleting route for job " + \
+                str(jobID) + " for user " + str(jobUser)
+            db_logger.exception(message)
+
+        # remove job from db
         db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
                 passwd=CARME_DB_PW,  db=CARME_DB_DB)  
 
         cur = db.cursor()
-        sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
-        print(sql)
+        sql='delete from `carme-base_slurmjobs` where SLURM_ID="'+str(jobID)+'";'
 
         try: 
             deleted = cur.execute(sql)
@@ -431,9 +495,12 @@ class CarmeBackEndService(rpyc.Service):
             db.rollback() 
             cur.close()
             db.close()
-            setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
-            return "Error: SQL FAIL!" 
+            setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
+            return 150
+
         return ret
+
+
 
     def exposed_SetTrigger(self, jobSlurmID, jobUser, jobName):                              
         """ 
@@ -496,8 +563,8 @@ class CarmeBackEndService(rpyc.Service):
         try:
             # define an unsecure LDAP server, requesting info on DSE and schema
             s = Server(CARME_LDAP_SERVER_IP, get_info=ALL)
-            c = Connection(s, user='cn=admin,dc=carme,dc=local',
-                           password=CARME_LDAP_SERVER_PW)
+            LDAP_ADMIN_USER='cn='+str(CARME_LDAP_ADMIN)+',dc='+str(CARME_LDAP_DC1)+',dc='+str(CARME_LDAP_DC2)
+            c = Connection(s, user=LDAP_ADMIN_USER, password=CARME_LDAP_SERVER_PW)
             c.bind()
             c.modify(user, {'userPassword': [(MODIFY_REPLACE, password)]})
             c.unbind()

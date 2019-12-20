@@ -13,15 +13,6 @@ CARME_BACKEND_PORT=os.environ['CARME_BACKEND_PORT']
 
 """
 
-
-def getDASK_Master():
-    """ get DASK scheduler IP:Port
-    
-    """
-    bash="grep -ir 'Master running on' ~/.job-log-dir/${SLURM_JOB_ID}-${SLURM_JOB_NAME}.out | awk '{print $4}' "
-    res = subprocess.check_output(bash,shell=True,universal_newlines=True)
-    return str(res.rstrip())+":8786"
-    
 def getHomePath():
     """ get the user home directory
 
@@ -64,9 +55,10 @@ def WhoAmI():
     """ get user authenticaton from Carme backend
 
     """
-    user=getUserName() 
-    key="/home/"+user+"/.carme/"+user+".key"
-    cert="/home/"+user+"/.carme/"+user+".crt"  
+    user=getUserName()
+    user_home=getHomePath()
+    key=user_home+"/.config/carme/"+user+".key"
+    cert=user_home+"/.config/carme/"+user+".crt"  
     conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=key, certfile=cert)  
     name = conn.root.whoami()                                                                                                                                                                       
     conn.close()
@@ -82,8 +74,9 @@ def sendNotification(text):
             can be used to post job status and other information
     """
     user=getUserName()
-    key="/home/"+user+"/.carme/"+user+".key"
-    cert="/home/"+user+"/.carme/"+user+".crt"
+    user_home=getHomePath() 
+    key=user_home+"/.config/carme/"+user+".key"
+    cert=user_home+"/.config/carme/"+user+".crt"
     text= "User Notification: "+text
     conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=key, certfile=cert)
     if conn.root.SendMessage(user,text) != 0:

@@ -16,7 +16,6 @@
 
 function get_variable () {
   variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-		variable_value=${variable_value%#*}
 		variable_value=$(echo "$variable_value" | tr -d '"')
   echo $variable_value
 }
@@ -26,10 +25,8 @@ function get_variable () {
 CARME_SCRIPTS_PATH=$1
 CONFIG_FILE="${CARME_SCRIPTS_PATH}/../InsideContainer/CarmeConfig.container"
 
-LOGDIR="/home/$USER/.job-log-dir"
-if [ ! -d $LOGDIR ]; then
-    mkdir $LOGDIR
-fi
+LOGDIR="${HOME}/.local/share/carme/job-log-dir"
+mkdir -p $LOGDIR
 
 DBJOBID=$2
 IMAGE=$3
@@ -87,6 +84,12 @@ do
   else
 				sbatch ${SBATCH_PARAMETERS} ${CARME_SCRIPTS_PATH}/slurm.sh ${DBJOBID} ${IMAGE} ${MOUNTS} ${NUM_GPUS_PER_NODE} ${MEM} ${CARME_SCRIPT_PATH} ${GPU_TYPE}
 		fi
+
+  if [ "$?" != 0 ]; then
+    echo "sbatch failed with exit code ${SBATCH_EC}"
+    exit 137
+  fi
+
   ((COUNTER++))
 done
 

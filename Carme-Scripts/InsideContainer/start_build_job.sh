@@ -11,7 +11,7 @@ chmod -R 1777 /tmp
 # start theia ----------------------------------------------------------------------------------------------------------------------
 THEIA_BASE_DIR="/opt/theia-ide/"
 if [ -d ${THEIA_BASE_DIR} ]; then
-  THEIA_JOB_TMP=${HOME}"/carme_tmp/"${SLURM_JOBID}"_job_tmp"
+  THEIA_JOB_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
   mkdir -p $THEIA_JOB_TMP
   cd ${THEIA_BASE_DIR}
   PATH=/opt/anaconda3/bin/:$PATH TMPDIR=$THEIA_JOB_TMP TMP=$THEIA_JOB_TMP TEMP=$THEIA_JOB_TMP /opt/anaconda3/bin/node node_modules/.bin/theia start ${HOME} --hostname $IPADDR --port $TA_PORT --startup-timeout -1 &
@@ -19,8 +19,14 @@ if [ -d ${THEIA_BASE_DIR} ]; then
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
+
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${HOME}/.job-log-dir/${SLURM_JOB_ID}-jupyter_notebook_config.py --allow-root
+STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
+/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py --allow-root &
 #-----------------------------------------------------------------------------------------------------------------------------------
 
+
+# wait until the job is done -------------------------------------------------------------------------------------------------------
+wait
+#-----------------------------------------------------------------------------------------------------------------------------------
 
