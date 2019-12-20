@@ -362,25 +362,51 @@ class CarmeBackEndService(rpyc.Service):
             jobName: name string (NOTE: must be unique)
             jobGPUType: type of the GPU we want to use
         """
+        
         if self.user != "frontend":
             setCarmeLog("BACKEND: AUTH FAILED", 40)
             return "Auth Failed"
 
         print("start job ", CARME_SCRIPT_PATH) 
+        
         com = 'runuser -l '+str(jobUser)+' '+str(CARME_BACKEND_PATH)+'/Bash/submitJob.sh '+str(CARME_SCRIPT_PATH)+' '+str(jobID)+' '+str(
             jobImage)+' '+str(jobMounts)+' '+str(jobPartition)+' '+str(jobNumGPUs)+' '+str(jobNumNodes)+' '+str(jobName)+' '+str(
             CARME_SCRIPT_PATH)+' '+str(jobGPUType)
+        
         if CARME_BACKEND_DEBUG:
             print (com)
             setCarmeLog("BACKEND: "+str(com), 10)
+        
         ret = os.system(com)
+        
         if ret == 0:
             sendMatterMostMessage(
                 jobUser, "Job " + str(jobName) + " has been schedued for execution")
-            setMessage("Scheduled Job " + str(jobName), str(jobUser), "#e8be17") 
+            setMessage("Scheduled Job " + str(jobName), str(jobUser), "#e8be17")
+            
         else:
-            sendMatterMostMessage(
-                jobUser, "scheduling job " + str(jobName) + " FAILED! - Contact your admin.")
+            # remove job from db
+            db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                    passwd=CARME_DB_PW,  db=CARME_DB_DB)  
+            cur = db.cursor()
+            sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+            
+            try: 
+                deleted = cur.execute(sql)
+                print("try SQL stop: ", deleted)
+                db.commit()
+                cur.close()
+                db.close()
+                print ("SQL stop done")
+            except:
+                print ("SQL ERROR")
+                db.rollback() 
+                cur.close()
+                db.close()
+                setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
+                return 150
+            
+            setMessage("scheduling job " + str(jobName) + " FAILED! - Contact your admin.", str(jobUser), "red")
             sendMatterMostMessage("admin", "scheduling job " + str(jobName) +
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
         return ret
