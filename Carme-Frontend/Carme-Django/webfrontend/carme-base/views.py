@@ -356,9 +356,10 @@ def stop_job(request):
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            
-            if conn.root.cancel(str(jobID), str(jobUser)) != 0:
-                print("Error stopping job {} from user {}".format(jobID, jobUser))
+            if conn.root.StopJob(str(jobID), str(jobName), str(jobUser)) != 0:
+                message = "FRONTEND: Error stopping job " + \
+                    str(jobName) + " for user " + str(jobUser)
+                db_logger.exception(message)
                 raise Exception("ERROR stopping job [backend]")
 
             return HttpResponseRedirect('/carme-base/JobTable/')

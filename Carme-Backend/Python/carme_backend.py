@@ -336,61 +336,59 @@ class Backend(Service):
             print("error exposed_schedule - job {} could not be scheduled for user {}".format(name, user))
             self.send_notification("Error: Scheduling job {} failed! - Please contact your admin.".format(name), user, "red")
 
-        return job_id
-
-    def exposed_cancel(self, job_id, user):
-        """cancel the job via the batch system
+    def exposed_StopJob(self, jobID, jobName, jobUser):
+        """
+        Tells the batch system to terminate a job
 
         # note
             only requests from the frontend are exepted
 
-        # arguments
-            job_id: id string of the job
-            user: username of job owner
-        
-        # returns
-            nothing
+        # Arguments
+            jobID: id string of the job
+            jobName: name string of the job
+            jobUser: username of job owner 
         """
 
-        print("cancel job {} for user {}".format(job_id, user))
-
         if self.user != "frontend":
-            print("error exposed_cancel - has to executed by frontend, but user is {}".format(user))
-            return
+            setCarmeLog("BACKEND: AUTH FAILED", 40)
+            return "Auth Failed"
 
-        # cancel job via batch system
-        com = "scancel {}".format(job_id)
+        if CARME_BACKEND_DEBUG:
+            print("Stop job: ", str(jobName))
+
+        com = 'scancel -n '+str(jobName)
 
         ret = os.system(com)
         
         if ret == 0:
-            job = None
+            if jobID == '' or int(jobID) < 0:
+                # remove job from db
+                db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                        passwd=CARME_DB_PW,  db=CARME_DB_DB)  
 
-            # select job from database
-            try:
-                cur = self.db.cursor()
-                cur.execute(queries["select_job_status_by_id"], (job_id,))
+                cur = db.cursor()
+                sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
 
-                job = cur.fetchone()
-            except:
-                print("error exposed_cancel - sql statement select_job_status_by_id failed")
-                traceback.print_exc()
+                try: 
+                    deleted = cur.execute(sql)
+                    print("try SQL stop: ", deleted)
+                    db.commit()
+                    cur.close()
+                    db.close()
+                    print ("SQL stop done")
+                except:
+                    print ("SQL ERROR")
+                    db.rollback() 
+                    cur.close()
+                    db.close()
+                    setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
+                    return 150
+            setCarmeLog("BACKEND: Job " + str(jobName) +
+                        " terminated by user.", 20)
+            setMessage("Terminated Job " + str(jobName), str(jobUser), "#00B5FF")
+            sendMatterMostMessage(
+                jobUser, "Job " + str(jobName) + " terminated by user.")
 
-            # delete job if status is queued
-            if job is None:
-                print("error exposed_cancel - no job found for slurm_id {} and user {}".format(slurm_id, user))
-            else:
-                if job[0] == "queued":
-                    try:
-                        cur.execute(queries["delete_job"], (job_id,))
-
-                        self.db.commit()
-                    except:
-                        print("error exposed_cancel - sql statement delete_job failed")
-                        traceback.print_exc()
-
-            print("cancelled job {} for user {}".format(job_id, user))
-            self.send_notification("Cancelled job {}".format(job_id), user, "#e8be17")
         else:
             print("error exposed_cancel - scancel failed for job {} from user {}".format(job_id, user))
             self.send_notification("Error: Cancelling job {} failed!  - Please contact your admin.".format(job_id), user, "red")
