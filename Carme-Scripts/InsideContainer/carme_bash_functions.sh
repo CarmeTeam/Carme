@@ -33,7 +33,7 @@ function carme_cudnn_version () {
 
 # redefine mpirun ------------------------------------------------------------------------------------------------------------------
 function carme_mpirun () {
-  /opt/anaconda3/bin/mpirun -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh --mca plm_rsh_args "-p 2222 -i ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}"  --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output ${@}
+  /opt/anaconda3/bin/mpirun -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x HOROVOD_MPI_THREADS_DISABLE=1 -x PATH --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/ssh_${SLURM_JOB_ID}/ssh_config_${SLURM_JOB_ID}" --mca ras simulator --display-map --wdir ~/tmp --mca btl_openib_warn_default_gid_prefix 0 --mca orte_tmpdir_base ~/tmp --tag-output ${@}
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
 

@@ -76,6 +76,27 @@ echo "
 # write conda base environment to file
 /opt/anaconda3/bin/conda list >> ${STOREDIR}/conda_base.txt
 
+
+# find new free sshd port
+NEW_SSHD_PORT=""
+BASE_PORT="2222"
+FINAL_PORT="2300"
+
+for ((i=${BASE_PORT};i<=${FINAL_PORT};i++)); do
+  LISTEN=$(ss -tln -4 | grep ${i})
+ 
+  if [ -z "${LISTEN}" ];then
+    NEW_SSHD_PORT=${i}
+    break
+  fi
+  
+  if [[ "$i" -eq "${FINAL_PORT}" && ! -z "${LISTEN}" ]];then
+    echo "ERROR: No free SSHD port found!"
+    exit 137
+  fi
+done
+
+
 # create ${STOREDIR}/bash_${SLURM_JOB_ID}
 echo "
 # CARME specific exports -----------------------------------------------------------------------------------------------------------
@@ -154,28 +175,27 @@ if [[ "${SLURM_JOB_NUM_NODES}" -gt "1" || "${#GPUS}" -gt "1" ]]; then
 		chmod 640 ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
 
   rm ${HOME}/.ssh/known_hosts
-  rm ${HOME}/.ssh/config
   
-		echo "SendEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" > ${HOME}/.ssh/config
-  echo "HashKnownHosts yes" >> ${HOME}/.ssh/config
-  echo "GSSAPIAuthentication yes" >> ${HOME}/.ssh/config
-  echo "CheckHostIP no" >> ${HOME}/.ssh/config
-  echo "StrictHostKeyChecking no" >> ${HOME}/.ssh/config
-  echo "" >> ${HOME}/.ssh/config
+		echo "SendEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" > ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "HashKnownHosts yes" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "GSSAPIAuthentication yes" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "CheckHostIP no" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "StrictHostKeyChecking no" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
 
-  for i in ${CARME_NODES_LIST};do
-    echo "Host "$i >> ${HOME}/.ssh/config
-    echo "  HostName "$i >> ${HOME}/.ssh/config
-    echo "  User ${USER}" >> ${HOME}/.ssh/config
-    echo "  Port 2222" >> ${HOME}/.ssh/config
-    echo "" >> ${HOME}/.ssh/config
-  done
+		echo "Host $(hostname)" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+		echo "  HostName $(hostname)" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "  User ${USER}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "  Port ${NEW_SSHD_PORT}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+		echo "  IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+
   chmod 640 ${HOME}/.ssh/config		
   
   echo "starting SSHD on MASTER" $(hostname)
-  /usr/sbin/sshd -p 2222 -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
+  /usr/sbin/sshd -p ${NEW_SSHD_PORT} -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
   
-  echo "alias ssh='ssh -i ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}'" >> ${STOREDIR}/bash_${SLURM_JOB_ID}
+		echo "alias ssh='ssh -F ${SSHDIR}/ssh_config_${SLURM_JOB_ID}'" >> ${STOREDIR}/bash_${SLURM_JOB_ID}
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -183,7 +203,7 @@ fi
 # start tensorboard ----------------------------------------------------------------------------------------------------------------
 TENSORBOARD_LOG_DIR="${TBDIR}/tensorboard_${SLURM_JOB_ID}"
 mkdir ${TENSORBOARD_LOG_DIR}
-/opt/anaconda3/bin/tensorboard --logdir=${TENSORBOARD_LOG_DIR} --port=${TB_PORT} --path_prefix="/tb_${MYHASH}" & 
+LC_ALL=C /opt/anaconda3/bin/tensorboard --logdir=${TENSORBOARD_LOG_DIR} --port=${TB_PORT} --path_prefix="/tb_${MYHASH}" & 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
