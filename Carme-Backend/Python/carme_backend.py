@@ -411,7 +411,7 @@ class CarmeBackEndService(rpyc.Service):
                                   " for user " + str(jobUser) + "FAILED! check Django logs.")
         return ret
 
-    def exposed_StopJob(self, jobName, jobUser):
+    def exposed_StopJob(self, jobID, jobName, jobUser):
         """
         Tells the batch system to terminate a job
 
@@ -419,23 +419,51 @@ class CarmeBackEndService(rpyc.Service):
             only requests from the frontend are exepted
 
         # Arguments
+            jobID: id string of the job
             jobName: name string of the job
             jobUser: username of job owner 
         """
+
         if self.user != "frontend":
             setCarmeLog("BACKEND: AUTH FAILED", 40)
             return "Auth Failed"
+
         if CARME_BACKEND_DEBUG:
             print("Stop job: ", str(jobName))
+
         com = 'scancel -n '+str(jobName)
 
         ret = os.system(com)
+        
         if ret == 0:
+            if jobID == '' or int(jobID) < 0:
+                # remove job from db
+                db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                        passwd=CARME_DB_PW,  db=CARME_DB_DB)  
+
+                cur = db.cursor()
+                sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+
+                try: 
+                    deleted = cur.execute(sql)
+                    print("try SQL stop: ", deleted)
+                    db.commit()
+                    cur.close()
+                    db.close()
+                    print ("SQL stop done")
+                except:
+                    print ("SQL ERROR")
+                    db.rollback() 
+                    cur.close()
+                    db.close()
+                    setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
+                    return 150
             setCarmeLog("BACKEND: Job " + str(jobName) +
                         " terminated by user.", 20)
             setMessage("Terminated Job " + str(jobName), str(jobUser), "#00B5FF")
             sendMatterMostMessage(
                 jobUser, "Job " + str(jobName) + " terminated by user.")
+
         else:
             setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
             sendMatterMostMessage(
