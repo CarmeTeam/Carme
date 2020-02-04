@@ -64,12 +64,12 @@ if [[ "${SLURM_JOB_NUM_NODES}" -gt "1" || "${#GPUS}" -gt "1" ]]; then
 
 		SSHDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/ssh_"${SLURM_JOB_ID}
 
-  echo "Host $(hostname)" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "  HostName $(hostname)" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "  User ${USER}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "  Port ${NEW_SSHD_PORT}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "  IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+  echo "Host $(hostname)
+  HostName $(hostname)
+  User ${USER}
+  Port ${NEW_SSHD_PORT}
+  IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
 
 		echo "WORKER: starting SSHD on WORKER" $(hostname)
 		/usr/sbin/sshd -p ${NEW_SSHD_PORT} -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
