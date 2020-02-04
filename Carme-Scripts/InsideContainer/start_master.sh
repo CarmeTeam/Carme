@@ -98,8 +98,7 @@ done
 
 
 # create ${STOREDIR}/bash_${SLURM_JOB_ID}
-echo "
-# CARME specific exports -----------------------------------------------------------------------------------------------------------
+echo "# CARME specific exports -----------------------------------------------------------------------------------------------------------
 export CARME_VERSION=${CARME_VERSION}
 export CARME_TMP=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/tmp_"${SLURM_JOB_ID}
 export CARME_NODES=${NODELIST}
@@ -158,37 +157,38 @@ if [[ "${SLURM_JOB_NUM_NODES}" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   mv ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub
   cat ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub >> ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}
 
-  echo "PermitRootLogin no" > ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "PubkeyAuthentication yes" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "ChallengeResponseAuthentication no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "UsePAM no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "AuthorizedKeysFile ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "LoginGraceTime 30s" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "MaxAuthTries 3" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "ClientAliveInterval 3600" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "ClientAliveCountMax 1" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "X11Forwarding no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "PrintMotd no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "AcceptEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-  echo "AllowUsers" ${USER} >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
-		echo "PermitUserEnvironment no" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
+  echo "PermitRootLogin no
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+UsePAM no
+AuthorizedKeysFile ${SSHDIR}/authorized_keys_${SLURM_JOB_ID}
+LoginGraceTime 30s
+MaxAuthTries 3
+ClientAliveInterval 3600
+ClientAliveCountMax 1
+X11Forwarding no
+PrintMotd no
+AcceptEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR
+AllowUsers ${USER}
+PermitUserEnvironment no
+" >> ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
 		chmod 640 ${SSHDIR}/sshd_config_${SLURM_JOB_ID}
 
   rm ${HOME}/.ssh/known_hosts
   
-		echo "SendEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR" > ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "HashKnownHosts yes" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "GSSAPIAuthentication yes" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "CheckHostIP no" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "StrictHostKeyChecking no" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-
-		echo "Host $(hostname)" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-		echo "  HostName $(hostname)" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "  User ${USER}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "  Port ${NEW_SSHD_PORT}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-		echo "  IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
-  echo "" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+		echo "SendEnv LANG LC_* CUDA* ENVIRONMENT GIT* GPU_DEVICE_ORDINAL HASH HOSTNAME JUPYTER_DATA LD_LIBRARY_PATH SINGULARITY* SLURM* S_COLORS TBDIR XGD_RUNTIME_DIR
+HashKnownHosts yes
+GSSAPIAuthentication yes
+CheckHostIP no
+StrictHostKeyChecking no
+ 
+Host $(hostname)
+  HostName $(hostname)
+  User ${USER}
+  Port ${NEW_SSHD_PORT}
+  IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+  
+" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
 
   chmod 640 ${HOME}/.ssh/config		
   
