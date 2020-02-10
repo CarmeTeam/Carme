@@ -199,7 +199,7 @@ def job_table(request):
             db_logger.info(message)
 
             # dirty theia port hack
-            TA_PORT = job.TB_PORT + 10
+            TA_PORT = job.TB_PORT + 1000
 
             # write route to proxy
             pfile = str(settings.CARME_PROXY_PATH) + \
