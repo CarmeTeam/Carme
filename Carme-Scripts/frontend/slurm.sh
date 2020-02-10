@@ -61,8 +61,25 @@ source "${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/bashrc" || die "cannot so
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#source job ports ------------------------------------------------------------------------------------------------------------------
-source "${CARME_JOBDIR}/ports/$(hostname)" || die "cannot source job ports"
+#compute ports: base port + first GPU id -------------------------------------------------------------------------------------------
+JOB_OFFSET=$(echo -n "$SLURM_JOB_ID" | tail -c 3)
+PORT_OFFSET="1000"
+
+NB_PORT=$((6000 + 10#$JOB_OFFSET))
+TB_PORT=$((NB_PORT + PORT_OFFSET))
+TA_PORT=$((NB_PORT + PORT_OFFSET + PORT_OFFSET))
+
+LISTEN_NB=$(ss -tln -4 | grep ${NB_PORT})
+LISTEN_TB=$(ss -tln -4 | grep ${TB_PORT})
+LISTEN_TA=$(ss -tln -4 | grep ${TA_PORT})
+
+if [[ -n "${LISTEN_NB}" || -n "${LISTEN_TB}" || -n "${LISTEN_TA}" ]];then
+  echo "ERROR: No free port for entrypoints found!"
+  echo "NB_PORT: ${NB_PORT}"
+  echo "TB_PORT: ${TB_PORT}"
+  echo "TA_PORT: ${TA_PORT}"
+  exit 137
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

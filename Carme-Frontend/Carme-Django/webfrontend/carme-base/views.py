@@ -150,8 +150,119 @@ def job_table(request):
 
     # NOTE: no update of session ex time here!
 
-    # get all jobs by user
-    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
+    # setup logger
+    db_logger = logging.getLogger('db')
+
+    current_user = request.user.username
+    # search for ready slurm jobs
+    slurm_ready = SlurmJobs.objects.filter(status__exact="ready", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
+    for job in slurm_ready:
+        job.status = "configuring"  # set status to avoid deadlock loop on faield jobs
+        job.save()
+        conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
+                                certfile=settings.BASE_DIR+"/SSL/frontend.crt")
+        testtrigger = conn.root.SetTrigger(
+            str(job.SLURM_ID), str(job.user), str(job.jobName))
+
+        if testtrigger != 0:
+            # delete job that can not be started from db - backen has notified used and admin
+            #mess = 'Sarting job '+str(job.SLURM_ID)+' failed !'
+            #messages.success(request, mess)  # add messages
+            message = 'FRONTEND ERROR: Sarting job ' + \
+                str(job.SLURM_ID)+' failed !'
+            db_logger.exception(message)
+            # set status to fialed -> keep job in db for later investigation an d debugging
+            job.status = "failed"
+            job.save()
+        else:
+            job.status = "running"  # job will now be displayed
+            job.save()
+
+            message = "FRONTEND: set trigger vals " + \
+                str(job.SLURM_ID) + " " + \
+                str(job.user) + " " + str(job.jobName)
+            db_logger.info(message)
+
+            # dirty theia port hack
+            TA_PORT = job.TB_PORT + 1000
+
+            # write route to proxy
+            pfile = str(settings.CARME_PROXY_PATH) + \
+                '/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(job.SLURM_ID)+".toml"
+            f = open(pfile, 'w')
+            route = '''
+            [frontends.nb_'''+str(job.HASH)+''']
+            backend = "nb_'''+str(job.HASH)+'''"
+            passHostHeader = true
+            [frontends.nb_'''+str(job.HASH)+'''.routes.route_1]
+            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefix:/nb_'''+str(job.HASH)+'''"
+
+            [backends.nb_'''+str(job.HASH)+''']
+            [backends.nb_'''+str(job.HASH)+'''.servers.server1]
+            url = "http://'''+str(job.IP)+''':'''+str(job.NB_PORT)+'''"
+
+            [frontends.tb_'''+str(job.HASH)+''']
+            backend = "tb_'''+str(job.HASH)+'''"
+            entrypoints = ["https"]
+            [frontends.tb_'''+str(job.HASH)+'''.routes.route_1]
+            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefix:/tb_'''+str(job.HASH)+'''"
+
+            [backends.tb_'''+str(job.HASH)+''']
+            [backends.tb_'''+str(job.HASH)+'''.servers.server1]
+            url = "http://'''+str(job.IP)+''':'''+str(job.TB_PORT)+'''"
+
+            [frontends.dd_'''+str(job.HASH)+''']
+            backend = "dd_'''+str(job.HASH)+'''"
+            entrypoints = ["https"]
+            [frontends.dd_'''+str(job.HASH)+'''.routes.route_1]
+            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefix:/dd_'''+str(job.HASH)+'''"
+            
+            [backends.dd_'''+str(job.HASH)+''']
+            [backends.dd_'''+str(job.HASH)+'''.servers.server1]
+            url = "http://'''+str(job.IP)+''':8787"   
+
+            [frontends.ta_'''+str(job.HASH)+'''] 
+            backend = "ta_'''+str(job.HASH)+'''"
+            entrypoints = ["https"]
+            [frontends.ta_'''+str(job.HASH)+'''.routes.route_1]
+            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefixStrip:/ta_'''+str(job.HASH)+'''"
+            
+            [backends.ta_'''+str(job.HASH)+''']
+            [backends.ta_'''+str(job.HASH)+'''.servers.server1] 
+            url = "http://'''+str(job.IP)+''':'''+str(TA_PORT)+'''"
+            '''
+            f.write(route)
+            f.close()
+            # stupid hack to trigger an inotifywait event and cause traefik to update config
+            com = 'chmod 777 '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/*; rm '+str(
+                settings.CARME_PROXY_PATH)+'/routes/dummy.toml;touch '+str(settings.CARME_PROXY_PATH)+'/routes/dummy.toml'
+            if os.system(com) != 0:
+                message = 'FRONTEND ERROR: Sarting job ' + \
+                    str(job.SLURM_ID)+'('+str(settings.CARME_FRONTEND_ID)+') failed !'
+                db_logger.exception(message)
+                raise Exception("ERROR trafik job update")
+    
+    #check for timeout 
+    slurm_running = SlurmJobs.objects.filter(status__exact="running", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
+    for job in slurm_running:
+        job_slurm = CarmeJobTable.objects.filter(
+                id_job__exact=job.SLURM_ID )
+        now = int(datetime.datetime.now().timestamp())
+        if (job.status == "running") and (len(job_slurm) >0) and (job_slurm[0].timelimit>0):
+            job_timelimit = job_slurm[0].timelimit*60+job_slurm[0].time_start
+            if now > job_timelimit:
+                print ("TIMEOUT :", str(job.SLURM_ID), " : ", job.status, " : ",job_timelimit, " ", now)
+                job.status = "timeout"
+                conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
+                    certfile=settings.BASE_DIR+"/SSL/frontend.crt")
+                message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "#00B5FF")
+                job.save()
+
+
+
+
+
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
     numjobs = len(slurm_list_user)
     jobheight = calculate_jobheight(numjobs)
 
