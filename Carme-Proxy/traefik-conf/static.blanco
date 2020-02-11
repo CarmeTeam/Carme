@@ -41,8 +41,14 @@
     stsIncludeSubdomains = true
     stsPreload = true
 
-  [http.middlewares.https_redirect.redirectScheme]
-    scheme = "https"
-    permanent = true
+  [frontends.web]
+  backend = "web"
+  [frontends.web.headers]
+  STSSeconds = 63072000
+  STSIncludeSubdomains = true
+  STSPreload = true
+  forceSTSHeader = true
+    [frontends.web.routes.route_1]
+    rule = "Host:CARME_URL"
 
 
