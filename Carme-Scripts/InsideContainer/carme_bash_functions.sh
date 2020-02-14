@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# include cluster specific bash functions ------------------------------------------------------------------------------------------
+# it is expected that those funktions are stored as bash scripts with a file-ending ".sh" and are stores in local_bash_functions
+# NOTE: the path to check for the scripts is the PATH inside the singularity container!
+BASH_SCRIPTS="$(ls /home/.CarmeScripts/local_bash_functions/*.sh)"
+if [[ -n ${BASH_SCRIPTS} ]];then
+  for BASH_SCRIPT in $BASH_SCRIPTS;do
+    source ${BASH_SCRIPTS}
+  done
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 # define Tensorflow Version function -----------------------------------------------------------------------------------------------
 function CARME_TENSORFLOW_VERSION () {
   TF_VERSION=$(grep "tensorflow-gpu" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')

@@ -61,8 +61,6 @@ LOGDIR=${HOME}"/.local/share/carme/job-log-dir"
 OUTFILE=${LOGDIR}"/"${SLURM_JOB_ID}"-"${SLURM_JOB_NAME}".out"
 NODELIST=$(grep --color=never -Po "^NODELIST: \K.*" "${OUTFILE}")
 
-# write default bashrc to ${HOME}/.bashrc
-cat /home/.CarmeScripts/base_bashrc.sh > ~/.bashrc
 
 # overwrite ${HOME}/.bash_profile to source ${HOME}/.bashrc
 echo "
@@ -152,6 +150,7 @@ if [[ "${SLURM_JOB_NUM_NODES}" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   # start SSHD
   SSHDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}"/ssh_"${SLURM_JOB_ID}
   mkdir -p ${SSHDIR}
+  mkdir -p "${SSHDIR}"/ssh_config.d
   ssh-keygen -t ssh-rsa -N "" -f ${SSHDIR}/server_key_${SLURM_JOB_ID}
   ssh-keygen -t rsa -N "" -f ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
   mv ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub ${SSHDIR}/id_rsa_${SLURM_JOB_ID}.pub
@@ -181,13 +180,14 @@ HashKnownHosts yes
 GSSAPIAuthentication yes
 CheckHostIP no
 StrictHostKeyChecking no
- 
+
+Include ${SSHDIR}/ssh_config.d/*
+
 Host $(hostname)
   HostName $(hostname)
   User ${USER}
   Port ${NEW_SSHD_PORT}
-  IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
-  
+  IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}  
 " >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
 
   chmod 640 ${HOME}/.ssh/config		
