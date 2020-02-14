@@ -6,7 +6,7 @@
 BASH_SCRIPTS="$(ls /home/.CarmeScripts/local_bash_functions/*.sh)"
 if [[ -n ${BASH_SCRIPTS} ]];then
   for BASH_SCRIPT in $BASH_SCRIPTS;do
-    source ${BASH_SCRIPTS}
+    source ${BASH_SCRIPT}
   done
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
