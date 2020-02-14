@@ -69,10 +69,10 @@ if [[ "${SLURM_JOB_NUM_NODES}" -gt "1" || "${#GPUS}" -gt "1" ]]; then
   User ${USER}
   Port ${NEW_SSHD_PORT}
   IdentityFile ${HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
-" >> ${SSHDIR}/ssh_config_${SLURM_JOB_ID}
+" >> ${SSHDIR}/ssh_config.d/ssh_config_"$(hostname)"
 
-		echo "WORKER: starting SSHD on WORKER" $(hostname)
-		/usr/sbin/sshd -p ${NEW_SSHD_PORT} -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
+  echo "WORKER: starting SSHD on WORKER" $(hostname)
+  /usr/sbin/sshd -p ${NEW_SSHD_PORT} -D -h ${SSHDIR}/server_key_${SLURM_JOB_ID} -E ${SSHDIR}/sshd_log_${SLURM_JOB_ID} -f ${SSHDIR}/sshd_config_${SLURM_JOB_ID} &
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 

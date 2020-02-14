@@ -35,6 +35,7 @@ fi
 CARME_GATEWAY=$(get_variable CARME_GATEWAY ${CONFIG_FILE})
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT ${CONFIG_FILE})
+CARME_BUILDNODE_1_IP=$(get_variable CARME_BUILDNODE_1_IP ${CONFIG_FILE})
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 MOUNTS=${mountstr//[_]/ }
@@ -67,7 +68,7 @@ echo "WORKER GPUS: " ${IPADDR} ${GPUS} ${GPU_DEVICES}
 if [[ "${GPU_TYPE}" == "default" ]];then
   echo "WORKER GPUS: #(GPUS): ${GPUS}, GPU-Devices: ${GPU_DEVICES}, GPU type not specified"
 else
-		echo "MASTER GPUS: #(GPUs): ${GPUS}, GPU-Devices: ${GPU_DEVICES}, GPU type: ${GPU_TYPE}"
+		echo "WORKER GPUS: #(GPUs): ${GPUS}, GPU-Devices: ${GPU_DEVICES}, GPU type: ${GPU_TYPE}"
 fi
 echo ""
 
@@ -82,6 +83,10 @@ fi
 #-------------------------------------------------------------                        
 
 #start singularity ------------------------------------
-newpid singularity exec -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_worker.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
+if [ ${IPADDR} != "${CARME_BUILDNODE_1_IP}" ];then
+  newpid singularity exec -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_worker.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
+else
+  newpid singularity exec -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_worker.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
+fi
 #------------------------------------------------------
 
