@@ -28,5 +28,3 @@ zabbix-graphs/
 __pycache__/
 
 local_bash_functions/
-
-local-messages/
