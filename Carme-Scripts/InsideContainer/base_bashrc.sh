@@ -59,38 +59,10 @@ if [[ "$-" = *i* ]];then
   # --------------------------------------------------------------------------------------------------------------------------------
 
 
-  # add terminal welcome message
-  set -e
-  set -o pipefail
-  CARME_MESSAGES="${CARME_SCRIPTS_DIR}/carme-messages.sh"
-  [[ -f "${CARME_MESSAGES}" && -z "${SSH_CLIENT}" ]] && source "${CARME_MESSAGES}"
-  set +e
-  set +o pipefail
-  #---------------------------------------------------------------------------------------------------------------------------------
-else
-  export PS1="[\u@\h:\W]\$ "
-fi
-
-
-# redefine mpirun ------------------------------------------------------------------------------------------------------------------
-if [[ -f "/usr/bin/mpirun" ]];then
-  function carme_mpirun () {
-    if [[ $# -eq 0 ]] ; then
-      /usr/bin/mpirun
-    elif [[ "${1}" == "--help" ]];then
-      /usr/bin/mpirun --help
-    elif [[ "${1}" == "-h" ]];then
-      /usr/bin/mpirun -h
-    elif [[ "${1}" == "--version" ]];then
-      /usr/bin/mpirun --version
-    elif [[ "${1}" == "-V" ]];then
-      /usr/bin/mpirun -V
-    else
-      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
-    fi
-  }
-  complete -f -d -c carme_mpirun
-  export -f carme_mpirun
+# make anaconda environment visible ------------------------------------------------------------------------------------------------
+if [[ -f "/opt/anaconda3/etc/profile.d/conda.sh" ]];then
+  source "/opt/anaconda3/etc/profile.d/conda.sh"
+  conda activate base
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
