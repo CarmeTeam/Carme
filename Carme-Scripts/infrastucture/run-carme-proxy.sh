@@ -27,8 +27,7 @@ CARME_PROXY_DIR="/opt/Carme/Carme-Proxy"
 if [ -f ${IMAGE_NAME}.simg ];then
   if [[ "$1" == "start" ]];then
     mkdir -p ${PROXY_LOGS_DIR}
-    mkdir -p ${PROXY_ROUTES_DIR}/dynamic
-				chmod 777 ${PROXY_ROUTES_DIR}/dynamic
+
 				chown -R www-data:www-data ${PROXY_ROUTES_DIR}
 				chown -R www-data:www-data ${PROXY_LOGS_DIR}
 				if [[ ! -f "${PROXY_ROUTES_DIR}/static.toml" ]];then
