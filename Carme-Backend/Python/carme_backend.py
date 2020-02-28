@@ -27,7 +27,7 @@ SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig').load_module()
 from CarmeConfig import CARME_MATTERMOST_PATH, CARME_MATTERMOST_COMMAND, CARME_MATTERMOST_WEBHOCK_2
 from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
 from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
-from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH
+from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH_BACKEND
 from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
 from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME
 
@@ -495,7 +495,7 @@ class CarmeBackEndService(rpyc.Service):
 
         print("Job epilog: ", str(jobID))
 
-        com = 'ssh ' + CARME_LOGINNODE_NAME + ' "rm /opt/Carme-Proxy-Routes/dynamic/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml"'
+        com = 'ssh ' + str(CARME_LOGINNODE_NAME) + ' "rm ' + str(CARME_PROXY_PATH_BACKEND) + 'routes/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml && touch ' + str(CARME_PROXY_PATH_BACKEND) + 'routes"'
         
         ret = os.system(com)
 

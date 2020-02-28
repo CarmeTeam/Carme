@@ -61,8 +61,11 @@ CARME_SSL_EMAIL_BASE=""
 #e.g. @my-carme-cluster.institute.com
 
 #proxy
-CARME_PROXY_PATH=''
+CARME_PROXY_PATH_BACKEND=''
 #e.g. '/opt/Carme/Carme-Proxy/'
+
+CARME_PROXY_PATH_FRONTEND=''
+#e.g. '/opt/traefik/'
 
 #mounts
 #WARNING: set scripts mout correct
