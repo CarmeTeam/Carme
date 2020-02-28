@@ -98,7 +98,8 @@ def proxy_router_str(path, entrypoint, middlewares):
     entryPoints = ["''' + entrypoint + '''"]
     rule = "Host(`''' + str(settings.CARME_URL) + '''`) && PathPrefix(`/''' + path + '''`)"
     middlewares = [''' + mw_str + ''']
-    service = "''' + path + '''"'''
+    service = "''' + path + '''"
+    [http.routers.''' + path + '''.tls]'''
 
 def proxy_service_str(path, ip, port):
     return '''  [[http.services.''' + path + '''.loadBalancer.servers]]
