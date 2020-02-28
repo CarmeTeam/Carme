@@ -45,13 +45,14 @@ CARME_PROXY_DIR="/opt/Carme/Carme-Proxy"
 # start repectively stop the singularity instance ----------------------------------------------------------------------------------
 if [ -f ${IMAGE_NAME}.simg ];then
   if [[ "$1" == "start" ]];then
+    mkdir -p ${PROXY_LOGS_DIR}
 
-    mkdir -p "${PROXY_LOGS_DIR}" || die "cannot create ${PROXY_LOGS_DIR}"
-
-    echo "starting singularity instance ${INSTANCE_NAME}"
-    echo "(image: ${IMAGE_NAME}.simg)"
-    singularity instance start -B ${CARME_PROXY_DIR}:/opt/Carme/Carme-Proxy -B ${PROXY_LOGS_DIR}:/opt/Carme-Traefik-Logs -B ${PROXY_ROUTES_DIR}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
-
+				chown -R www-data:www-data ${PROXY_ROUTES_DIR}
+				chown -R www-data:www-data ${PROXY_LOGS_DIR}
+				if [[ ! -f "${PROXY_ROUTES_DIR}/static.toml" ]];then
+      ln -s ${CARME_PROXY_DIR}/traefik-conf/static.toml ${PROXY_ROUTES_DIR}/static.toml
+				fi
+				singularity instance start -B ${CARME_PROXY_DIR}:/opt/Carme/Carme-Proxy -B ${PROXY_LOGS_DIR}:/opt/Carme-Traefik-Logs -B ${PROXY_ROUTES_DIR}:/opt/traefik/routes ${IMAGE_NAME}.simg ${INSTANCE_NAME}
   elif [[ "$1" == "stop" ]];then
 
     PROXY_PID=$(singularity instance list | grep "${INSTANCE_NAME}\s" | awk '{print $2}')

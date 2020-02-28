@@ -423,10 +423,7 @@ class Backend(Service):
 
         print("epilog for job {}".format(job_id))
 
-        # delete route file
-        base_path = os.path.join(CARME_PROXY_PATH_BACKEND, "routes")
-        toml_path = os.path.join(base_path, "{}-{}.toml".format(CARME_FRONTEND_ID, job_id))
-        com = "ssh {node} 'rm -f {toml_path} && touch {base_path}'".format(node=CARME_LOGINNODE_NAME, toml_path=toml_path, base_path=base_path)
+        com = 'ssh ' + str(CARME_LOGINNODE_NAME) + ' "rm ' + str(CARME_PROXY_PATH_BACKEND) + 'routes/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml && touch ' + str(CARME_PROXY_PATH_BACKEND) + 'routes"'
         
         ret = os.system(com)
 

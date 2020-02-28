@@ -75,6 +75,35 @@ def generateChoices(request):
 
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
+def proxy_config_str(hash, entrypoint, ip, nb_port, tb_port, ta_port):
+    nb_path = "nb_" + hash
+    tb_path = "tb_" + hash
+    ta_path = "ta_" + hash
+
+    return "[http.routers]\n" \
+           + proxy_router_str(nb_path, entrypoint, []) + "\n\n" \
+           + proxy_router_str(tb_path, entrypoint, []) + "\n\n" \
+           + proxy_router_str(ta_path, entrypoint, ["stripprefix-theia"]) + "\n\n" \
+           + "\n\n" \
+           + "[http.services]\n" \
+           + proxy_service_str(nb_path, ip, nb_port) + "\n\n" \
+           + proxy_service_str(tb_path, ip, tb_port) + "\n\n" \
+           + proxy_service_str(ta_path, ip, ta_port) + "\n\n" \
+           + "\n"
+
+def proxy_router_str(path, entrypoint, middlewares):
+    mw_str = ', '.join(['"' + str(mw) + '"' for mw in middlewares])
+
+    return '''  [http.routers.''' + path + ''']
+    entryPoints = ["''' + entrypoint + '''"]
+    rule = "Host(`''' + str(settings.CARME_URL) + '''`) && PathPrefix(`/''' + path + '''`)"
+    middlewares = [''' + mw_str + ''']
+    service = "''' + path + '''"'''
+
+def proxy_service_str(path, ip, port):
+    return '''  [[http.services.''' + path + '''.loadBalancer.servers]]
+    url = "http://''' + ip + ''':''' + port + '''"'''
+
 @login_required(login_url='/login') 
 def index(request):
     """rendering of the website / -> template:home.html
@@ -186,61 +215,16 @@ def job_table(request):
             # dirty theia port hack
             TA_PORT = job.TB_PORT + 1000
 
+            route = proxy_config_str(str(job.HASH), "https", str(job.IP), str(job.NB_PORT), str(job.TB_PORT), str(TA_PORT))
+
             # write route to proxy
-            pfile = str(settings.CARME_PROXY_PATH) + \
-                '/routes/dynamic/'+str(settings.CARME_FRONTEND_ID)+"-"+str(job.SLURM_ID)+".toml"
+            pfile = str(settings.CARME_PROXY_PATH_FRONTEND) + \
+                '/routes/'+str(settings.CARME_FRONTEND_ID)+"-"+str(job.SLURM_ID)+".toml"
             f = open(pfile, 'w')
-            route = '''
-            [frontends.nb_'''+str(job.HASH)+''']
-            backend = "nb_'''+str(job.HASH)+'''"
-            passHostHeader = true
-            [frontends.nb_'''+str(job.HASH)+'''.routes.route_1]
-            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefix:/nb_'''+str(job.HASH)+'''"
-
-            [backends.nb_'''+str(job.HASH)+''']
-            [backends.nb_'''+str(job.HASH)+'''.servers.server1]
-            url = "http://'''+str(job.IP)+''':'''+str(job.NB_PORT)+'''"
-
-            [frontends.tb_'''+str(job.HASH)+''']
-            backend = "tb_'''+str(job.HASH)+'''"
-            entrypoints = ["https"]
-            [frontends.tb_'''+str(job.HASH)+'''.routes.route_1]
-            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefix:/tb_'''+str(job.HASH)+'''"
-
-            [backends.tb_'''+str(job.HASH)+''']
-            [backends.tb_'''+str(job.HASH)+'''.servers.server1]
-            url = "http://'''+str(job.IP)+''':'''+str(job.TB_PORT)+'''"
-
-            [frontends.dd_'''+str(job.HASH)+''']
-            backend = "dd_'''+str(job.HASH)+'''"
-            entrypoints = ["https"]
-            [frontends.dd_'''+str(job.HASH)+'''.routes.route_1]
-            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefix:/dd_'''+str(job.HASH)+'''"
-            
-            [backends.dd_'''+str(job.HASH)+''']
-            [backends.dd_'''+str(job.HASH)+'''.servers.server1]
-            url = "http://'''+str(job.IP)+''':8787"   
-
-            [frontends.ta_'''+str(job.HASH)+'''] 
-            backend = "ta_'''+str(job.HASH)+'''"
-            entrypoints = ["https"]
-            [frontends.ta_'''+str(job.HASH)+'''.routes.route_1]
-            rule = "Host:'''+str(settings.CARME_URL)+''';PathPrefixStrip:/ta_'''+str(job.HASH)+'''"
-            
-            [backends.ta_'''+str(job.HASH)+''']
-            [backends.ta_'''+str(job.HASH)+'''.servers.server1] 
-            url = "http://'''+str(job.IP)+''':'''+str(TA_PORT)+'''"
-            '''
             f.write(route)
             f.close()
-            # stupid hack to trigger an inotifywait event and cause traefik to update config
-            com = 'chmod 777 '+str(settings.CARME_PROXY_PATH)+'/routes/dynamic/*; rm '+str(
-                settings.CARME_PROXY_PATH)+'/routes/dummy.toml;touch '+str(settings.CARME_PROXY_PATH)+'/routes/dummy.toml'
-            if os.system(com) != 0:
-                message = 'FRONTEND ERROR: Sarting job ' + \
-                    str(job.SLURM_ID)+'('+str(settings.CARME_FRONTEND_ID)+') failed !'
-                db_logger.exception(message)
-                raise Exception("ERROR trafik job update")
+
+            os.system('touch ' + str(settings.CARME_PROXY_PATH_FRONTEND) + 'routes')
     
     #check for timeout 
     slurm_running = SlurmJobs.objects.filter(status__exact="running", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
