@@ -2,68 +2,63 @@
 #-----------------------------------------------------------------------------------------------------------------------------------
 # script to add new users to slurm
 #
-# Copyright (C) 2018 by Dr. Dominik Straßel
+# Copyright (C) 2020 by Dr. Dominik Straßel
 #-----------------------------------------------------------------------------------------------------------------------------------
+echo ""
 
-# default parameters ---------------------------------------------------------------------------------------------------------------
-printf "\n"
 
-CLUSTER_DIR="/opt/Carme"
-CONFIG_FILE="CarmeConfig"
-
-SETCOLOR='\033[1;33m'
-NOCOLOR='\033[0m'
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-if [ ! "$BASH_VERSION" ]; then
-    printf "${SETCOLOR}This is a bash-script. Please use bash to execute it!${NOCOLOR}\n\n"
-    exit 137
-fi
-
-if [ ! $(whoami) = "root" ]; then
-    printf "${SETCOLOR}you need root privileges to run this script${NOCOLOR}\n\n"
-    exit 137
-fi
-
-if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-  function get_variable () {
-    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-    variable_value=$(echo "$variable_value" | tr -d '"')
-    echo $variable_value
-  }
+# source basic bash functions ------------------------------------------------------------------------------------------------------
+PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
+  echo "ERROR: carme-basic-bash-functions.sh not found but needed"
   exit 137
 fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# some basic checks before we continue ---------------------------------------------------------------------------------------------
+# check if bash is used to execute the script
+is_bash
+
+# check if root executes this script
+is_root
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from config
-CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr)
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-THIS_NODE_IPS=( $(hostname -I) )
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_SLURM_ControlAddr} " ]]; then
-    printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-    exit 137
+
+# functions ------------------------------------------------------------------------------------------------------------------------
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh"
+else
+  echo "ERROR: carme-slurm-mgmt-functions.sh not found but needed"
+  exit 137
 fi
-
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-read -p "Do you want to modify user entries in the slurm database? [y/N] " RESP
-if [ "$RESP" = "y" ]; then
 
-  printf "\n"
-  read -p "enter slurm-user(s) that you want to modify [multiple users separated by space]: " SLURMUSER_HELPER
-  printf "\n"
+# check if this node is the slurmctld node -----------------------------------------------------------------------------------------
+check_if_slurmctld_node "${CARME_SLURM_ControlAddr}"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-  read -p "enter what you want to modify: " SLURMMODIFY
 
-  for SLURMUSER in $SLURMUSER_HELPER
-  do
-      echo $SLURMUSER
-      sacctmgr modify user $SLURMUSER set $SLURMMODIFY
+read -rp "Do you want to modify user entries in the slurm database? [y/N] " RESP
+if [ "$RESP" = "y" ];then
+  read -rp "enter slurm-user(s) that you want to modify [multiple users separated by space]: " SLURMUSER_HELPER
+  echo ""
+
+  read -rp "enter what you want to modify: " SLURMMODIFY
+
+  for SLURMUSER in ${SLURMUSER_HELPER};do
+    echo "${SLURMUSER}"
+    sacctmgr modify user "${SLURMUSER}" set "${SLURMMODIFY}"
   done
 else
-    printf "Bye Bye...\n\n"
+  echo "Bye Bye..."
 fi
-
