@@ -17,7 +17,7 @@ function check_if_slurmctld_node () {
   THIS_NODE_IPS=( "$(hostname -I)" )
   if [[ ! " ${THIS_NODE_IPS[*]} " =~ ${1} ]]; then
     echo "ERROR: this is not the slurmctld node"
-    exit 200
+    exit 137
   fi
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ function check_if_user_exists () {
   USEREXISTS=$(id -u "${1}" > /dev/null 2>&1; echo $?)
   if [ "${USEREXISTS}" = "1" ]; then
       echo "ERROR: cannot delete ${1} as it does not exist"
-      exit 200
+      exit 137
   fi
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -40,7 +40,10 @@ function check_if_user_exists () {
 function read_and_check_slurm_limitations () {
     # list avialbale groups of the user(s) --------------------------------------------------------
     echo -e "${SETCOLOR}available groups for user ${1}${NOCOLOR}"
-    groups "${1}"
+    
+    for i in ${2};do
+      groups "${i}"
+    done
     echo ""
     echo ""
     #----------------------------------------------------------------------------------------------
@@ -61,9 +64,9 @@ function read_and_check_slurm_limitations () {
     echo ""
     
     read -rp "enter slurm-account ${1} is suppost to be added to ${LBR}" CARME_SLURM_ACCOUNT
-    if [[ ! "${SLURM_ACCOUNTS_AVAIL[*]}" =~ ${CARME_SLURM_ACCOUNT} ]];then
+    if [[ ! "${SLURM_ACCOUNTS_AVAIL[*]}" =~ "${CARME_SLURM_ACCOUNT}" ]];then
       echo "ERROR: you did not provide an available slurm account"
-      exit 200
+      exit 137
     fi
     echo ""
     echo ""
@@ -74,7 +77,7 @@ function read_and_check_slurm_limitations () {
     read -rp "options are Admin or None ${LBR}" SLURM_ADMIN_LEVEL
     if [[ "${SLURM_ADMIN_LEVEL}" != "Admin" && "${SLURM_ADMIN_LEVEL}" != "None" ]];then
       echo "ERROR: you can only choose between 'Admin' and 'None'"
-      exit 200
+      exit 137
     fi
     echo ""
     echo ""
@@ -88,9 +91,9 @@ function read_and_check_slurm_limitations () {
     read -rp "enter partitions (separated by comma, no spaces) ${LBR}" SLURM_PARTITION_LIST
     PARTITION_LIST_HELPER="${SLURM_PARTITION_LIST//,/ }"
     for SLURM_PARTITION in ${PARTITION_LIST_HELPER[*]};do
-      if [[ ! "${SLURM_PARTITIONS_AVAIL[*]}" =~ ${SLURM_PARTITION} ]];then
+      if [[ ! "${SLURM_PARTITIONS_AVAIL[*]}" =~ "${SLURM_PARTITION}" ]];then
         echo "ERROR: you did not provide a valid slurm partition"
-        exit 200
+        exit 137
       fi
     done
     echo ""
@@ -113,21 +116,23 @@ function read_and_check_slurm_limitations () {
 # put together and check -----------------------------------------------------------------------------------------------------------
 # USAGE: put_together_and_check put_together_and_check "${SLURMUSER}" "${CARME_SLURM_ClusterName}" "${CARME_SLURM_ACCOUNT}" "${SLURM_ADMIN_LEVEL}" "${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
 function put_together_and_check () {
+  if [ -z "${6}" ];then
+    CARME_SLURM_ACCOUNT_SPECS="AdminLevel=${4} partition=${5}"
+  else
+    CARME_SLURM_ACCOUNT_SPECS="AdminLevel=${4} partition=${5} ${6}"
+  fi
+
   echo -e "${SETCOLOR}do you want to add ${1} with the following specifications${NOCOLOR}"
   echo "cluster: ${2}"
   echo "account: ${3}"
-  echo "admin level: ${4}"
-  echo "partition(s): ${5}"
-  if [[ -n "${6}" ]];then
-    echo "additional limits: ${6}"
-  fi
+  echo "limitations: ${CARME_SLURM_ACCOUNT_SPECS}"
   echo ""
-  read -rp "[y|N] ${LBR}" RESP
+  read -rp "(y|n) ${LBR}" RESP
 
-  if [ "$RESP" = "N" ];then
-    exit 200
-  elif [[ "$RESP" != "y" && "$RESP" != "N" ]];then
-    exit 200
+  if [ "$RESP" = "n" ];then
+    exit 137
+  elif [[ "$RESP" != "y" && "$RESP" != "n" ]];then
+    exit 137
   fi
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -139,7 +144,7 @@ function list_slurm_accounts () {
   ACCOUNTS_HELPER=( "$(sacctmgr list -n associations user="${1}" format=Account | tr ' ' '\n' | sort -u | tr '\n' ' ')" )
   if [[ ! ${ACCOUNTS_HELPER[*]} ]];then
     echo "ERROR: ${1} is not found in the slurm database, so we cannot delete it"
-    exit 200
+    exit 137
   fi
   
   echo -e "${SETCOLOR}determine account for ${1}${NOCOLOR}"
@@ -154,3 +159,4 @@ function list_slurm_accounts () {
   read -rp "enter slurm-account you want to delete the user from ${LBR}" CARME_SLURM_ACCOUNT
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
+

@@ -215,6 +215,79 @@ CARME_SLURM_BackupController=""
 
 CARME_SLURM_ClusterName=""
 #e.g. cluster
+
+CARME_SLURM_SlurmctldPidFile=""
+#default: /var/run/slurm-llnl/slurmctld.pid
+
+CARME_SLURM_SlurmctldPort=""
+#default: 6817
+
+CARME_SLURM_SlurmdPidFile=""
+#default: /var/run/slurm-llnl/slurmd.pid
+
+CARME_SLURM_SlurmdPort=""
+#default: 6818
+
+CARME_SLURM_SlurmdSpoolDir=""
+#default: /var/lib/slurm-llnl/slurmd
+
+CARME_SLURM_SlurmUser=""
+#default: slurm
+
+CARME_SLURM_StateSaveLocation=""
+#e.g. /var/slurm
+
+CARME_SLURM_AccountingStorageHost=""
+#e.g. headnode IP
+
+CARME_SLURM_SlurmctldDebug=""
+#default: 7 -- debug level from 1 to 7
+
+CARME_SLURM_SlurmctldLogFile=""
+#default: /var/log/slurm-llnl/slurmctld.log
+
+CARME_SLURM_SlurmdDebug=""
+#default: 7 -- debug level from 1 to 7
+
+CARME_SLURM_SlurmdLogFile=""
+#default: "/var/log/slurm-llnl/slurmd.log"
+
+# note: if different nodes are used change /opt/Carme/Carme-Scripts/carme-slurm-node-weight-shuffle.sh
+CARME_SLURM_COMPUTENODES_CONFIG_1=""
+#e.g. CPUs=24 Sockets=1 CoresPerSocket=12 ThreadsPerCore=2 RealMemory=IN-MB MemSpecLimit=2048 State=UNKNOWN
+
+#CARME_SLURM_COMPUTENODES_CONFIG_2=""
+#e.g. CPUs=36 Sockets=1 CoresPerSocket=18 ThreadsPerCore=2 RealMemory=IN-MB MemSpecLimit=2048 State=UNKNOWN
+
+#CARME_SLURM_COMPUTENODES_CONFIG_3=""
+#e.g. CPUs=48 Sockets=2 CoresPerSocket=12 ThreadsPerCore=2 RealMemory=IN-MB MemSpecLimit=2048 State=UNKNOWN
+
+CARME_SLURM_PARITION_1=""
+#e.g. PartitionName=short Nodes=node[01-10] MaxMemPerNode=IN-MB Default=NO Priority=90 MaxCPUsPerNode=12 DefMemPerCPU=IN-MB MaxMemPerCPU=IN-MB DefaultTime=IN-MINUTES MaxTime=IN-MINUTES State=UP
+
+#CARME_SLURM_PARITION_2=""
+#e.g. PartitionName=normal Nodes=node[11-20] MaxMemPerNode=IN-MB Default=NO Priority=70 MaxCPUsPerNode=8 DefMemPerCPU=IN-MB MaxMemPerCPU=IN-MB DefaultTime=IN-MINUTES MaxTime=IN-MINUTES State=UP
+
+#CARME_SLURM_PARITION_3=""
+#e.g. PartitionName=long Nodes=node[21-30] MaxMemPerNode=IN-MB Default=NO Priority=50 MaxCPUsPerNode=4 DefMemPerCPU=IN-MB MaxMemPerCPU=IN-MB DefaultTime=IN-MINUTES MaxTime=IN-MINUTES State=UP
+
+CARME_SLURM_StoragePass=""
+#e.g. slurmdbpasswd
+
+CARME_SLURM_StorageUser=""
+#e.g. slurm
+
+CARME_SLURM_Cgroups=""
+#yes or no
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+#Carme Containers ------------------------------------------------------------------------------------------------------------------
+CARME_CONTAINER_STORAGE=""
+#e.g. /home/container-store [where the singularity images are located]
+
+CARME_SINGULARITY_PATH=""
+#e.g. /bin
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

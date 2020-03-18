@@ -4,12 +4,7 @@
 #
 # Copyright (C) 2020 by Dr. Dominik Straßel
 #-----------------------------------------------------------------------------------------------------------------------------------
-
-
-#bash set buildins -----------------------------------------------------------------------------------------------------------------
-set -e
-set -o pipefail
-#-----------------------------------------------------------------------------------------------------------------------------------
+echo ""
 
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
@@ -18,7 +13,7 @@ if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
   echo "ERROR: carme-basic-bash-functions.sh not found but needed"
-  exit 200
+  exit 137
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -43,7 +38,7 @@ if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh"
 else
   echo "ERROR: carme-slurm-mgmt-functions.sh not found but needed"
-  exit 200
+  exit 137
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -54,10 +49,7 @@ check_if_slurmctld_node "${CARME_SLURM_ControlAddr}"
 
 
 read -rp "Do you want to modify user entries in the slurm database? [y/N] " RESP
-echo ""
-
 if [ "$RESP" = "y" ];then
-
   read -rp "enter slurm-user(s) that you want to modify [multiple users separated by space]: " SLURMUSER_HELPER
   echo ""
 
@@ -69,7 +61,5 @@ if [ "$RESP" = "y" ];then
   done
 
 else
-
   echo "Bye Bye..."
-
 fi
