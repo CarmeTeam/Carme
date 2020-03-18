@@ -329,37 +329,6 @@ CARME_SLURM_StorageUser=""
 
 CARME_SLURM_Cgroups=""
 #yes or no
-
-CARME_SLURM_ACCOUNT_1=""
-#associated with CARME_LDAPGROUP_1
-
-CARME_SLURM_ACCOUNT_SPECS_1=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_2=""
-#associated with CARME_LDAPGROUP_2
-
-CARME_SLURM_ACCOUNT_SPECS_2=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_3=""
-#associated with CARME_LDAPGROUP_3
-
-CARME_SLURM_ACCOUNT_SPECS_3=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_4=""
-#associated with CARME_LDAPGROUP_4
-
-CARME_SLURM_ACCOUNT_SPECS_4=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_5=""
-#associated with CARME_LDAPGROUP_5
-
-CARME_SLURM_ACCOUNT_SPECS_5=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
