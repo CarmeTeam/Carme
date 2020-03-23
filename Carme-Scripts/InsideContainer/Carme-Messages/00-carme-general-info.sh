@@ -19,21 +19,31 @@ echo ""
 echo -e "\033[1mJob Information ------------------------------\033[0m"
 echo "Job-ID|-Name: ${CARME_JOBID} | ${CARME_JOB_NAME}"
 echo "Nodes:        ${CARME_NODES}"
-if [[ ! -z ${CARME_GPUS_PER_NODE} ]];then
+if [[ -n "${CARME_GPUS_PER_NODE}" ]];then
   echo "GPUs/Node:    ${CARME_GPUS_PER_NODE}"
 fi
-if [[ ! -z ${CARME_GPU_LIST} ]];then
+if [[ -n "${CARME_GPU_LIST}" ]];then
   echo "GPU-ID(s):    ${CARME_GPU_LIST}"
 fi
 echo "End-Time:   $(grep "^${CARME_JOBID}[[:space:]]${CARME_JOB_NAME}" .local/share/carme/job-log-dir/job-log.dat | awk '{print $6}')"
 echo ""
 
 # print base ennv information
-STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
-if [[ -f "${STOREDIR}/conda_base.txt" ]];then
-  echo -e "\033[1mBase Environment -----------------------------\033[0m"
-  echo "TensorFlow: $(grep "^tensorflow-gpu " ${STOREDIR}/conda_base.txt | awk '{ print $2 }')"
-  echo "PyTorch:    $(grep "^pytorch " ${STOREDIR}/conda_base.txt | awk '{ print $2 }')"
-  echo ""
+STOREDIR="${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}"
+
+TF_VERSION="$(grep "^tensorflow-gpu " "${STOREDIR}/conda_base.txt" | awk '{ print $2 }')"
+PT_VERSION="$(grep "^pytorch " "${STOREDIR}/conda_base.txt" | awk '{ print $2 }')"
+
+if [[ -n "${TF_VERSION}" || -n "${PT_VERSION}" ]];then
+  if [[ -f "${STOREDIR}/conda_base.txt" ]];then
+    echo -e "\033[1mBase Environment -----------------------------\033[0m"
+    if [[ -n "${TF_VERSION}" ]];then
+      echo "TensorFlow: ${TF_VERSION}"
+    fi
+    if [[ -n "${PT_VERSION}" ]];then
+      echo "PyTorch:    ${PT_VERSION}"
+    fi
+    echo ""
+  fi
 fi
 

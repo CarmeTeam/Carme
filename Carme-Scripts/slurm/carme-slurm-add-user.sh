@@ -70,10 +70,10 @@ if [ "${IS_MULTI_USER}" = "1" ];then
     read_and_check_slurm_limitations "${SLURMUSER}" "${SLURMUSER_HELPER[*]}"
 
     # put together what we have so far
-    put_together_and_check put_together_and_check "${SLURMUSER}" "${CARME_SLURM_ClusterName}" "${CARME_SLURM_ACCOUNT}" "${SLURM_ADMIN_LEVEL}" "${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
-
+    put_together_and_check "${SLURMUSER}" "${CARME_SLURM_ClusterName}" "${CARME_SLURM_ACCOUNT}" "${SLURM_ADMIN_LEVEL}" "${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
+    
     # add user to slurm db
-    sacctmgr create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" "${CARME_SLURM_ACCOUNT_SPECS}"
+    sacctmgr create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
 
     # check what we just did via slurm commands
     sacctmgr list associations user="${SLURMUSER}"
@@ -97,7 +97,7 @@ elif [ "${IS_MULTI_USER}" = "2" ];then
     check_if_user_exists "${SLURMUSER}"
 
     # add user to slurm db
-    sacctmgr create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" "${CARME_SLURM_ACCOUNT_SPECS}"
+    sacctmgr create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
 
     # check what we just did via slurm commands
     sacctmgr list associations user="${SLURMUSER}"

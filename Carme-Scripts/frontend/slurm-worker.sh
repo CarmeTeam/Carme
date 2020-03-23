@@ -84,9 +84,9 @@ fi
 
 #start singularity ------------------------------------
 if [ ${IPADDR} != "${CARME_BUILDNODE_1_IP}" ];then
-  newpid singularity exec -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_worker.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
+  newpid singularity exec --nv -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_worker.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM}
 else
-  newpid singularity exec -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_worker.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
+  newpid singularity exec --nv -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_worker.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
 fi
 #------------------------------------------------------
 
