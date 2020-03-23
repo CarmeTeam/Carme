@@ -3,10 +3,10 @@
 # include cluster specific bash functions ------------------------------------------------------------------------------------------
 # it is expected that those funktions are stored as bash scripts with a file-ending ".sh" and are stores in local_bash_functions
 # NOTE: the path to check for the scripts is the PATH inside the singularity container!
-BASH_SCRIPTS="$(ls /home/.CarmeScripts/local_bash_functions/*.sh)"
-if [[ -n ${BASH_SCRIPTS} ]];then
+BASH_SCRIPTS=( "$(find "/home/.CarmeScripts/local_bash_functions" -maxdepth 1 -name "*.sh")" ) 
+if [[ "${#BASH_SCRIPTS[@]}" -gt 0 ]];then
   for BASH_SCRIPT in $BASH_SCRIPTS;do
-    source ${BASH_SCRIPT}
+    source "${BASH_SCRIPT}"
   done
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------

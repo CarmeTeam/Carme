@@ -116,16 +116,14 @@ function read_and_check_slurm_limitations () {
 # put together and check -----------------------------------------------------------------------------------------------------------
 # USAGE: put_together_and_check put_together_and_check "${SLURMUSER}" "${CARME_SLURM_ClusterName}" "${CARME_SLURM_ACCOUNT}" "${SLURM_ADMIN_LEVEL}" "${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
 function put_together_and_check () {
-  if [ -z "${6}" ];then
-    CARME_SLURM_ACCOUNT_SPECS="AdminLevel=${4} partition=${5}"
-  else
-    CARME_SLURM_ACCOUNT_SPECS="AdminLevel=${4} partition=${5} ${6}"
-  fi
-
   echo -e "${SETCOLOR}do you want to add ${1} with the following specifications${NOCOLOR}"
   echo "cluster: ${2}"
   echo "account: ${3}"
-  echo "limitations: ${CARME_SLURM_ACCOUNT_SPECS}"
+  echo "admin level: ${4}"
+  echo "partition(s): ${5}"
+  if [[ -n "${6}" ]];then
+    echo "additional limits: ${6}"
+  fi
   echo ""
   read -rp "(y|n) ${LBR}" RESP
 
