@@ -202,8 +202,10 @@ fi
 
 # start tensorboard ----------------------------------------------------------------------------------------------------------------
 TENSORBOARD_LOG_DIR="${TBDIR}/tensorboard_${SLURM_JOB_ID}"
-mkdir ${TENSORBOARD_LOG_DIR}
-LC_ALL=C /opt/anaconda3/bin/tensorboard --logdir=${TENSORBOARD_LOG_DIR} --port=${TB_PORT} --path_prefix="/tb_${MYHASH}" & 
+if [[ -f "/opt/anaconda3/bin/tensorboard" ]];then
+  mkdir ${TENSORBOARD_LOG_DIR}
+  LC_ALL=C /opt/anaconda3/bin/tensorboard --logdir=${TENSORBOARD_LOG_DIR} --port=${TB_PORT} --path_prefix="/tb_${MYHASH}" & 
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -218,7 +220,9 @@ fi
 
 
 # start jupyter-lab ----------------------------------------------------------------------------------------------------------------
-/opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py &
+if [[ -f "/opt/anaconda3/bin/jupyter" ]];then
+  /opt/anaconda3/bin/jupyter lab --ip=${IPADDR} --port=${NB_PORT} --notebook-dir=/home --no-browser --config=${STOREDIR}/jupyter_notebook_config-${SLURM_JOB_ID}.py &
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
