@@ -129,7 +129,6 @@ export LC_MESSAGES=POSIX
 
 
 # define aliases -------------------------------------------------------------------------------------------------------------------
-alias nvidia-smi='nvidia-smi -i ${GPUS}'
 alias ls='ls --group-directories-first --color'
 alias la='ls -lahv'
 alias ld='ls -av'
