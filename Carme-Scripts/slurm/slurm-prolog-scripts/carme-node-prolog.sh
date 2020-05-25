@@ -94,8 +94,7 @@ fi
 
 # define the users home directory and its primary group
 USER_HOME="$(getent passwd "${SLURM_JOB_USER}" | cut -d: -f6)"
-[[ -z "${USER_HOME}" ]] && die "home-folder of user ${SLURM_JOB_USER} not set"
-[[ ! -d "${USER_HOME}" ]] && die "home-folder (${USER_HOME}) of user ${SLURM_JOB_USER} does not exist"
+[[ -z "${USER_HOME}" ]] && die "home-folder of ${SLURM_JOB_USER} not set"
 log "slurm-user: ${SLURM_JOB_USER}"
 log "slurm-user home: ${USER_HOME}"
 
@@ -215,11 +214,6 @@ export TA_PORT=${TA_PORT}" >> "${JOBDIR}/ports/$(hostname)"
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
 
     # create folders needed for ssh
-    if [[ ! -d "${USER_HOME}/.ssh" ]];then
-      mkdir "${USER_HOME}/.ssh"
-      chown "${SLURM_JOB_USER}":"${USER_GROUP}" "${USER_HOME}/.ssh"
-    fi
-
     log "create ${JOBDIR}/ssh"
     mkdir -p "${JOBDIR}/ssh" || die "cannot create ${JOBDIR}/ssh"
 
@@ -233,11 +227,32 @@ export TA_PORT=${TA_PORT}" >> "${JOBDIR}/ports/$(hostname)"
     log "create ssh keys"
 
     ssh-keygen -t ssh-rsa -N "" -f "${JOBDIR}/ssh/server_key"
-    ssh-keygen -t rsa -N "" -f "${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}"
+    ssh-keygen -t rsa -N "" -f "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}"
+    chown "${SLURM_JOB_USER}":"${USER_GROUP}" "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}"
+    mv "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub" "${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}.pub"
     cat "${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}.pub" >> "${JOBDIR}/ssh/authorized_keys"
 
 
-    # create ssh config
+    # create sshd and ssh config
+    log "create sshd config"
+
+    echo "PermitRootLogin no
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+UsePAM no
+AuthorizedKeysFile ${JOBDIR}/ssh/authorized_keys
+LoginGraceTime 30s
+MaxAuthTries 3
+ClientAliveInterval 3600
+ClientAliveCountMax 1
+X11Forwarding no
+PrintMotd no
+AcceptEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
+AllowUsers ${SLURM_JOB_USER}
+PermitUserEnvironment no
+" >> "${JOBDIR}/ssh/sshd_config"
+    chmod 640 "${JOBDIR}/ssh/sshd_config"
+
     log "create ssh config"
     echo "SendEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
 HashKnownHosts yes
@@ -257,12 +272,14 @@ Include ${JOBDIR}/ssh/ssh_config.d/*
   log "change ownership of ${LOGDIR}"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${LOGDIR}"
 
-  log "change ownership of ${USER_HOME}/.local/share/carme/job"
-  chown "${SLURM_JOB_USER}":"${USER_GROUP}" "${USER_HOME}/.local/share/carme/job"
-
   log "change ownership of ${JOBDIR}"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JOBDIR}"
 
+  log "change ownership of ${JUPYTERLAB_BASEDIR}"
+  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JUPYTERLAB_BASEDIR}"
+
+  log "change ownership of ${JUPYTERLAB_WORKSPACESDIR}"
+  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JUPYTERLAB_WORKSPACESDIR}"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -283,7 +300,7 @@ export CARME_HASH=${HASH}
 
   #register job with frontend db
   log "register job with frontend db"
-  runuser -u "${SLURM_JOB_USER}" -- "${CARME_SCRIPT_PATH}"/dist_alter_jobDB_entry/alter_jobDB_entry "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${SLURM_JOB_GPUS}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
+  runuser -u "${SLURM_JOB_USER}" -- "${CARME_SCRIPT_PATH}"/dist_alter_jobDB_entry/alter_jobDB_entry "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${CUDA_VISIBLE_DEVICES}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
 
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -292,37 +309,9 @@ fi
 # create ssh:config.d files --------------------------------------------------------------------------------------------------------
 if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
 
-  # create folder for sshd_configs
-  log "create ${JOBDIR}/ssh/sshd"
-  mkdir -p "${JOBDIR}/ssh/sshd" || die "cannot create ${JOBDIR}/ssh/sshd"
-
-  # create node specific sshd_configs
-  log "create sshd config for $(hostname)"
-
-  echo "PermitRootLogin no
-PasswordAuthentication no
-PubkeyAuthentication yes
-ChallengeResponseAuthentication no
-UsePAM no
-AuthorizedKeysFile ${JOBDIR}/ssh/authorized_keys
-PidFile ${JOBDIR}/ssh/sshd/$(hostname).pid
-LoginGraceTime 30s
-MaxAuthTries 3
-ClientAliveInterval 60
-ClientAliveCountMax 3
-X11Forwarding no
-PrintMotd no
-AcceptEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
-AllowUsers ${SLURM_JOB_USER}
-PermitUserEnvironment no
-" >> "${JOBDIR}/ssh/sshd/$(hostname).conf"
-  chmod 640 "${JOBDIR}/ssh/sshd/$(hostname).conf"
-
-  # create folder for ports
   log "create ${JOBDIR}/ports"
   mkdir -p "${JOBDIR}/ports" || die "cannot create ${JOBDIR}/ports"
 
-  # create folder for local ssh_configs
   log "create ${JOBDIR}/ssh/ssh_config.d"
   mkdir -p "${JOBDIR}/ssh/ssh_config.d" || die "cannot create ${JOBDIR}/ssh/ssh_config.d"
 
@@ -332,7 +321,7 @@ PermitUserEnvironment no
   FINAL_PORT="2300"
 
   for ((i=BASE_PORT;i<=FINAL_PORT;i++)); do
-    if ! ss -tln -4 | grep -q "${i}"
+    if ! ss -tln -4 | grep -q ${i}
     then
       SSHD_PORT=${i}
       echo "export SSHD_PORT=${SSHD_PORT}" >> "${JOBDIR}/ports/$(hostname)"
@@ -351,7 +340,7 @@ PermitUserEnvironment no
   HostName $(hostname)
   User ${SLURM_JOB_USER}
   Port ${SSHD_PORT}
-  IdentityFile ${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}
+  IdentityFile ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
 " >> "${JOBDIR}/ssh/ssh_config.d/$(hostname)"
 
   log "change ownership of ${JOBDIR}"

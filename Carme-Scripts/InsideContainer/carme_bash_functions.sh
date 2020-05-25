@@ -3,77 +3,10 @@
 # include cluster specific bash functions ------------------------------------------------------------------------------------------
 # it is expected that those funktions are stored as bash scripts with a file-ending ".sh" and are stores in local_bash_functions
 # NOTE: the path to check for the scripts is the PATH inside the singularity container!
-BASH_SCRIPTS=( "$(find "/home/.CarmeScripts/local_bash_functions" -maxdepth 1 -name "*.sh")" ) 
-if [[ "${#BASH_SCRIPTS[@]}" -gt 0 ]];then
-  for BASH_SCRIPT in $BASH_SCRIPTS;do
-    source "${BASH_SCRIPT}"
-  done
-fi
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-# define Tensorflow Version function -----------------------------------------------------------------------------------------------
-function CARME_TENSORFLOW_VERSION () {
-  TF_VERSION=$(grep "tensorflow-gpu" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
-  echo ${TF_VERSION}
-}
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# define PyTorch Version function --------------------------------------------------------------------------------------------------
-function CARME_PYTORCH_VERSION () {
-  PT_VERSION=$(grep "pytorch" ${STOREDIR}/conda_base.txt | awk '{ print $2 }')
-}
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# define CUDA Version function -----------------------------------------------------------------------------------------------------
-function CARME_CUDA_VERSION () {
-  CUDA_VERSION=$(nvcc --version  | grep release | awk '{print $6}')
-  echo ${CUDA_VERSION}
-}
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# define CUDNN_VERSION function ----------------------------------------------------------------------------------------------------
-function carme_cudnn_version () {
-  CUDNN_VERSION=$(cat /opt/cuda/include/cudnn.h | grep "define CUDNN_MAJOR" | awk '{print $3}' | cut -d/ -f1)
-  echo ${CUDNN_VERSION}
-}
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# define cancel function -----------------------------------------------------------------------------------------------------------
-function carme_canceljob() {
-    NUMBERCHECK='^[0-9]+$'
-    if ! [[ $1 =~ ${NUMBERCHECK} ]];then
-        VALUE=( $(ps ax | grep "$1" | grep -v grep | awk '{ print $1 }') )
-        echo "${VALUE[0]}"
-        kill ${VALUE[0]}
-        VALUE=( $(ps ax | grep "$1" | grep -v grep | awk '{ print $1 }') )
-        if [[ ! -z ${VALUE[0]} ]];then
-            pgrep -P ${VALUE[0]} | xargs kill -9
-            kill -9 ${VALUE[0]}
-        fi
-                                                                sleep 1
-        VALUE=( $(ps ax | grep "$1" | grep -v grep | awk '{ print $1 }') )
-        if [[ ! -z ${VALUE[0]} ]];then
-            echo "your job cannot be killed, please contact your systemadministrator"
-        fi
-    else
-        pgrep -P $1 | xargs kill
-        kill $1
-        VALUE=( $(ps ax | grep $1 | grep -v grep | awk '{ print $1 }') )
-        if [[ ! -z ${VALUE[0]} ]];then
-            pgrep -P $1 | xargs kill -9
-            kill -9 $1
-        fi
-                                                                sleep 1
-        VALUE=( $(ps ax | grep "$1" | grep -v grep | awk '{ print $1 }') )
-        if [[ ! -z ${VALUE[0]} ]];then
-            echo "your job cannot be killed, please contact your systemadministrator"
-        fi
-    fi
-}
+mapfile -t BASH_SCRIPTS < <(find "/home/.CarmeScripts/local_bash_functions" -maxdepth 1 -name "*.sh")
+for BASH_SCRIPT in "${BASH_SCRIPTS[@]}";do
+  source "${BASH_SCRIPT}"
+done
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

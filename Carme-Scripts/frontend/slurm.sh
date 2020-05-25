@@ -61,25 +61,8 @@ source "${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/bashrc" || die "cannot so
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#compute ports: base port + first GPU id -------------------------------------------------------------------------------------------
-JOB_OFFSET=$(echo -n "$SLURM_JOB_ID" | tail -c 3)
-PORT_OFFSET="1000"
-
-NB_PORT=$((6000 + 10#$JOB_OFFSET))
-TB_PORT=$((NB_PORT + PORT_OFFSET))
-TA_PORT=$((NB_PORT + PORT_OFFSET + PORT_OFFSET))
-
-LISTEN_NB=$(ss -tln -4 | grep ${NB_PORT})
-LISTEN_TB=$(ss -tln -4 | grep ${TB_PORT})
-LISTEN_TA=$(ss -tln -4 | grep ${TA_PORT})
-
-if [[ -n "${LISTEN_NB}" || -n "${LISTEN_TB}" || -n "${LISTEN_TA}" ]];then
-  echo "ERROR: No free port for entrypoints found!"
-  echo "NB_PORT: ${NB_PORT}"
-  echo "TB_PORT: ${TB_PORT}"
-  echo "TA_PORT: ${TA_PORT}"
-  exit 137
-fi
+#source job ports ------------------------------------------------------------------------------------------------------------------
+source "${CARME_JOBDIR}/ports/$(hostname)" || die "cannot source job ports"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -93,6 +76,8 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   # check if IP is set
   [[ -z ${CARME_MASTER_IP} ]] && die "master ip not set"
 
+  # check if hash is set
+  [[ -z ${CARME_HASH} ]] && die "hash not set"
 
   # get start- and estimated end-time
   STARTTIME=$(squeue -h -j "${SLURM_JOB_ID}" -o "%.20S")
@@ -190,7 +175,8 @@ export SLURM_TOPOLOGY_ADDR_PATTERN=\"${SLURM_TOPOLOGY_ADDR_PATTERN}\"
 export SLURM_UMASK=\"${SLURM_UMASK}\"
 export SLURM_WORKING_CLUSTER=\"${SLURM_WORKING_CLUSTER}\"
 export CUDA_VISIBLE_DEVICES=\"${CUDA_VISIBLE_DEVICES}\"
-export GPU_DEVICE_ORDINAL=\"${GPU_DEVICE_ORDINAL}\"" > "${CARME_SSHDIR}/envs/$(hostname)"
+export GPU_DEVICE_ORDINAL=\"${GPU_DEVICE_ORDINAL}\"
+" > "${CARME_SSHDIR}/envs/$(hostname)"
 
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -203,15 +189,15 @@ cd "${HOME}" || die "cannot change directory to ${HOME}"
 
 #start singularity -----------------------------------------------------------------------------------------------------------------
 export XDG_RUNTIME_DIR=""
-if [[ ${IMAGE} = *"scratch_image_build"* ]];then #sandbox image - add own start script
-  echo "Sandox Mode" ${IMAGE} ${MOUNTS}
-  newpid sudo singularity exec -B /etc/libibverbs.d ${MOUNTS} --writable ${IMAGE} /bin/bash /home/.CarmeScripts/start_build_job.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES}
-else
-		if [ ${IPADDR} != "${CARME_BUILDNODE_1_IP}" ];then
-    newpid singularity exec --nv -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} -B /scratch_local/${SLURM_JOB_ID}:/home/SSD ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
-		else
-		  newpid singularity exec --nv -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_master.sh ${IPADDR} ${NB_PORT} ${TB_PORT} ${TA_PORT} ${USER} ${HASH} ${GPU_DEVICES} ${MEM} ${GPUS}
-		fi
+
+# split predefined mounts (separated by space)
+# NOTE: never double quote this variable!
+MOUNTS=${MOUNTSTR//[_]/ }
+
+[[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
+if [[ -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
+    log "using local SSD"
+    MOUNTS="${MOUNTS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
 fi
 
 log "start container"

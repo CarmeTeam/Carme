@@ -4,7 +4,20 @@
 #
 # Copyright (C) 2020 by Dr. Dominik Straßel
 #-----------------------------------------------------------------------------------------------------------------------------------
-echo ""
+
+
+#bash set buildins -----------------------------------------------------------------------------------------------------------------
+set -e
+set -o pipefail
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "ERROR: ${1}"
+  exit 200
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
@@ -12,8 +25,7 @@ PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
 if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  echo "ERROR: carme-basic-bash-functions.sh not found but needed"
-  exit 137
+  die "carme-basic-bash-functions.sh not found but needed"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -30,6 +42,9 @@ is_root
 # load variables from config -------------------------------------------------------------------------------------------------------
 CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr)
 CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName)
+
+[[ -z ${CARME_SLURM_ControlAddr} ]] && die "CARME_SLURM_ControlAddr is not set"
+[[ -z ${CARME_SLURM_ClusterName} ]] && die "CARME_SLURM_ClusterName is not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -37,8 +52,7 @@ CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName)
 if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh"
 else
-  echo "ERROR: carme-slurm-mgmt-functions.sh not found but needed"
-  exit 137
+  die "carme-slurm-mgmt-functions.sh not found but needed"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -55,8 +69,7 @@ if [ "$RESP" = "y" ]; then
   read -rp "enter slurm-user(s) that you want to delete [multiple users separated by space] ${LBR}" SLURMUSER_HELPER
   echo ""
 
-  for SLURMUSER in $SLURMUSER_HELPER
-  do
+  for SLURMUSER in ${SLURMUSER_HELPER};do
     # check if user exists
     check_if_user_exists "${SLURMUSER}"
     
@@ -68,6 +81,7 @@ if [ "$RESP" = "y" ]; then
   done
 
 else
+
   echo "Bye Bye..."
-  exit 137
+
 fi

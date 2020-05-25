@@ -33,12 +33,6 @@ function log () {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# write LD_LIBRARY_PATH to local hostname specific env file ------------------------------------------------------------------------
-echo "export LD_LIBRARY_PATH=\"${LD_LIBRARY_PATH}\"
-" >> "${CARME_SSHDIR}/envs/$(hostname)"
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # activate conda base environment --------------------------------------------------------------------------------------------------
 # NOTE: conda should always be activated not only in interactive shells
 CONDA_INIT_FILE="/opt/anaconda3/etc/profile.d/conda.sh"
@@ -55,7 +49,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   # start ssh server if we have more than one node or more than one GPU ------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     log "start SSHD server"
-    /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+    /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd_log" -f "${CARME_SSHDIR}/sshd_config" &
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -79,7 +73,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
   # start jupyter-lab --------------------------------------------------------------------------------------------------------------
   log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
-  jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' &
+  jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser   --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False &
   #---------------------------------------------------------------------------------------------------------------------------------
 
 else
@@ -87,7 +81,7 @@ else
   # start ssh server if a job has more than one node or mor than one GPU -----------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     log "start SSHD server"
-    /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+    /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd_log" -f "${CARME_SSHDIR}/sshd_config" &
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
 

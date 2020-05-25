@@ -42,7 +42,6 @@ tables = {
 queries = {
     "insert_notification": "INSERT INTO `{}` (user, message, color) VALUES (%s, %s, %s)".format(tables["notifications"]),
     "select_job_by_id_and_user": "SELECT * FROM `{}` WHERE slurm_id = %s AND user = %s LIMIT 1".format(tables["jobs"]),
-    "select_job_status_by_id": "SELECT status FROM `{}` WHERE slurm_id = %s LIMIT 1".format(tables["jobs"]),
     "update_job": "UPDATE `{}` SET status = \"running\", ip = %s, url_suffix = %s, nb_port = %s, tb_port = %s, ta_port = %s, gpu_ids = %s WHERE slurm_id = %s".format(tables["jobs"]),
     "delete_job": "DELETE FROM `{}` WHERE slurm_id = %s".format(tables["jobs"])
 }
@@ -253,7 +252,7 @@ class Backend(Service):
 
         return 0
 
-    def exposed_schedule(self, user, home, image, mounts, partition, num_gpus, num_nodes, name, gpu_type):
+    def exposed_schedule(self, user, image, mounts, partition, num_gpus, num_nodes, name, gpu_type):
         """schedule a new job via the batch system
 
         # note 
@@ -261,7 +260,6 @@ class Backend(Service):
 
         # arguments
             user: username
-            home: home directory
             image: image to start
             mounts: mount points to be set
             partition: partition to be used
@@ -309,12 +307,12 @@ class Backend(Service):
             'gpu_type': ('' if (gpu_type == 'default' or gpu_type == 'cpu') else (':' + gpu_type)),
             'cores_per_node': cores_per_node,
             'mem_per_node': str(mem_per_node) + 'G',
-            'log_dir': os.path.join(home, '.local/share/carme/job-log-dir')
+            'log_dir': '/home/{}/.local/share/carme/job-log-dir'.format(user)
         }
 
         params = "--parsable --constraint=\"{constraints}\" --partition=\"{partition}\" --job-name=\"{job_name}\" --nodes=\"{num_nodes}\" --ntasks-per-node=\"{cores_per_node}\" --cpus-per-task=\"1\" --mem=\"{mem_per_node}\" --gres=\"gpu{gpu_type}{gpus_per_node}\" --gres-flags=\"enforce-binding\" -o \"{log_dir}/%j.out\" -e \"{log_dir}/%j.err\"".format(**values)
         
-        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPT_PATH, "slurm.sh"), image=image, mounts=mounts)
+        com = "runuser -u {user} -- bash -l -c 'SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPT_PATH, "slurm.sh"), image=image, mounts=mounts)
 
         # execute sbatch as user
         proc = subprocess.Popen(com, shell=True, stdout=subprocess.PIPE)
@@ -336,59 +334,36 @@ class Backend(Service):
             print("error exposed_schedule - job {} could not be scheduled for user {}".format(name, user))
             self.send_notification("Error: Scheduling job {} failed! - Please contact your admin.".format(name), user, "red")
 
-    def exposed_StopJob(self, jobID, jobName, jobUser):
-        """
-        Tells the batch system to terminate a job
+        return job_id
+
+    def exposed_cancel(self, job_id, user):
+        """cancel the job via the batch system
 
         # note
             only requests from the frontend are exepted
 
-        # Arguments
-            jobID: id string of the job
-            jobName: name string of the job
-            jobUser: username of job owner 
+        # arguments
+            job_id: id string of the job
+            user: username of job owner
+        
+        # returns
+            nothing
         """
 
+        print("cancel job {} for user {}".format(job_id, user))
+
         if self.user != "frontend":
-            setCarmeLog("BACKEND: AUTH FAILED", 40)
-            return "Auth Failed"
+            print("error exposed_cancel - has to executed by frontend, but user is {}".format(user))
+            return
 
-        if CARME_BACKEND_DEBUG:
-            print("Stop job: ", str(jobName))
-
-        com = 'scancel -n '+str(jobName)
+        # cancel job via batch system
+        com = "scancel {}".format(job_id)
 
         ret = os.system(com)
         
         if ret == 0:
-            if jobID == '' or int(jobID) < 0:
-                # remove job from db
-                db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                        passwd=CARME_DB_PW,  db=CARME_DB_DB)  
-
-                cur = db.cursor()
-                sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
-
-                try: 
-                    deleted = cur.execute(sql)
-                    print("try SQL stop: ", deleted)
-                    db.commit()
-                    cur.close()
-                    db.close()
-                    print ("SQL stop done")
-                except:
-                    print ("SQL ERROR")
-                    db.rollback() 
-                    cur.close()
-                    db.close()
-                    setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
-                    return 150
-            setCarmeLog("BACKEND: Job " + str(jobName) +
-                        " terminated by user.", 20)
-            setMessage("Terminated Job " + str(jobName), str(jobUser), "#00B5FF")
-            sendMatterMostMessage(
-                jobUser, "Job " + str(jobName) + " terminated by user.")
-
+            print("cancelled job {} for user {}".format(job_id, user))
+            self.send_notification("Cancelled job {}".format(job_id), user, "#e8be17")
         else:
             print("error exposed_cancel - scancel failed for job {} from user {}".format(job_id, user))
             self.send_notification("Error: Cancelling job {} failed!  - Please contact your admin.".format(job_id), user, "red")
@@ -423,7 +398,10 @@ class Backend(Service):
 
         print("epilog for job {}".format(job_id))
 
-        com = 'ssh ' + str(CARME_LOGINNODE_NAME) + ' "rm ' + str(CARME_PROXY_PATH_BACKEND) + 'routes/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml && touch ' + str(CARME_PROXY_PATH_BACKEND) + 'routes"'
+        # delete route file
+        base_path = os.path.join(CARME_PROXY_PATH_BACKEND, "routes")
+        toml_path = os.path.join(base_path, "{}-{}.toml".format(CARME_FRONTEND_ID, job_id))
+        com = "ssh {node} 'rm -f {toml_path} && touch {base_path}'".format(node=CARME_LOGINNODE_NAME, toml_path=toml_path, base_path=base_path)
         
         ret = os.system(com)
 
@@ -473,7 +451,7 @@ class Backend(Service):
         try:
             LDAP_ADMIN_USER = "cn={cn},dc={dc1},dc={dc2}".format(cn=CARME_LDAP_ADMIN, dc1=CARME_LDAP_DC1, dc2=CARME_LDAP_DC2)
 
-            s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ldap3.ALL)
+            s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ALL)
             c = ldap3.Connection(s, user=LDAP_ADMIN_USER, password=CARME_LDAP_SERVER_PW)
             
             c.bind()

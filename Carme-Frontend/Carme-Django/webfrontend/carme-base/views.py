@@ -75,36 +75,6 @@ def generateChoices(request):
 
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
-def proxy_config_str(hash, entrypoint, ip, nb_port, tb_port, ta_port):
-    nb_path = "nb_" + hash
-    tb_path = "tb_" + hash
-    ta_path = "ta_" + hash
-
-    return "[http.routers]\n" \
-           + proxy_router_str(nb_path, entrypoint, []) + "\n\n" \
-           + proxy_router_str(tb_path, entrypoint, []) + "\n\n" \
-           + proxy_router_str(ta_path, entrypoint, ["stripprefix-theia"]) + "\n\n" \
-           + "\n\n" \
-           + "[http.services]\n" \
-           + proxy_service_str(nb_path, ip, nb_port) + "\n\n" \
-           + proxy_service_str(tb_path, ip, tb_port) + "\n\n" \
-           + proxy_service_str(ta_path, ip, ta_port) + "\n\n" \
-           + "\n"
-
-def proxy_router_str(path, entrypoint, middlewares):
-    mw_str = ', '.join(['"' + str(mw) + '"' for mw in middlewares])
-
-    return '''  [http.routers.''' + path + ''']
-    entryPoints = ["''' + entrypoint + '''"]
-    rule = "Host(`''' + str(settings.CARME_URL) + '''`) && PathPrefix(`/''' + path + '''`)"
-    middlewares = [''' + mw_str + ''']
-    service = "''' + path + '''"
-    [http.routers.''' + path + '''.tls]'''
-
-def proxy_service_str(path, ip, port):
-    return '''  [[http.services.''' + path + '''.loadBalancer.servers]]
-    url = "http://''' + ip + ''':''' + port + '''"'''
-
 @login_required(login_url='/login') 
 def index(request):
     """rendering of the website / -> template:home.html
@@ -180,73 +150,9 @@ def job_table(request):
 
     # NOTE: no update of session ex time here!
 
-    # setup logger
-    db_logger = logging.getLogger('db')
-
     current_user = request.user.username
-    # search for ready slurm jobs
-    slurm_ready = SlurmJobs.objects.filter(status__exact="ready", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
-    for job in slurm_ready:
-        job.status = "configuring"  # set status to avoid deadlock loop on faield jobs
-        job.save()
-        conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
-                                certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-        testtrigger = conn.root.SetTrigger(
-            str(job.SLURM_ID), str(job.user), str(job.jobName))
 
-        if testtrigger != 0:
-            # delete job that can not be started from db - backen has notified used and admin
-            #mess = 'Sarting job '+str(job.SLURM_ID)+' failed !'
-            #messages.success(request, mess)  # add messages
-            message = 'FRONTEND ERROR: Sarting job ' + \
-                str(job.SLURM_ID)+' failed !'
-            db_logger.exception(message)
-            # set status to fialed -> keep job in db for later investigation an d debugging
-            job.status = "failed"
-            job.save()
-        else:
-            job.status = "running"  # job will now be displayed
-            job.save()
-
-            message = "FRONTEND: set trigger vals " + \
-                str(job.SLURM_ID) + " " + \
-                str(job.user) + " " + str(job.jobName)
-            db_logger.info(message)
-
-            # dirty theia port hack
-            TA_PORT = job.TB_PORT + 1000
-
-            route = proxy_config_str(str(job.HASH), "https", str(job.IP), str(job.NB_PORT), str(job.TB_PORT), str(TA_PORT))
-
-            # write route to proxy
-            pfile = str(settings.CARME_PROXY_PATH_FRONTEND) + \
-                '/routes/'+str(settings.CARME_FRONTEND_ID)+"-"+str(job.SLURM_ID)+".toml"
-            f = open(pfile, 'w')
-            f.write(route)
-            f.close()
-
-            os.system('touch ' + str(settings.CARME_PROXY_PATH_FRONTEND) + 'routes')
-    
-    #check for timeout 
-    slurm_running = SlurmJobs.objects.filter(status__exact="running", user__exact=current_user, frontend__exact=settings.CARME_FRONTEND_ID)
-    for job in slurm_running:
-        job_slurm = CarmeJobTable.objects.filter(
-                id_job__exact=job.SLURM_ID )
-        now = int(datetime.datetime.now().timestamp())
-        if (job.status == "running") and (len(job_slurm) >0) and (job_slurm[0].timelimit>0):
-            job_timelimit = job_slurm[0].timelimit*60+job_slurm[0].time_start
-            if now > job_timelimit:
-                print ("TIMEOUT :", str(job.SLURM_ID), " : ", job.status, " : ",job_timelimit, " ", now)
-                job.status = "timeout"
-                conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
-                    certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-                message = conn.root.SendNotify("Timeout " + str(job.jobName), str(job.user), "#00B5FF")
-                job.save()
-
-
-
-
-
+    # get all jobs by user
     slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
     numjobs = len(slurm_list_user)
     jobheight = calculate_jobheight(numjobs)
@@ -299,14 +205,14 @@ def start_job(request):
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
+            job_id = conn.root.schedule(str(request.user.username), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
             
             if int(job_id) > 0:
                 SlurmJobs.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
                                          user=request.user.username, slurm_id=int(job_id), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
-                print("Queued job {} for user {} on {} nodes".format(job_id, ldap_username(request), num_nodes))
+                print("Queued job {} for user {} on {} nodes".format(job_id, request.user.username, num_nodes))
             else:
-                print("ERROR queueing job {} for user {} on {} nodes".format(job_name, ldap_username(request), num_nodes))
+                print("ERROR queueing job {} for user {} on {} nodes".format(job_name, request.user.username, num_nodes))
 
                 raise Exception("ERROR starting job")
 
@@ -452,10 +358,9 @@ def stop_job(request):
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            if conn.root.StopJob(str(jobID), str(jobName), str(jobUser)) != 0:
-                message = "FRONTEND: Error stopping job " + \
-                    str(jobName) + " for user " + str(jobUser)
-                db_logger.exception(message)
+            
+            if conn.root.cancel(str(jobID), str(jobUser)) != 0:
+                print("Error stopping job {} from user {}".format(jobID, jobUser))
                 raise Exception("ERROR stopping job [backend]")
 
             return HttpResponseRedirect('/carme-base/JobTable/')
@@ -475,31 +380,29 @@ def change_password(request):
         if form.is_valid():
             # init
             user_dn = request.user.ldap_user.dn
+
+            # check new pw
             password = str(form.cleaned_data['new_password1'])
-            
+            length_error = len(password) < 13  # length
+
             # check results
-            valid_length = len(password) >= 13  # length
-            valid_equality = str(form.cleaned_data['new_password1']) == str(
-                form.cleaned_data['new_password2']) # equality
-
-            char_types = []
-            char_types.append(re.search(r"[0-9]", password) is not None)  # digits
-            char_types.append(re.search(r"[A-Z]", password) is not None)  # uppercase
-            char_types.append(re.search(r"[a-z]", password) is not None)  # lowercase
-            char_types.append(re.search(r"[^0-9a-zA-Z]", password) is not None) # other
-
-            valid_chars = sum(char_types) >= 3 # character types
+            digit_error = re.search(r"\d", password) is None  # digits
+            uppercase_error = re.search(r"[A-Z]", password) is None  # case
+            symbol_error = re.search(
+                r"[ !#$%&'()*+,-./[\\\]^_`{|}~"+r'"]', password) is None  # symbols
+            equal_error = str(form.cleaned_data['new_password1']) != str(
+                form.cleaned_data['new_password2'])
             
             # whether the password passed all checks
-            valid_password = valid_length and valid_equality and valid_chars
+            password_ok = not (length_error or digit_error or uppercase_error or symbol_error or equal_error)
 
-            if valid_password:
+            if (password_ok):
                 # backend call
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                         certfile=settings.BASE_DIR+"/SSL/frontend.crt")
                 password = str(form.cleaned_data['new_password2'])
 
-                if conn.root.change_password(str(user_dn), ldap_username(request), password):
+                if conn.root.change_password(str(user_dn), str(request.user.username), password):
                     mess = "Password update for user: "+str(user_dn)
                     dj_messages.success(request, mess)
                 else:

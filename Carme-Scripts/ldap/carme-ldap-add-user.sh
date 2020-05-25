@@ -103,7 +103,7 @@ if [ "$RESP" = "y" ];then
   # define ldap instance and group -------------------------------------------------------------------------------------------------
   echo "enter GROUPID of new user"
   echo -e "$CARME_LDAPGROUP_1:\t$CARME_LDAPGROUP_ID_1\n"
-  echo -e "$CARME_LDAPGROUP_2:\t$CARME_LDAPGROUP_ID_2\n"
+  echo -e"$CARME_LDAPGROUP_2:\t$CARME_LDAPGROUP_ID_2\n"
   echo -e "$CARME_LDAPGROUP_3:\t$CARME_LDAPGROUP_ID_3\n"
   echo -e "$CARME_LDAPGROUP_4:\t$CARME_LDAPGROUP_ID_4\n"
   echo -e "$CARME_LDAPGROUP_5:\t$CARME_LDAPGROUP_ID_5\n"
