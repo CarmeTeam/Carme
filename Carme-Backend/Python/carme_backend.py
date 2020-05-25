@@ -12,613 +12,467 @@
 # Contact: info@open-carme.org
 # ---------------------------------------------
 
-import rpyc
+import sys
+import os
+import ssl
+from datetime import datetime
+import subprocess
+import traceback
+import ldap3
+import MySQLdb
+from rpyc import Service
 from rpyc.utils.server import ThreadedServer
 from rpyc.utils.authenticators import SSLAuthenticator
-import ssl
-import os
-from ldap3 import *
-import MySQLdb
-import datetime
 
 # import needed variables from CarmeConfig
 from importlib.machinery import SourceFileLoader
-SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig').load_module()
-from CarmeConfig import CARME_MATTERMOST_PATH, CARME_MATTERMOST_COMMAND, CARME_MATTERMOST_WEBHOCK_2
+SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig.backend').load_module()
+
 from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
 from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
 from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH_BACKEND
 from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
-from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME
+from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
 
+tables = {
+    "notifications": "carme-base_carmemessages",
+    "jobs": "carme-base_slurmjobs"
+}
 
-# to be replace by reading Carme Config
-CARME_MATTERMOST_BIN = CARME_MATTERMOST_PATH+"/bin/"+CARME_MATTERMOST_COMMAND
+queries = {
+    "insert_notification": "INSERT INTO `{}` (user, message, color) VALUES (%s, %s, %s)".format(tables["notifications"]),
+    "select_job_by_id_and_user": "SELECT * FROM `{}` WHERE slurm_id = %s AND user = %s LIMIT 1".format(tables["jobs"]),
+    "update_job": "UPDATE `{}` SET status = \"running\", ip = %s, url_suffix = %s, nb_port = %s, tb_port = %s, ta_port = %s, gpu_ids = %s WHERE slurm_id = %s".format(tables["jobs"]),
+    "delete_job": "DELETE FROM `{}` WHERE slurm_id = %s".format(tables["jobs"])
+}
 
-
-"""
-Carme Backend Server
-See Carme/Carme-Doc/DevelDoc/BackendDocu.md for details.
-"""
-def setCarmeLog(message, level):
-    """adds a message to Carme log files.
-
-    # Arguments
-        message: string message to be logged
-        level: int log level (20=info, 30=warning, 10=debug, 40=error)
-
-    """
-    db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                         passwd=CARME_DB_PW,  db=CARME_DB_DB)
-    cur = db.cursor()
-    ts = datetime.datetime.now()
-    st = ts.strftime('%Y-%m-%d %H:%M:%S')
-    sql = 'insert into `django_db_logger_statuslog` (logger_name, level, msg, trace, create_datetime) values ("db", "'+str(
-        level)+'", "'+str(message)+'", "NULL","'+str(st)+'")'
-    try:
-        cur.execute(sql)
-        db.commit()
-    except:
-        print("log fail")
-        db.rollback()
-    db.close()
-
-def setMessage(message, user, color): 
-    """adds a message to Carme.                                                                                                                                                                          
-
-    # Arguments
-
-        message: string message 
-	user: username
-	color: color of message                                                                                                                                                                        
-    """     
-    message = datetime.datetime.now().strftime("%d/%m/%Y - %H:%M:%S: ") + message
-    db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                         passwd=CARME_DB_PW,  db=CARME_DB_DB)
-    cur = db.cursor() 
-    sql = 'insert into `carme-base_carmemessages` (user, message, color) values ("'+str(user)+'","'+str(message)+'","'+str(color)+'" )' 
-
-    try:             
-        cur.execute(sql) 
-        db.commit()
-
-    except:
-        print("message fail")   
-        db.rollback() 
-    db.close()        
-
-def sendMatterMostMessage(user, message):
-    """sends Mattermost message to user
-
-    # Arguments 
-        user: recipiant
-        message: string
-    """
-    com = '''curl -i -X POST --data-urlencode 'payload={\"channel\": \"@'''+str(
-        user)+'''\",\"text\": \" '''+str(message)+'''\"}' ''' + str(CARME_MATTERMOST_WEBHOCK_2)
-    setCarmeLog("MATTERMOST: "+str(user)+" "+str(message), 20)
-    return os.system(com)
-
-
-def checkUserJob(user, jobname):
-    """ checks if a user owns the given job
-
-    # Arguments
-        user: job owner
-        jobname: slurm job name
-    # Returns
-        ok or error message
-
-    """
-    db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-            passwd=CARME_DB_PW,  db=CARME_DB_DB)
-    cur = db.cursor()
-    sql = 'select * from `carme-base_slurmjobs` where (user="'+str(user)+'" and jobName="'+str(jobname)+'");'
-    res=0
-    try:
-        cur.execute(sql)
-        selections= cur.fetchall()
-        res= len(selections) #is there an entry?
-    except:
-        print("SQL error")
-        db.rollback()
-        return "SQL ERROR"
-
-    db.close()
+def proxy_config_str(url_suffix, entrypoint, ip, nb_port, tb_port, ta_port):
+    """returns full config string for traefik route file
     
-    if res !=1:
-        return "ERROR: job "+jobname+ "does not belong to user "+user
-    else:
-        return "ok"
+    # arguments
+        url_suffix: url suffix added to entry point paths
+        entrypoint: proxy entry point name
+        ip: middlewares for this route
+        nb_port: jupyterlab port
+        tb_port: tensorboard port
+        ta_port: theia port
 
-def checkUserJobID(user, jobid):  
-    """ checks if a user owns the given job by slurm ID
-
-    # Arguments
-        user: job owner  
-        jobid: db job id  
-
-    # Returns
-        ok or error message  
-    """ 
-
-    db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,  
-            passwd=CARME_DB_PW,  db=CARME_DB_DB)  
-    cur = db.cursor()  
-    sql = 'select * from `carme-base_slurmjobs` where (user="'+str(user)+'" and id="'+str(jobid)+'");'   
-    print (sql)
-    res=0
-
-    try:
-        cur.execute(sql)  
-        selections= cur.fetchall()  
-        res= len(selections) #is there an entry? 
-    except:
-        print("SQL error")  
-        db.rollback()  
-        return "SQL ERROR" 
-    db.close()     
-
-    if res !=1:  
-        return "ERROR: job "+jobid+ "does not belong to user "+user  
-    else:   
-        return "ok"                           
-
-def checkUserSlurmID(user, SLURM_ID):
-    """ checks if a user owns the given job by slurm ID  
-
-    # Arguments 
-        user: job owner  
-        SLURM_ID: job SLURM_ID
-
-    # Returns
-        ok or error message    
-    """ 
-
-    db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,   
-            passwd=CARME_DB_PW,  db=CARME_DB_DB) 
-    cur = db.cursor() 
-    sql = 'select * from `carme-base_slurmjobs` where (user="'+str(user)+'" and SLURM_ID="'+str(SLURM_ID)+'");'
-    print (sql)   
-    res=0 
-
-    try: 
-        cur.execute(sql)  
-        selections= cur.fetchall()  
-        res= len(selections) #is there an entry?
-    except:
-        print("SQL error")  
-        db.rollback() 
-        return "SQL ERROR"
-    db.close() 
-
-    if res !=1: 
-        return "ERROR: job "+jobid+ "does not belong to user "+user    
-    else:   
-        return "ok"                                          
-
-
-class CarmeBackEndService(rpyc.Service):
-    """ Carme backend server class
-
-    # Note 
-        only methods that are _exposed_ are callable via rpc
+    # returns
+        proxy config string
     """
 
-    def __init__(self):
-        self.myConnection = ''
-        self.user = ''
+    nb_path = "nb_{}".format(url_suffix)
+    tb_path = "tb_{}".format(url_suffix)
+    ta_path = "ta_{}".format(url_suffix)
+    proxy_auth = "proxy-auth-{}".format(CARME_FRONTEND_ID)
+
+    return "[http.routers]\n" \
+           + proxy_router_str(nb_path, entrypoint, [proxy_auth]) + "\n\n" \
+           + proxy_router_str(tb_path, entrypoint, [proxy_auth]) + "\n\n" \
+           + proxy_router_str(ta_path, entrypoint, ["stripprefix-theia", proxy_auth]) + "\n\n" \
+           + "\n\n" \
+           + "[http.services]\n" \
+           + proxy_service_str(nb_path, ip, nb_port) + "\n\n" \
+           + proxy_service_str(tb_path, ip, tb_port) + "\n\n" \
+           + proxy_service_str(ta_path, ip, ta_port) + "\n\n" \
+           + "\n"
+
+def proxy_router_str(path, entrypoint, middlewares):
+    """returns router config string for traefik route file
+
+    # arguments
+        path: url path for entry point
+        entrypoint: proxy entry point name
+        middlewares: middlewares for this route
+
+    # returns
+        router config string
+    """
+
+    middlewares_str = ", ".join(["\"{}\"".format(mw) for mw in middlewares])
+
+    return '''  [http.routers.{path}]
+    entryPoints = ["{entrypoint}"]
+    rule = "Host(\`{host}\`) && PathPrefix(\`/{path}\`)"
+    middlewares = [{middlewares}]
+    service = "{path}"
+    [http.routers.{path}.tls]'''.format(path=path, entrypoint=entrypoint, middlewares=middlewares_str, host=CARME_URL)
+
+def proxy_service_str(path, ip, port):
+    """returns service config string for traefik route file
+
+    # arguments
+        path: url path for entry point
+        ip: ip of node running entry point
+        port: port of entry point
+
+    # returns
+        service config string
+    """
+
+    return '''  [[http.services.{path}.loadBalancer.servers]]
+    url = "http://{ip}:{port}"'''.format(path=path, ip=ip, port=port)
+
+class Backend(Service):
+    """carme backend service class
+
+    # note 
+        only methods with prefix exposed_ are callable via rpc
+    """
 
     def on_connect(self, conn):
-        """ method is automatically run at new rpc connections
+        """called on a new rpc connection
+        
+        # arguments
+            conn: rpyc connection object
+
+        # returns
+            nothing
         """
-        self.myConnection = conn
-        print (conn._config['credentials']['subject'])
+
+        self.db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
+                                    passwd=CARME_DB_PW,  db=CARME_DB_DB)
         self.user = conn._config['credentials']['subject'][5][0][1]
-        if CARME_BACKEND_DEBUG:
-            print("new connection: ",
-                  conn._config['endpoints'], "from user ", self.user)
-            setCarmeLog("BACKEND: new connection from " + str(self.user), 10)
-        pass
+
+        endpoint = conn._config['endpoints'][1]
+        print("connect of user {user} from {ip}:{port}".format(user=self.user, ip=endpoint[0], port=endpoint[1]))
 
     def on_disconnect(self, conn):
-        """method is automatically run when rpc connection is terminated
-        """
-        if CARME_BACKEND_DEBUG:
-            print ("conn ended", conn._config['connid'])
-            setCarmeLog("BACKEND: connection ended", 10)
-        pass
+        """called when a new rpc is terminated
 
-    def exposed_ping(self):
-        """simple ping for rpc connection testing
-        """
-        if CARME_BACKEND_DEBUG:
-            print ("ping")
-            setCarmeLog("BACKEND: ping", 10)
-        return 'pong'
+        # arguments
+            conn: rpyc connection object
 
-    def exposed_whoami(self):
-        """simple authentication check
-
-        Note: auth will actually fail at on_connect()
-        """
-        return self.user
-
-
-    def exposed_userAlterJobDB(self, IPADDR, HASH, NB_PORT, TB_PORT, SLURM_JOBID, URL, GPUS, DBJOBID ):
-        """ updates job status after it has been started by the scheduler
-
-        # Arguments
-            IPADDR: master node IP
-            HASH: job hash
-            NB_PORT: jupyterlab port
-            TB_PORT: tensorboard port
-            SLURM_JOBID: job id
-            URL: full URL
-            GPUS: num of GPUs
-            DBJOBID: db job key
-
-
+        # returns
+            nothing
         """
 
-        #check if user owns job
-        check=checkUserJobID(self.user, DBJOBID)
-        if check!="ok":
-            if CARME_BACKEND_DEBUG:
-                print ("User auth failed")
-            setCarmeLog("User auth failed on alter_job_db", 40)
-            return check
+        endpoint = conn._config['endpoints'][1]
+        print("disconnect of user {user} from {ip}:{port}".format(user=self.user, ip=endpoint[0], port=endpoint[1]))
 
-        #alter db entry
-        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                passwd=CARME_DB_PW,  db=CARME_DB_DB)
-        cur = db.cursor()
-        sql='update `carme-base_slurmjobs` set IP="'+str(IPADDR)+'", HASH="'+str(HASH)+'", NB_PORT='+str(NB_PORT)+',TB_PORT='+str(TB_PORT)+',status="ready",SLURM_ID='+str(SLURM_JOBID)+',URL="'+str(URL)+'",GPUS="'+str(GPUS)+'",  EntryNode="'+str(IPADDR)+'" where id='+str(DBJOBID)+';'
-        
+    def send_notification(self, message, user, color): 
+        """send a frontend notification to the user
+
+        # arguments
+            message: string message
+            user: username
+            color: color of message
+
+        # returns
+            nothing
+        """
+
+        notification = "{}: {}".format(datetime.now().strftime("%d/%m/%Y - %H:%M:%S"), message)
+
+        # insert notification into database
         try:
-            cur.execute(sql) 
-            db.commit()  
-        except: 
-            if CARME_BACKEND_DEBUG:
-                print("SQL error", sql)
-            setCarmeLog("SQL error", 40)
-            db.rollback() 
-        db.close()
+            cur = self.db.cursor()
+            cur.execute(queries["insert_notification"], (user, notification, color,))
 
-        return "ok"
-
-
-
-    def exposed_userTerminateJob(self, jobUser, jobName):
-        """ allows users to terminate running jobs
-
-        #Arguments
-            jobUser
-            JobName
-        """
-        #check user auth
-        if self.user!=jobUser:
-            message="Error: User "+jobUser+" tried to terminate job of user "+self.user
-            if CARME_BACKEND_DEBUG:
-                print ("message")
-            setCarmeLog(message, 40)
-            return message
-
-        #check if user owns job
-        check=checkUserJob(jobUser, jobName)
-
-        #terminate jom
-        if check!="ok":
-            return check
-        com = 'scancel -n '+str(jobName)
-
-        ret = os.system(com)  
-
-        if ret == 0:  
-            setCarmeLog("BACKEND: Job " + str(jobName) +
-                        " terminated by user API.", 20) 
-            setMessage("Terminated Job " + str(jobName), str(jobUser), "#00B5FF")
-            sendMatterMostMessage(  
-                jobUser, "Job " + str(jobName) + " terminated by user API.")
-        else:       
-            setMessage("ERROR: Terminated Job " + str(jobName), str(jobUser), "#C81464")   
-            sendMatterMostMessage( 
-                jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
-            sendMatterMostMessage("admin", "terminating job " + str(jobName) +
-                                  " for user " + str(jobUser) + "FAILED! check Django logs.")            
-        #remove job from db
-        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                passwd=CARME_DB_PW,  db=CARME_DB_DB)
-
-        cur = db.cursor() 
-        sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
-        try:
-            cur.execute(sql) 
-            db.commit()
-            db.close()
+            self.db.commit()
         except:
-            db.rollback()
-            db.close()
-            return "Error: SQL FAIL!"
-        
-        return ret
+            print("error send_notification - sql statement insert_notification failed")
+            traceback.print_exc()
 
+            self.db.rollback()
 
-    def exposed_StartJob(self, jobUser, jobID, jobImage, jobMounts, jobPartition, jobNumGPUs, jobNumNodes, jobName, jobGPUType):
-        """
-        Tells the batch-system to schedule a new job
+    def is_job_owner(self, user, slurm_id):  
+        """checks if a user owns the given job by slurm ID
 
-        # NOTE 
-            only requests from the frontend are exepted
+        # arguments
+            user: job owner
+            slurm_id: slurm job id
 
-        # Arguments
-            jobUser: username
-            jobID: frontend job id 
-            jobImage: image to start
-            jobMounts: mount points to be set
-            jobPartition: partition to be used
-            jobNumGPUs: number of GPUs to be used
-            jobNumNodes: number of nodes
-            jobName: name string (NOTE: must be unique)
-            jobGPUType: type of the GPU we want to use
-        """
-        
-        if self.user != "frontend":
-            setCarmeLog("BACKEND: AUTH FAILED", 40)
-            return "Auth Failed"
-
-        print("start job ", CARME_SCRIPT_PATH) 
-        
-        com = 'runuser -l '+str(jobUser)+' '+str(CARME_BACKEND_PATH)+'/Bash/submitJob.sh '+str(CARME_SCRIPT_PATH)+' '+str(jobID)+' '+str(
-            jobImage)+' '+str(jobMounts)+' '+str(jobPartition)+' '+str(jobNumGPUs)+' '+str(jobNumNodes)+' '+str(jobName)+' '+str(
-            CARME_SCRIPT_PATH)+' '+str(jobGPUType)
-        
-        if CARME_BACKEND_DEBUG:
-            print (com)
-            setCarmeLog("BACKEND: "+str(com), 10)
-        
-        ret = os.system(com)
-        
-        if ret == 0:
-            sendMatterMostMessage(
-                jobUser, "Job " + str(jobName) + " has been schedued for execution")
-            setMessage("Scheduled Job " + str(jobName), str(jobUser), "#e8be17")
-            
-        else:
-            # remove job from db
-            db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                    passwd=CARME_DB_PW,  db=CARME_DB_DB)  
-            cur = db.cursor()
-            sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
-            
-            try: 
-                deleted = cur.execute(sql)
-                print("try SQL stop: ", deleted)
-                db.commit()
-                cur.close()
-                db.close()
-                print ("SQL stop done")
-            except:
-                print ("SQL ERROR")
-                db.rollback() 
-                cur.close()
-                db.close()
-                setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
-                return 150
-            
-            setMessage("scheduling job " + str(jobName) + " FAILED! - Contact your admin.", str(jobUser), "red")
-            sendMatterMostMessage("admin", "scheduling job " + str(jobName) +
-                                  " for user " + str(jobUser) + "FAILED! check Django logs.")
-        return ret
-
-    def exposed_StopJob(self, jobID, jobName, jobUser):
-        """
-        Tells the batch system to terminate a job
-
-        # NOTE
-            only requests from the frontend are exepted
-
-        # Arguments
-            jobID: id string of the job
-            jobName: name string of the job
-            jobUser: username of job owner 
+        # returns
+            true or false whether user is owner or not
         """
 
-        if self.user != "frontend":
-            setCarmeLog("BACKEND: AUTH FAILED", 40)
-            return "Auth Failed"
+        res = False
 
-        if CARME_BACKEND_DEBUG:
-            print("Stop job: ", str(jobName))
+        # select job from database
+        try:
+            cur = self.db.cursor()
+            cur.execute(queries["select_job_by_id_and_user"], (slurm_id, user,))
 
-        com = 'scancel -n '+str(jobName)
+            if cur.fetchone() is None:
+                print("no job found for slurm_id {} and user {}".format(slurm_id, user))
+            else:
+                res = True
+        except:
+            print("error is_job_owner - sql statement select_job_by_id_and_user failed")
+            traceback.print_exc()
+
+        return res
+
+    def exposed_update(self, ip, url_suffix, nb_port, tb_port, ta_port, job_id, url, gpu_ids):
+        """updates job data after it has been started by the scheduler
+
+        # arguments
+            ip: master node IP
+            url_suffix: job hash
+            nb_port: jupyterlab port
+            tb_port: tensorboard port
+            ta_port: theia port
+            job_id: job id
+            url: full URL
+            gpu_ids: num of GPUs
+        
+        # returns
+            exit code, success = 0
+        """
+
+        print("update job {} for user {}".format(job_id, self.user))
+
+        # check if user owns job
+        if not self.is_job_owner(self.user, job_id):
+            return 1
+
+        # create route toml
+        route = proxy_config_str(url_suffix, "https", ip, nb_port, tb_port, ta_port)
+        path = os.path.join(CARME_PROXY_PATH_BACKEND, "routes", "{}-{}.toml".format(CARME_FRONTEND_ID, job_id))
+        com = "ssh {node} 'cat > {path} << EOF\n{content}\nEOF'".format(node=CARME_LOGINNODE_NAME, path=path, content=route)
 
         ret = os.system(com)
-        
-        if ret == 0:
-            if jobID == '' or int(jobID) < 0:
-                # remove job from db
-                db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                        passwd=CARME_DB_PW,  db=CARME_DB_DB)  
 
-                cur = db.cursor()
-                sql='delete from `carme-base_slurmjobs` where jobName="'+str(jobName)+'";'
+        if ret != 0:
+            print("error exposed_update - route file could not be created for job {}".format(job_id))
+            return ret
 
-                try: 
-                    deleted = cur.execute(sql)
-                    print("try SQL stop: ", deleted)
-                    db.commit()
-                    cur.close()
-                    db.close()
-                    print ("SQL stop done")
-                except:
-                    print ("SQL ERROR")
-                    db.rollback() 
-                    cur.close()
-                    db.close()
-                    setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
-                    return 150
-            setCarmeLog("BACKEND: Job " + str(jobName) +
-                        " terminated by user.", 20)
-            setMessage("Terminated Job " + str(jobName), str(jobUser), "#00B5FF")
-            sendMatterMostMessage(
-                jobUser, "Job " + str(jobName) + " terminated by user.")
+        # update job in database
+        try:
+            cur = self.db.cursor()
+            cur.execute(queries["update_job"], (ip, url_suffix, nb_port, tb_port, ta_port, gpu_ids, job_id,))
 
-        else:
-            setMessage("ERROR: Failed terminating job " + str(jobName), str(jobUser), "red")
-            sendMatterMostMessage(
-                jobUser, "terminating job " + str(jobName) + " FAILED! - Contact your admin.")
-            sendMatterMostMessage("admin", "terminating job " + str(jobName) +
-                                  " for user " + str(jobUser) + "FAILED! check Django logs.")
-    
-    def exposed_JobProlog(self, jobID, jobUser):
-        """
-        Tells the backend, that a job is starting
+            self.db.commit()  
+        except: 
+            print("error exposed_update - sql statement update_job failed")
+            traceback.print_exc()
 
-        # Arguments
-            jobID: id of the job
-            jobUser: username of job owner 
-        """
-        
-        print("Job prolog: ", str(jobID))
+            self.db.rollback()
 
         return 0
 
-    def exposed_JobEpilog(self, jobID, jobUser):
+    def exposed_schedule(self, user, image, mounts, partition, num_gpus, num_nodes, name, gpu_type):
+        """schedule a new job via the batch system
+
+        # note 
+            only requests from the frontend are expected
+
+        # arguments
+            user: username
+            image: image to start
+            mounts: mount points to be set
+            partition: partition to be used
+            num_gpus: number of GPUs to be used
+            num_nodes: number of nodes
+            name: name string, must be unique
+            gpu_type: type of the GPU we want to use
+
+        # returns
+            batch system job id
         """
-        Tells the backend, that a job was terminated
+        
+        print("schedule job {} for user {}".format(name, user))
 
-        # Arguments
-            jobID: id of the job
-            jobUser: username of job owner 
+        if self.user != "frontend":
+            print("error exposed_schedule - has to executed by frontend, but user is {}".format(user))
+            return 0
+
+        # get cores_per_gpu and mem_per_gpu from config based on gpu_type
+        gpu_defaults = CARME_GPU_DEFAULTS.split(" ")
+        cores_per_gpu = None
+        mem_per_gpu = None
+
+        for default in gpu_defaults:
+            if default.startswith(gpu_type):
+                default_split = default.split(":")
+                cores_per_gpu = int(default_split[1])
+                mem_per_gpu = int(default_split[2])
+                break
+        
+        if cores_per_gpu is None or mem_per_gpu is None:
+            print("error exposed_schedule - cores per gpu or mem per gpu could not be extracted from CARME_GPU_DEFAULTS")
+            return 0
+
+        cores_per_node = int(num_gpus) * cores_per_gpu
+        mem_per_node = int(num_gpus) * mem_per_gpu
+
+        # build sbatch command
+        values = {
+            'constraints': 'carme',
+            'partition': partition,
+            'job_name': name,
+            'num_nodes': num_nodes,
+            'gpus_per_node': ':' + num_gpus,
+            'gpu_type': ('' if (gpu_type == 'default' or gpu_type == 'cpu') else (':' + gpu_type)),
+            'cores_per_node': cores_per_node,
+            'mem_per_node': str(mem_per_node) + 'G',
+            'log_dir': '/home/{}/.local/share/carme/job-log-dir'.format(user)
+        }
+
+        params = "--parsable --constraint=\"{constraints}\" --partition=\"{partition}\" --job-name=\"{job_name}\" --nodes=\"{num_nodes}\" --ntasks-per-node=\"{cores_per_node}\" --cpus-per-task=\"1\" --mem=\"{mem_per_node}\" --gres=\"gpu{gpu_type}{gpus_per_node}\" --gres-flags=\"enforce-binding\" -o \"{log_dir}/%j.out\" -e \"{log_dir}/%j.err\"".format(**values)
+        
+        com = "runuser -u {user} -- bash -l -c 'SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPT_PATH, "slurm.sh"), image=image, mounts=mounts)
+
+        # execute sbatch as user
+        proc = subprocess.Popen(com, shell=True, stdout=subprocess.PIPE)
+
+        try:
+            proc.wait(10) # wait at most 10 seconds for sbatch to terminate
+        except:
+            pass # ignore if timeout exceeds, because the returncode won't be 0
+
+        # read job_id from output
+        job_id = 0
+
+        if proc.returncode == 0:
+            job_id = proc.stdout.read().decode("utf-8").split(";")[0].strip()
+
+            print("scheduled job {} for user {}".format(job_id, user))
+            self.send_notification("Scheduled job {}".format(job_id), user, "#e8be17")
+        else:
+            print("error exposed_schedule - job {} could not be scheduled for user {}".format(name, user))
+            self.send_notification("Error: Scheduling job {} failed! - Please contact your admin.".format(name), user, "red")
+
+        return job_id
+
+    def exposed_cancel(self, job_id, user):
+        """cancel the job via the batch system
+
+        # note
+            only requests from the frontend are exepted
+
+        # arguments
+            job_id: id string of the job
+            user: username of job owner
+        
+        # returns
+            nothing
         """
 
-        print("Job epilog: ", str(jobID))
+        print("cancel job {} for user {}".format(job_id, user))
 
-        com = 'ssh ' + str(CARME_LOGINNODE_NAME) + ' "rm ' + str(CARME_PROXY_PATH_BACKEND) + 'routes/' + str(CARME_FRONTEND_ID) + '-' + str(jobID) + '.toml && touch ' + str(CARME_PROXY_PATH_BACKEND) + 'routes"'
+        if self.user != "frontend":
+            print("error exposed_cancel - has to executed by frontend, but user is {}".format(user))
+            return
+
+        # cancel job via batch system
+        com = "scancel {}".format(job_id)
+
+        ret = os.system(com)
+        
+        if ret == 0:
+            print("cancelled job {} for user {}".format(job_id, user))
+            self.send_notification("Cancelled job {}".format(job_id), user, "#e8be17")
+        else:
+            print("error exposed_cancel - scancel failed for job {} from user {}".format(job_id, user))
+            self.send_notification("Error: Cancelling job {} failed!  - Please contact your admin.".format(job_id), user, "red")
+    
+    def exposed_prolog(self, job_id, user):
+        """global prolog for job
+
+        # arguments
+            job_id: id of the job
+            user: username of job owner
+        
+        # returns
+            exit code, success = 0
+        """
+        
+        print("prolog for job {}".format(job_id))
+
+        self.send_notification("Started job {}".format(job_id), user, "#64FA3C")
+
+        return 0
+
+    def exposed_epilog(self, job_id, user):
+        """global epilog for job
+
+        # arguments
+            job_id: id of the job
+            user: username of job owner
+        
+        # returns
+            exit code, success = 0
+        """
+
+        print("epilog for job {}".format(job_id))
+
+        # delete route file
+        base_path = os.path.join(CARME_PROXY_PATH_BACKEND, "routes")
+        toml_path = os.path.join(base_path, "{}-{}.toml".format(CARME_FRONTEND_ID, job_id))
+        com = "ssh {node} 'rm -f {toml_path} && touch {base_path}'".format(node=CARME_LOGINNODE_NAME, toml_path=toml_path, base_path=base_path)
         
         ret = os.system(com)
 
         if ret != 0:
-            message = "FRONTEND: Error deleting route for job " + \
-                str(jobID) + " for user " + str(jobUser)
-            db_logger.exception(message)
+            print("error exposed_epilog - deleting route for job {} from user {} failed".format(job_id, user))
 
-        # remove job from db
-        db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                passwd=CARME_DB_PW,  db=CARME_DB_DB)  
+        # delete job from database
+        try:
+            cur = self.db.cursor()
+            cur.execute(queries["delete_job"], (job_id,))
 
-        cur = db.cursor()
-        sql='delete from `carme-base_slurmjobs` where SLURM_ID="'+str(jobID)+'";'
-
-        try: 
-            deleted = cur.execute(sql)
-            print("try SQL stop: ", deleted)
-            db.commit()
-            cur.close()
-            db.close()
-            print ("SQL stop done")
+            self.db.commit()
+            self.send_notification("Terminated job {}".format(job_id), user, "#00B5FF")
         except:
-            print ("SQL ERROR")
-            db.rollback() 
-            cur.close()
-            db.close()
-            setMessage("ERROR: Failed terminating job " + str(jobID), str(jobUser), "red")
-            return 150
+            print("error exposed_epilog - sql statement delete_job failed")
+            traceback.print_exc()
 
-        return ret
+            self.db.rollback() 
+            self.send_notification("Error: Epilog for job {} failed! - Please contact your admin.".format(job_id), user, "red")
 
-
-
-    def exposed_SetTrigger(self, jobSlurmID, jobUser, jobName):                              
-        """ 
-        sets batch system trigger for running job  
-        # NOTE  
-            only requests from the frontend are exepted 
-        # Arguments   
-            jobSlurmID: batch system job id   
-            jobUser: username  
-            jobName: name string of the job   
-        """   
-        print("TRIGGER") 
-                                                                                                                                                                                         
-        if self.user != "frontend":      
-            setCarmeLog("BACKEND: AUTH FAILED", 40)  
-            print ("AUTH FAILED")
-            return "Auth Failed" 
-
-        sendMatterMostMessage(                                                                                                                                                                                 
-                jobUser, "Job "+str(jobName)+" (ID: " + str(jobSlurmID) + ") Started!")  
-                                                                                                                        
-        setMessage("Started Job " + str(jobName), str(jobUser), "#64FA3C") 
-        
-        print ("TRIGGER DONE")  
- 
         return 0
-        
-    def exposed_SendNotify(self, message, user, color):
-        sendMatterMostMessage(user, message)
-        setMessage(message, user, color)
 
-    def exposed_SendMessage(self, user, message):
-        """
-        sends Mattermoste message
+    def exposed_change_password(self, user, user_name, password):
+        """change password for ldap user
 
-        # Arguments
-            user: recipiant user name
-            message: string
-        """
-        return sendMatterMostMessage(user, message)
+        # note
+            only requests from the frontend are expected
 
-    def exposed_SetPassword(self, user, user_name, password):
-        """
-        sets LDAP user password
-
-        # NOTE
-            only requests from the frontend are exepted
-
-        # Arguments
+        # arguments
             user: LDAP user ID
             user_name: user name string
             password: new password to be set
-
+        
+        # returns
+            true or false, whether password has been changed
         """
+
+        print("change password for user {}".format(user_name))
+        
         if self.user != "frontend":
-            setCarmeLog("BACKEND: AUTH FAILED", 40)
-            return "Auth Failed"
-        ret = 0  # fail by default
-        # LDAP
+            print("error exposed_change_password has to executed by frontend, but user is {}".format(jobUser))
+            return
+        
+        ret = False # fail by default
+
+        # change password via ldap
         try:
-            # define an unsecure LDAP server, requesting info on DSE and schema
-            s = Server(CARME_LDAP_SERVER_IP, get_info=ALL)
-            LDAP_ADMIN_USER='cn='+str(CARME_LDAP_ADMIN)+',dc='+str(CARME_LDAP_DC1)+',dc='+str(CARME_LDAP_DC2)
-            c = Connection(s, user=LDAP_ADMIN_USER, password=CARME_LDAP_SERVER_PW)
+            LDAP_ADMIN_USER = "cn={cn},dc={dc1},dc={dc2}".format(cn=CARME_LDAP_ADMIN, dc1=CARME_LDAP_DC1, dc2=CARME_LDAP_DC2)
+
+            s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ALL)
+            c = ldap3.Connection(s, user=LDAP_ADMIN_USER, password=CARME_LDAP_SERVER_PW)
+            
             c.bind()
-            c.modify(user, {'userPassword': [(MODIFY_REPLACE, password)]})
+            c.modify(user, {'userPassword': [(ldap3.MODIFY_REPLACE, password)]})
             c.unbind()
-            setCarmeLog("BACKEND: password changed for " + str(user), 10)
-            ret = 1
+
+            print("password changed for user {}".format(user))
+
+            ret = True
         except:
-            setCarmeLog("BACKEND: LDAP ERROR", 40)
-            return 0
-        # Mattermost
-        com = "cd "+str(CARME_MATTERMOST_PATH)+"/bin/; "+"./"+CARME_MATTERMOST_COMMAND+ " user password " + \
-            str(user_name) + " '" + str(password) + "'"
-        print(com)
-        oscall = os.system(com)
-        if oscall != 0:
-            ret = 0
-            setCarmeLog("MATTERMOST: chpwd ERROR", 40)
-        else:
-            setCarmeLog("MATTERMOST: password changed for " + str(user), 10)
+            print("error exposed_change_password - changing ldap password for user {} failed".format(user_name))
+            traceback.print_exc()
+
         return ret
 
 
 if __name__ == "__main__":
-    print("Came Backend up, using ", CARME_SCRIPT_PATH)
-    setCarmeLog("Came Backend started", 10)
-    auth = SSLAuthenticator(str(CARME_BACKEND_PATH)+"SSL/backend.key", str(CARME_BACKEND_PATH) +
-                            "SSL/backend.crt", cert_reqs=ssl.CERT_REQUIRED, ca_certs=str(CARME_BACKEND_PATH)+"SSL/backend.crt")
-    server = ThreadedServer(CarmeBackEndService, port=CARME_BACKEND_PORT,
+    auth = SSLAuthenticator(os.path.join(CARME_BACKEND_PATH, "SSL/backend.key"), os.path.join(CARME_BACKEND_PATH, "SSL/backend.crt"),
+                                            cert_reqs=ssl.CERT_REQUIRED, ca_certs=os.path.join(CARME_BACKEND_PATH, "SSL/backend.crt"))
+    server = ThreadedServer(Backend, port=CARME_BACKEND_PORT,
                             authenticator=auth, protocol_config={'allow_all_attrs': True})
+
+    print("starting backend on port {}".format(CARME_BACKEND_PORT))
     server.start()

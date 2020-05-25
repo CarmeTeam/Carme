@@ -10,7 +10,7 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
-from .models import CarmeJobTable, CarmeAssocTable
+from .models import CarmeJobTable
 
 """ db drivers for accessing external dbs
 
@@ -22,7 +22,5 @@ class MyDBRouter(object):
     def db_for_read(self, model, **hints):
         """ reading SomeModel from otherdb """
         if model == CarmeJobTable:
-            return 'slurm'
-        elif model == CarmeAssocTable:
             return 'slurm'
         return None

@@ -1,4 +1,6 @@
 #!/bin/bash
-# usage: carme_add_python_path PATH
-echo $1 >> /opt/anaconda3/lib/python3.6/site-packages/conda.pth
+#-----------------------------------------------------------------------------------------------------------------------------------
+# script to add a local python path to anaconda
+#-----------------------------------------------------------------------------------------------------------------------------------
 
+echo "$1" >> /opt/anaconda3/lib/python3.6/site-packages/conda.pth

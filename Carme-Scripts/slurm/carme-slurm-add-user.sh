@@ -4,7 +4,20 @@
 #
 # Copyright (C) 2020 by Dr. Dominik Straßel
 #-----------------------------------------------------------------------------------------------------------------------------------
-echo ""
+
+
+#bash set buildins -----------------------------------------------------------------------------------------------------------------
+set -e
+set -o pipefail
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "ERROR: ${1}"
+  exit 200
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
@@ -12,8 +25,7 @@ PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
 if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  echo "ERROR: carme-basic-bash-functions.sh not found but needed"
-  exit 137
+  die "carme-basic-bash-functions.sh not found but needed"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -30,6 +42,9 @@ is_root
 # load variables from config -------------------------------------------------------------------------------------------------------
 CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr)
 CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName)
+
+[[ -z ${CARME_SLURM_ControlAddr} ]] && die "CARME_SLURM_ControlAddr is not set"
+[[ -z ${CARME_SLURM_ClusterName} ]] && die "CARME_SLURM_ClusterName is not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -37,8 +52,7 @@ CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName)
 if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh"
 else
-  echo "ERROR: carme-slurm-mgmt-functions.sh not found but needed"
-  exit 137
+  die "carme-slurm-mgmt-functions.sh not found but needed"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,7 +62,7 @@ check_if_slurmctld_node "${CARME_SLURM_ControlAddr}"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-echo -e "${SETCOLOR}Do you want to add a single or multiple users to your slurm cluster (${CARME_SLURM_ClusterName})?${NOCOLOR}"
+echo "Do you want to add a single or multiple users to your slurm cluster (${CARME_SLURM_ClusterName})?"
 read -rp "single user (1), multiple users (2) [default is 1] ${LBR}" IS_MULTI_USER
 echo ""
 
@@ -59,7 +73,7 @@ fi
 if [ "${IS_MULTI_USER}" = "1" ];then
 
   read -rp "enter the ldap-username of the new slurm-user ${LBR}" SLURMUSER_HELPER
-  printf "\n"
+  echo ""
   
   for SLURMUSER in $SLURMUSER_HELPER
   do
@@ -106,8 +120,7 @@ elif [ "${IS_MULTI_USER}" = "2" ];then
   scontrol reconfig
 
 else
-  echo "ERROR: you can only choose between 1 and 2."
-  exit 137
-fi
 
-exit 0
+  die "you can only choose between 1 and 2."
+
+fi
