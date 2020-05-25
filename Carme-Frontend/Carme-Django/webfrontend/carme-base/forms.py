@@ -11,7 +11,6 @@
 # Contact: info@open-carme.org
 # ---------------------------------------------
 from django import forms
-from .models import Images
 from django.utils.safestring import mark_safe
 
 """ admin messages
@@ -46,7 +45,7 @@ class StartJobForm(forms.Form):
         self.fields["image"] = forms.ChoiceField(
             label=mark_safe('<strong>IMAGE</strong>'), choices=image_choices)
         self.fields["name"] = forms.CharField(label=mark_safe('<strong>Job-Name</strong>'))
-        self.fields["name"].initial = str('MyJob')
+        self.fields["name"].initial = str('My Job')
 
 """ stop jobs
 

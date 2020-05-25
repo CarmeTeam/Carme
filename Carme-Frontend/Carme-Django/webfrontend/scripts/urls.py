@@ -5,10 +5,6 @@ from django.views.generic.base import TemplateView
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
-#from django.conf.urls import handler400, handler403, handler404, handler500
-
-#handler404 = 'carme-base.views.page_not_found'
-#handler500 = 'carme-base.views.error'  
 
 urlpatterns = [
     url(r'^', include('carme-base.urls'), name='home'),

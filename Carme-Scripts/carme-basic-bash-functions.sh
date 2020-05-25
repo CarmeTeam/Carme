@@ -10,7 +10,7 @@ CONFIG_FILE="CarmeConfig"
 
 if [ ! -f ${CLUSTER_DIR}/${CONFIG_FILE} ];then
   echo "ERROR: no config-file found in ${CLUSTER_DIR}"
-  exit 137
+  exit 200
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ fi
 function is_bash () {
   if [ ! "$BASH_VERSION" ]; then
     echo "ERROR: This is a bash-script. Please use bash to execute it!"
-    exit 137
+    exit 200
   fi
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ function is_bash () {
 function is_root () {
   if [ ! "$(whoami)" = "root" ]; then
     echo "ERROR: you need root privileges to run this script"
-    exit 137
+    exit 200
   fi
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -48,4 +48,3 @@ function get_variable () {
   echo "${variable_value}"
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
-

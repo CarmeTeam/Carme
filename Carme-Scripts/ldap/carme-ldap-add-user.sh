@@ -3,169 +3,181 @@
 # script to add a new user to LDAP
 #
 # Copyright (C) 2018 by Dr. Dominik Straßel
-#----------------------------------------------------------------------------------------------------------------------------------- 
-
-CLUSTER_DIR="/opt/Carme"
-CONFIG_FILE="CarmeConfig"
-
-SETCOLOR='\033[1;33m'
-NOCOLOR='\033[0m'
-printf "\n"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-if [ ! "$BASH_VERSION" ]; then
-    printf "${SETCOLOR}This is a bash-script. Please use bash to execute it!${NOCOLOR}\n\n"
-    exit 137
-fi
 
-if [ ! $(whoami) = "root" ]; then
-    printf "${SETCOLOR}you need root privileges to run this script${NOCOLOR}\n\n"
-    exit 137
-fi
+#bash set buildins -----------------------------------------------------------------------------------------------------------------
+set -e
+set -o pipefail
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-  function get_variable () {
-    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-    variable_value=$(echo "$variable_value" | tr -d '"')
-    echo $variable_value
-  }
+
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "ERROR: ${1}"
+  exit 200
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# source basic bash functions ------------------------------------------------------------------------------------------------------
+PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-  exit 137
+  die "carme-basic-bash-functions.sh not found but needed"
 fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# some basic checks before we continue ---------------------------------------------------------------------------------------------
+# check if bash is used to execute the script
+is_bash
+
+# check if root executes this script
+is_root
+#-----------------------------------------------------------------------------------------------------------------------------------
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from config
-CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_1=$(get_variable CARME_LDAPGROUP_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_2=$(get_variable CARME_LDAPGROUP_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_3=$(get_variable CARME_LDAPGROUP_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_4=$(get_variable CARME_LDAPGROUP_4 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_5=$(get_variable CARME_LDAPGROUP_5 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_1=$(get_variable CARME_LDAPGROUP_ID_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_2=$(get_variable CARME_LDAPGROUP_ID_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_3=$(get_variable CARME_LDAPGROUP_ID_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_4=$(get_variable CARME_LDAPGROUP_ID_4 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_5=$(get_variable CARME_LDAPGROUP_ID_5 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPINSTANZ_1=$(get_variable CARME_LDAPINSTANZ_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPINSTANZ_2=$(get_variable CARME_LDAPINSTANZ_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPINSTANZ_3=$(get_variable CARME_LDAPINSTANZ_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPINSTANZ_4=$(get_variable CARME_LDAPINSTANZ_4 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPINSTANZ_5=$(get_variable CARME_LDAPINSTANZ_5 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAP_DEFAULTPASSWD_FOLDER=$(get_variable CARME_LDAP_DEFAULTPASSWD_FOLDER $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAP_PASSWD_BASESTRING=$(get_variable CARME_LDAP_PASSWD_BASESTRING $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAP_PASSWD_LENGTH=$(get_variable CARME_LDAP_PASSWD_LENGTH $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAP_ADMIN=$(get_variable CARME_LDAP_ADMIN $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAP_DC1=$(get_variable CARME_LDAP_DC1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAP_DC2=$(get_variable CARME_LDAP_DC2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_MATTERMOST_TRIGGER=$(get_variable CARME_MATTERMOST_TRIGGER $CLUSTER_DIR/${CONFIG_FILE})
-CARME_MATTERMOST_PATH=$(get_variable CARME_MATTERMOST_PATH $CLUSTER_DIR/${CONFIG_FILE})
-CARME_MATTERMOST_COMMAND=$(get_variable CARME_MATTERMOST_COMMAND $CLUSTER_DIR/${CONFIG_FILE})
-CARME_MATTERMOST_EMAIL_BASE=$(get_variable CARME_MATTERMOST_EMAIL_BASE $CLUSTER_DIR/${CONFIG_FILE})
-CARME_MATTERMOST_DEFAULT_TEAM=$(get_variable CARME_MATTERMOST_DEFAULT_TEAM $CLUSTER_DIR/${CONFIG_FILE})
+CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP)
+CARME_LDAPGROUP_1=$(get_variable CARME_LDAPGROUP_1)
+CARME_LDAPGROUP_2=$(get_variable CARME_LDAPGROUP_2)
+CARME_LDAPGROUP_3=$(get_variable CARME_LDAPGROUP_3)
+CARME_LDAPGROUP_4=$(get_variable CARME_LDAPGROUP_4)
+CARME_LDAPGROUP_5=$(get_variable CARME_LDAPGROUP_5)
+CARME_LDAPGROUP_ID_1=$(get_variable CARME_LDAPGROUP_ID_1)
+CARME_LDAPGROUP_ID_2=$(get_variable CARME_LDAPGROUP_ID_2)
+CARME_LDAPGROUP_ID_3=$(get_variable CARME_LDAPGROUP_ID_3)
+CARME_LDAPGROUP_ID_4=$(get_variable CARME_LDAPGROUP_ID_4)
+CARME_LDAPGROUP_ID_5=$(get_variable CARME_LDAPGROUP_ID_5)
+CARME_LDAPINSTANZ_1=$(get_variable CARME_LDAPINSTANZ_1)
+CARME_LDAPINSTANZ_2=$(get_variable CARME_LDAPINSTANZ_2)
+CARME_LDAPINSTANZ_3=$(get_variable CARME_LDAPINSTANZ_3)
+CARME_LDAPINSTANZ_4=$(get_variable CARME_LDAPINSTANZ_4)
+CARME_LDAPINSTANZ_5=$(get_variable CARME_LDAPINSTANZ_5)
+CARME_LDAP_DEFAULTPASSWD_FOLDER=$(get_variable CARME_LDAP_DEFAULTPASSWD_FOLDER)
+CARME_LDAP_PASSWD_BASESTRING=$(get_variable CARME_LDAP_PASSWD_BASESTRING)
+CARME_LDAP_PASSWD_LENGTH=$(get_variable CARME_LDAP_PASSWD_LENGTH)
+CARME_LDAP_ADMIN=$(get_variable CARME_LDAP_ADMIN)
+CARME_LDAP_DC1=$(get_variable CARME_LDAP_DC1)
+CARME_LDAP_DC2=$(get_variable CARME_LDAP_DC2)
+CARME_MATTERMOST_TRIGGER=$(get_variable CARME_MATTERMOST_TRIGGER)
+CARME_MATTERMOST_PATH=$(get_variable CARME_MATTERMOST_PATH)
+CARME_MATTERMOST_COMMAND=$(get_variable CARME_MATTERMOST_COMMAND)
+CARME_MATTERMOST_EMAIL_BASE=$(get_variable CARME_MATTERMOST_EMAIL_BASE)
+CARME_MATTERMOST_DEFAULT_TEAM=$(get_variable CARME_MATTERMOST_DEFAULT_TEAM)
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-THIS_NODE_IPS=( $(hostname -I) )
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_LDAP_SERVER_IP} " ]]; then
-  printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-  exit 137
-fi
 
+# check if host is the server hosting ldap -----------------------------------------------------------------------------------------
+THIS_NODE_IPS=( "$(hostname -I)" )
+[[ ! "${THIS_NODE_IPS[*]}" =~ ${CARME_LDAP_SERVER_IP} ]] && die "this is not the server hosting ldap"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-read -p "Do you want to add a new user? [y/N] " RESP
-if [ "$RESP" = "y" ]; then
-    printf "\n"
 
-    read -p "enter new user name: " LDAPUSER
+read -rp "Do you want to add a new user? [y/N] " RESP
+echo ""
 
-    if [[ $LDAPUSER =~ [A-Z] ]]; then
-        printf "uppercase user-names not allowed\n"
-        exit 137
-    fi
+if [ "$RESP" = "y" ];then
 
-    if [[ -z "$LDAPUSER" ]]; then
-        printf "empty user-names not allowed\n"
-        exit 137
-    fi
+  read -rp "enter new user name: " LDAPUSER
 
-    #check if user allready exists
-    USEREXISTS=$(id -u $LDAPUSER > /dev/null 2>&1; echo $?)
-    if [ "$USEREXISTS" = "0" ]; then
-        printf "${SETCOLOR}cannot create${NOCOLOR} $LDAPUSER ${SETCOLOR} --> already exists${NOCOLOR}\n\n"
-        exit 137
-    fi
-
-    printf "enter GROUPID of new user\n"
-    printf "$CARME_LDAPGROUP_1:\t$CARME_LDAPGROUP_ID_1\n"
-    printf "$CARME_LDAPGROUP_2:\t$CARME_LDAPGROUP_ID_2\n"
-    printf "$CARME_LDAPGROUP_3:\t$CARME_LDAPGROUP_ID_3\n"
-    printf "$CARME_LDAPGROUP_4:\t$CARME_LDAPGROUP_ID_4\n"
-    printf "$CARME_LDAPGROUP_5:\t$CARME_LDAPGROUP_ID_5\n"
-    read GROUPID
-
-    case "$GROUPID" in
-        "$CARME_LDAPGROUP_ID_1") LDAPINSTANZ="$CARME_LDAPINSTANZ_1"
-                                 LDAPGROUP="$CARME_LDAPGROUP_1"
-        ;;
-        "$CARME_LDAPGROUP_ID_2") LDAPINSTANZ="$CARME_LDAPINSTANZ_2"
-                                 LDAPGROUP="$CARME_LDAPGROUP_2"
-        ;;
-        "$CARME_LDAPGROUP_ID_3") LDAPINSTANZ="$CARME_LDAPINSTANZ_3"
-                                 LDAPGROUP="$CARME_LDAPGROUP_3"
-        ;;
-        "$CARME_LDAPGROUP_ID_4") LDAPINSTANZ="$CARME_LDAPINSTANZ_4"
-                                 LDAPGROUP="$CARME_LDAPGROUP_4"
-        ;;
-        "$CARME_LDAPGROUP_ID_5") LDAPINSTANZ="$CARME_LDAPINSTANZ_5"
-                                 LDAPGROUP="$CARME_LDAPGROUP_5"
-        ;;
-    esac
+  # check is username contains uppercase characters --------------------------------------------------------------------------------
+  [[ $LDAPUSER =~ [A-Z] ]] && die "uppercase usernames are not allowed"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    #get date and check if default-passwd-folder exists
-    LDAP_DATE=`date +%Y-%m-%d`
-    LDAP_DATE_END=`date -d "$LDAP_DATE $LDAP_EXPIRE month" +%Y-%m-%d`
-    LDAP_FILENAME="new-ldap-user--$LDAP_DATE--$LDAPUSER.txt"
-    if [ ! -d $CARME_LDAP_DEFAULTPASSWD_FOLDER ];then
-        mkdir $CARME_LDAP_DEFAULTPASSWD_FOLDER
-    fi
-    LDAP_FILE="$CARME_LDAP_DEFAULTPASSWD_FOLDER/$LDAP_FILENAME"
+  # check if username is empty -----------------------------------------------------------------------------------------------------
+  [[ -z "$LDAPUSER" ]] && die "empty usernames are not allowed"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    #determine highest userid
-    LDAP_STRING=$(getent passwd | awk -F : '$3>h{h=$3;u=$1}END{print h ":" u}')
-    LDAP_HIGHUSER=${LDAP_STRING#*:}
-    LDAP_HIGHUID=${LDAP_STRING%%:*}
-    NEXTUID=$((LDAP_HIGHUID+1))
+  # check if user allready exists --------------------------------------------------------------------------------------------------
+  USEREXISTS=$(id -u "${LDAPUSER}" > /dev/null 2>&1; echo $?)
+  [[ "${USEREXISTS}" = "0" ]] && die "cannot create ${LDAPUSER} as it already exists"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    read -p "expiration time in months [default is 3]: " LDAP_EXPIRE_HELP
-    if [[ -z "$LDAP_EXPIRE_HELP" ]]; then
-        LDAP_EXPIRE="3"
-    else
-        LDAP_EXPIRE=$LDAP_EXPIRE_HELP
-    fi
-    printf "\n"
+  # define ldap instance and group -------------------------------------------------------------------------------------------------
+  echo "enter GROUPID of new user"
+  echo -e "$CARME_LDAPGROUP_1:\t$CARME_LDAPGROUP_ID_1\n"
+  echo -e"$CARME_LDAPGROUP_2:\t$CARME_LDAPGROUP_ID_2\n"
+  echo -e "$CARME_LDAPGROUP_3:\t$CARME_LDAPGROUP_ID_3\n"
+  echo -e "$CARME_LDAPGROUP_4:\t$CARME_LDAPGROUP_ID_4\n"
+  echo -e "$CARME_LDAPGROUP_5:\t$CARME_LDAPGROUP_ID_5\n"
+
+  read -r GROUPID
+
+  case "$GROUPID" in
+    "$CARME_LDAPGROUP_ID_1") LDAPINSTANZ="$CARME_LDAPINSTANZ_1"
+                             LDAPGROUP="$CARME_LDAPGROUP_1"
+    ;;
+    "$CARME_LDAPGROUP_ID_2") LDAPINSTANZ="$CARME_LDAPINSTANZ_2"
+                             LDAPGROUP="$CARME_LDAPGROUP_2"
+    ;;
+    "$CARME_LDAPGROUP_ID_3") LDAPINSTANZ="$CARME_LDAPINSTANZ_3"
+                             LDAPGROUP="$CARME_LDAPGROUP_3"
+    ;;
+    "$CARME_LDAPGROUP_ID_4") LDAPINSTANZ="$CARME_LDAPINSTANZ_4"
+                             LDAPGROUP="$CARME_LDAPGROUP_4"
+    ;;
+    "$CARME_LDAPGROUP_ID_5") LDAPINSTANZ="$CARME_LDAPINSTANZ_5"
+                             LDAPGROUP="$CARME_LDAPGROUP_5"
+    ;;
+  esac
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    #ask for the LDAP admin password
-    read -s -p "enter the LDAP admin password: " LDAP_ADMIN_PASSWORD
-    if [[ -z "$LDAP_ADMIN_PASSWORD" ]]; then
-        printf "LDAP admin password cannot be empty\n"
-        exit 137
-    fi
-    printf "\n"
+  # get date and check if default-passwd-folder exists -----------------------------------------------------------------------------
+  LDAP_DATE="$(date +%Y-%m-%d)"
+  LDAP_DATE_END="$(date -d "${LDAP_DATE} ${LDAP_EXPIRE} month" +%Y-%m-%d)"
+  LDAP_FILENAME="new-ldap-user--$LDAP_DATE--$LDAPUSER.txt"
+
+  [[ -z ${CARME_LDAP_DEFAULTPASSWD_FOLDER} ]] && die "CARME_LDAP_DEFAULTPASSWD_FOLDER not set"
+  if [ ! -d "${CARME_LDAP_DEFAULTPASSWD_FOLDER}" ];then
+    mkdir "${CARME_LDAP_DEFAULTPASSWD_FOLDER}" || die "cannot create ${CARME_LDAP_DEFAULTPASSWD_FOLDER}"
+  fi
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    # create random password
-    LDAP_PASSWD=$(cat /dev/urandom | tr -dc "$CARME_LDAP_PASSWD_BASESTRING" | fold -w $CARME_LDAP_PASSWD_LENGTH | head -n 1)
-    echo "default password is:" $LDAP_PASSWD
-				printf "\n"
+  # determine highest userid and set user-id ---------------------------------------------------------------------------------------
+  LDAP_STRING=$(getent passwd | awk -F : '$3>h{h=$3;u=$1}END{print h ":" u}')
+  LDAP_HIGHUID=${LDAP_STRING%%:*}
+  NEXTUID=$((LDAP_HIGHUID+1))
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    # step (3): add new user to LDAP database (note do not add whitespaces at the beginning of the next lines!)
-ldapadd -v -x -D "cn=$CARME_LDAP_ADMIN,dc=$CARME_LDAP_DC1,dc=$CARME_LDAP_DC2" -w $LDAP_ADMIN_PASSWORD  << EOF
+  # define expiration time ---------------------------------------------------------------------------------------------------------
+  # NOTE: this is defined in order to have an overview over the users. They are not aitomatically deleted after that time
+  read -rp "expiration time in months [default is 3]: " LDAP_EXPIRE_HELP
+  echo ""
+  if [[ -z "${LDAP_EXPIRE_HELP}" ]];then
+    LDAP_EXPIRE="3"
+  else
+    LDAP_EXPIRE="${LDAP_EXPIRE_HELP}"
+  fi
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # ask for the LDAP admin password ------------------------------------------------------------------------------------------------
+  read -s -rp "enter the LDAP admin password: " LDAP_ADMIN_PASSWORD
+  echo ""
+  [[ -z "${LDAP_ADMIN_PASSWORD}" ]] && die "LDAP admin password cannot be empty"
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # create random default password -------------------------------------------------------------------------------------------------
+  LDAP_PASSWD=$(head /dev/urandom | tr -dc "${CARME_LDAP_PASSWD_BASESTRING}" | head -c "${CARME_LDAP_PASSWD_LENGTH}")
+  [[ -z ${LDAP_PASSWD} ]] && die "LDAP_PASSWD not set"
+  echo "default password is: ${LDAP_PASSWD}"
+  echo ""
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # add new user to LDAP database --------------------------------------------------------------------------------------------------
+ldapadd -v -x -D "cn=${CARME_LDAP_ADMIN},dc=${CARME_LDAP_DC1},dc=${CARME_LDAP_DC2}" -w "${LDAP_ADMIN_PASSWORD}"  << EOF
 dn:uid=${LDAPUSER},cn=${LDAPGROUP},ou=${LDAPINSTANZ},dc=${CARME_LDAP_DC1},dc=${CARME_LDAP_DC2}
 objectClass:top
 objectClass:account
@@ -179,40 +191,58 @@ homeDirectory:/home/$LDAPUSER
 loginShell:/bin/bash
 EOF
 
-    ldappasswd -D "cn=$CARME_LDAP_ADMIN,dc=$CARME_LDAP_DC1,dc=$CARME_LDAP_DC2" uid=$LDAPUSER,cn=$LDAPGROUP,ou=$LDAPINSTANZ,dc=$CARME_LDAP_DC1,dc=$CARME_LDAP_DC2 -w $LDAP_ADMIN_PASSWORD -s $LDAP_PASSWD
+  ldappasswd -D "cn=${CARME_LDAP_ADMIN},dc=${CARME_LDAP_DC1},dc=${CARME_LDAP_DC2}" uid="${LDAPUSER}",cn="${LDAPGROUP}",ou="${LDAPINSTANZ}",dc="${CARME_LDAP_DC1}",dc="${CARME_LDAP_DC2}" -w "${LDAP_ADMIN_PASSWORD}" -s "${LDAP_PASSWD}"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    #pipe new user data to file
-    echo "user: $LDAPUSER" >>$LDAP_FILE
-    echo "userid: $NEXTUID" >>$LDAP_FILE
-    echo "default password: $LDAP_PASSWD" >>$LDAP_FILE
-    echo "created: $LDAP_DATE" >>$LDAP_FILE
-    echo "expires: $LDAP_DATE_END" >>$LDAP_FILE
-    echo "groubid: $GROUPID" >>$LDAP_FILE
-
-    # create home
-    mkdir -v /home/$LDAPUSER
-    cp -vr /etc/skel/. /home/$LDAPUSER
-			 mkdir -vp /home/$LDAPUSER/.config/carme
-    mkdir -vp /home/$LDAPUSER/.local/share/carme
-			 mkdir -vp /home/$LDAPUSER/.ssh	
-    chown -v -R $NEXTUID:$GROUPID /home/$LDAPUSER
+  # pipe new user data to file -----------------------------------------------------------------------------------------------------
+  echo "user: ${LDAPUSER}
+userid: ${NEXTUID}
+default password: ${LDAP_PASSWD}
+created: ${LDAP_DATE}
+expires: ${LDAP_DATE_END}
+groubid: ${GROUPID}
+" >> "${CARME_LDAP_DEFAULTPASSWD_FOLDER}/${LDAP_FILENAME}"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    # add to mattermost
-    if [ $CARME_MATTERMOST_TRIGGER = "yes" ]; then
-        cd $CARME_MATTERMOST_PATH/bin
-        ./$CARME_MATTERMOST_COMMAND user create --email $LDAPUSER@$CARME_MATTERMOST_EMAIL_BASE --username $LDAPUSER --password $LDAP_PASSWD
-        ./$CARME_MATTERMOST_COMMAND team add $CARME_MATTERMOST_DEFAULT_TEAM $LDAPUSER@$CARME_MATTERMOST_EMAIL_BASE $LDAPUSER
-        cd
-    fi
+  # create user home ---------------------------------------------------------------------------------------------------------------
+  mkdir -v "/home/${LDAPUSER}" || die "cannot create /home/${LDAPUSER}"
+  cp -vr "/etc/skel/." "/home/${LDAPUSER}" || die "cannot copy /etc/skel/. to /home/${LDAPUSER}"
+  mkdir -vp "/home/${LDAPUSER}/.config/carme" || die "cannot create /home/${LDAPUSER}/.config/carme"
+  mkdir -vp "/home/${LDAPUSER}/.local/share/carme" || die "cannot create /home/${LDAPUSER}/.local/share/carme"
+  mkdir -vp "/home/${LDAPUSER}/.ssh" || die "cannot create /home/${LDAPUSER}/.ssh"
+  chown -v -R "${NEXTUID}":"${GROUPID}" "/home/${LDAPUSER}" || die "cannot change ownership of /home/${LDAPUSER}"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    # reminder
-    printf "${SETCOLOR}remember to add $LDAPUSER to the scheduler!${NOCOLOR}\n"
+  # add to mattermost --------------------------------------------------------------------------------------------------------------
+  if [ "${CARME_MATTERMOST_TRIGGER}" = "yes" ];then
+    [[ -z ${CARME_MATTERMOST_PATH} ]] && die "CARME_MATTERMOST_PATH not set"
+    cd "${CARME_MATTERMOST_PATH}/bin" || die "cannot change directory to ${CARME_MATTERMOST_PATH}/bin"
 
-    printf "\n"
+    [[ -z ${CARME_MATTERMOST_COMMAND} ]] && die "CARME_MATTERMOST_COMMAND not set"
+    "./${CARME_MATTERMOST_COMMAND}" user create --email "${LDAPUSER}"@"${CARME_MATTERMOST_EMAIL_BASE}" --username "${LDAPUSER}" --password "${LDAP_PASSWD}"
+    "./${CARME_MATTERMOST_COMMAND}" team add "${CARME_MATTERMOST_DEFAULT_TEAM}" "${LDAPUSER}"@"${CARME_MATTERMOST_EMAIL_BASE}" "${LDAPUSER}"
+    cd || die "cannot change directory"
+  fi
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # note ---------------------------------------------------------------------------------------------------------------------------
+  echo "user credentials are stored in"
+  echo "${CARME_LDAP_DEFAULTPASSWD_FOLDER}/${LDAP_FILENAME}"
+  echo ""
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+  # reminder -----------------------------------------------------------------------------------------------------------------------
+  echo "remember to"
+  echo "           - add ${LDAPUSER} to the scheduler"
+  echo "           - create a user certificate for ${LDAPUSER}"
+  #---------------------------------------------------------------------------------------------------------------------------------
+
 else
-    printf "Bye Bye...\n\n"
-fi
 
+  echo "Bye Bye..."
+
+fi

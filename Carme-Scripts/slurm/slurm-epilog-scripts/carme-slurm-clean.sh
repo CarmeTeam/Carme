@@ -13,52 +13,119 @@
 set -e # stop after error
 set -o pipefail # stop if command in pipe failed
 
-# check if something has to be done ------------------------------------------------------------------------------------------------
-if [[ -z "${SLURM_JOB_USER}" || -z "${SLURM_JOB_ID}" ]]; then
+
+# do nothing if this is not a carme job --------------------------------------------------------------------------------------------
+CONSTRAINTS="$(scontrol show job "${SLURM_JOB_ID}" | grep Features | awk -F' ' '{ print $1 }' | awk -F'=' '{ print $2 }')"
+if ! [[ "${CONSTRAINTS}" =~ "carme" ]];then
   exit 0
 fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define function to print time and date -------------------------------------------------------------------------------------------
+function currenttime () {
+  date +"[%F %T.%3N]"
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define logfile -------------------------------------------------------------------------------------------------------------------
+LOG_FILE="/var/log/carme/slurmd/epilog/${SLURM_JOB_ID}.log"
+{ # start command grouping for output redirection
+echo "$(currenttime) start slurm epilog"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "$(currenttime) ERROR: ${1}"
+  exit 200
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define function for output -------------------------------------------------------------------------------------------------------
+function log () {
+  echo "$(currenttime) ${1}"
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# check if something has to be done ------------------------------------------------------------------------------------------------
+[[ -z "${SLURM_JOB_USER}" || -z "${SLURM_JOB_ID}" ]] && die "SLURM_JOB_USER or SLURM_JOB_ID not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # Don't try to kill user root or system daemon jobs --------------------------------------------------------------------------------
-if [ -z "$SYS_UID_MAX" ]; then
-  SYS_UID_MAX=999
-fi
+[[ -z "$SYS_UID_MAX" ]] && SYS_UID_MAX=999
 
-if [ $SLURM_JOB_UID -lt $SYS_UID_MAX ]; then
-  exit 0
-fi
+[[ "$SLURM_JOB_UID" -lt "$SYS_UID_MAX" ]] && die "SLURM_JOB_UID (${SLURM_JOB_UID}) is lower than SYS_UID_MAX (${SYS_UID_MAX})"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# delte CARME specific job folders -------------------------------------------------------------------------------------------------
-# delete local scratch folder ------------------------------------------------------------------------------------------------------
-if [[ -d "/scratch_local/${SLURM_JOB_ID}" ]];then
-  rm -r /scratch_local/${SLURM_JOB_ID} 
+# delete CARME specific files and folders ------------------------------------------------------------------------------------------
+
+# source needed variables from /home/.CarmeScripts/CarmeConfig.container -----------------------------------------------------------
+CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.container"
+if [ -f ${CONFIG_FILE} ];then
+  function get_variable () {
+    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
+    variable_value=$(echo "${variable_value}" | tr -d '"')
+    echo "${variable_value}"
+  }
+else
+  die "${CONFIG_FILE} not found"
 fi
 
+CARME_DISTRIBUTED_FS=$(get_variable CARME_DISTRIBUTED_FS ${CONFIG_FILE})
+CARME_LOCAL_SSD_PATH=$(get_variable CARME_LOCAL_SSD_PATH ${CONFIG_FILE})
 
-# remove stuff in ${HOME} ----------------------------------------------------------------------------------------------------------
-MASTER_NODE=$(scontrol show job ${SLURM_JOB_ID} | grep BatchHost | cut -d "=" -f 2 | cut -d/ -f1)
-USER_HOME=$(getent passwd ${SLURM_JOB_USER} | cut -d: -f6)
+[[ -z ${CARME_DISTRIBUTED_FS} ]] && die "CARME_DISTRIBUTED_FS not set"
+[[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-if [[ "$(hostname)" == "${MASTER_NODE}" ]];then
+
+# remove carme specific files and folders ------------------------------------------------------------------------------------------
+MASTER_NODE=$(scontrol show job "${SLURM_JOB_ID}" | grep BatchHost | cut -d "=" -f 2 | cut -d/ -f1)
+log "master node: ${MASTER_NODE}"
+log "distributed file system: ${CARME_DISTRIBUTED_FS}"
+
+if [[ "$(hostname)" == "${MASTER_NODE}" && "${CARME_DISTRIBUTED_FS}" == "yes" ]];then
+  CARME_NODEID="0"
+elif [[ "${CARME_DISTRIBUTED_FS}" == "no" ]];then
+  CARME_NODEID="0"
+fi
+
+if [[ "${CARME_NODEID}" == "0" ]];then
+
+  USER_HOME=$(getent passwd "${SLURM_JOB_USER}" | cut -d: -f6)
+  [[ -z "${USER_HOME}" ]] && die "home-folder of ${SLURM_JOB_USER} not set"
+  log "slurm-user: ${SLURM_JOB_USER}"
+  log "slurm-user home: ${USER_HOME}"
+
   # remove job specific stuff
-  if [[ -d "${USER_HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}" ]];then
-    rm -r ${USER_HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}
+  CARME_JOBDIR="${USER_HOME}/.local/share/carme/job/${SLURM_JOB_ID}"
+  if [[ -d "${CARME_JOBDIR}" ]];then
+    log "remove ${CARME_JOBDIR}"
+    rm -r "${CARME_JOBDIR}"
   fi
 
-  # remove job tensorboard folder
-  if [[ -d "${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}" ]];then
-    rm -r ${USER_HOME}/tensorboard/tensorboard_${SLURM_JOB_ID}
-  fi
-
-  # remove job ssh stuff
-  if [[ -f "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}" ]];then
-    rm ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+  # remove job ssh key
+  CARME_JOBKEY="${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}"
+  if [[ -f "${CARME_JOBKEY}" ]];then
+    log "remove ${CARME_JOBKEY}"
+    rm "${CARME_JOBKEY}"
   fi
 fi
+
+# delete local scratch folder
+if [[ -n ${CARME_LOCAL_SSD_PATH} && -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
+  log "remove ${CARME_LOCAL_SSD_PATH:?}/${SLURM_JOB_ID}"
+  rm -r "${CARME_LOCAL_SSD_PATH:?}/${SLURM_JOB_ID}"
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
+
+echo "$(currenttime) completed slurm epilog"
+} > "${LOG_FILE}" 2>&1 # end command grouping for output redirection
 
 exit 0
-

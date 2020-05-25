@@ -1,25 +1,42 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------------------------------------------------------
-# simple script to display messages in JupyterLab terminals
+# simple script to display messages in terminals
 #
 # Copyright (C) 2018 by Dr. Dominik Straßel
-#----------------------------------------------------------------------------------------------------------------------------------- 
-SETCOLOR='\033[1;33m'
-NOCOLOR='\033[0m'
 #-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# display messages that are provided by carme --------------------------------------------------------------------------------------
 CARME_MESSAGE_PATH="/home/.CarmeScripts/Carme-Messages"
-for file in "${CARME_MESSAGE_PATH}"/* ; do
-				if [[ ! ${file: -1} == "~" ]]; then
-        if [[ ! $file == *.txt ]]; then
-            source $file
-        else
-            if [[ $file == ${CARME_MESSAGE_PATH}/99-carme-webfrontend-messages.txt ]]; then
-                CARME_MESSAGE=$(<$file)
-                printf "${SETCOLOR}${CARME_MESSAGE}${NOCOLOR}\n\n"
-            else
-                CARME_MESSAGE=$(<$file)
-                printf "${CARME_MESSAGE}\n\n"
-            fi
-        fi
-				fi
+mapfile -t CARME_MESSAGES < <(find "${CARME_MESSAGE_PATH}" -maxdepth 1 -type f)
+
+for MESSAGE in "${CARME_MESSAGES[@]}";do
+  if [[ ${MESSAGE} == *".sh" ]]; then
+    source "${MESSAGE}"
+    echo ""
+  elif [[ ${MESSAGE} == *".txt" ]]; then
+    CARME_MESSAGE=$(<"${MESSAGE}")
+    echo "${CARME_MESSAGE}"
+    echo ""
+  fi
 done
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# display cluster specific messages that are not part of carme ---------------------------------------------------------------------
+CARME_LOCAL_MESSAGE_PATH="/home/.CarmeScripts/local-messages"
+if [[ -d ${CARME_LOCAL_MESSAGE_PATH} ]];then
+  mapfile -t CARME_LOCAL_MESSAGES < <(find "${CARME_LOCAL_MESSAGE_PATH}" -maxdepth 1 -type f)
+
+  for MESSAGE in "${CARME_LOCAL_MESSAGES[@]}";do
+    if [[ ${MESSAGE} == *".sh" ]]; then
+      source "${MESSAGE}"
+      echo ""
+    elif [[ ${MESSAGE} == *".txt" ]]; then
+      CARME_MESSAGE=$(<"${MESSAGE}")
+      echo "${CARME_MESSAGE}"
+      echo ""
+    fi
+  done
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
