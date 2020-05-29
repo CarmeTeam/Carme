@@ -378,23 +378,25 @@ def change_password(request):
         if form.is_valid():
             # init
             user_dn = request.user.ldap_user.dn
-
-            # check new pw
             password = str(form.cleaned_data['new_password1'])
-            length_error = len(password) < 13  # length
-
+            
             # check results
-            digit_error = re.search(r"\d", password) is None  # digits
-            uppercase_error = re.search(r"[A-Z]", password) is None  # case
-            symbol_error = re.search(
-                r"[ !#$%&'()*+,-./[\\\]^_`{|}~"+r'"]', password) is None  # symbols
-            equal_error = str(form.cleaned_data['new_password1']) != str(
-                form.cleaned_data['new_password2'])
+            valid_length = len(password) >= 13  # length
+            valid_equality = str(form.cleaned_data['new_password1']) == str(
+                form.cleaned_data['new_password2']) # equality
+
+            char_types = []
+            char_types.append(re.search(r"[0-9]", password) is not None)  # digits
+            char_types.append(re.search(r"[A-Z]", password) is not None)  # uppercase
+            char_types.append(re.search(r"[a-z]", password) is not None)  # lowercase
+            char_types.append(re.search(r"[^0-9a-zA-Z]", password) is not None) # other
+
+            valid_chars = sum(char_types) >= 3 # character types
             
             # whether the password passed all checks
-            password_ok = not (length_error or digit_error or uppercase_error or symbol_error or equal_error)
+            valid_password = valid_length and valid_equality and valid_chars
 
-            if (password_ok):
+            if valid_password:
                 # backend call
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                         certfile=settings.BASE_DIR+"/SSL/frontend.crt")
