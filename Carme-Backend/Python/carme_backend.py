@@ -42,6 +42,7 @@ tables = {
 queries = {
     "insert_notification": "INSERT INTO `{}` (user, message, color) VALUES (%s, %s, %s)".format(tables["notifications"]),
     "select_job_by_id_and_user": "SELECT * FROM `{}` WHERE slurm_id = %s AND user = %s LIMIT 1".format(tables["jobs"]),
+    "select_job_status_by_id": "SELECT status FROM `{}` WHERE slurm_id = %s LIMIT 1".format(tables["jobs"]),
     "update_job": "UPDATE `{}` SET status = \"running\", ip = %s, url_suffix = %s, nb_port = %s, tb_port = %s, ta_port = %s, gpu_ids = %s WHERE slurm_id = %s".format(tables["jobs"]),
     "delete_job": "DELETE FROM `{}` WHERE slurm_id = %s".format(tables["jobs"])
 }
@@ -363,6 +364,31 @@ class Backend(Service):
         ret = os.system(com)
         
         if ret == 0:
+            job = None
+
+            # select job from database
+            try:
+                cur = self.db.cursor()
+                cur.execute(queries["select_job_status_by_id"], (job_id,))
+
+                job = cur.fetchone()
+            except:
+                print("error exposed_cancel - sql statement select_job_status_by_id failed")
+                traceback.print_exc()
+
+            # delete job if status is queued
+            if job is None:
+                print("error exposed_cancel - no job found for slurm_id {} and user {}".format(slurm_id, user))
+            else:
+                if job[0] == "queued":
+                    try:
+                        cur.execute(queries["delete_job"], (job_id,))
+
+                        self.db.commit()
+                    except:
+                        print("error exposed_cancel - sql statement delete_job failed")
+                        traceback.print_exc()
+
             print("cancelled job {} for user {}".format(job_id, user))
             self.send_notification("Cancelled job {}".format(job_id), user, "#e8be17")
         else:
