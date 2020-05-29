@@ -452,7 +452,7 @@ class Backend(Service):
         try:
             LDAP_ADMIN_USER = "cn={cn},dc={dc1},dc={dc2}".format(cn=CARME_LDAP_ADMIN, dc1=CARME_LDAP_DC1, dc2=CARME_LDAP_DC2)
 
-            s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ALL)
+            s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ldap3.ALL)
             c = ldap3.Connection(s, user=LDAP_ADMIN_USER, password=CARME_LDAP_SERVER_PW)
             
             c.bind()
