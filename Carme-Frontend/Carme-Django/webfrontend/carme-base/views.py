@@ -150,10 +150,8 @@ def job_table(request):
 
     # NOTE: no update of session ex time here!
 
-    current_user = request.user.username
-
     # get all jobs by user
-    slurm_list_user = SlurmJobs.objects.filter(user__exact=current_user)
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
     numjobs = len(slurm_list_user)
     jobheight = calculate_jobheight(numjobs)
 
@@ -205,14 +203,14 @@ def start_job(request):
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            job_id = conn.root.schedule(str(request.user.username), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
+            job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
             
             if int(job_id) > 0:
                 SlurmJobs.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
                                          user=request.user.username, slurm_id=int(job_id), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
-                print("Queued job {} for user {} on {} nodes".format(job_id, request.user.username, num_nodes))
+                print("Queued job {} for user {} on {} nodes".format(job_id, ldap_username(request), num_nodes))
             else:
-                print("ERROR queueing job {} for user {} on {} nodes".format(job_name, request.user.username, num_nodes))
+                print("ERROR queueing job {} for user {} on {} nodes".format(job_name, ldap_username(request), num_nodes))
 
                 raise Exception("ERROR starting job")
 
@@ -402,7 +400,7 @@ def change_password(request):
                                         certfile=settings.BASE_DIR+"/SSL/frontend.crt")
                 password = str(form.cleaned_data['new_password2'])
 
-                if conn.root.change_password(str(user_dn), str(request.user.username), password):
+                if conn.root.change_password(str(user_dn), ldap_username(request), password):
                     mess = "Password update for user: "+str(user_dn)
                     dj_messages.success(request, mess)
                 else:
