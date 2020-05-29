@@ -252,7 +252,7 @@ class Backend(Service):
 
         return 0
 
-    def exposed_schedule(self, user, image, mounts, partition, num_gpus, num_nodes, name, gpu_type):
+    def exposed_schedule(self, user, home, image, mounts, partition, num_gpus, num_nodes, name, gpu_type):
         """schedule a new job via the batch system
 
         # note 
@@ -260,6 +260,7 @@ class Backend(Service):
 
         # arguments
             user: username
+            home: home directory
             image: image to start
             mounts: mount points to be set
             partition: partition to be used
@@ -307,12 +308,12 @@ class Backend(Service):
             'gpu_type': ('' if (gpu_type == 'default' or gpu_type == 'cpu') else (':' + gpu_type)),
             'cores_per_node': cores_per_node,
             'mem_per_node': str(mem_per_node) + 'G',
-            'log_dir': '/home/{}/.local/share/carme/job-log-dir'.format(user)
+            'log_dir': os.path.join(home, '.local/share/carme/job-log-dir')
         }
 
         params = "--parsable --constraint=\"{constraints}\" --partition=\"{partition}\" --job-name=\"{job_name}\" --nodes=\"{num_nodes}\" --ntasks-per-node=\"{cores_per_node}\" --cpus-per-task=\"1\" --mem=\"{mem_per_node}\" --gres=\"gpu{gpu_type}{gpus_per_node}\" --gres-flags=\"enforce-binding\" -o \"{log_dir}/%j.out\" -e \"{log_dir}/%j.err\"".format(**values)
         
-        com = "runuser -u {user} -- bash -l -c 'SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPT_PATH, "slurm.sh"), image=image, mounts=mounts)
+        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPT_PATH, "slurm.sh"), image=image, mounts=mounts)
 
         # execute sbatch as user
         proc = subprocess.Popen(com, shell=True, stdout=subprocess.PIPE)
