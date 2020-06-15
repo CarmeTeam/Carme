@@ -2,7 +2,9 @@ CarmeConfig
 CarmeConfig.frontend*
 CarmeConfig.container*
 CarmeConfig.backend*
-CarmeConfig_blanco.new
+
+*.bak
+*.new
 
 *.bak
 *.new
