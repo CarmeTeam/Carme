@@ -94,7 +94,8 @@ fi
 
 # define the users home directory and its primary group
 USER_HOME="$(getent passwd "${SLURM_JOB_USER}" | cut -d: -f6)"
-[[ -z "${USER_HOME}" ]] && die "home-folder of ${SLURM_JOB_USER} not set"
+[[ -z "${USER_HOME}" ]] && die "home-folder of user ${SLURM_JOB_USER} not set"
+[[ ! -d "${USER_HOME}" ]] && die "home-folder (${USER_HOME}) of user ${SLURM_JOB_USER} does not exist"
 log "slurm-user: ${SLURM_JOB_USER}"
 log "slurm-user home: ${USER_HOME}"
 
@@ -214,6 +215,11 @@ export TA_PORT=${TA_PORT}" >> "${JOBDIR}/ports/$(hostname)"
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
 
     # create folders needed for ssh
+    if [[ ! -d "${USER_HOME}/.ssh" ]];then
+      mkdir "${USER_HOME}/.ssh"
+      chown "${SLURM_JOB_USER}":"${USER_GROUP}" "${USER_HOME}/.ssh"
+    fi
+
     log "create ${JOBDIR}/ssh"
     mkdir -p "${JOBDIR}/ssh" || die "cannot create ${JOBDIR}/ssh"
 
@@ -272,14 +278,12 @@ Include ${JOBDIR}/ssh/ssh_config.d/*
   log "change ownership of ${LOGDIR}"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${LOGDIR}"
 
+  log "change ownership of ${USER_HOME}/.local/share/carme/job"
+  chown "${SLURM_JOB_USER}":"${USER_GROUP}" "${USER_HOME}/.local/share/carme/job"
+
   log "change ownership of ${JOBDIR}"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JOBDIR}"
 
-  log "change ownership of ${JUPYTERLAB_BASEDIR}"
-  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JUPYTERLAB_BASEDIR}"
-
-  log "change ownership of ${JUPYTERLAB_WORKSPACESDIR}"
-  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JUPYTERLAB_WORKSPACESDIR}"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -321,7 +325,7 @@ if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && 
   FINAL_PORT="2300"
 
   for ((i=BASE_PORT;i<=FINAL_PORT;i++)); do
-    if ! ss -tln -4 | grep -q ${i}
+    if ! ss -tln -4 | grep -q "${i}"
     then
       SSHD_PORT=${i}
       echo "export SSHD_PORT=${SSHD_PORT}" >> "${JOBDIR}/ports/$(hostname)"
