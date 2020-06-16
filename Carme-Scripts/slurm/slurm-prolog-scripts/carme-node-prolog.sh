@@ -233,9 +233,7 @@ export TA_PORT=${TA_PORT}" >> "${JOBDIR}/ports/$(hostname)"
     log "create ssh keys"
 
     ssh-keygen -t ssh-rsa -N "" -f "${JOBDIR}/ssh/server_key"
-    ssh-keygen -t rsa -N "" -f "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}"
-    chown "${SLURM_JOB_USER}":"${USER_GROUP}" "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}"
-    mv "${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}.pub" "${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}.pub"
+    ssh-keygen -t rsa -N "" -f "${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}"
     cat "${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}.pub" >> "${JOBDIR}/ssh/authorized_keys"
 
 
@@ -249,8 +247,8 @@ UsePAM no
 AuthorizedKeysFile ${JOBDIR}/ssh/authorized_keys
 LoginGraceTime 30s
 MaxAuthTries 3
-ClientAliveInterval 3600
-ClientAliveCountMax 1
+ClientAliveInterval 60
+ClientAliveCountMax 3
 X11Forwarding no
 PrintMotd no
 AcceptEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
@@ -344,7 +342,7 @@ if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && 
   HostName $(hostname)
   User ${SLURM_JOB_USER}
   Port ${SSHD_PORT}
-  IdentityFile ${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}
+  IdentityFile ${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}
 " >> "${JOBDIR}/ssh/ssh_config.d/$(hostname)"
 
   log "change ownership of ${JOBDIR}"
