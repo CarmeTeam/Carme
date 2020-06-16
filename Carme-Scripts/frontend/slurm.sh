@@ -175,8 +175,7 @@ export SLURM_TOPOLOGY_ADDR_PATTERN=\"${SLURM_TOPOLOGY_ADDR_PATTERN}\"
 export SLURM_UMASK=\"${SLURM_UMASK}\"
 export SLURM_WORKING_CLUSTER=\"${SLURM_WORKING_CLUSTER}\"
 export CUDA_VISIBLE_DEVICES=\"${CUDA_VISIBLE_DEVICES}\"
-export GPU_DEVICE_ORDINAL=\"${GPU_DEVICE_ORDINAL}\"
-" > "${CARME_SSHDIR}/envs/$(hostname)"
+export GPU_DEVICE_ORDINAL=\"${GPU_DEVICE_ORDINAL}\"" > "${CARME_SSHDIR}/envs/$(hostname)"
 
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------

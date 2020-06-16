@@ -33,6 +33,12 @@ function log () {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# write LD_LIBRARY_PATH to local hostname specific env file ------------------------------------------------------------------------
+echo "export LD_LIBRARY_PATH=\"${LD_LIBRARY_PATH}\"
+" >> "${CARME_SSHDIR}/envs/$(hostname)"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # activate conda base environment --------------------------------------------------------------------------------------------------
 # NOTE: conda should always be activated not only in interactive shells
 CONDA_INIT_FILE="/opt/anaconda3/etc/profile.d/conda.sh"
@@ -73,7 +79,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
   # start jupyter-lab --------------------------------------------------------------------------------------------------------------
   log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
-  jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser   --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' &
+  jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' &
   #---------------------------------------------------------------------------------------------------------------------------------
 
 else

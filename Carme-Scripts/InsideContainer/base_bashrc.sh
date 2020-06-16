@@ -75,7 +75,19 @@ fi
 # redefine mpirun ------------------------------------------------------------------------------------------------------------------
 if [[ -f "/usr/bin/mpirun" ]];then
   function carme_mpirun () {
-    "/usr/bin/mpirun" --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
+    if [[ $# -eq 0 ]] ; then
+      /usr/bin/mpirun
+    elif [[ "${1}" == "--help" ]];then
+      /usr/bin/mpirun --help
+    elif [[ "${1}" == "-h" ]];then
+      /usr/bin/mpirun -h
+    elif [[ "${1}" == "--version" ]];then
+      /usr/bin/mpirun --version
+    elif [[ "${1}" == "-V" ]];then
+      /usr/bin/mpirun -V
+    else
+      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
+    fi
   }
   complete -f -d -c carme_mpirun
   export -f carme_mpirun
