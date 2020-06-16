@@ -110,12 +110,6 @@ if [[ "${CARME_NODEID}" == "0" ]];then
     rm -r "${CARME_JOBDIR}"
   fi
 
-  # remove job ssh key
-  CARME_JOBKEY="${USER_HOME}/.ssh/id_rsa_${SLURM_JOB_ID}"
-  if [[ -f "${CARME_JOBKEY}" ]];then
-    log "remove ${CARME_JOBKEY}"
-    rm "${CARME_JOBKEY}"
-  fi
 fi
 
 # delete local scratch folder
