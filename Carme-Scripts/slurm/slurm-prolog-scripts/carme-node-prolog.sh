@@ -237,26 +237,7 @@ export TA_PORT=${TA_PORT}" >> "${JOBDIR}/ports/$(hostname)"
     cat "${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}.pub" >> "${JOBDIR}/ssh/authorized_keys"
 
 
-    # create sshd and ssh config
-    log "create sshd config"
-
-    echo "PermitRootLogin no
-PubkeyAuthentication yes
-ChallengeResponseAuthentication no
-UsePAM no
-AuthorizedKeysFile ${JOBDIR}/ssh/authorized_keys
-LoginGraceTime 30s
-MaxAuthTries 3
-ClientAliveInterval 60
-ClientAliveCountMax 3
-X11Forwarding no
-PrintMotd no
-AcceptEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
-AllowUsers ${SLURM_JOB_USER}
-PermitUserEnvironment no
-" >> "${JOBDIR}/ssh/sshd_config"
-    chmod 640 "${JOBDIR}/ssh/sshd_config"
-
+    # create ssh config
     log "create ssh config"
     echo "SendEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
 HashKnownHosts yes
@@ -302,7 +283,7 @@ export CARME_HASH=${HASH}
 
   #register job with frontend db
   log "register job with frontend db"
-  runuser -u "${SLURM_JOB_USER}" -- "${CARME_SCRIPT_PATH}"/dist_alter_jobDB_entry/alter_jobDB_entry "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${CUDA_VISIBLE_DEVICES}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
+  runuser -u "${SLURM_JOB_USER}" -- "${CARME_SCRIPT_PATH}"/dist_alter_jobDB_entry/alter_jobDB_entry "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${SLURM_JOB_GPUS}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
 
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -311,9 +292,37 @@ fi
 # create ssh:config.d files --------------------------------------------------------------------------------------------------------
 if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
 
+  # create folder for sshd_configs
+  log "create ${JOBDIR}/ssh/sshd"
+  mkdir -p "${JOBDIR}/ssh/sshd" || die "cannot create ${JOBDIR}/ssh/sshd"
+
+  # create node specific sshd_configs
+  log "create sshd config for $(hostname)"
+
+  echo "PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+UsePAM no
+AuthorizedKeysFile ${JOBDIR}/ssh/authorized_keys
+PidFile ${JOBDIR}/ssh/sshd/$(hostname).pid
+LoginGraceTime 30s
+MaxAuthTries 3
+ClientAliveInterval 60
+ClientAliveCountMax 3
+X11Forwarding no
+PrintMotd no
+AcceptEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
+AllowUsers ${SLURM_JOB_USER}
+PermitUserEnvironment no
+" >> "${JOBDIR}/ssh/sshd/$(hostname).conf"
+  chmod 640 "${JOBDIR}/ssh/sshd/$(hostname).conf"
+
+  # create folder for ports
   log "create ${JOBDIR}/ports"
   mkdir -p "${JOBDIR}/ports" || die "cannot create ${JOBDIR}/ports"
 
+  # create folder for local ssh_configs
   log "create ${JOBDIR}/ssh/ssh_config.d"
   mkdir -p "${JOBDIR}/ssh/ssh_config.d" || die "cannot create ${JOBDIR}/ssh/ssh_config.d"
 
