@@ -40,10 +40,7 @@ function check_if_user_exists () {
 function read_and_check_slurm_limitations () {
     # list avialbale groups of the user(s) --------------------------------------------------------
     echo -e "${SETCOLOR}available groups for user ${1}${NOCOLOR}"
-    
-    for i in ${2};do
-      groups "${i}"
-    done
+    groups "${1}"
     echo ""
     echo ""
     #----------------------------------------------------------------------------------------------
@@ -125,11 +122,11 @@ function put_together_and_check () {
     echo "additional limits: ${6}"
   fi
   echo ""
-  read -rp "(y|n) ${LBR}" RESP
+  read -rp "[y|N] ${LBR}" RESP
 
-  if [ "$RESP" = "n" ];then
+  if [ "$RESP" = "N" ];then
     exit 200
-  elif [[ "$RESP" != "y" && "$RESP" != "n" ]];then
+  elif [[ "$RESP" != "y" && "$RESP" != "N" ]];then
     exit 200
   fi
 }

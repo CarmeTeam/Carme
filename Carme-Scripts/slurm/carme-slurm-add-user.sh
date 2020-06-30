@@ -62,43 +62,16 @@ check_if_slurmctld_node "${CARME_SLURM_ControlAddr}"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-echo "Do you want to add a single or multiple users to your slurm cluster (${CARME_SLURM_ClusterName})?"
-read -rp "single user (1), multiple users (2) [default is 1] ${LBR}" IS_MULTI_USER
+read -rp "Do you want to add a new user to the slurm database (cluster=${CARME_SLURM_ClusterName})? [y|N] ${LBR}" RESP
 echo ""
 
-if [ -z "${IS_MULTI_USER}" ];then
-  IS_MULTI_USER="1"
-fi
+if [ "${RESP}" = "y" ];then
 
-if [ "${IS_MULTI_USER}" = "1" ];then
-
-  read -rp "enter the ldap-username of the new slurm-user ${LBR}" SLURMUSER_HELPER
+  read -rp "enter the ldap-username of the new slurm-user ${LBR}" SLURMUSER
   echo ""
-  
-  for SLURMUSER in $SLURMUSER_HELPER
-  do
-    # check if user exists
-    check_if_user_exists "${SLURMUSER}"
 
-    # read user limits from terminal
-    read_and_check_slurm_limitations "${SLURMUSER}" "${SLURMUSER_HELPER[*]}"
-
-    # put together what we have so far
-    put_together_and_check "${SLURMUSER}" "${CARME_SLURM_ClusterName}" "${CARME_SLURM_ACCOUNT}" "${SLURM_ADMIN_LEVEL}" "${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
-    
-    # add user to slurm db
-    sacctmgr create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
-
-    # check what we just did via slurm commands
-    sacctmgr list associations user="${SLURMUSER}"
-  done
-
-  scontrol reconfig
-
-elif [ "${IS_MULTI_USER}" = "2" ];then
-
-  read -rp "enter the ldap-usernames of the new slurm-users (with the same limits) [separated by space] ${LBR}" SLURMUSER_HELPER
-  echo ""
+  # check if user exists
+  check_if_user_exists "${SLURMUSER}"
 
   # read user limits from terminal
   read_and_check_slurm_limitations "${SLURMUSER}" "${SLURMUSER_HELPER[*]}"
@@ -106,21 +79,18 @@ elif [ "${IS_MULTI_USER}" = "2" ];then
   # put together what we have so far
   put_together_and_check "${SLURMUSER}" "${CARME_SLURM_ClusterName}" "${CARME_SLURM_ACCOUNT}" "${SLURM_ADMIN_LEVEL}" "${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
 
-  for SLURMUSER in $SLURMUSER_HELPER;do
-    # check if user exists
-    check_if_user_exists "${SLURMUSER}"
-
-    # add user to slurm db
-    sacctmgr create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
-
-    # check what we just did via slurm commands
-    sacctmgr list associations user="${SLURMUSER}"
-  done
+  # add user to slurm db
+  echo ""
+  if [[ -z "${SLURM_ADDITIONAL_LIMITS}" ]];then
+    sacctmgr -i create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}"
+  else
+    sacctmgr -i create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
+  fi
 
   scontrol reconfig
 
 else
 
-  die "you can only choose between 1 and 2."
+  echo "Bye Bye..."
 
 fi
