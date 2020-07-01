@@ -1,76 +1,105 @@
+#!/bin/bash
 #
-# ${HOME}/.bashrc
+# /etc/bash.bashrc
 #
-
-# If not running interactively, don't do anything ----------------------------------------------------------------------------------
-[[ $- != *i* ]] && return
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# redefine prompt and its color (can be overwritten in .bash_aliases) --------------------------------------------------------------
-if [[ $- = *i* ]];then
-  export PS1='[\[\033[01;35m\]\u\[\033[m\]@\[\033[01;32m\]\h\[\033[m\]:\[\033[01;31;1m\]\W\[\033[m\]]\$ '
-else
-  export PS1='[\u@\h:\W]\$ '
-fi
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# bash history settings ------------------------------------------------------------------------------------------------------------
-# don't add duplicate lines or lines starting with space
-HISTCONTROL=ignoreboth
-
-# append to history
-shopt -s histappend
-
-# set history length
-HISTSIZE=1000
-HISTFILESIZE=2000
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# add bash completion --------------------------------------------------------------------------------------------------------------
-if [ -f /usr/share/bash-completion/bash_completion ]; then
-  . /usr/share/bash-completion/bash_completion
-elif [ -f /etc/bash_completion ]; then
-  . /etc/bash_completion
-fi
-# ----------------------------------------------------------------------------------------------------------------------------------
-
-
-# add user specific bash settings --------------------------------------------------------------------------------------------------
-[[ -f ${HOME}/.bash_aliases ]] && . ${HOME}/.bash_aliases
-#-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # CARME specific changes -----------------------------------------------------------------------------------------------------------
+set -e
+set -o pipefail
+
+CARME_SCRIPTS_DIR="/home/.CarmeScripts"
+
+
 # add specific bash functions
-[[ -f /home/.CarmeScripts/carme_bash_functions.sh ]] && . /home/.CarmeScripts/carme_bash_functions.sh
+CARME_BASH_FUNCTIONS="${CARME_SCRIPTS_DIR}/carme_bash_functions.sh"
+[[ -f "${CARME_BASH_FUNCTIONS}" ]] && source "${CARME_BASH_FUNCTIONS}"
+
 
 # add job specific bash settings
-if [[ -f ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/bash_${SLURM_JOB_ID} ]];then
-  . ${HOME}/.local/share/carme/tmp-files-${SLURM_JOB_ID}/bash_${SLURM_JOB_ID}
-fi
+CARME_JOB_DIR="${HOME}/.local/share/carme/job/${SLURM_JOB_ID}"
+[[ -f "${CARME_JOB_DIR}/bashrc" ]] && source "${CARME_JOB_DIR}/bashrc"
 
-# add terminal welcome message
-[[ -f /home/.CarmeScripts/carme-messages.sh ]] && . /home/.CarmeScripts/carme-messages.sh
+
+# add variables that should be availabe in ssh
+[[ -f "${CARME_JOB_DIR}/ssh/envs/$(hostname)" ]] && source "${CARME_JOB_DIR}/ssh/envs/$(hostname)"
+
+set +e
+set +o pipefail
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# make anaconda environment visible ------------------------------------------------------------------------------------------------
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
+if [[ "$-" = *i* ]];then
+  # redefine prompt and its color (can be overwritten in .bash_aliases) ------------------------------------------------------------
+  export PS1="[\[\033[01;35m\]\u\[\033[m\]@\[\033[01;32m\]\h\[\033[m\]:\[\033[01;31;1m\]\W\[\033[m\]]\$ "
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # bash history settings ----------------------------------------------------------------------------------------------------------
+  # don't add duplicate lines or lines starting with space
+  HISTCONTROL=ignoreboth
+
+
+  # append to history
+  shopt -s histappend
+
+
+  # set history length
+  HISTSIZE=1000
+  HISTFILESIZE=2000
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # add bash completion ------------------------------------------------------------------------------------------------------------
+  if [ -f "/usr/share/bash-completion/bash_completion" ]; then
+    source "/usr/share/bash-completion/bash_completion"
+  elif [ -f "/etc/bash_completion" ]; then
+    source "/etc/bash_completion"
+  fi
+  # --------------------------------------------------------------------------------------------------------------------------------
+
+
+  # add terminal welcome message
+  set -e
+  set -o pipefail
+  CARME_MESSAGES="${CARME_SCRIPTS_DIR}/carme-messages.sh"
+  [[ -f "${CARME_MESSAGES}" && -z "${SSH_CLIENT}" ]] && source "${CARME_MESSAGES}"
+  set +e
+  set +o pipefail
+  #---------------------------------------------------------------------------------------------------------------------------------
 else
-    if [ -f "/opt/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/opt/anaconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/opt/anaconda3/bin:$PATH"
-    fi
+  export PS1="[\u@\h:\W]\$ "
 fi
-unset __conda_setup
-# <<< conda initialize <<<
+
+
+# redefine mpirun ------------------------------------------------------------------------------------------------------------------
+if [[ -f "/usr/bin/mpirun" ]];then
+  function carme_mpirun () {
+    if [[ $# -eq 0 ]] ; then
+      /usr/bin/mpirun
+    elif [[ "${1}" == "--help" ]];then
+      /usr/bin/mpirun --help
+    elif [[ "${1}" == "-h" ]];then
+      /usr/bin/mpirun -h
+    elif [[ "${1}" == "--version" ]];then
+      /usr/bin/mpirun --version
+    elif [[ "${1}" == "-V" ]];then
+      /usr/bin/mpirun -V
+    else
+      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
+    fi
+  }
+  complete -f -d -c carme_mpirun
+  export -f carme_mpirun
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
+
+# activate conda base environment --------------------------------------------------------------------------------------------------
+# NOTE: conda should always be activated not only in interactive shells
+CONDA_INIT_FILE="/opt/anaconda3/etc/profile.d/conda.sh"
+if [[ -f "${CONDA_INIT_FILE}" ]];then
+  source "${CONDA_INIT_FILE}"
+  conda activate base
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------

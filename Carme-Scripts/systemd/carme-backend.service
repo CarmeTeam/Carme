@@ -1,16 +1,13 @@
 [Unit]
-Description=CarmeBackeind
+Description=Carme Backend
 Wants=network-online.target
 After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /opt/Carme/Carme-Backend/carme_backend.py
-
+ExecStart=/usr/bin/python3 -u /opt/Carme/Carme-Backend/Python/carme_backend.py
 Restart=on-failure
 RestartSec=1
-StartLimitAction=reboot
 
 [Install]
 WantedBy=multi-user.target
-

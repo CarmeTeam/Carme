@@ -30,8 +30,8 @@
 																<thead>
 																<tr>
 																								<td><b>User</b></td>
-																								<td><b>Job Name</b></td>
 																								<td><b>JobID</b></td>
+																								<td><b>Job Name</b></td>
 																								<td align="center"><b>#(Nodes)</b></td>
 																								<td><b>Master</b></td>
 																								<td><b>GPU Type</b></td>
@@ -44,21 +44,21 @@
 																</thead>
 																{% for job in slurm_list %}
 																<tr>
-																								<td>{{job.user}}</td><td align="center">{{job.jobName}}</td><td align="center">{{job.SLURM_ID}}</td><td align="center">{{ job.NumNodes }}</td><td align="center">{{ job.IP }}</td><td align="center">{{ job.gpu_type }}</td><td align="center">{{ job.NumGPUs }}</td><td>{{ job.imageName }}</td>
+																								<td>{{job.user}}</td><td align="center">{{job.slurm_id}}</td><td align="center">{{job.name}}</td><td align="center">{{ job.num_nodes }}</td><td align="center">{{ job.ip }}</td><td align="center">{{ job.gpu_type }}</td><td align="center">{{ job.num_gpus }}</td><td>{{ job.image_name }}</td>
 																								<td>
-																																<a href="/nb_{{ job.HASH }}/" target="_new"><img src="{% static "jupyter.png" %}" alt="Jupyter" height=40/></A>                                                     
-																																<a href="/tb_{{ job.HASH }}/" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="TensorBoard" height=40/></A>  
+																																<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" target="_new"><img src="{% static "jupyter.png" %}" alt="Jupyter" height=40/></A>                                                     
+																																<a href="/tb_{{ job.url_suffix }}/" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="TensorBoard" height=40/></A>  
 																								</td>
 																								<td>
 																																<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}{{ job_info_form }}
-																																								<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
+																																								<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 																																								<input type="image" src="{% static "info.jpg" %}" alt="Job Info" width=40 />  
 																																</form>
 																								</td>             											   
 																								<td>
 																																<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
-																																								<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
-																																								<input type="hidden" name="jobName" value="{{job.jobName}}">
+																																								<input type="hidden" name="jobID" value="{{job.slurm_id}}">
+																																								<input type="hidden" name="jobName" value="{{job.name}}">
 																																								<input type="hidden" name="jobUser" value="{{job.user}}">
 																																								<input type="image" src="{% static "stop.jpg" %}" alt="Stop" width=40 />
 																																</form>

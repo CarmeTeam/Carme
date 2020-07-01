@@ -1,64 +1,48 @@
+[[tls.certificates]]
+  certFile = "/opt/traefik/SSL/FILENAME.pem"
+  keyFile = "/opt/traefik/SSL/FILENAME.key"
 
-  [frontends.traefik]
-  backend = "traefik"
-  passHostHeader = true
-  basicAuth = ["admin:SECRET_HASH"]
-  [frontends.traefik.headers]
-    [frontends.traefik.routes.route_1]
-    rule = "Host:proxy.CARME_URL"
+[tls.options]
+  [tls.options.default]
+    minVersion = "VersionTLS12"
+    cipherSuites = [
+      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+      "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+      "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
+      "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+    ]
 
-  [frontends.zabbix]
-  backend = "zabbix"
-  passHostHeader = true
-  [frontends.zabbix.headers]
-    [frontends.zabbix.routes.route_1]
-    rule = "Host:monitor.CARME_URL"
 
-  [frontends.ib]
-  backend = "ib"
-  passHostHeader = true
-  basicAuth = ["admin:SECRET_HASH"]
-  [frontends.ib.headers]
-    [frontends.ib.routes.route_1]
-    rule = "Host:net.CARME_URL"
+[http.routers]
+  [http.routers.http_catchall]
+    entryPoints = ["http"]
+    middlewares = ["https_redirect"]
+    rule = "HostRegexp(`{any:.+}`)"
+    service = "styx"
 
-  [frontends.chat]
-  backend = "chat"
-  passHostHeader = true
-  [frontends.chat.headers]
-    [frontends.chat.routes.route_1]
-    rule = "Host:chat.CARME_URL"
+  [http.routers.carme]
+    entryPoints = ["https"]
+    rule = "Host(`CARME_URL`)"
+    middlewares = ["sts"]
+    service = "carme"
 
-  [frontends.ldap]
-  backend = "ldap"
-  passHostHeader = true
-  basicAuth = ["admin:SECRET_HASH"]
-  [frontends.ldap.headers]
-    [frontends.ldap.routes.route_1]
-    rule = "Host:ldap.CARME_URL"
-
-  [frontends.web]
-  backend = "web"
-    [frontends.web.routes.route_1]
-    rule = "Host:CARME_URL"
-
-[backends]
-  [backends.traefik]
-    [backends.traefik.servers.server1]
-    url = "http://CARME_LOGINNODE_IP:PORT"
-  [backends.zabbix]
-    [backends.zabbix.servers.server1]
+[http.services]
+  [[http.services.carme.loadBalancer.servers]]
     url = "http://CARME_HEADNODE_IP:PORT"
-  [backends.ib]
-    [backends.ib.servers.server1]
-    url = "http://IB_SWITCH_IP"
-  [backends.chat]
-    [backends.chat.servers.server1]
-    url = "http://CARME_HEADNODE_IP:PORT"
-  [backends.ldap]
-    [backends.ldap.servers.server1]
-    url = "http://CARME_HEADNODE_IP:PORT"
-  [backends.web]
-    [backends.web.servers.server1]
-    url = "http://CARME_LOGINNODE_IP:PORT"
+
+[http.middlewares]
+  [http.middlewares.stripprefix-theia.stripPrefixRegex]
+    regex = ["/ta_[a-z0-9]+/"]
+
+  [http.middlewares.sts.headers]
+    stsSeconds = 63072000
+    stsIncludeSubdomains = true
+    stsPreload = true
+
+  [http.middlewares.https_redirect.redirectScheme]
+    scheme = "https"
+    permanent = true
+
 

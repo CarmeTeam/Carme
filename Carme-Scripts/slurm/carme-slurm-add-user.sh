@@ -2,114 +2,95 @@
 #-----------------------------------------------------------------------------------------------------------------------------------
 # script to add new users to slurm
 #
-# Copyright (C) 2018 by Dr. Dominik Straßel
+# Copyright (C) 2020 by Dr. Dominik Straßel
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-# default parameters ---------------------------------------------------------------------------------------------------------------
-printf "\n"
 
-CLUSTER_DIR="/opt/Carme"
-CONFIG_FILE="CarmeConfig"
-
-SETCOLOR='\033[1;33m'
-NOCOLOR='\033[0m'
+#bash set buildins -----------------------------------------------------------------------------------------------------------------
+set -e
+set -o pipefail
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-if [ ! "$BASH_VERSION" ]; then
-    printf "${SETCOLOR}This is a bash-script. Please use bash to execute it!${NOCOLOR}\n\n"
-    exit 137
-fi
 
-if [ ! $(whoami) = "root" ]; then
-    printf "${SETCOLOR}you need root privileges to run this script${NOCOLOR}\n\n"
-    exit 137
-fi
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "ERROR: ${1}"
+  exit 200
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-  function get_variable () {
-    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-    variable_value=$(echo "$variable_value" | tr -d '"')
-    echo $variable_value
-  }
+
+# source basic bash functions ------------------------------------------------------------------------------------------------------
+PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-    printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-    exit 137
+  die "carme-basic-bash-functions.sh not found but needed"
 fi
-
-#-----------------------------------------------------------------------------------------------------------------------------------
-# load variables from config
-CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_1=$(get_variable CARME_LDAPGROUP_ID_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_2=$(get_variable CARME_LDAPGROUP_ID_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_3=$(get_variable CARME_LDAPGROUP_ID_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_4=$(get_variable CARME_LDAPGROUP_ID_4 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_LDAPGROUP_ID_5=$(get_variable CARME_LDAPGROUP_ID_5 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_1=$(get_variable CARME_SLURM_ACCOUNT_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_SPECS_1=$(get_variable CARME_SLURM_ACCOUNT_SPECS_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_2=$(get_variable CARME_SLURM_ACCOUNT_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_SPECS_2=$(get_variable CARME_SLURM_ACCOUNT_SPECS_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_3=$(get_variable CARME_SLURM_ACCOUNT_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_SPECS_3=$(get_variable CARME_SLURM_ACCOUNT_SPECS_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_4=$(get_variable CARME_SLURM_ACCOUNT_4 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_SPECS_4=$(get_variable CARME_SLURM_ACCOUNT_SPECS_4 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_5=$(get_variable CARME_SLURM_ACCOUNT_5 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_ACCOUNT_SPECS_5=$(get_variable CARME_SLURM_ACCOUNT_SPECS_5 $CLUSTER_DIR/${CONFIG_FILE})
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-THIS_NODE_IPS=( $(hostname -I) )
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_SLURM_ControlAddr} " ]]; then
-  printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-  exit 137
-fi	
 
+# some basic checks before we continue ---------------------------------------------------------------------------------------------
+# check if bash is used to execute the script
+is_bash
+
+# check if root executes this script
+is_root
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-read -p "enter ldap-username(s) of new slurm-user(s) [multiple users separated by space] " SLURMUSER_HELPER
-printf "\n"
 
-for SLURMUSER in $SLURMUSER_HELPER
-do
-    echo $SLURMUSER
+# load variables from config -------------------------------------------------------------------------------------------------------
+CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr)
+CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName)
 
-    USEREXISTS=$(id -u $SLURMUSER > /dev/null 2>&1; echo $?)
-    if [ "$USEREXISTS" = "1" ]; then
-        printf "${SETCOLOR}cannot add${NOCOLOR} $SLURMUSER ${SETCOLOR} --> user does not exist${NOCOLOR}\n\n"
-        exit 1
-    fi
+[[ -z ${CARME_SLURM_ControlAddr} ]] && die "CARME_SLURM_ControlAddr is not set"
+[[ -z ${CARME_SLURM_ClusterName} ]] && die "CARME_SLURM_ClusterName is not set"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-    #-------------------------------------------------------------------------------------------------------------------------------
 
-    STRING=$(getent passwd | grep $SLURMUSER | awk -F : '$3>h{h=$3;g=$4;u=$1}END{print g ":" u}')
-    printf "$STRING\n\n"
-    SLURMUSERGROUPID=${STRING%%:*}
+# functions ------------------------------------------------------------------------------------------------------------------------
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh"
+else
+  die "carme-slurm-mgmt-functions.sh not found but needed"
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-    if [ "$SLURMUSERGROUPID" = "$CARME_LDAPGROUP_ID_1" ]; then
-        sacctmgr create user name=$SLURMUSER cluster=$CARME_SLURM_ClusterName account=$CARME_SLURM_ACCOUNT_1 $CARME_SLURM_ACCOUNT_SPECS_1 
-    fi
 
-    if [ "$SLURMUSERGROUPID" = "$CARME_LDAPGROUP_ID_2" ]; then
-        sacctmgr create user name=$SLURMUSER cluster=$CARME_SLURM_ClusterName account=$CARME_SLURM_ACCOUNT_2 $CARME_SLURM_ACCOUNT_SPECS_2
-    fi
+# check if this node is the slurmctld node -----------------------------------------------------------------------------------------
+check_if_slurmctld_node "${CARME_SLURM_ControlAddr}"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-    if [ "$SLURMUSERGROUPID" = "$CARME_LDAPGROUP_ID_3" ]; then
-        sacctmgr create user name=$SLURMUSER cluster=$CARME_SLURM_ClusterName account=$CARME_SLURM_ACCOUNT_3 $CARME_SLURM_ACCOUNT_SPECS_3
-    fi
 
-    if [ "$SLURMUSERGROUPID" = "$CARME_LDAPGROUP_ID_4" ]; then
-        sacctmgr create user name=$SLURMUSER cluster=$CARME_SLURM_ClusterName account=$CARME_SLURM_ACCOUNT_4 $CARME_SLURM_ACCOUNT_SPECS_4
-    fi
+read -rp "Do you want to add a new user to the slurm database (cluster=${CARME_SLURM_ClusterName})? [y|N] ${LBR}" RESP
+echo ""
 
-    if [ "$SLURMUSERGROUPID" = "$CARME_LDAPGROUP_ID_5" ]; then
-        sacctmgr create user name=$SLURMUSER cluster=$CARME_SLURM_ClusterName account=$CARME_SLURM_ACCOUNT_5 $CARME_SLURM_ACCOUNT_SPECS_5
-    fi
+if [ "${RESP}" = "y" ];then
 
-    #-------------------------------------------------------------------------------------------------------------------------------
+  read -rp "enter the ldap-username of the new slurm-user ${LBR}" SLURMUSER
+  echo ""
 
-    sacctmgr list associations user=$SLURMUSER
-done
+  # check if user exists
+  check_if_user_exists "${SLURMUSER}"
 
-scontrol reconfig
+  # read user limits from terminal
+  read_and_check_slurm_limitations "${SLURMUSER}" "${SLURMUSER_HELPER[*]}"
 
-exit 0
+  # put together what we have so far
+  put_together_and_check "${SLURMUSER}" "${CARME_SLURM_ClusterName}" "${CARME_SLURM_ACCOUNT}" "${SLURM_ADMIN_LEVEL}" "${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
 
+  # add user to slurm db
+  echo ""
+  if [[ -z "${SLURM_ADDITIONAL_LIMITS}" ]];then
+    sacctmgr -i create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}"
+  else
+    sacctmgr -i create user name="${SLURMUSER}" cluster="${CARME_SLURM_ClusterName}" account="${CARME_SLURM_ACCOUNT}" AdminLevel="${SLURM_ADMIN_LEVEL}" partition="${SLURM_PARTITION_LIST}" "${SLURM_ADDITIONAL_LIMITS}"
+  fi
+
+  scontrol reconfig
+
+else
+
+  echo "Bye Bye..."
+
+fi

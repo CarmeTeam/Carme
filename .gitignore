@@ -3,6 +3,9 @@ CarmeConfig.frontend*
 CarmeConfig.container*
 CarmeConfig.backend*
 
+*.bak
+*.new
+
 *.crt
 *.csr
 *.key
@@ -23,3 +26,7 @@ dist_*
 zabbix-graphs/
 
 __pycache__/
+
+local_bash_functions/
+
+local-messages/

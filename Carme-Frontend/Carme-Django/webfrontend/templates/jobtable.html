@@ -28,8 +28,8 @@
 																<table class="JobTable">
 																								<thead>
 																								<tr >
-																																<td><b>Job-Name</b></td>
 																																<td><b>Slurm-ID</b></td>
+																																<td><b>Job-Name</b></td>
 																																<td><b>#(nodes)</b></td>
 																																<td><b>GPU-Type</b></td>
 																																<td><b>#(GPUs)</b></td>
@@ -43,21 +43,21 @@
 																								{% for job in slurm_list_user %}
 																								<tr valign=middle>
 																																{% if job.status == 'running' %}
-																																<td>{{ job.jobName }}</td>
-																																<td>{{ job.SLURM_ID }}</td>
-																																<td>{{ job.NumNodes }}</td>
+																																<td>{{ job.slurm_id }}</td>
+																																<td>{{ job.name }}</td>
+																																<td>{{ job.num_nodes }}</td>
 																																<td>{{ job.gpu_type }}</td>
-																																<td>{{ job.NumGPUs }}</td>
-																																<td>{{ job.imageName }}</td>
+																																<td>{{ job.num_gpus }}</td>
+																																<td>{{ job.image_name }}</td>
 																																<td><div style="border-radius: 5px; background-color: green; padding: 10px 2px;" >{{ job.status }}</div></td>
 																																<td>
-																																{% if job.imageName|slice:":10" == 'Base_image' or job.imageName|slice:":9" == 'Benchmark' %}
+																																{% if job.image_name|slice:":10" == 'Base_image' or job.image_name|slice:":9" == 'Benchmark' %}
 																																<!-- <a href="/ta_{{ job.HASH }}/" data-title="{{job.jobName}}" target="_new"><img src="{% static "theia.jpg" %}" alt="" height=40/></A> -->
-																																<a href="/ta_{{ job.HASH }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.jobName}}';})(); return false;" target="_new"><img src="{% static "theia.jpg" %}" alt="" style="height:3em;"/></a>
+																																<a href="/ta_{{ job.url_suffix }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "theia.jpg" %}" alt="" style="height:3em;"/></a>
 																																{% endif %}
-																																<a href="/nb_{{ job.HASH }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.jobName}}';})(); return false;" target="_new"><img src="{% static "jupyter.png" %}" alt="" style="height:3em;"/></a>
-																																<a href="/tb_{{ job.HASH }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.jobName}}';})(); return false;" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="" style="height:3em;"/></a>
-																																<a href="/nb_{{ job.HASH }}/terminals/new" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.jobName}}';})(); return false;" target="_new"><img src="{% static "terminal.jpg" %}" alt="" style="height:2.5em;"/></a>
+																																<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "jupyter.png" %}" alt="" style="height:3em;"/></a>
+																																<a href="/tb_{{ job.url_suffix }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="" style="height:3em;"/></a>
+																																<a href="/nb_{{ job.url_suffix }}/terminals/new" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "terminal.jpg" %}" alt="" style="height:2.5em;"/></a>
 																																<!-- {% if job.NumGPUs > 1 %}
 																																<a href="/dd_{{ job.HASH }}/status" data-title="{{job.jobName}}"  target="_new"><img src="{% static "dask-logo.svg" %}" alt="" height=40/></A>
 																																</td>
@@ -65,32 +65,32 @@
 																																</td>
 																																<td>
 																																								<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}
-																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}"> 	
+																																																<input type="hidden" name="jobID" value="{{job.slurm_id}}"> 	
 																																																<input type="image" src="{% static "info.jpg" %}" alt="" style="width:2.5em;" />
 																																								</form>
 																																</td>
 																																<td>
 																																								<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}
-																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
-																																																<input type="hidden" name="jobName" value="{{job.jobName}}">
+																																																<input type="hidden" name="jobID" value="{{job.slurm_id}}">
+																																																<input type="hidden" name="jobName" value="{{job.name}}">
 																																																<input type="hidden" name="jobUser" value="{{job.user}}">
 																																																<input type="image" src="{% static "stop.jpg" %}" alt="" style="width:2.5em;" />
 																																								</form>
 																																</td>
 																																{% else %}
-																																<td>{{ job.jobName }}</td>
-																																<td>-</td>
-																																<td>{{ job.NumNodes }}</td>
+																																<td>{{ job.slurm_id }}</td>
+																																<td>{{ job.name }}</td>
+																																<td>{{ job.num_nodes }}</td>
 																																<td>{{ job.gpu_type }}</td>
-																																<td>{{ job.NumGPUs }}</td>
-																																<td>{{ job.imageName }}</td>
+																																<td>{{ job.num_gpus }}</td>
+																																<td>{{ job.image_name }}</td>
 																																<td > <div style="border-radius: 5px; background-color: red; padding: 10px 2px;" >{{ job.status }} </div></td>
 																																<td>---</td>
 																																<td>---</td>
 																																<td>
 																																								<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}
-																																																<input type="hidden" name="jobID" value="{{job.SLURM_ID}}">
-																																																<input type="hidden" name="jobName" value="{{job.jobName}}">
+																																																<input type="hidden" name="jobID" value="{{job.slurm_id}}">
+																																																<input type="hidden" name="jobName" value="{{job.name}}">
 																																																<input type="hidden" name="jobUser" value="{{job.user}}">	
 																																																<input type="image" src="{% static "stop.jpg" %}" alt="" style="width:2.5em;" />
 																																								</form>

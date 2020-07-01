@@ -17,23 +17,12 @@ echo ""
 
 # print job information
 echo -e "\033[1mJob Information ------------------------------\033[0m"
-echo "Job-ID|-Name: ${CARME_JOBID} | ${CARME_JOB_NAME}"
+echo "Job-ID|-Name: ${SLURM_JOB_ID} | ${SLURM_JOB_NAME}"
 echo "Nodes:        ${CARME_NODES}"
-if [[ ! -z ${CARME_GPUS_PER_NODE} ]];then
-  echo "GPUs/Node:    ${CARME_GPUS_PER_NODE}"
+if [[ -n "$(echo "${SLURM_JOB_GPUS}" | tr ',' '\n' | wc -l)" ]];then
+  echo "GPUs/Node:    $(echo "${SLURM_JOB_GPUS}" | tr ',' '\n' | wc -l)"
 fi
-if [[ ! -z ${CARME_GPU_LIST} ]];then
-  echo "GPU-ID(s):    ${CARME_GPU_LIST}"
+if [[ -n "${SLURM_JOB_GPUS}" ]];then
+  echo "GPU-ID(s):    ${SLURM_JOB_GPUS}"
 fi
-echo "End-Time:   $(grep "^${CARME_JOBID}[[:space:]]${CARME_JOB_NAME}" .local/share/carme/job-log-dir/job-log.dat | awk '{print $6}')"
-echo ""
-
-# print base ennv information
-STOREDIR=${HOME}"/.local/share/carme/tmp-files-"${SLURM_JOB_ID}
-if [[ -f "${STOREDIR}/conda_base.txt" ]];then
-  echo -e "\033[1mBase Environment -----------------------------\033[0m"
-  echo "TensorFlow: $(grep "^tensorflow-gpu " ${STOREDIR}/conda_base.txt | awk '{ print $2 }')"
-  echo "PyTorch:    $(grep "^pytorch " ${STOREDIR}/conda_base.txt | awk '{ print $2 }')"
-  echo ""
-fi
-
+echo "End-Time:   $(grep "^${SLURM_JOB_ID}[[:space:]]${SLURM_JOB_NAME}" .local/share/carme/job-log-dir/job-log.dat | awk '{print $6}')"
