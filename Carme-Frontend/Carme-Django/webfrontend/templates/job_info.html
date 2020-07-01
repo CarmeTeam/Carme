@@ -10,14 +10,14 @@
 {% if job_details %}
 {% for job in job_details %}
 <div class="main-container">
-<h3>Infos for Job {{ job.SLURM_ID }} - {{ job.jobName }}</h3>
+<h3>Infos for Job {{ job.slurm_id }} - {{ job.name }}</h3>
 <table>
 								<tr><td><b>User:</b></td> <td>{{ job.user }}</td><td width=50></td> <td><b>Submit Time:</b></td> <td>{{ job_submit_time }}</td></tr>
 								<tr><td><b>Nodes:</b></td> <td>{{ job_nodes }}: {{job_node_list}}</td><td width=50></td> <td><b>Start Time:</b></td> <td>{{ job_start_time }}</td></td></tr>
-								<tr><td><b>Entry Node:</b></td> <td>{{ job.IP }}</td><td width=50></td> <td><b>Timelimit:</b></td> <td>{{ job_timelimit }}</td></tr> 
+								<tr><td><b>Entry Node:</b></td> <td>{{ job.ip }}</td><td width=50></td> <td><b>Timelimit:</b></td> <td>{{ job_timelimit }}</td></tr> 
 								<tr><td><b>CPU Cores/Node:</b></td> <td>{{ job_cores }}</td><td width=50></td> <td><b>Memory:</b></td> <td>{{ job_mem}}</td></tr>
-								<tr><td><b>GPU-Type:</b></td> <td>{{ job.gpu_type }}</td><td width=50></td> <td><b>GPUs/Node:</b></td> <td>{{ job.NumGPUs }}</td></tr>
-								<tr><td><b>Image:</b></td> <td>{{ job.imageName }}</td><td width=50></td> <td><b>Partition:</b></td> <td>    {{ job_partition }}</td></td></tr> 	
+								<tr><td><b>GPU-Type:</b></td> <td>{{ job.gpu_type }}</td><td width=50></td> <td><b>GPUs/Node:</b></td> <td>{{ job.num_gpus }}</td></tr>
+								<tr><td><b>Image:</b></td> <td>{{ job.image_name }}</td><td width=50></td> <td><b>Partition:</b></td> <td>    {{ job_partition }}</td></td></tr> 	
 </table>
 </div>
 <BR>  
@@ -25,14 +25,14 @@
 <table>                                                                                                                                                                                                      
 								<tr> 
 																<td><b>Enter Job:</b></td> 
-																<td><a href="/nb_{{ job.HASH }}/" target="_new"><img src="{% static "jupyter.png" %}" alt="Jupyter" height=40/></A></td>                                       
-																<td><a href="/tb_{{ job.HASH }}/" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="TensorBoard" height=40/></A></td>                                
+																<td><a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" target="_new"><img src="{% static "jupyter.png" %}" alt="Jupyter" height=40/></A></td>                                       
+																<td><a href="/tb_{{ job.url_suffix }}/" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="TensorBoard" height=40/></A></td>                                
 								</tr>   
 </table>     
 {% endfor %}                                                                                                                                                                                                 
 {% else %}
 <div class="main-container">
-								<h3> Error: no such job: {{ job.jobName }} </H3>
+								<h3> Error: no such job: {{ job.name }} </H3>
 							 The job you requested must have been terminated...	
 </div>
 {% endif %}                              

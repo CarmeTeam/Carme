@@ -21,9 +21,7 @@ keyfile = "/opt/Carme/Carme-Scripts/backend/slurmctld.key"
 certfile = "/opt/Carme/Carme-Scripts/backend/slurmctld.crt"
 
 conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile, certfile=certfile)
-res = conn.root.exposed_JobProlog(SLURM_JOB_ID, SLURM_JOB_USER)
-
-print("notify_job_prolog:", res)
+res = conn.root.prolog(SLURM_JOB_ID, SLURM_JOB_USER)
 
 if isinstance(res, int):
   ec = res

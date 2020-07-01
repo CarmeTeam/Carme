@@ -3,120 +3,142 @@
 # script to stop beegfs
 #
 # Copyright (C) 2018 by Dr. Dominik Straßel
-#----------------------------------------------------------------------------------------------------------------------------------- 
-
-CLUSTER_DIR="/opt/Carme"
-CONFIG_FILE="CarmeConfig"
-
-SETCOLOR='\033[1;33m'
-NOCOLOR='\033[0m'
-printf "\n"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-if [ ! "$BASH_VERSION" ]; then
-    printf "${SETCOLOR}This is a bash-script. Please use bash to execute it!${NOCOLOR}\n\n"
-    exit 137
-fi
 
-if [ ! $(whoami) = "root" ]; then
-    printf "${SETCOLOR}you need root privileges to run this script${NOCOLOR}\n\n"
-    exit 137
-fi
+#bash set buildins -----------------------------------------------------------------------------------------------------------------
+set -e
+set -o pipefail
+#----------------------------------------------------------------------------------------------------------------------------------
 
-if [ -f $CLUSTER_DIR/$CONFIG_FILE ]; then
-  function get_variable () {
-    variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
-    variable_value=$(echo "$variable_value" | tr -d '"')
-    echo $variable_value
-  }
+
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "ERROR: ${1}"
+  exit 200
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# source basic bash functions ------------------------------------------------------------------------------------------------------
+PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  printf "${SETCOLOR}no config-file found in $CLUSTER_DIR${NOCOLOR}\n"
-  exit 137
+  die "carme-basic-bash-functions.sh not found but needed"
 fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# some basic checks before we continue ---------------------------------------------------------------------------------------------
+# check if bash is used to execute the script
+is_bash
+
+# check if root executes this script
+is_root
+#----------------------------------------------------------------------------------------------------------------------------------
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 # variables from config
-CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_CONFIG_FILE=$(get_variable CARME_SLURM_CONFIG_FILE $CLUSTER_DIR/${CONFIG_FILE})
-CARME_NODES_LIST=$(get_variable CARME_NODES_LIST $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_BackupController=$(get_variable CARME_SLURM_BackupController $CLUSTER_DIR/${CONFIG_FILE})
-CARME_COMPUTENODES_1=$(get_variable CARME_COMPUTENODES_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_BUILDNODE_1=$(get_variable CARME_BUILDNODE_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_COMPUTENODES_CONFIG_1=$(get_variable CARME_SLURM_COMPUTENODES_CONFIG_1 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_COMPUTENODES_2=$(get_variable CARME_COMPUTENODES_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_COMPUTENODES_LIST_2=$(get_variable CARME_COMPUTENODES_LIST_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_BUILDNODE_2=$(get_variable CARME_BUILDNODE_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_COMPUTENODES_CONFIG_2=$(get_variable CARME_SLURM_COMPUTENODES_CONFIG_2 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_COMPUTENODES_3=$(get_variable CARME_COMPUTENODES_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_COMPUTENODES_LIST_3=$(get_variable CARME_COMPUTENODES_LIST_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_BUILDNODE_3=$(get_variable CARME_BUILDNODE_3 $CLUSTER_DIR/${CONFIG_FILE})
-CARME_SLURM_COMPUTENODES_CONFIG_3=$(get_variable CARME_SLURM_COMPUTENODES_CONFIG_3 $CLUSTER_DIR/${CONFIG_FILE})
+CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr)
+CARME_SLURM_CONFIG_FILE=$(get_variable CARME_SLURM_CONFIG_FILE)
+CARME_NODES_LIST=$(get_variable CARME_NODES_LIST)
+CARME_SLURM_BackupController=$(get_variable CARME_SLURM_BackupController)
+
+[[ -z ${CARME_SLURM_ControlAddr} ]] && die "CARME_SLURM_ControlAddr is unset"
+[[ -z ${CARME_SLURM_CONFIG_FILE} ]] && die "CARME_SLURM_CONFIG_FILE is unset"
+[[ -z ${CARME_NODES_LIST} ]] && die "CARME_NODES_LIST is unset"
+[[ -z ${CARME_SLURM_BackupController} ]] && die "CARME_SLURM_BackupController is unset"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-THIS_NODE_IPS=( $(hostname -I) )
-if [[ ! " ${THIS_NODE_IPS[@]} " =~ " ${CARME_SLURM_ControlAddr} " ]]; then
-  printf "${SETCOLOR}this is not the Headnode${NOCOLOR}\n"
-  exit 137
+
+# functions ------------------------------------------------------------------------------------------------------------------------
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh"
+else
+  echo "ERROR: carme-slurm-mgmt-functions.sh not found but needed"
+  exit 200
 fi
-
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-read -p "Do you want to shuffle the weights of the compute nodes? [y/N] " RESP
+
+# check if this node is the slurmctld node -----------------------------------------------------------------------------------------
+check_if_slurmctld_node "${CARME_SLURM_ControlAddr}"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# declare array to store node that have no weights
+NO_WEIGHTS=()
+
+
+read -rp "Do you want to shuffle the weights of the compute nodes? [y/N] " RESP
 if [ "$RESP" = "y" ]; then
-    printf "\n"
 
-    # nodes config number 1
-    for NODES in $CARME_COMPUTENODES_1; do
-      if [ $NODES = $CARME_BUILDNODE_1 ];then
-        RAND=$(( $RANDOM % 1000 + 701 ))
-      else
-        RAND=$(( $RANDOM % 500 + 1 ))
-      fi
-      sed -i '/NodeName='"${NODES}"'/c\NodeName='"${NODES}"' '"${CARME_SLURM_COMPUTENODES_CONFIG_1}"' Weight='"${RAND}" $CARME_SLURM_CONFIG_FILE
+  # backup slurm.conf
+  echo "backup slurm.conf in slurm.conf.bak"
+  cp "${CARME_SLURM_CONFIG_FILE}" "${CARME_SLURM_CONFIG_FILE}.bak"
+
+  for NODE in $CARME_NODES_LIST; do
+    OLD_NODE_CONFIG="$(grep -r "NodeName=${NODE}" "${CARME_SLURM_CONFIG_FILE}")"
+    
+    if ! [[ "${OLD_NODE_CONFIG}" =~ "Weight" ]];then
+      NO_WEIGHTS+=( "${NODE}" )
+      continue
+    fi
+
+    OLD_WEIGHT="$(grep -r "NodeName=${NODE}" "${CARME_SLURM_CONFIG_FILE}" | awk -F'Weight=' '{ print $2 }')"
+    NEW_WEIGHT=$(( RANDOM % 500 + 1 ))
+    echo "${NODE}"
+    echo "old weight: ${OLD_WEIGHT}"
+    echo "new weight: ${NEW_WEIGHT}"
+    echo ""
+
+    NEW_NODE_CONFIG="${OLD_NODE_CONFIG/${OLD_WEIGHT}/${NEW_WEIGHT}}"
+
+    sed -i 's/'"${OLD_NODE_CONFIG}"'/'"${NEW_NODE_CONFIG}"'/g' "${CARME_SLURM_CONFIG_FILE}"
+
+  done
+
+
+  # check if there are nodes without weights
+  if [ ${#NO_WEIGHTS[@]} -eq 0 ]; then
+
+    # copy new slurm config to all compute nodes
+    echo "copy new slurm.conf to all nodes"
+    for NODE in $CARME_NODES_LIST; do
+      scp "${CARME_SLURM_CONFIG_FILE}" "${NODE}":"${CARME_SLURM_CONFIG_FILE}"
     done
 
 
-    # nodes config number 2
-				if [[ ! -z "$CARME_COMPUTENODES_2" ]]; then
-      for NODES in $CARME_COMPUTENODES_LIST_2; do
-        if [ $NODES = $CARME_BUILDNODE_2 ];then
-          RAND=$(( $RANDOM % 1000 + 701 ))
-        else
-          RAND=$(( $RANDOM % 500 + 1 ))
-        fi
-        sed -i '/NodeName='"${NODES}"'/c\NodeName='"${NODES}"' '"${CARME_SLURM_COMPUTENODES_CONFIG_2}"' Weight='"${RAND}" $CARME_SLURM_CONFIG_FILE
-      done
-				fi
-
-
-    # nodes config number 3
-    if [[ ! -z "$CARME_COMPUTENODES_3" ]]; then
-      for NODES in $CARME_COMPUTENODES_LIST_3; do
-        if [ $NODES = $CARME_BUILDNODE_3 ];then
-          RAND=$(( $RANDOM % 1000 + 701 ))
-        else
-          RAND=$(( $RANDOM % 500 + 1 ))
-        fi
-        sed -i '/NodeName='"${NODES}"'/c\NodeName='"${NODES}"' '"${CARME_SLURM_COMPUTENODES_CONFIG_3}"' Weight='"${RAND}" $CARME_SLURM_CONFIG_FILE
-      done
+    # copy new config to backupo slurm controler if it exists
+    if [[ -n "$CARME_SLURM_BackupController" ]]; then
+      echo "copy new slurm.conf to backup controler"
+      scp "${CARME_SLURM_CONFIG_FILE}" "${CARME_SLURM_BackupController}":"${CARME_SLURM_CONFIG_FILE}"
     fi
 
 
-    for HOSTS in $CARME_NODES_LIST; do
-        printf "\n--------------------\n"
-        printf "${HOSTS}\n"
-        scp $CARME_SLURM_CONFIG_FILE ${HOSTS}:$CARME_SLURM_CONFIG_FILE
-    done
-
-
-    if [[ ! -z "$CARME_SLURM_BackupController" ]]; then
-        scp $CARME_SLURM_CONFIG_FILE $CARME_SLURM_BackupController:$CARME_SLURM_CONFIG_FILE
-    fi
-
+    # reload slurm config
+    echo "reload slurm.conf"
     scontrol reconfig
 
-    printf "\n"
-else
-    printf "Bye Bye...\n\n"
-fi
+  else
 
+    echo ""
+    echo "ERROR: cannot create new slurm.conf as there are nodes without weights."
+
+    echo "move slurm.conf.bak to slurm.conf"
+    mv "${CARME_SLURM_CONFIG_FILE}.bak" "${CARME_SLURM_CONFIG_FILE}"
+
+    echo "nodes without weights:"
+    for NODE in "${NO_WEIGHTS[@]}";do
+      echo -e "\t${NODE}"
+    done
+
+  fi
+
+else
+
+  echo "Bye Bye..."
+
+fi

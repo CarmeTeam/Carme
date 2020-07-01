@@ -12,8 +12,8 @@
 #---------------------------------------------------------------------
 #Carme develop -> Things that need to be changed between Carme branches
 #---------------------------------------------------------------------
-CARME_VERSION="r0.6.0"
-#stable release: r0.6.0
+CARME_VERSION="r0.7.0"
+#stable release: r0.7.0
 
 CARME_URL=""
 #e.g. my-carme-cluster.institute.com
@@ -61,8 +61,11 @@ CARME_SSL_EMAIL_BASE=""
 #e.g. @my-carme-cluster.institute.com
 
 #proxy
-CARME_PROXY_PATH=''
+CARME_PROXY_PATH_BACKEND=''
 #e.g. '/opt/Carme/Carme-Proxy/'
+
+CARME_PROXY_PATH_FRONTEND=''
+#e.g. '/opt/traefik/'
 
 #mounts
 #WARNING: set scripts mout correct
@@ -140,16 +143,6 @@ CARME_FRONTEND_LOGO_TOP_RIGHT_2=""
 #titles
 CARME_FRONTEND_TITLE=""
 #e.g.
-
-#sandbox
-CARME_SANDBOX_MOUNT=""
-#e.g.
-
-CARME_SANDBOX_PARTITION=""
-# Note that this is a partition|queue that has to be defined in you batchsystem (e.g. SLURM). If you define in
-# CARME_SLURM_ACCOUNT_SPECS_x (see section SLURM) partitions a user is allowed to use and there is a specific
-# group of users that are allowed to create a singularity image you have to add the name of the partition
-# defined here there as well.
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -175,34 +168,6 @@ CARME_LOGINNODE_NAME=""
 CARME_NODES_LIST=""
 #e.g. node01 node02 node03 ... [this contains ALL compute AND build nodes]
 
-# note: if different nodes are used change /opt/Carme/Carme-Scripts/carme-slurm-node-weight-shuffle.sh
-CARME_BUILDNODE_1=""
-#e.g. build01
-
-CARME_BUILDNODE_1_IP=""
-#e.g. 123.456.789.10
-
-CARME_COMPUTENODES_1=""
-#e.g. node01 node02 node03 ... [same hardware as BUILDNODE_1]
-
-#CARME_BUILDNODE_2=""
-#e.g. build02 [if not needed leave empty]
-
-#CARME_BUILDNODE_2_IP=
-#e.g. 123.456.789.11 [if not needed leave empty]
-
-#CARME_COMPUTENODES_2=""
-#e.g. node10 node11 node12 ... [same hardware as BUILDNODE_2, if not needed leave empty]
-
-#CARME_BUILDNODE_3=""
-#e.g. build03 [if not needed leave empty]
-
-#CARME_BUILDNODE_3_IP=
-#e.g. 123.456.789.12 [if not needed leave empty]
-
-#CARME_COMPUTENODES_3=""
-#e.g. node10 node11 node12 ... [same hardware as BUILDNODE_3, if not needed leave empty]
-
 CARME_HARDWARE_NUM_GPUS=
 #e.g. 100 [this is the total number of GPUs in the Cluster]
 #has to be an integer number! (note: do not use double quotes)
@@ -214,6 +179,18 @@ CARME_GPU_DEFAULTS=""
 # defines the by default allocated CPUs and MEM (in GB) according the GPU types
 # it has to have the following form and be written in quotes:
 # default:CPUs:MEM volta:CPUs:MEM titan:CPUs:MEM
+
+CARME_DISTRIBUTED_FS=""
+# define if there is a global distributed FS that can be used or not
+# allowed values are: yes | no
+
+CARME_LOCAL_SSD_PATH=""
+# define if there is a local SSD available on the compute nodes
+# e.g. /scratch_for_jobs
+
+CARME_START_SSHD=""
+# define whether we want ssh connection the jobs or not
+# possible values are "always|multi|never"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -221,35 +198,14 @@ CARME_GPU_DEFAULTS=""
 CARME_NETWORK_BASE=""
 #e.g. 123.456.789.
 
-CARME_IPMIN=""
-#e.g. 123.456.789.1
-
-CARME_IPMAX=""
-#e.g. 123.456.789.255
-
-CARME_SUBNET_MASK=""
-#e.g. 255.255.255.0
-
 CARME_GATEWAY=""
 #e.g. 123.456.789.3
-
-CARME_NTP_SERVER_NAME=""
-#e.g. ntp.server.com
-
-CARME_NTP_SERVER_IP=""
-#e.g. 111.222.333.444
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #SLURM -----------------------------------------------------------------------------------------------------------------------------
-CARME_SLURM_SCRIPTS_PATH="/opt/Carme/Carme-Scripts/frontend"
-#default: /opt/Carme/Carme-Scripts/frontend
-
 CARME_SLURM_CONFIG_FILE="/etc/slurm-llnl/slurm.conf"
 #default: /etc/slurm-llnl/slurm.conf (for Debian based systems)
-
-CARME_SLURM_ControlMachine=""
-#e.g. headnode
 
 CARME_SLURM_ControlAddr=""
 #e.g. 123.456.789.1
@@ -257,127 +213,14 @@ CARME_SLURM_ControlAddr=""
 CARME_SLURM_BackupController=""
 #e.g. headnode2
 
-CARME_SLURM_BackupAddr=""
-#e.g. 123.456.789.2
-
 CARME_SLURM_ClusterName=""
 #e.g. cluster
-
-CARME_SLURM_SlurmctldPidFile=""
-#default: /var/run/slurm-llnl/slurmctld.pid
-
-CARME_SLURM_SlurmctldPort=""
-#default: 6817
-
-CARME_SLURM_SlurmdPidFile=""
-#default: /var/run/slurm-llnl/slurmd.pid
-
-CARME_SLURM_SlurmdPort=""
-#default: 6818
-
-CARME_SLURM_SlurmdSpoolDir=""
-#default: /var/lib/slurm-llnl/slurmd
-
-CARME_SLURM_SlurmUser=""
-#default: slurm
-
-CARME_SLURM_StateSaveLocation=""
-#e.g. /var/slurm
-
-CARME_SLURM_AccountingStorageHost=""
-#e.g. headnode IP
-
-CARME_SLURM_SlurmctldDebug=""
-#default: 7 -- debug level from 1 to 7
-
-CARME_SLURM_SlurmctldLogFile=""
-#default: /var/log/slurm-llnl/slurmctld.log
-
-CARME_SLURM_SlurmdDebug=""
-#default: 7 -- debug level from 1 to 7
-
-CARME_SLURM_SlurmdLogFile=""
-#default: "/var/log/slurm-llnl/slurmd.log"
-
-# note: if different nodes are used change /opt/Carme/Carme-Scripts/carme-slurm-node-weight-shuffle.sh
-CARME_SLURM_COMPUTENODES_CONFIG_1=""
-#e.g. CPUs=24 Sockets=1 CoresPerSocket=12 ThreadsPerCore=2 RealMemory=IN-MB MemSpecLimit=2048 State=UNKNOWN
-
-#CARME_SLURM_COMPUTENODES_CONFIG_2=""
-#e.g. CPUs=36 Sockets=1 CoresPerSocket=18 ThreadsPerCore=2 RealMemory=IN-MB MemSpecLimit=2048 State=UNKNOWN
-
-#CARME_SLURM_COMPUTENODES_CONFIG_3=""
-#e.g. CPUs=48 Sockets=2 CoresPerSocket=12 ThreadsPerCore=2 RealMemory=IN-MB MemSpecLimit=2048 State=UNKNOWN
-
-CARME_SLURM_PARITION_1=""
-#e.g. PartitionName=short Nodes=node[01-10] MaxMemPerNode=IN-MB Default=NO Priority=90 MaxCPUsPerNode=12 DefMemPerCPU=IN-MB MaxMemPerCPU=IN-MB DefaultTime=IN-MINUTES MaxTime=IN-MINUTES State=UP
-
-#CARME_SLURM_PARITION_2=""
-#e.g. PartitionName=normal Nodes=node[11-20] MaxMemPerNode=IN-MB Default=NO Priority=70 MaxCPUsPerNode=8 DefMemPerCPU=IN-MB MaxMemPerCPU=IN-MB DefaultTime=IN-MINUTES MaxTime=IN-MINUTES State=UP
-
-#CARME_SLURM_PARITION_3=""
-#e.g. PartitionName=long Nodes=node[21-30] MaxMemPerNode=IN-MB Default=NO Priority=50 MaxCPUsPerNode=4 DefMemPerCPU=IN-MB MaxMemPerCPU=IN-MB DefaultTime=IN-MINUTES MaxTime=IN-MINUTES State=UP
-
-CARME_SLURM_StoragePass=""
-#e.g. slurmdbpasswd
-
-CARME_SLURM_StorageUser=""
-#e.g. slurm
-
-CARME_SLURM_Cgroups=""
-#yes or no
-
-CARME_SLURM_ACCOUNT_1=""
-#associated with CARME_LDAPGROUP_1
-
-CARME_SLURM_ACCOUNT_SPECS_1=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_2=""
-#associated with CARME_LDAPGROUP_2
-
-CARME_SLURM_ACCOUNT_SPECS_2=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_3=""
-#associated with CARME_LDAPGROUP_3
-
-CARME_SLURM_ACCOUNT_SPECS_3=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_4=""
-#associated with CARME_LDAPGROUP_4
-
-CARME_SLURM_ACCOUNT_SPECS_4=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-CARME_SLURM_ACCOUNT_5=""
-#associated with CARME_LDAPGROUP_5
-
-CARME_SLURM_ACCOUNT_SPECS_5=""
-#e.g. AdminLevel=? partition=? MaxJobs=? GrpJobs=? MaxJobs=? GrpCPURunMins=? etc.
-
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-#Carme Containers ------------------------------------------------------------------------------------------------------------------
-CARME_CONTAINER_STORAGE=""
-#e.g. /home/container-store [where the singularity images are located]
-
-CARME_SINGULARITY_PATH=""
-#e.g. /bin
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #Carme Scripts ---------------------------------------------------------------------------------------------------------------------
 CARME_SCRIPTS_PATH="/opt/Carme/Carme-Scripts"
 #default: /opt/Carme/Carme-Scripts
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-#Carme Web-Frontend ----------------------------------------------------------------------------------------------------------------
-CARME_WEB_PATH="/opt/Carme/Carme-Frontend"
-#default: /opt/Carme/Carme-Frontend
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -405,9 +248,6 @@ CARME_LDAP_DC1=""
 
 CARME_LDAP_DC2=""
 #e.g. local
-
-CARME_LDAP_URI=""
-#e.g. ldap:///123.456.789.1
 
 CARME_LDAP_ADMIN=""
 #e.g. admin
@@ -498,21 +338,6 @@ CARME_BEEGFS_HOMEMOUNT_NODES=""
 
 
 #Zabbix ----------------------------------------------------------------------------------------------------------------------------
-CARME_ZABBIX_SERVER=""
-#e.g. 123.189.156.1
-
-CARME_ZABBIX_DB_HOST=""
-#e.g. 123.189.156.1
-
-CARME_ZABBIX_DB_NAME=""
-#e.g. zabbix_db
-
-CARME_ZABBIX_DB_USER=""
-#e.g. zabbix
-
-CARME_ZABBIX_DB_PASSWORD=""
-#e.g. zabbixpasswd
-
 CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/Carme-Django/static/zabbix-graphs"
 #default: /opt/Carme/Carme-Frontend/static/zabbix-graphs
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -528,32 +353,10 @@ CARME_MATTERMOST_PATH=""
 CARME_MATTERMOST_COMMAND=""
 #mattermost or platform [depends on mattermost version]
 
-CARME_MATTERMOST_URL=""
-#e.g. https://mattermost.my-cluster.my-server.com/
-
-CARME_MATTERMOST_CONFIG=""
-#e.g. /opt/mattermost/config/config.json
-
-CARME_MATTERMOST_DB_USER=""
-#e.g. mattermost
-
-CARME_MATTERMOST_DB_PASSWORD=""
-#e.g. mattermostpassword
-
 CARME_MATTERMOST_EMAIL_BASE=""
 #e.g. mymail.com
 
 CARME_MATTERMOST_DEFAULT_TEAM=""
 #note: do not use uppercases
 #e.g. myteam [do not use uppercases]
-
-CARME_MATTERMOST_WEBHOCK=""
-#e.g. https://mattermost.my-cluster.my-server.com/hooks/HASH generate in mattermost
-#(needed in /opt/Carme/Carme-Scripts/maintenance/carme-find-ghost-jobs-notify.sh)
-
-CARME_MATTERMOST_WEBHOCK_2=""
-#note: used to sent information about finished jobs
-#e.g. https://mattermost.my-cluster.my-server.com/hooks/HASH generate in mattermost
-#(needed in /opt/Carme/Carme-Backend/carme_backend.py)
 #-----------------------------------------------------------------------------------------------------------------------------------
-

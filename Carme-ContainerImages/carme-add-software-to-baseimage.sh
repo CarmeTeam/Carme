@@ -6,47 +6,53 @@
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-SETCOLOR='\033[1;33m'
-NOCOLOR='\033[0m'
-printf "\n"
+#bash set buildins -----------------------------------------------------------------------------------------------------------------
+set -e
+set -o pipefail
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-if [ ! $(whoami) = "root" ]; then
-    printf "${SETCOLOR}you need root privileges to run this script${NOCOLOR}\n\n"
-    exit 137
-fi
 
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "ERROR: ${1}"
+  exit 200
+}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-read -p "Do you want to create a new singularity recipe file? [y/N] " RESP
+
+# check if bash is used to execute the script --------------------------------------------------------------------------------------
+[[ ! "$BASH_VERSION" ]] && die "This is a bash-script. Please use bash to execute it!"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# check if root executes this script -----------------------------------------------------------------------------------------------
+[[ ! "$(whoami)" = "root" ]] && die "you need root privileges to run this script"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+read -rp "Do you want to create a new singularity recipe file? [y/N] " RESP
+echo ""
 if [ "$RESP" = "y" ]; then
 
-    printf "\n"
-    read -p "Type the file-name of the extensions you want to add? (without .txt) " NEW_INSTALL
+  read -rp "Type the file-name of the extensions you want to add? (without .txt) " NEW_INSTALL
+  echo ""
 
-    if [[ ! $NEW_INSTALL =~ ^[0-9]{4}-0[1-9]|1[0-2]-0[1-9]|[1-2][0-9]|3[0-1]_[a-fA-F]$ ]]; then 
-      printf "your file should have to form YYYY-MM-DD_text.txt\n"
-    # else
-    #   printf "wuuhhuuu \(^o^)/\n"
-    fi
+  [[ ! $NEW_INSTALL =~ ^[0-9]{4}-0[1-9]|1[0-2]-0[1-9]|[1-2][0-9]|3[0-1]_[a-fA-F]$ ]] && die "your file should have to form YYYY-MM-DD_text.txt"
 
-    FILENAME="${NEW_INSTALL}.txt"
-    FILENAME_TMP="tmp.txt"
-    NEW_FILENAME="Carme-Baseimage_${NEW_INSTALL}.recipe"
+  FILENAME="${NEW_INSTALL}.txt"
+  FILENAME_TMP="tmp.txt"
+  NEW_FILENAME="Carme-Baseimage_${NEW_INSTALL}.recipe"
 
-    cp ../Carme-Baseimage.recipe $NEW_FILENAME
-    cp $FILENAME $FILENAME_TMP
+  cp ../Carme-Baseimage.recipe "${NEW_FILENAME}" || die "cannot copy ../Carme-Baseimage.recipe to ${NEW_FILENAME}"
+  cp "${FILENAME}" "${FILENAME_TMP}" || die "cannot copy ${FILENAME} to ${FILENAME_TMP}"
 
-    sed -i 's/^/    /' $FILENAME_TMP
+  sed -i 's/^/    /' "${FILENAME_TMP}"
 
-    STRING_TO_REPLACE="#post-replace"
-    sed -i -e "/$STRING_TO_REPLACE/r $FILENAME_TMP" -e "/$STRING_TO_REPLACE/d" $NEW_FILENAME
-    rm $FILENAME_TMP
-
-    printf "\n"
-    exit 0
+  STRING_TO_REPLACE="#post-replace"
+  sed -i -e "/$STRING_TO_REPLACE/r $FILENAME_TMP" -e "/$STRING_TO_REPLACE/d" "${NEW_FILENAME}"
+  rm "${FILENAME_TMP}" || die "cannot remove ${FILENAME_TMP}"
 
 else
-    printf "${SETCOLOR}Bye Bye...${NOCOLOR}\n\n"
-    exit 0
+
+  echo "Bye Bye..."
+
 fi

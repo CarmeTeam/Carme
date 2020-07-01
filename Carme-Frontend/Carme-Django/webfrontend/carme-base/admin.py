@@ -36,10 +36,10 @@ class ImageAdmin(admin.ModelAdmin):
 
 """
 class SlurmJobAdmin(admin.ModelAdmin):
-    list_display = ('frontend','imageName', 'user', 'URL', 'NumNodes', 'NumGPUs', 'comment', 'SLURM_ID',
-                    'status', 'EntryNode', 'imageID', 'IP', 'HASH', 'NB_PORT', 'TB_PORT', 'GPUS')
-    list_display_links = ('imageName', 'user')
-    search_fields = ('imageName', 'user', 'SLURM_ID', 'status', 'EntryNode')
+    list_display = ('frontend','image_name', 'user', 'num_nodes', 'num_gpus', 'slurm_id',
+                    'status', 'ip', 'url_suffix', 'nb_port', 'tb_port', 'ta_port', 'gpu_ids')
+    list_display_links = ('image_name', 'user')
+    search_fields = ('image_name', 'user', 'slurm_id', 'status')
     list_per_page = 25
 
 """ admin view for user messages
