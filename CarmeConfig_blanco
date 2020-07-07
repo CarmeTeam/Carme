@@ -12,8 +12,8 @@
 #---------------------------------------------------------------------
 #Carme develop -> Things that need to be changed between Carme branches
 #---------------------------------------------------------------------
-CARME_VERSION="r0.7.0"
-#stable release: r0.7.0
+CARME_VERSION="r0.8.0"
+#stable release: r0.8.0
 
 CARME_URL=""
 #e.g. my-carme-cluster.institute.com
