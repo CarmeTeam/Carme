@@ -16,6 +16,8 @@ CarmeConfig.backend*
 *~
 *.swp
 
+*.DS_Store
+
 tmp
 
 *.out
@@ -33,3 +35,4 @@ __pycache__/
 local_bash_functions/
 
 local-messages/
+
