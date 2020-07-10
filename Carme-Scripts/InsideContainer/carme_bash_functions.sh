@@ -77,7 +77,7 @@ function carme_start_tensorboard () {
     TB_VERSION="$(conda list | grep tensorboard | awk '{ print $2 }')"
     if [[ -n "${TB_VERSION}" && -n $(which tensorboard) ]];then
       echo "starting TensorBoard (${TB_VERSION})"
-      (LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --host="$(hostname)" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" >>"${CARME_LOGDIR}/${SLURM_JOB_ID}.out" 2>>"${CARME_LOGDIR}/${SLURM_JOB_ID}.err" & echo "$!" > "${PID_FILE}")
+      (LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --host="$(hostname)" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" >>"${CARME_LOGDIR}/${CARME_JOB_ID}.out" 2>>"${CARME_LOGDIR}/${CARME_JOB_ID}.err" & echo "$!" > "${PID_FILE}")
       while ! wget -q -O/dev/null "http://$(hostname):${TB_PORT}/tb_${CARME_HASH}/"; do
         sleep 1
       done
