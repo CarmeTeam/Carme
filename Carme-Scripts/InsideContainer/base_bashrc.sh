@@ -16,8 +16,13 @@ CARME_BASH_FUNCTIONS="${CARME_SCRIPTS_DIR}/carme_bash_functions.sh"
 [[ -f "${CARME_BASH_FUNCTIONS}" ]] && source "${CARME_BASH_FUNCTIONS}"
 
 
+# get job-id based on scheduler specific environment variable
+if [[ -n ${SLURM_JOB_ID} ]];then
+  JOB_ID=${SLURM_JOB_ID}
+fi
+
 # add job specific bash settings
-CARME_JOB_DIR="${HOME}/.local/share/carme/job/${SLURM_JOB_ID}"
+CARME_JOB_DIR="${HOME}/.local/share/carme/job/${JOB_ID}"
 [[ -f "${CARME_JOB_DIR}/bashrc" ]] && source "${CARME_JOB_DIR}/bashrc"
 
 
@@ -86,7 +91,7 @@ if [[ -f "/usr/bin/mpirun" ]];then
     elif [[ "${1}" == "-V" ]];then
       /usr/bin/mpirun -V
     else
-      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
+      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${CARME_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
     fi
   }
   complete -f -d -c carme_mpirun
