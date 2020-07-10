@@ -91,7 +91,7 @@ if [[ -f "/usr/bin/mpirun" ]];then
     elif [[ "${1}" == "-V" ]];then
       /usr/bin/mpirun -V
     else
-      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${CARME_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
+      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${CARME_JOB_ID:?"not set"}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
     fi
   }
   complete -f -d -c carme_mpirun
