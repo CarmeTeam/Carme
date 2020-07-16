@@ -174,6 +174,9 @@ export CARME_NODES=$(scontrol show hostname "${NODE_LIST}" | paste -d, -s)
 export CARME_MASTER=${MASTER_NODE}
 export CARME_START_SSHD=${CARME_START_SSHD}
 export CARME_LOCAL_SSD_PATH=${CARME_LOCAL_SSD_PATH}
+export CARME_JOB_ID=${SLURM_JOB_ID}
+export CARME_JOB_NAME=$(scontrol show job "${SLURM_JOB_ID}" | grep JobName | awk -F'JobName=' '{ print $2 }')
+export CARME_JOB_GPUS=${SLURM_JOB_GPUS}
 " > "${JOBDIR}/bashrc"
 
 
