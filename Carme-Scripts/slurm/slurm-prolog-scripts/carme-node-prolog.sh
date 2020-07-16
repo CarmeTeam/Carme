@@ -63,7 +63,7 @@ CARME_LOCAL_SSD_PATH=$(get_variable CARME_LOCAL_SSD_PATH "${CONFIG_FILE}")
 CARME_GATEWAY=$(get_variable CARME_GATEWAY "${CONFIG_FILE}")
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER "${CONFIG_FILE}")
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT "${CONFIG_FILE}")
-CARME_SCRIPT_PATH=$(get_variable CARME_SCRIPT_PATH "${CONFIG_FILE}")
+CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH "${CONFIG_FILE}")
 CARME_START_SSHD=$(get_variable CARME_START_SSHD "${CONFIG_FILE}")
 CARME_VERSION=$(get_variable CARME_VERSION "${CONFIG_FILE}")
 CARME_URL=$(get_variable CARME_URL "${CONFIG_FILE}")
@@ -73,7 +73,7 @@ CARME_URL=$(get_variable CARME_URL "${CONFIG_FILE}")
 [[ -z ${CARME_GATEWAY} ]] && die "CARME_GATEWAY not set"
 [[ -z ${CARME_BACKEND_SERVER} ]] && die "CARME_BACKEND_SERVER not set"
 [[ -z ${CARME_BACKEND_PORT} ]] && die "CARME_BACKEND_PORT not set"
-[[ -z ${CARME_SCRIPT_PATH} ]] && die "CARME_SCRIPT_PATH not set"
+[[ -z ${CARME_SCRIPTS_PATH} ]] && die "CARME_SCRIPTS_PATH not set"
 [[ -z ${CARME_START_SSHD} ]] && die "CARME_START_SSHD not set"
 [[ -z ${CARME_VERSION} ]] && die "CARME_VERSION not set"
 [[ -z ${CARME_URL} ]] && die "CARME_URL not set"
@@ -286,7 +286,7 @@ export CARME_HASH=${HASH}
 
   #register job with frontend db
   log "register job with frontend db"
-  runuser -u "${SLURM_JOB_USER}" -- "${CARME_SCRIPT_PATH}"/dist_alter_jobDB_entry/alter_jobDB_entry "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${SLURM_JOB_GPUS}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
+  runuser -u "${SLURM_JOB_USER}" -- "${CARME_SCRIPTS_PATH}/frontend/dist_alter_jobDB_entry/alter_jobDB_entry" "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${SLURM_JOB_GPUS}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
 
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
