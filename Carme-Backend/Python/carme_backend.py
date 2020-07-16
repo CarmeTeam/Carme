@@ -30,7 +30,7 @@ SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig.backend').load_module()
 
 from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
 from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
-from CarmeConfig import CARME_SCRIPT_PATH, CARME_PROXY_PATH_BACKEND
+from CarmeConfig import CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
 from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
 from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
 
@@ -314,7 +314,7 @@ class Backend(Service):
 
         params = "--parsable --constraint=\"{constraints}\" --partition=\"{partition}\" --job-name=\"{job_name}\" --nodes=\"{num_nodes}\" --ntasks-per-node=\"{cores_per_node}\" --cpus-per-task=\"1\" --mem=\"{mem_per_node}\" --gres=\"gpu{gpu_type}{gpus_per_node}\" --gres-flags=\"enforce-binding\" -o \"{log_dir}/%j.out\" -e \"{log_dir}/%j.err\"".format(**values)
         
-        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPT_PATH, "slurm.sh"), image=image, mounts=mounts)
+        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "/slurm/slurm.sh"), image=image, mounts=mounts)
 
         # execute sbatch as user
         proc = subprocess.Popen(com, shell=True, stdout=subprocess.PIPE)
