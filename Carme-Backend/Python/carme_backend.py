@@ -314,7 +314,7 @@ class Backend(Service):
 
         params = "--parsable --constraint=\"{constraints}\" --partition=\"{partition}\" --job-name=\"{job_name}\" --nodes=\"{num_nodes}\" --ntasks-per-node=\"{cores_per_node}\" --cpus-per-task=\"1\" --mem=\"{mem_per_node}\" --gres=\"gpu{gpu_type}{gpus_per_node}\" --gres-flags=\"enforce-binding\" -o \"{log_dir}/%j.out\" -e \"{log_dir}/%j.err\"".format(**values)
         
-        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "/slurm/job-scripts/slurm.sh"), image=image, mounts=mounts)
+        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "slurm/job-scripts/slurm.sh"), image=image, mounts=mounts)
 
         # execute sbatch as user
         proc = subprocess.Popen(com, shell=True, stdout=subprocess.PIPE)
