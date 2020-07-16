@@ -1,152 +1,23 @@
 #-----------------------------------------------------------------------------------------------------------------------------------
-#Carme Global Config File
+# CARME Global Config File
 #
 # no space between variable="test"!!!
-#
-# config tools:
-# * carme_config_frontend PATH
-# *
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------
-#Carme develop -> Things that need to be changed between Carme branches
-#---------------------------------------------------------------------
+
+# version --------------------------------------------------------------------------------------------------------------------------
 CARME_VERSION="r0.8.0"
 #stable release: r0.8.0
-
-CARME_URL=""
-#e.g. my-carme-cluster.institute.com
-
-CARME_TIMEZONE=""
-#e.g. Europe/Berlin
-
-#scripts 
-CARME_SCRIPT_PATH="/opt/Carme/Carme-Scripts/frontend/"
-#default: /opt/Carme/Carme-Scripts/frontend/
-
-#Backend
-CARME_BACKEND_DEBUG=
-#True or False (note: do not use double quotes)
-
-CARME_BACKEND_PATH="/opt/Carme/Carme-Backend/"
-#default: /opt/Carme/Carme-Backend/
-
-CARME_BACKEND_SERVER=""
-#e.g. headnode
-
-CARME_BACKEND_PORT=
-#e.g. 99999 (note: do not use double quotes)
-
-CARME_MESSAGE_PATH="/home/.CarmeScripts/Carme-Messages"
-#default: /home/.CarmeScripts/Carme-Messages
-
-#SSL
-CARME_SSL_C=""
-#e.g. your country shortcuts
-
-CARME_SSL_ST=""
-#e.g. your state shortcuts
-
-CARME_SSL_L=""
-#e.g. your city
-
-CARME_SSL_O=""
-#e.g. your organization
-
-CARME_SSL_OU=""
-#e.g. your organizational unit
-
-CARME_SSL_EMAIL_BASE=""
-#e.g. @my-carme-cluster.institute.com
-
-#proxy
-CARME_PROXY_PATH_BACKEND=''
-#e.g. '/opt/Carme/Carme-Proxy/'
-
-CARME_PROXY_PATH_FRONTEND=''
-#e.g. '/opt/traefik/'
-
-#mounts
-#WARNING: set scripts mout correct
-CARME_BASE_MOUNTS=''
-#e.g.
-
-#################
-#frontend
-################
-
-CARME_FRONTEND_ID=""
-#e.g. unique name for the frontend (needed when running multiple frontends)
-
-CARME_FRONTEND_PATH="/opt/Carme/Carme-Frontend"
-#default: /opt/Carme/Carme-Frontend
-
-CARME_FRONTEND_DEBUG=
-#True or False (note: do not use double quotes)
-
-CARME_FRONTEND_KEY=''
-#needs to be secret and different for each install
-
-#Admin pannel
-CARME_ADMIN_HEADER=""
-#e.g.
-
-CARME_ADMIN_SITE_NAME=""
-#e.g.
-
-CARME_ADMIN_SITE_INDEX=""
-#e.g.
-
-
-#links
-CARME_FRONTEND_LINK_PROXY=""
-#e.g. https://my-proxy.my-carme-cluster.institute.com/
-
-CARME_FRONTEND_LINK_MONITOR=""
-#e.g. https://my-monitor.my-carme-cluster.institute.com/
-
-CARME_FRONTEND_LINK_SWITCH="" 
-#e.g. https://my-switch.my-carme-cluster.institute.com/
-
-CARME_FRONTEND_LINK_LDAP=""
-#e.g. https://my-ldap.my-carme-cluster.institute.com/
-
-CARME_FRONTEND_LINK_MATTERMOST=""
-#e.g. https://my-mattermost.my-carme-cluster.institute.com/
-
-CARME_FRONTEND_LINK_DISCLAIMER=""
-#link to your usage disclaimer
-
-CARME_FRONTEND_LINK_PRIVACY=""
-#link to your data privacy disclaimer
-
-CARME_FRONTEND_LINK_ORGA_URL=""
-#link to your university|department|institute|company
-
-CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR=""
-#e.g.
-
-
-#logos
-CARME_FRONTEND_LOGO_TOP_LEFT=""
-#e.g. the logo of your department
-#must bee in static
-
-CARME_FRONTEND_LOGO_TOP_RIGHT_1=""
-#e.g. the logo of your univerity
-
-CARME_FRONTEND_LOGO_TOP_RIGHT_2=""
-#e.g. the logo of some founding
-
-
-#titles
-CARME_FRONTEND_TITLE=""
-#e.g.
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#Carme Infrastructure --------------------------------------------------------------------------------------------------------------
+# CARME specific scripts -----------------------------------------------------------------------------------------------------------
+CARME_SCRIPTS_PATH="/opt/Carme/Carme-Scripts"
+#default: /opt/Carme/Carme-Scripts
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# infrastructure variables ---------------------------------------------------------------------------------------------------------
 CARME_HEADNODE_IP=""
 #e.g. 123.456.789.1
 
@@ -194,7 +65,7 @@ CARME_START_SSHD=""
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#Carme Network ---------------------------------------------------------------------------------------------------------------------
+# network specific variables -------------------------------------------------------------------------------------------------------
 CARME_NETWORK_BASE=""
 #e.g. 123.456.789.
 
@@ -203,28 +74,132 @@ CARME_GATEWAY=""
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#SLURM -----------------------------------------------------------------------------------------------------------------------------
-CARME_SLURM_CONFIG_FILE="/etc/slurm-llnl/slurm.conf"
-#default: /etc/slurm-llnl/slurm.conf (for Debian based systems)
+# container specific variables -----------------------------------------------------------------------------------------------------
+CARME_MESSAGE_PATH="/home/.CarmeScripts/Carme-Messages"
+#default: /home/.CarmeScripts/Carme-Messages
 
-CARME_SLURM_ControlAddr=""
-#e.g. 123.456.789.1
-
-CARME_SLURM_BackupController=""
-#e.g. headnode2
-
-CARME_SLURM_ClusterName=""
-#e.g. cluster
+CARME_BASE_MOUNTS=''
+#e.g.
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#Carme Scripts ---------------------------------------------------------------------------------------------------------------------
-CARME_SCRIPTS_PATH="/opt/Carme/Carme-Scripts"
-#default: /opt/Carme/Carme-Scripts
+# CARME backend specific variables -------------------------------------------------------------------------------------------------
+CARME_BACKEND_DEBUG=
+#True or False (note: do not use double quotes)
+
+CARME_BACKEND_PATH="/opt/Carme/Carme-Backend/"
+#default: /opt/Carme/Carme-Backend/
+
+CARME_BACKEND_SERVER=""
+#e.g. headnode
+
+CARME_BACKEND_PORT=
+#e.g. 99999 (note: do not use double quotes)
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#Database Backend ------------------------------------------------------------------------------------------------------------------
+# CARME specific SSL variables -----------------------------------------------------------------------------------------------------
+CARME_SSL_C=""
+#e.g. your country shortcuts
+
+CARME_SSL_ST=""
+#e.g. your state shortcuts
+
+CARME_SSL_L=""
+#e.g. your city
+
+CARME_SSL_O=""
+#e.g. your organization
+
+CARME_SSL_OU=""
+#e.g. your organizational unit
+
+CARME_SSL_EMAIL_BASE=""
+#e.g. @my-carme-cluster.institute.com
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# CARME proxy specific variables ---------------------------------------------------------------------------------------------------
+CARME_PROXY_PATH_BACKEND=''
+#e.g. '/opt/Carme/Carme-Proxy/'
+
+CARME_PROXY_PATH_FRONTEND=''
+#e.g. '/opt/traefik/'
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# CARME frontend variables ---------------------------------------------------------------------------------------------------------
+CARME_URL=""
+#e.g. my-carme-cluster.institute.com
+
+CARME_TIMEZONE=""
+#e.g. Europe/Berlin
+
+CARME_FRONTEND_ID=""
+#e.g. unique name for the frontend (needed when running multiple frontends)
+
+CARME_FRONTEND_PATH="/opt/Carme/Carme-Frontend"
+#default: /opt/Carme/Carme-Frontend
+
+CARME_FRONTEND_DEBUG=
+#True or False (note: do not use double quotes)
+
+CARME_FRONTEND_KEY=''
+#needs to be secret and different for each install
+
+#Admin pannel
+CARME_ADMIN_HEADER=""
+#e.g.
+
+CARME_ADMIN_SITE_NAME=""
+#e.g.
+
+CARME_ADMIN_SITE_INDEX=""
+#e.g.
+
+CARME_FRONTEND_LINK_PROXY=""
+#e.g. https://my-proxy.my-carme-cluster.institute.com/
+
+CARME_FRONTEND_LINK_MONITOR=""
+#e.g. https://my-monitor.my-carme-cluster.institute.com/
+
+CARME_FRONTEND_LINK_SWITCH="" 
+#e.g. https://my-switch.my-carme-cluster.institute.com/
+
+CARME_FRONTEND_LINK_LDAP=""
+#e.g. https://my-ldap.my-carme-cluster.institute.com/
+
+CARME_FRONTEND_LINK_MATTERMOST=""
+#e.g. https://my-mattermost.my-carme-cluster.institute.com/
+
+CARME_FRONTEND_LINK_DISCLAIMER=""
+#link to your usage disclaimer
+
+CARME_FRONTEND_LINK_PRIVACY=""
+#link to your data privacy disclaimer
+
+CARME_FRONTEND_LINK_ORGA_URL=""
+#link to your university|department|institute|company
+
+CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR=""
+#e.g.
+
+CARME_FRONTEND_LOGO_TOP_LEFT=""
+#e.g. the logo of your department
+#must bee in static
+
+CARME_FRONTEND_LOGO_TOP_RIGHT_1=""
+#e.g. the logo of your univerity
+
+CARME_FRONTEND_LOGO_TOP_RIGHT_2=""
+#e.g. the logo of some founding
+
+CARME_FRONTEND_TITLE=""
+#e.g.
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# database backend variables -------------------------------------------------------------------------------------------------------
 CARME_DB_PORT=""
 #e.g. mysql-default-port
  
@@ -242,7 +217,22 @@ CARME_DB_DB=""
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#LDAP ------------------------------------------------------------------------------------------------------------------------------
+# SLURM specific variables ---------------------------------------------------------------------------------------------------------
+CARME_SLURM_CONFIG_FILE="/etc/slurm-llnl/slurm.conf"
+#default: /etc/slurm-llnl/slurm.conf (for Debian based systems)
+
+CARME_SLURM_ControlAddr=""
+#e.g. 123.456.789.1
+
+CARME_SLURM_BackupController=""
+#e.g. headnode2
+
+CARME_SLURM_ClusterName=""
+#e.g. cluster
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# LDAP specific variables ----------------------------------------------------------------------------------------------------------
 CARME_LDAP_DC1=""
 #e.g. my-server
 
@@ -319,7 +309,7 @@ CARME_LDAP_PASSWD_BASESTRING=""
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#BeeGFS ----------------------------------------------------------------------------------------------------------------------------
+# BeeGFS specific variables --------------------------------------------------------------------------------------------------------
 CARME_BEEGFS_MGMTNODE=""
 #e.g. beegfsmgmt
 
@@ -337,13 +327,13 @@ CARME_BEEGFS_HOMEMOUNT_NODES=""
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#Zabbix ----------------------------------------------------------------------------------------------------------------------------
+# Zabbix specific variables --------------------------------------------------------------------------------------------------------
 CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/Carme-Django/static/zabbix-graphs"
 #default: /opt/Carme/Carme-Frontend/static/zabbix-graphs
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-#MatterMost ------------------------------------------------------------------------------------------------------------------------
+# MatterMost specific variables ----------------------------------------------------------------------------------------------------
 CARME_MATTERMOST_TRIGGER=""
 #yes or no
 
