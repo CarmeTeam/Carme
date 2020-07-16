@@ -16,18 +16,13 @@ CARME_BASH_FUNCTIONS="${CARME_SCRIPTS_DIR}/carme_bash_functions.sh"
 [[ -f "${CARME_BASH_FUNCTIONS}" ]] && source "${CARME_BASH_FUNCTIONS}"
 
 
-# get job-id based on scheduler specific environment variable
-if [[ -n ${SLURM_JOB_ID} ]];then
-  JOB_ID=${SLURM_JOB_ID}
-fi
-
 # add job specific bash settings
-CARME_JOB_DIR="${HOME}/.local/share/carme/job/${JOB_ID}"
-[[ -f "${CARME_JOB_DIR}/bashrc" ]] && source "${CARME_JOB_DIR}/bashrc"
+[[ -n ${SLURM_JOB_ID} ]] && CARME_JOBDIR="${HOME}/.local/share/carme/job/${SLURM_JOB_ID}"
+[[ -f "${CARME_JOBDIR}/bashrc" ]] && source "${CARME_JOBDIR}/bashrc"
 
 
 # add variables that should be availabe in ssh
-[[ -f "${CARME_JOB_DIR}/ssh/envs/$(hostname)" ]] && source "${CARME_JOB_DIR}/ssh/envs/$(hostname)"
+[[ -f "${CARME_JOBDIR}/ssh/envs/$(hostname)" ]] && source "${CARME_JOBDIR}/ssh/envs/$(hostname)"
 
 set +e
 set +o pipefail
