@@ -64,8 +64,8 @@ fi
 CARME_FRONTEND_PATH=$(get_variable CARME_FRONTEND_PATH)
 [[ -z ${CARME_FRONTEND_PATH} ]] && die "CARME_FRONTEND_PATH not set"
 
-CARME_SCRIPT_PATH=$(get_variable CARME_SCRIPT_PATH)
-[[ -z ${CARME_SCRIPT_PATH} ]] && die "CARME_SCRIPT_PATH not set"
+CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH)
+[[ -z ${CARME_SCRIPTS_PATH} ]] && die "CARME_SCRIPTS_PATH not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -131,8 +131,8 @@ MODIFYDATE_FRONTEND_CONFIG=$(date -r "${CARME_FRONTEND_PATH}"/CarmeConfig.fronte
 echo ""
 echo "collect variables needed inside the containers"
 
-if [[ -f "${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container" ]];then
-  mv "${CARME_SCRIPT_PATH}"/../InsideContainer/CarmeConfig.container "${CARME_SCRIPT_PATH}"/../InsideContainer/CarmeConfig.container_old  || die "cannot backup CarmeConfig.container"
+if [[ -f "${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container" ]];then
+  mv "${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container" "${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container_old"  || die "cannot backup CarmeConfig.container"
   echo "saved previous CarmeConfig.container as CarmeConfig.container_old"
 fi
 
@@ -154,14 +154,14 @@ chmod 644 CarmeConfig.container || die "cannot change file permissions of CarmeC
 echo "changed permission of CarmeConfig.container to 644"
 
 
-# move new CarmeConfig.container to CARME_SCRIPT_PATH/../InsideContainer
-mv CarmeConfig.container "${CARME_SCRIPT_PATH}"/../InsideContainer/CarmeConfig.container || die "cannot move CarmeConfig.container ${CARME_SCRIPT_PATH}/../InsideContainer"
-echo "moved CarmeConfig.container to ${CARME_SCRIPT_PATH}/../InsideContainer"
+# move new CarmeConfig.container to CARME_SCRIPTS_PATH/InsideContainer
+mv CarmeConfig.container "${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container" || die "cannot move CarmeConfig.container ${CARME_SCRIPTS_PATH}/InsideContainer"
+echo "moved CarmeConfig.container to ${CARME_SCRIPTS_PATH}/InsideContainer"
 
 
 # check modification date
-MODIFYDATE_CONTAINER_CONFIG=$(date -r "${CARME_SCRIPT_PATH}"/../InsideContainer/CarmeConfig.container "+%d-%m-%Y")
-[[ "${MODIFYDATE_CONTAINER_CONFIG}" != "${TODAY}" ]] && die "${CARME_SCRIPT_PATH}/../InsideContainer/CarmeConfig.container not modified (last modification ${MODIFYDATE_FRONTEND_CONFIG})"
+MODIFYDATE_CONTAINER_CONFIG=$(date -r "${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container" "+%d-%m-%Y")
+[[ "${MODIFYDATE_CONTAINER_CONFIG}" != "${TODAY}" ]] && die "${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container not modified (last modification ${MODIFYDATE_FRONTEND_CONFIG})"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
