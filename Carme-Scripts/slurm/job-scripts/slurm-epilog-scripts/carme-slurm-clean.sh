@@ -65,7 +65,7 @@ function log () {
 
 # delete CARME specific files and folders ------------------------------------------------------------------------------------------
 
-# source needed variables from /home/.CarmeScripts/CarmeConfig.container -----------------------------------------------------------
+# source needed variables ----------------------------------------------------------------------------------------------------------
 CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.container"
 if [ -f ${CONFIG_FILE} ];then
   function get_variable () {
