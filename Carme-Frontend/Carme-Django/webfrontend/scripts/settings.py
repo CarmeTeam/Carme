@@ -33,9 +33,6 @@ if LOAD_CUSTOM_SETTINGS:
     SourceFileLoader('custom', BASE_DIR+'/scripts/custom.py').load_module()
     from custom import custom_settings
 
-#NOTE: use unified name some time
-CARME_HEAD_NODE=CARME_HEADNODE_IP
-CARME_LOGIN_NODE=CARME_LOGINNODE_IP
 #######################
 
 
@@ -48,7 +45,7 @@ SECRET_KEY = CARME_FRONTEND_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = CARME_FRONTEND_DEBUG
 
-ALLOWED_HOSTS = [CARME_URL, CARME_LOGIN_NODE]
+ALLOWED_HOSTS = [CARME_URL, CARME_LOGINNODE_IP]
 
 # Application definition
 
@@ -141,7 +138,7 @@ WSGI_APPLICATION = 'scripts.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'webfrontend',
+        'NAME': CARME_DB_DB,
         'USER': CARME_DB_USER,
         'PASSWORD': CARME_DB_PW,
         'HOST': CARME_DB_NODE,
