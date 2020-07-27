@@ -79,7 +79,7 @@ fi
 
 
 # call notify_job_prolog -----------------------------------------------------------------------------------------------------------
-log "run ${CARME_SCRIPTS_PATH}/backend/notify_job_epilog.py"
+log "run ${CARME_SCRIPTS_PATH}/backend/notify_job_prolog.py"
 if ! python3 "${CARME_SCRIPTS_PATH}"/backend/notify_job_prolog.py "${SLURM_JOB_ID}" "${SLURM_JOB_USER}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
 then
   die "${CARME_SCRIPTS_PATH}/backend/notify_job_prolog.py failed"
