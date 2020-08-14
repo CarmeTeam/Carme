@@ -71,7 +71,11 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   if [[ -d "${THEIA_BASE_DIR}" ]]; then
     log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
     cd "${THEIA_BASE_DIR}" || die "ERROR: $(hostname): cannot open ${THEIA_BASE_DIR}"
-    node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 &
+    if [[ -d "plugins" ]];then
+      node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 --plugins=local-dir:plugins &
+    else
+      node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 &
+    fi
     cd || die "cannot change directory"
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
