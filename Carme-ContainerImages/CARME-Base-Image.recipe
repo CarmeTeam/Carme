@@ -12,29 +12,37 @@ VERSION v1.0
 
 
 %post
+# add repos ------------------------------------------------------------------------------------------------------------------------
 echo "deb http://ftp.de.debian.org/debian/ stable main contrib non-free" > /etc/apt/sources.list
 echo "deb-src http://ftp.de.debian.org/debian/ stable main contrib non-free" >> /etc/apt/sources.list
 echo "deb http://security.debian.org/ stable/updates main contrib non-free" >> /etc/apt/sources.list
 echo "deb-src http://security.debian.org/ stable/updates main contrib non-free" >> /etc/apt/sources.list
 echo "deb http://ftp.de.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list
-echo "deb-src http://ftp.de.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list 
+echo "deb-src http://ftp.de.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-# update and upgrade ---------------------------------------------------------------------------------------------------------------
+
+# update and upgrade installed packages --------------------------------------------------------------------------------------------
 apt update
 apt upgrade -y
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# base stuff -----------------------------------------------------------------------------------------------------------------------
+# install basic packages -----------------------------------------------------------------------------------------------------------
 apt install -y automake bash-completion cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-# ib stuff
+
+# install packges needed for IB ----------------------------------------------------------------------------------------------------
 apt install -y libibverbs1 libibverbs-dev librdmacm1 libibmad5 libibumad3 librdmacm1 ibverbs-providers rdmacm-utils infiniband-diags libfabric1 ibverbs-utils
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # set timezone ---------------------------------------------------------------------------------------------------------------------
 rm /etc/localtime
 ln -snf /usr/share/zoneinfo/Europe/Berlin /etc/localtime     # change to your preferred timezone
 echo "Europe/Berlin" > /etc/timezone
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # clean-up -------------------------------------------------------------------------------------------------------------------------
@@ -42,21 +50,28 @@ apt update
 apt upgrade -y
 apt autoremove -y 
 apt clean
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# reconfigure some stuff -----------------------------------------------------------------------------------------------------------
+# reconfigure /tmp permissions -----------------------------------------------------------------------------------------------------
 chmod 1777 /tmp
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# set default shell to bash --------------------------------------------------------------------------------------------------------
 rm "/bin/sh"
 ln -s "/bin/bash" "/bin/sh"
 rm "/usr/share/man/man1/sh.1.gz"
 ln -s "/usr/share/man/man1/sh.distrib.1.gz" "/usr/share/man/man1/sh.1.gz"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# conda stuff ----------------------------------------------------------------------------------------------------------------------
+# install mini-conda ---------------------------------------------------------------------------------------------------------------
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh -b -u -p /opt/anaconda3
 rm Miniconda3-latest-Linux-x86_64.sh
-  
+
+# create conda base environment and the needed packages
 . "/opt/anaconda3/etc/profile.d/conda.sh"
 conda activate base
   
@@ -68,9 +83,10 @@ conda install -y -c conda-forge jupyterlab
 conda install -y nb_conda_kernels
 conda install -y -c conda-forge yarn=1.22.4 nodejs=10.16.3
 conda clean --all -y
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# theia (hard coded way) -----------------------------------------------------------------------------------------------------------
+# install theia.ide and basic plugins ----------------------------------------------------------------------------------------------
 THEIA_DIR="/opt/theia-ide"
 LOCAL_DIR="$(pwd)"
 CONDA_DIR="/opt/anaconda3"
@@ -176,9 +192,10 @@ apt purge -y python2.7-minimal
 rm "${THEIA_DIR}/python"
 apt autoremove --purge -y
 apt clean
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# build gpi ------------------------------------------------------------------------------------------------------------------------
+# build and install gpi ------------------------------------------------------------------------------------------------------------
 cd /opt
 git clone https://github.com/cc-hpc-itwm/GPI-2.git GPI-SRC
 cd /opt/GPI-SRC
@@ -190,13 +207,20 @@ cd
 rm -r /opt/GPI-SRC
 
 cd /opt/GPI/bin
-sed -i 's/GASPI_LAUNCHER="ssh"/GASPI_LAUNCHER="ssh -F ${CARME_SSHDIR}\/ssh_config"/g' gaspi_run 
+sed -i 's/GASPI_LAUNCHER="ssh"/GASPI_LAUNCHER="ssh -F ${CARME_SSHDIR}\/ssh_config"/g' gaspi_run
 sed -i 's/\/tmp\//${TMP}\//g' gaspi_run
 cd
+
 ln -s /opt/GPI/bin/* /usr/local/bin/
 ln -s /opt/GPI/include/* /usr/local/include/
 mkdir -p /usr/local/lib64
 ln -s /opt/GPI/lib64/* /usr/local/lib64/
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# install additional libraries and packages-----------------------------------------------------------------------------------------
+#post-replace
+# ----------------------------------------------------------------------------------------------------------------------------------
 
 
 %environment
