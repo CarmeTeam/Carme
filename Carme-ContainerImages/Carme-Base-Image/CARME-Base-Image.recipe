@@ -1,0 +1,122 @@
+BootStrap: debootstrap
+OSVersion: stable
+MirrorURL: http://ftp.de.debian.org/debian/
+
+%help
+  If you need any help you should ask the maintainer of this image.
+
+
+%labels
+  MAINTAINER CC-HPC Fraunhofer ITWM
+  VERSION v1.0
+
+
+%setup
+  mkdir "${SINGULARITY_ROOTFS}/opt/theia-ide"
+
+
+%files
+  Base-Image-Default-Configs/theia--package.json /opt/theia-ide/package.json
+  Base-Image-Default-Configs/theia--index-html-fix.html /opt/theia-ide/index-html-fix.html
+  Base-Image-Default-Configs/jupyterlab--overrides.json /opt/overrides.json
+  Base-Image-Default-Configs/jupyterlab--page_config.json /opt/page_config.json
+
+
+%post
+  # add repos and update -----------------------------------------------------------------------------------------------------------
+  echo "deb http://security.debian.org/ stable/updates main" >> /etc/apt/sources.list
+  apt update
+  apt upgrade -y
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # install basic packages ---------------------------------------------------------------------------------------------------------
+  apt install -y automake bash-completion cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # install packges needed for IB --------------------------------------------------------------------------------------------------
+  apt install -y libibverbs1 libibverbs-dev librdmacm1 libibmad5 libibumad3 librdmacm1 ibverbs-providers rdmacm-utils infiniband-diags libfabric1 ibverbs-utils
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # install mini-conda -------------------------------------------------------------------------------------------------------------
+  cd /opt || exit
+  CONDA_INSTALL_PATH="/opt/anaconda3"
+  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  bash Miniconda3-latest-Linux-x86_64.sh -b -u -p "${CONDA_INSTALL_PATH}"
+  rm Miniconda3-latest-Linux-x86_64.sh
+
+  # create conda base environment and the needed packages
+  . "${CONDA_INSTALL_PATH}/etc/profile.d/conda.sh"
+  conda activate base
+
+  conda install -y python=3.8.5 nb_conda_kernels
+  conda install -y -c conda-forge jupyterlab yarn=1.22.4 nodejs=10.16.3
+
+  mkdir "${CONDA_INSTALL_PATH}/share/jupyter/lab/settings"
+  mv /opt/overrides.json "${CONDA_INSTALL_PATH}/share/jupyter/lab/setting/overrides.json"
+  mv /opt/page_config.json "${CONDA_INSTALL_PATH}/share/jupyter/lab/setting/page_config.json"
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # install theia.ide and basic plugins --------------------------------------------------------------------------------------------
+  THEIA_DIR="/opt/theia-ide"
+  cd ${THEIA_DIR} || exit
+
+  apt install -y python2.7-minimal
+  ln -s "/usr/bin/python2.7" "${THEIA_DIR}/python"
+
+  PATH="${THEIA_DIR}:${PATH}" yarn
+  apt purge -y python2.7-minimal
+  rm "${THEIA_DIR}/python"
+
+  yarn theia build
+  mv index-html-fix.html "lib/index.html"
+
+  cd || exit
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # build and install gpi ----------------------------------------------------------------------------------------------------------
+  cd /opt || exit
+  git clone https://github.com/cc-hpc-itwm/GPI-2.git GPI-SRC
+
+  cd /opt/GPI-SRC || exit
+  ./autogen.sh
+  CC=gcc FC=gfortran ./configure --with-infiniband --prefix=/opt/GPI
+  make -j 20
+  make install
+  cd || exit
+  rm -r /opt/GPI-SRC
+
+  cd /opt/GPI/bin || exit
+  sed -i 's/GASPI_LAUNCHER="ssh"/GASPI_LAUNCHER="ssh -F ${CARME_SSHDIR}\/ssh_config"/g' gaspi_run
+  sed -i 's/\/tmp\//${TMP}\//g' gaspi_run
+  cd || exit
+
+  ln -s /opt/GPI/bin/* /usr/local/bin/
+  ln -s /opt/GPI/include/* /usr/local/include/
+  mkdir -p /usr/local/lib64
+  ln -s /opt/GPI/lib64/* /usr/local/lib64/
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+  # install additional libraries and packages---------------------------------------------------------------------------------------
+  #post-replace
+  # --------------------------------------------------------------------------------------------------------------------------------
+
+
+  # clean-up -----------------------------------------------------------------------------------------------------------------------
+  conda clean --all -y
+  apt autoremove --purge -y
+  apt clean
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
+%environment
+
+
+%runscript
+  echo "This is the CARME base-image singularity container (Debian)"
+  echo "Containing basic software, miniconda, theia, jupyterlab, gpi and mpi"
