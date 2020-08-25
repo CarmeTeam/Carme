@@ -16,10 +16,10 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
 %files
-  Base-Image-Default-Configs/theia--package.json /opt/theia-ide/package.json
-  Base-Image-Default-Configs/theia--index-html-fix.html /opt/theia-ide/index-html-fix.html
-  Base-Image-Default-Configs/jupyterlab--overrides.json /opt/overrides.json
-  Base-Image-Default-Configs/jupyterlab--page_config.json /opt/page_config.json
+  includes/theia--package.json /opt/theia-ide/package.json
+  includes/theia--index-html-fix.html /opt/theia-ide/index-html-fix.html
+  includes/jupyterlab--overrides.json /opt/overrides.json
+  includes/jupyterlab--page_config.json /opt/page_config.json
 
 
 %post
@@ -31,7 +31,9 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
   # install basic packages ---------------------------------------------------------------------------------------------------------
-  apt install -y automake cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
+  apt install -y automake bash-completion cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less locales nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
+  echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+  dpkg-reconfigure --frontend=noninteractive locales
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -41,7 +43,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
   # install mini-conda -------------------------------------------------------------------------------------------------------------
-  cd /opt || exit
+  cd /opt
   CONDA_INSTALL_PATH="/opt/anaconda3"
   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
   bash Miniconda3-latest-Linux-x86_64.sh -b -u -p "${CONDA_INSTALL_PATH}"
@@ -62,7 +64,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
   # install theia.ide and basic plugins --------------------------------------------------------------------------------------------
   THEIA_DIR="/opt/theia-ide"
-  cd ${THEIA_DIR} || exit
+  cd ${THEIA_DIR}
 
   apt install -y python2.7-minimal
   ln -s "/usr/bin/python2.7" "${THEIA_DIR}/python"
@@ -73,27 +75,23 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
   yarn theia build
   mv index-html-fix.html "lib/index.html"
-
-  cd || exit
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
   # build and install gpi ----------------------------------------------------------------------------------------------------------
-  cd /opt || exit
+  cd /opt
   git clone https://github.com/cc-hpc-itwm/GPI-2.git GPI-SRC
 
-  cd /opt/GPI-SRC || exit
+  cd /opt/GPI-SRC
   ./autogen.sh
   CC=gcc FC=gfortran ./configure --with-infiniband --prefix=/opt/GPI
   make -j 20
   make install
-  cd || exit
+  cd
   rm -r /opt/GPI-SRC
 
-  cd /opt/GPI/bin || exit
-  sed -i 's/GASPI_LAUNCHER="ssh"/GASPI_LAUNCHER="ssh -F ${CARME_SSHDIR}\/ssh_config"/g' gaspi_run
-  sed -i 's/\/tmp\//${TMP}\//g' gaspi_run
-  cd || exit
+  sed -i 's/GASPI_LAUNCHER="ssh"/GASPI_LAUNCHER="ssh -F ${CARME_SSHDIR}\/ssh_config"/g' /opt/GPI/bin/gaspi_run
+  sed -i 's/\/tmp\//${TMP}\//g' /opt/GPI/bin/gaspi_run
 
   ln -s /opt/GPI/bin/* /usr/local/bin/
   ln -s /opt/GPI/include/* /usr/local/include/
@@ -112,9 +110,6 @@ MirrorURL: http://ftp.de.debian.org/debian/
   apt autoremove --purge -y
   apt clean
   #---------------------------------------------------------------------------------------------------------------------------------
-
-
-%environment
 
 
 %runscript
