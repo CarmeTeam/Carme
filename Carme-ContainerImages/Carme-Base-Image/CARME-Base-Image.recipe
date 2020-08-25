@@ -55,8 +55,8 @@ MirrorURL: http://ftp.de.debian.org/debian/
   conda install -y -c conda-forge jupyterlab yarn=1.22.4 nodejs=10.16.3
 
   mkdir "${CONDA_INSTALL_PATH}/share/jupyter/lab/settings"
-  mv /opt/overrides.json "${CONDA_INSTALL_PATH}/share/jupyter/lab/setting/overrides.json"
-  mv /opt/page_config.json "${CONDA_INSTALL_PATH}/share/jupyter/lab/setting/page_config.json"
+  mv /opt/overrides.json "${CONDA_INSTALL_PATH}/share/jupyter/lab/settings/overrides.json"
+  mv /opt/page_config.json "${CONDA_INSTALL_PATH}/share/jupyter/lab/settings/page_config.json"
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
