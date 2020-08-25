@@ -197,6 +197,11 @@ if [[ -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
     MOUNTS="${MOUNTS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
 fi
 
+
+# NOTE: never double quote this variable!
+BINDS="-B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc"
+
+
 log "start container"
-newpid singularity exec --nv -B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc -B /etc/libibverbs.d ${MOUNTS} "${IMAGE}" /bin/bash /home/.CarmeScripts/start_apps.sh
+TZ=$(cat /etc/timezone) newpid singularity exec --nv ${BINDS} ${MOUNTS} "${IMAGE}" /bin/bash /home/.CarmeScripts/start_apps.sh
 #-----------------------------------------------------------------------------------------------------------------------------------
