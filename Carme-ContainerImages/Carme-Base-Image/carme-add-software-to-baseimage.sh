@@ -42,7 +42,7 @@ if [ "$RESP" = "y" ]; then
   FILENAME_TMP="tmp.txt"
   NEW_FILENAME="Carme-Baseimage_${NEW_INSTALL}.recipe"
 
-  cp ../Carme-Baseimage.recipe "${NEW_FILENAME}" || die "cannot copy ../Carme-Baseimage.recipe to ${NEW_FILENAME}"
+  cp CARME-Base-Image.recipe "${NEW_FILENAME}" || die "cannot copy CARME-Base-Image.recipe to ${NEW_FILENAME}"
   cp "${FILENAME}" "${FILENAME_TMP}" || die "cannot copy ${FILENAME} to ${FILENAME_TMP}"
 
   sed -i 's/^/    /' "${FILENAME_TMP}"
