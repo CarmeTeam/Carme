@@ -203,5 +203,5 @@ BINDS="-B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bash
 
 
 log "start container"
-newpid singularity exec --nv ${BINDS} ${MOUNTS} "${IMAGE}" /bin/bash /home/.CarmeScripts/start_apps.sh
+TZ=$(cat /etc/timezone) newpid singularity exec --nv ${BINDS} ${MOUNTS} "${IMAGE}" /bin/bash /home/.CarmeScripts/start_apps.sh
 #-----------------------------------------------------------------------------------------------------------------------------------
