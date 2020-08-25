@@ -31,7 +31,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
   # install basic packages ---------------------------------------------------------------------------------------------------------
-  apt install -y automake bash-completion cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
+  apt install -y automake cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
