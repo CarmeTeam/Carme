@@ -79,7 +79,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
   # start jupyter-lab --------------------------------------------------------------------------------------------------------------
   log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
-  jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' &
+  jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' --LabApp.log_datefmt="%Y-%m-%d %H:%M:%S" &
   #---------------------------------------------------------------------------------------------------------------------------------
 
 else
