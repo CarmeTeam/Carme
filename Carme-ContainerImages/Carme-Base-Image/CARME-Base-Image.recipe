@@ -31,7 +31,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
   # install basic packages ---------------------------------------------------------------------------------------------------------
-  apt install -y automake bash-completion cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less locales nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
+  apt install -y automake bash-completion cmake colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances htop less locales man-db nano openmpi-bin openssh-server rsync shellcheck time unzip vim wget zip
   echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
   dpkg-reconfigure --frontend=noninteractive locales
   #---------------------------------------------------------------------------------------------------------------------------------
