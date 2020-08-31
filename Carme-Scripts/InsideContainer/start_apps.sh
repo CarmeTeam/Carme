@@ -54,7 +54,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
   # start ssh server if we have more than one node or more than one GPU ------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
-    log "start SSHD server"
+    log "start SSHD server at port ${SSHD_PORT}"
     /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ else
 
   # start ssh server if a job has more than one node or mor than one GPU -----------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
-    log "start SSHD server"
+    log "start SSHD server at port ${SSHD_PORT}"
     /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
