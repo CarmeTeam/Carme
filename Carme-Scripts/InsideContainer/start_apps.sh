@@ -33,6 +33,13 @@ function log () {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# define function to check if command is available on PATH -------------------------------------------------------------------------
+function check_command () {
+  command -v "${1}" >/dev/null 2>&1
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # write LD_LIBRARY_PATH to local hostname specific env file ------------------------------------------------------------------------
 echo "export LD_LIBRARY_PATH=\"${LD_LIBRARY_PATH}\"
 " >> "${CARME_SSHDIR}/envs/$(hostname)"
@@ -54,15 +61,21 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
   # start ssh server if we have more than one node or more than one GPU ------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
-    log "start SSHD server at port ${SSHD_PORT}"
-    /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+    if check_command sshd;then
+      log "start SSHD server at port ${SSHD_PORT}"
+      /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+    else
+      die "cannot start SSHD - requested but no executable found"
+    fi
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
   # start tensorboard --------------------------------------------------------------------------------------------------------------
-  log "start TensorBoard at ${CARME_MASTER_IP}:${TB_PORT}"
-  LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" & 
+  if check_command tensorboard;then
+    log "start TensorBoard at ${CARME_MASTER_IP}:${TB_PORT}"
+    LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" & 
+  fi
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -70,24 +83,40 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   THEIA_BASE_DIR="/opt/theia-ide/"
   if [[ -d "${THEIA_BASE_DIR}" ]]; then
     cd "${THEIA_BASE_DIR}" || die "ERROR: $(hostname): cannot open ${THEIA_BASE_DIR}"
-    log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
-    node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 --plugins=local-dir:plugins &
+    if [[ -f "node_modules/.bin/theia" ]];then
+      if check_command node;then
+        log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
+        node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 --plugins=local-dir:plugins &
+      else
+        die "cannot start TheiaIDE - requested but no executable found"
+      fi
+    else
+      die "cannot find thei start script"
+    fi
     cd || die "cannot change directory"
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
   # start jupyter-lab --------------------------------------------------------------------------------------------------------------
-  log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
-  jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' --LabApp.log_datefmt="%Y-%m-%d %H:%M:%S" &
+  if check_command jupyter; then
+    log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
+    jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' --LabApp.log_datefmt="%Y-%m-%d %H:%M:%S" &
+  else
+    die "cannot start JupyterLab - requested but no executable found"
+  fi
   #---------------------------------------------------------------------------------------------------------------------------------
 
 else
 
   # start ssh server if a job has more than one node or mor than one GPU -----------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
-    log "start SSHD server at port ${SSHD_PORT}"
-    /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+    if check_command sshd;then
+      log "start SSHD server at port ${SSHD_PORT}"
+      /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+    else
+      die "cannot start SSHD - requested but no executable found"
+    fi
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
 
