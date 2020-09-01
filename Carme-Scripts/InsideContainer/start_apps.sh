@@ -65,7 +65,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
       log "start SSHD server at port ${SSHD_PORT}"
       /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
     else
-      die "cannot start SSHD - requested but no executable found"
+      die "cannot start SSHD (no executable found)"
     fi
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
@@ -88,10 +88,10 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
         log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
         node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 --plugins=local-dir:plugins &
       else
-        die "cannot start TheiaIDE - requested but no executable found"
+        die "cannot start TheiaIDE (no executable found)"
       fi
     else
-      die "cannot find thei start script"
+      die "cannot find TheiaIDE start script"
     fi
     cd || die "cannot change directory"
   fi
@@ -103,7 +103,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
     log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
     jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' --LabApp.log_datefmt="%Y-%m-%d %H:%M:%S" &
   else
-    die "cannot start JupyterLab - requested but no executable found"
+    die "cannot start JupyterLab (no executable found)"
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -115,7 +115,7 @@ else
       log "start SSHD server at port ${SSHD_PORT}"
       /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
     else
-      die "cannot start SSHD - requested but no executable found"
+      die "cannot start SSHD (no executable found)"
     fi
   fi
   #---------------------------------------------------------------------------------------------------------------------------------
