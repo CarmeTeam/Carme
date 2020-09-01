@@ -1,7 +1,9 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------------------------------------------------------
-# CARME:
-# this script starts the applications inside the singularity container
+# CARME: Script to start the default applications inside the singularity container
+#
+# Copyright 2019 by Fraunhofer ITWM
+# License: http://open-carme.org/LICENSE.md
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -57,9 +59,10 @@ fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# start the default applications ---------------------------------------------------------------------------------------------------
 if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
-  # start ssh server if we have more than one node or more than one GPU ------------------------------------------------------------
+  # start SSHD server --------------------------------------------------------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     if check_command sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
@@ -71,7 +74,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
-  # start tensorboard --------------------------------------------------------------------------------------------------------------
+  # start TensorBoard --------------------------------------------------------------------------------------------------------------
   if check_command tensorboard;then
     log "start TensorBoard at ${CARME_MASTER_IP}:${TB_PORT}"
     LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" & 
@@ -79,7 +82,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
-  # start theia --------------------------------------------------------------------------------------------------------------------
+  # start Theia IDE ----------------------------------------------------------------------------------------------------------------
   THEIA_BASE_DIR="/opt/theia-ide/"
   if [[ -d "${THEIA_BASE_DIR}" ]]; then
     cd "${THEIA_BASE_DIR}" || die "ERROR: $(hostname): cannot open ${THEIA_BASE_DIR}"
@@ -98,7 +101,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
-  # start jupyter-lab --------------------------------------------------------------------------------------------------------------
+  # start JupyterLab ---------------------------------------------------------------------------------------------------------------
   if check_command jupyter; then
     log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
     jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' --LabApp.log_datefmt="%Y-%m-%d %H:%M:%S" &
@@ -109,7 +112,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
 else
 
-  # start ssh server if a job has more than one node or mor than one GPU -----------------------------------------------------------
+  # start SSHD ---------------------------------------------------------------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     if check_command sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
@@ -121,6 +124,7 @@ else
   #---------------------------------------------------------------------------------------------------------------------------------
 
 fi
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # wait until the job is done -------------------------------------------------------------------------------------------------------
