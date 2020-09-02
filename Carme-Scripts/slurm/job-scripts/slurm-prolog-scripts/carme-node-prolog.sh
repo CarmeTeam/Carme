@@ -49,7 +49,7 @@ function log () {
 # define function to get new ports for entry points --------------------------------------------------------------------------------
 # usage: get_free_port "PORT_START" "PORT_END" "VARIABLE_FOR_PORT_TO_BE_SET"
 function get_free_port () {
-  for ((i=${1};i<=${2};i++)); do
+  for ((i=1;i<=10;i++)); do
 
     local NEW_PORT
     local RANDOM
@@ -76,8 +76,8 @@ function get_free_port () {
       break
     fi
 
-    if [[ "${i}" -eq "${2}" ]];then
-      die "no free ${3} found!"
+    if [[ "${i}" -eq "10" ]];then
+      die "no free ${3} found after trying 10 times!"
     fi
   done
 }
