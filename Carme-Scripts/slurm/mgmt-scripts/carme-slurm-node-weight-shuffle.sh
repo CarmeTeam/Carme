@@ -54,8 +54,8 @@ CARME_SLURM_BackupController=$(get_variable CARME_SLURM_BackupController)
 
 
 # functions ------------------------------------------------------------------------------------------------------------------------
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh" ];then
-  source "${PATH_TO_SCRIPTS_FOLDER}/slurm/carme-slurm-mgmt-functions.sh"
+if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh" ];then
+  source "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh"
 else
   echo "ERROR: carme-slurm-mgmt-functions.sh not found but needed"
   exit 200

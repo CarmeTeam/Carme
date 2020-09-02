@@ -1,4 +1,14 @@
 {
+ "theia": {
+   "frontend": {
+     "config": {
+       "applicationName": "CARME IDE",
+       "preferences": {
+          "terminal.integrated.cursorBlinking": true
+       } 
+     }
+   }
+ },
  "private": true,
  "dependencies": {
    "@theia/callhierarchy": "next",

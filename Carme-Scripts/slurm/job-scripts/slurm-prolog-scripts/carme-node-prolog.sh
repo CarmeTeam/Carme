@@ -46,6 +46,44 @@ function log () {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# define function to get new ports for entry points --------------------------------------------------------------------------------
+# usage: get_free_port "PORT_START" "PORT_END" "VARIABLE_FOR_PORT_TO_BE_SET"
+function get_free_port () {
+  for ((i=1;i<=10;i++)); do
+
+    local NEW_PORT
+    local RANDOM
+    local NANOSECS
+    local SECS
+    local MINUTES
+    local HOURS
+    local MONTH
+
+    NANOSECS="$(( 10#$(date +%5N) + 1 ))"
+    SECS="$(( 10#$(date +%S) + 1 ))"
+    MINUTES="$(( 10#$(date +%M) + 1 ))"
+    HOURS="$(( 10#$(date +%H) + 1 ))"
+    MONTH="$(( 10#$(date +%m) + 1 ))"
+    RANDOM="$(( NANOSECS * SECS * MINUTES * HOURS * MONTH ))"
+    NEW_PORT="$(( (RANDOM % (${2} - ${1})) + ${1} ))"
+
+    if ! ss -tln -4 | grep -q "${NEW_PORT}"
+    then
+      echo "export ${3}=${NEW_PORT}" >> "${JOBDIR}/ports/$(hostname)"
+      log "${3}: ${NEW_PORT}"
+      local __PORT=${3}
+      eval $__PORT="'${NEW_PORT}'"
+      break
+    fi
+
+    if [[ "${i}" -eq "10" ]];then
+      die "no free ${3} found after trying 10 times!"
+    fi
+  done
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # source needed variables ----------------------------------------------------------------------------------------------------------
 CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.container"
 if [ -f ${CONFIG_FILE} ];then
@@ -180,38 +218,16 @@ export CARME_JOB_GPUS=${SLURM_JOB_GPUS}
 " > "${JOBDIR}/bashrc"
 
 
-  #compute ports: base port + first GPU id
-  JOB_OFFSET=${SLURM_JOB_ID:${#SLURM_JOB_ID}<3?0:-3}
-  PORT_OFFSET="1000"
+  #determine jupyterlab port
+  get_free_port "6000" "7000" "NB_PORT"
 
-  NB_PORT="$((6000 + 10#$JOB_OFFSET))"
-  log "jupyterlab port: ${NB_PORT}"
 
-  TB_PORT="$((NB_PORT + PORT_OFFSET))"
-  log "tensorboard port: ${TB_PORT}"
+  #determine theia-ide port
+  get_free_port "7001" "8000" "TA_PORT"
 
-  TA_PORT="$((NB_PORT + PORT_OFFSET + PORT_OFFSET))"
-  log "theia port: ${TA_PORT}"
 
-  log "create ${JOBDIR}/ports/$(hostname)"
-  echo "export NB_PORT=${NB_PORT}
-export TB_PORT=${TB_PORT}
-export TA_PORT=${TA_PORT}" >> "${JOBDIR}/ports/$(hostname)"
-
-  if ss -tln -4 | grep -q ${NB_PORT}
-  then
-    die "no free port for entrypoints found for NB_PORT (${NB_PORT})"
-  fi
-
-  if ss -tln -4 | grep -q ${TB_PORT}
-  then
-    die "no free port for entrypoints found for NB_PORT (${TB_PORT})"
-  fi
-
-  if ss -tln -4 | grep -q ${TA_PORT}
-  then
-    die "no free port for entrypoints found for NB_PORT (${TA_PORT})"
-  fi
+  #determine tensorboard port
+  get_free_port "8001" "9000" "TB_PORT"
 
 
   # create ssh stuff if needed
@@ -330,24 +346,7 @@ PermitUserEnvironment no
   mkdir -p "${JOBDIR}/ssh/ssh_config.d" || die "cannot create ${JOBDIR}/ssh/ssh_config.d"
 
   # find new free sshd port
-  SSHD_PORT=""
-  BASE_PORT="2222"
-  FINAL_PORT="2300"
-
-  for ((i=BASE_PORT;i<=FINAL_PORT;i++)); do
-    if ! ss -tln -4 | grep -q "${i}"
-    then
-      SSHD_PORT=${i}
-      echo "export SSHD_PORT=${SSHD_PORT}" >> "${JOBDIR}/ports/$(hostname)"
-      log "sshd port: ${SSHD_PORT}"
-      chown "${SLURM_JOB_USER}":"${USER_GROUP}" "${JOBDIR}/ports/$(hostname)"
-      break
-    fi
-
-    if [[ "$i" -eq "${FINAL_PORT}" && -n "${LISTEN}" ]];then
-      die "no free SSHD port found!"
-    fi
-  done
+  get_free_port "2000" "3000" "SSHD_PORT"
 
   log "create node specific ssh config"
   echo "Host $(hostname)
