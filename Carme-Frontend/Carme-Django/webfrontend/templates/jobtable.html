@@ -57,7 +57,6 @@
 																																{% endif %}
 																																<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "jupyter.png" %}" alt="" style="height:3em;"/></a>
 																																<a href="/tb_{{ job.url_suffix }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="" style="height:3em;"/></a>
-																																<a href="/nb_{{ job.url_suffix }}/terminals/new" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "terminal.jpg" %}" alt="" style="height:2.5em;"/></a>
 																																<!-- {% if job.NumGPUs > 1 %}
 																																<a href="/dd_{{ job.HASH }}/status" data-title="{{job.jobName}}"  target="_new"><img src="{% static "dask-logo.svg" %}" alt="" height=40/></A>
 																																</td>
