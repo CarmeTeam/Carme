@@ -90,7 +90,6 @@ MirrorURL: http://ftp.de.debian.org/debian/
   rm -r /opt/GPI-SRC
 
   sed -i 's/GASPI_LAUNCHER="ssh"/GASPI_LAUNCHER="ssh -F ${CARME_SSHDIR}\/ssh_config"/g' /opt/GPI/bin/gaspi_run
-  sed -i 's/\/tmp\//${TMP}\//g' /opt/GPI/bin/gaspi_run
 
   ln -s /opt/GPI/bin/* /usr/local/bin/
   ln -s /opt/GPI/include/* /usr/local/include/
