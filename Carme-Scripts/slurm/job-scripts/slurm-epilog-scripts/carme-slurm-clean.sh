@@ -79,9 +79,11 @@ fi
 
 CARME_DISTRIBUTED_FS=$(get_variable CARME_DISTRIBUTED_FS ${CONFIG_FILE})
 CARME_LOCAL_SSD_PATH=$(get_variable CARME_LOCAL_SSD_PATH ${CONFIG_FILE})
+CARME_TMPDIR=$(get_variable CARME_TMPDIR "${CONFIG_FILE}")
 
 [[ -z ${CARME_DISTRIBUTED_FS} ]] && die "CARME_DISTRIBUTED_FS not set"
 [[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
+[[ -z ${CARME_TMPDIR} ]] && die "CARME_TMPDIR not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -111,6 +113,14 @@ if [[ "${CARME_NODEID}" == "0" ]];then
   fi
 
 fi
+
+
+# delete job tmp folder
+if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)" ]];then
+  log "remove ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+  rm -r "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+fi
+
 
 # delete local scratch folder
 if [[ -n ${CARME_LOCAL_SSD_PATH} && -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
