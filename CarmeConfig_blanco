@@ -55,6 +55,11 @@ CARME_DISTRIBUTED_FS=""
 # define if there is a global distributed FS that can be used or not
 # allowed values are: yes | no
 
+CARME_TMPDIR="/tmp"
+# define the base directory for temporary files and folder inside a job
+# if you modify this variable make sure that the directory is available
+# on the compute nodes
+
 CARME_LOCAL_SSD_PATH=""
 # define if there is a local SSD available on the compute nodes
 # e.g. /scratch_for_jobs
