@@ -363,6 +363,9 @@ fi
 if [[ -d "${CARME_TMPDIR}" ]];then
   log "create job tmp directory ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
   mkdir "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+
+  log "change ownership of ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
 else
   die "cannot create tmp directory"
 fi
