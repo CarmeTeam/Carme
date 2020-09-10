@@ -196,14 +196,14 @@ MOUNTS=${MOUNTSTR//[_]/ }
 [[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
 if [[ -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
   log "using local SSD"
-  MOUNTS="${MOUNTS} -B \"${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD\""
+  MOUNTS="${MOUNTS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
 fi
 
 
 [[ -z ${CARME_TMPDIR} ]] && die "CARME_TMPDIR not set"
 if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)" ]];then
   log "using tmp dir ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
-  MOUNTS="${MOUNTS} -B \"${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname):/tmp\""
+  MOUNTS="${MOUNTS} -B ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname):/tmp"
 else
   die "no tmp directory found"
 fi
