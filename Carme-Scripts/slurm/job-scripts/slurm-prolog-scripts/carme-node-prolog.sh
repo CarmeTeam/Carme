@@ -367,7 +367,7 @@ if [[ -d "${CARME_TMPDIR}" ]];then
   log "change ownership of ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
 else
-  die "cannot create tmp directory"
+  die "cannot access CARME_TMPDIR=\"${CARME_TMPDIR}\" to create job tmp directory"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
