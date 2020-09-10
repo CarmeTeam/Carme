@@ -105,6 +105,7 @@ CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH "${CONFIG_FILE}")
 CARME_START_SSHD=$(get_variable CARME_START_SSHD "${CONFIG_FILE}")
 CARME_VERSION=$(get_variable CARME_VERSION "${CONFIG_FILE}")
 CARME_URL=$(get_variable CARME_URL "${CONFIG_FILE}")
+CARME_TMPDIR=$(get_variable CARME_TMPDIR "${CONFIG_FILE}")
 
 [[ -z ${CARME_DISTRIBUTED_FS} ]] && die "CARME_DISTRIBUTED_FS not set"
 [[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
@@ -115,6 +116,7 @@ CARME_URL=$(get_variable CARME_URL "${CONFIG_FILE}")
 [[ -z ${CARME_START_SSHD} ]] && die "CARME_START_SSHD not set"
 [[ -z ${CARME_VERSION} ]] && die "CARME_VERSION not set"
 [[ -z ${CARME_URL} ]] && die "CARME_URL not set"
+[[ -z ${CARME_TMPDIR} ]] && die "CARME_TMPDIR not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -166,9 +168,6 @@ if [[ "${CARME_NODEID}" == "0" ]];then
   log "create ${JOBDIR}"
   mkdir -p "${JOBDIR}" || die "cannot create ${JOBDIR}"
 
-  log "create ${JOBDIR}/tmp"
-  mkdir -p "${JOBDIR}/tmp" || die "cannot create ${JOBDIR}/tmp"
-
   log "create ${JOBDIR}/tensorboard"
   mkdir -p "${JOBDIR}/tensorboard" || die "cannot create ${JOBDIR}/tensorboard"
 
@@ -197,10 +196,7 @@ export CARME_SSHDIR=${JOBDIR}/ssh
 export CARME_PORTSDIR=${JOBDIR}/ports
 export CARME_JUPYTERLAB_WORKSPACESDIR=${JUPYTERLAB_WORKSPACESDIR}
 export CARME_TBDIR=${JOBDIR}/tensorboard
-export CARME_TMP=${JOBDIR}/tmp
-export TMPDIR=${JOBDIR}/tmp
-export TMP=${JOBDIR}/tmp
-export TEMP=${JOBDIR}/tmp
+export CARME_TMPDIR=${CARME_TMPDIR}
 
 
 # CARME specific exports -----------------------------------------------------------------------------------------------------------
@@ -359,6 +355,19 @@ PermitUserEnvironment no
   log "change ownership of ${JOBDIR}"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JOBDIR}"
 
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# create a tmp folder for this job -------------------------------------------------------------------------------------------------
+if [[ -d "${CARME_TMPDIR}" ]];then
+  log "create job tmp directory ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+  mkdir "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+
+  log "change ownership of ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+else
+  die "cannot access CARME_TMPDIR=\"${CARME_TMPDIR}\" to create job tmp directory"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
