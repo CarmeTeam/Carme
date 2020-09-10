@@ -48,36 +48,35 @@ function log () {
 
 # define function to get new ports for entry points --------------------------------------------------------------------------------
 # usage: get_free_port "PORT_START" "PORT_END" "VARIABLE_FOR_PORT_TO_BE_SET"
+# NOTE: make sure that the range (PORT_END - PORT_START) is a power of 2 and not smaller than 1024!
 function get_free_port () {
+  local TRIES
+  TRIES=()
+
   for ((i=1;i<=10;i++)); do
 
     local NEW_PORT
-    local RANDOM
-    local NANOSECS
-    local SECS
-    local MINUTES
-    local HOURS
-    local MONTH
+    local SEED
 
-    NANOSECS="$(( 10#$(date +%5N) + 1 ))"
-    SECS="$(( 10#$(date +%S) + 1 ))"
-    MINUTES="$(( 10#$(date +%M) + 1 ))"
-    HOURS="$(( 10#$(date +%H) + 1 ))"
-    MONTH="$(( 10#$(date +%m) + 1 ))"
-    RANDOM="$(( NANOSECS * SECS * MINUTES * HOURS * MONTH ))"
-    NEW_PORT="$(( (RANDOM % (${2} - ${1})) + ${1} ))"
+    SEED="$(od -An -N4 -t u4 < /dev/urandom)"
+    NEW_PORT="$(( SEED % (${2} - ${1}) + ${1} ))"
+    TRIES+=("${NEW_PORT} (seed ${SEED})")
 
     if ! ss -tln -4 | grep -q "${NEW_PORT}"
     then
       echo "export ${3}=${NEW_PORT}" >> "${JOBDIR}/ports/$(hostname)"
       log "${3}: ${NEW_PORT}"
-      local __PORT=${3}
-      eval $__PORT="'${NEW_PORT}'"
+      export ${3}=${NEW_PORT}
       break
     fi
 
     if [[ "${i}" -eq "10" ]];then
-      die "no free ${3} found after trying 10 times!"
+      echo ""
+      echo "tried 10 times to find a free port but failed"
+      for TRY in "${TRIES[@]}";do
+        echo "${TRY}"
+      done
+      die "no free ${3}"
     fi
   done
 }
@@ -214,18 +213,6 @@ export CARME_JOB_GPUS=${SLURM_JOB_GPUS}
 " > "${JOBDIR}/bashrc"
 
 
-  #determine jupyterlab port
-  get_free_port "6000" "7000" "NB_PORT"
-
-
-  #determine theia-ide port
-  get_free_port "7001" "8000" "TA_PORT"
-
-
-  #determine tensorboard port
-  get_free_port "8001" "9000" "TB_PORT"
-
-
   # create ssh stuff if needed
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
 
@@ -284,6 +271,15 @@ fi
 
 # do only once on master node ------------------------------------------------------------------------------------------------------
 if [[ "$(hostname)" == "${MASTER_NODE}" ]];then
+
+  #determine jupyterlab port
+  get_free_port "6000" "7000" "NB_PORT"
+
+  #determine theia-ide port
+  get_free_port "7001" "8000" "TA_PORT"
+
+  #determine tensorboard port
+  get_free_port "8001" "9000" "TB_PORT"
 
   # get IP of master node and create hash
   IPADDR="$(ip route get "${CARME_GATEWAY}" | head -1 | awk '{print $5}' | cut -d/ -f1)"
