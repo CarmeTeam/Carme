@@ -62,7 +62,9 @@ source "${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/bashrc" || die "cannot so
 
 
 #source job ports ------------------------------------------------------------------------------------------------------------------
-source "${CARME_JOBDIR}/ports/$(hostname)" || die "cannot source job ports"
+if [[ "$(hostname)" == "${CARME_MASTER}" || ("${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1")) ]];then
+  source "${CARME_JOBDIR}/ports/$(hostname)" || die "cannot source job ports"
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
