@@ -1,4 +1,4 @@
-<!---
+{% comment %}
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
@@ -10,99 +10,16 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
--->
+{% endcomment %}
+
 {% load static %}
-<HTML>
-								<head>
-																<link rel="stylesheet" type="text/css" href="{% static "home.css" %}"> 
-								</head>
-								<Body>
-																<div>
-																								<h3>
-																																<img src="{% static "schedule.jpg" %}" alt="" style="width:1.1em;"/>
-																																Jobs  
-																								</h3>
-																</div>
-																{% if slurm_list_user %}
 
-																<table class="JobTable">
-																								<thead>
-																								<tr >
-																																<td><b>Slurm-ID</b></td>
-																																<td><b>Job-Name</b></td>
-																																<td><b>#(nodes)</b></td>
-																																<td><b>GPU-Type</b></td>
-																																<td><b>#(GPUs)</b></td>
-																																<td><b>IMAGE</b></td>
-																																<td><b>Status</b></td>
-																																<td ><b>Entry Points</b></td>
-																																<td><b>Job-Info</b></td>
-																																<td><b>Stop</b></td>
-																								</tr>
-																								</thead>
-																								{% for job in slurm_list_user %}
-																								<tr valign=middle>
-																																{% if job.status == 'running' %}
-																																<td>{{ job.slurm_id }}</td>
-																																<td>{{ job.name }}</td>
-																																<td>{{ job.num_nodes }}</td>
-																																<td>{{ job.gpu_type }}</td>
-																																<td>{{ job.num_gpus }}</td>
-																																<td>{{ job.image_name }}</td>
-																																<td><div style="border-radius: 5px; background-color: green; padding: 10px 2px;" >{{ job.status }}</div></td>
-																																<td>
-																																{% if job.image_name|slice:":10" == 'Base_image' or job.image_name|slice:":9" == 'Benchmark' %}
-																																<!-- <a href="/ta_{{ job.HASH }}/" data-title="{{job.jobName}}" target="_new"><img src="{% static "theia.jpg" %}" alt="" height=40/></A> -->
-																																<a href="/ta_{{ job.url_suffix }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "theia.jpg" %}" alt="" style="height:3em;"/></a>
-																																{% endif %}
-																																<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "jupyter.png" %}" alt="" style="height:3em;"/></a>
-																																<a href="/tb_{{ job.url_suffix }}/" onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="" style="height:3em;"/></a>
-																																<!-- {% if job.NumGPUs > 1 %}
-																																<a href="/dd_{{ job.HASH }}/status" data-title="{{job.jobName}}"  target="_new"><img src="{% static "dask-logo.svg" %}" alt="" height=40/></A>
-																																</td>
-																																{% endif %} -->
-																																</td>
-																																<td>
-																																								<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}
-																																																<input type="hidden" name="jobID" value="{{job.slurm_id}}"> 	
-																																																<input type="image" src="{% static "info.jpg" %}" alt="" style="width:2.5em;" />
-																																								</form>
-																																</td>
-																																<td>
-																																								<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}
-																																																<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-																																																<input type="hidden" name="jobName" value="{{job.name}}">
-																																																<input type="hidden" name="jobUser" value="{{job.user}}">
-																																																<input type="image" src="{% static "stop.jpg" %}" alt="" style="width:2.5em;" />
-																																								</form>
-																																</td>
-																																{% else %}
-																																<td>{{ job.slurm_id }}</td>
-																																<td>{{ job.name }}</td>
-																																<td>{{ job.num_nodes }}</td>
-																																<td>{{ job.gpu_type }}</td>
-																																<td>{{ job.num_gpus }}</td>
-																																<td>{{ job.image_name }}</td>
-																																<td > <div style="border-radius: 5px; background-color: red; padding: 10px 2px;" >{{ job.status }} </div></td>
-																																<td>---</td>
-																																<td>---</td>
-																																<td>
-																																								<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}
-																																																<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-																																																<input type="hidden" name="jobName" value="{{job.name}}">
-																																																<input type="hidden" name="jobUser" value="{{job.user}}">	
-																																																<input type="image" src="{% static "stop.jpg" %}" alt="" style="width:2.5em;" />
-																																								</form>
+<!doctype html>
+<html lang="en">
 
-																																</td>
-																																{% endif %}
-																								</tr>
+<head></head>
+<body>
+	{% include "blocks/job_table.html" %}
+</body>
 
-																								{% endfor %}
-																</table>
-																{% else %}
-																<br>
-																No jobs in queue ..
-																{% endif %}
-								</body>
 </html>

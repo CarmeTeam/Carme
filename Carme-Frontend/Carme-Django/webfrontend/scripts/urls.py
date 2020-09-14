@@ -9,7 +9,7 @@ from django.conf import settings
 urlpatterns = [
     url(r'^', include('carme-base.urls'), name='home'),
     url(r'^login/$', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    url(r'^logout/$', auth_views.LogoutView.as_view(template_name='logged_out.html'), name='logout'),
+    url(r'^logout/$', include('carme-base.urls'), name='logout'),
     path('carme-base/', include('carme-base.urls')),
     url(r'^notifications/', include('django_nyt.urls')),
     url(r'^wiki/', include('wiki.urls')),

@@ -15,78 +15,80 @@
 
 {% extends 'base.html' %}
 {% load static %}
-{% load staticfiles %}
 {% load timetags %}
 {% block title %}Carme Home{% endblock %}
 {% block content %}
 
 {% include "blocks/java_scripts.html" %}
 {% if user.is_authenticated %}
-<div class="main-container">
-								<h3>Slurm Stats for user: <b>{{ user.username }} [{{uID}}]</b></h3>
-								<table> 
-																<tr>
-																								<td width=300><b>Total GPU hours used:</b></td>
-																								<td width=100>{{job_time}}</td> 
-																								<td width=200><b>Partitions:</b></td>
-																								<td width=500>{{partitions}}</td>
-																</tr> 
-																<tr>
-																								<td><b>Max jobs in queue:</b></td>
-																								<td>no limit</td>
-																								<td><b>Max jobs running:</b></td>
-																								<td>{{ max_jobs }}</td>
-																</tr> 
-																<tr>
-																								<td><b>Max GPUs:</b></td>
-																								<td>{{ max_gpus }}</td>  
-																								<td><b>Max nodes:</b></td>
-																								<td>{{ max_nodes }}</td>  
-																</tr>  
-								</table>   
+<div class="container">
+	<div class="card mt-4">
+		<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Slurm statistics</div>
+		<div class="card-body">
+			<div class="container">
+				<dl class="row mb-0">
+					<dt class="col-md-3">Total GPU hours used</dt>
+					<dd class="col-md-3">{{job_time}}</dd>
+
+					<dt class="col-md-3">Partitions</dt>
+					<dd class="col-md-3">{{partitions}}</dd>
+
+					<dt class="col-md-3">Max jobs in queue</dt>
+					<dd class="col-md-3">no limit</dd>
+
+					<dt class="col-md-3">Max jobs running</dt>
+					<dd class="col-md-3">{{ max_jobs }}</dd>
+
+					<dt class="col-md-3">Max GPUs</dt>
+					<dd class="col-md-3">{{ max_gpus }}</dd>
+
+					<dt class="col-md-3">Max nodes</dt>
+					<dd class="col-md-3">{{ max_nodes }}</dd>
+				</dl>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mt-4">
+		<div class="card-header font-weight-bold"><i class="fa fa-history fa-fw" aria-hidden="true"></i>&nbsp; Job history</div>
+		<div class="card-body">
+			{% if myjobhist %}
+			<table class="table mb-0">
+				<thead>
+					<tr>
+						<th scope="col">Slurm-ID</th>
+						<th scope="col">Name</th>
+						<th scope="col">Partition</th>
+						<th scope="col">Submitted</th>
+						<th scope="col">Ended</th>
+						<th scope="col">Exit code</th>
+						<th scope="col">Cores</th>
+						<th scope="col">Memory</th>
+						<th scope="col">Nodes</th>
+					</tr>
+				</thead>
+				<tbody class="text-center">
+					{% for job in myjobhist %}
+					<tr>
+						<th class="align-middle" scope="row">{{ job.id_job }}</th>
+						<td class="align-middle">{{ job.job_name }}</td>
+						<td class="align-middle">{{ job.partition }}</td>
+						<td class="align-middle">{{ job.time_submit | print_timestamp }}</td>
+						<td class="align-middle">{{ job.time_end | print_timestamp}}</td>
+						<td class="align-middle">{{ job.exit_code }}</td>
+						<td class="align-middle">{{ job.cpus_req }}</td>
+						<td class="align-middle">{{ job.mem_req }}</td>
+						<td class="align-middle">{{ job.nodelist }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<p>Table shows the last 20 jobs.</p>
+			{% endif %}
+		</div>
+	</div>
 </div>
-<BR>
-<div class="main-container"> 
-																<h3> Job History </h3>
-																{% if myjobhist %}
-																<table class="JobHistTable">
-																								<thead>
-																								<tr>
-																																<td width=50><b>Id</b></td>
-																																<td width=100><b>Name</b></td>
-																																<td width=150><b>Partition</b></td>	
-																																<td width=220><b>Submitted</b></td>
-																																<td width=220><b>Ended</b></td>
-																																<td><b>Exit Code</b></td>
-																																<td><b>Cores</b></td>
-																																<td><b>Memory</b></td> 
-																																<td><b>Nodes</b></td>
-																								</tr>
-																								</thead>
-																								{% for job in myjobhist %}
-																								<tr>
-																																<td> {{ job.id_job }}</td>
-																																<td> {{ job.job_name }}</td>
-																																<td> {{ job.partition }}</td> 
-																																<td> {{ job.time_submit | print_timestamp }}</td>
-																																<td>	{{ job.time_end | print_timestamp}}</td>
-																																<td align="center"> {{ job.exit_code }}</td>
-																																<td align="center"> {{ job.cpus_req }}</td>
-																																<td> {{ job.mem_req }}</td>
-																																<td> {{ job.nodelist }}</td>
-																								</tr>
-																								{% endfor %}
-																</table>
-																<BR>
-																Table shows the last 20 jobs.
-</div>
-<BR>
-{% endif %}
-{% if user.is_superuser %}
-{% include "blocks/admin_footer.html" %}  
-<BR>  
-{% endif %}
-{% include "blocks/footer.html" %}
+
 {% else %}
 <h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
 Cluster Access is ristricted to authorized users.<BR><BR>

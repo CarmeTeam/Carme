@@ -15,22 +15,88 @@
 {% load static %}
 {% if user.is_authenticated %}
 <div>
-								<h3>
-																<img src="{% static "play.jpg" %}" style="width:1.1em;"/> 
-																Start new Job:
-								</h3>
+	<h3>
+		<img src="{% static "play.jpg" %}" style="width:1.1em;" />
+		Start new Job:
+	</h3>
 </div>
-<div class="start-job"> 
-								<form class="ajax" action="/carme-base/StartJob/" method="post">
-																{% csrf_token %}
-																{{ start_job_form }}
-																<input type="submit" value="">
-								</form>
-</div> 
+<div class="start-job">
+	<form class="form ajax" action="/carme-base/StartJob/" method="post">
+		{% csrf_token %}
+		{{ start_job_form }}
+
+		<div class="form-row">
+			<div class="col">
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-sizing-default">#(nodes)</span>
+					</div>
+					<select class="custom-select">
+						<option>1</option>
+						<option>2</option>
+						<option>3</option>
+						<option>4</option>
+						<option>5</option>
+						<option>6</option>
+						<option>7</option>
+						<option>8</option>
+						<option>9</option>
+						<option>10</option>
+					</select>
+				</div>
+			</div>
+			<div class="col">
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-sizing-default">GPU-Type</span>
+					</div>
+					<select class="custom-select">
+						<option>GTX 1080 Ti</option>
+						<option>Tesla V100</option>
+					</select>
+				</div>
+			</div>
+			<div class="col">
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-sizing-default">GPUs/Node</span>
+					</div>
+					<select class="custom-select">
+						<option>1</option>
+						<option>2</option>
+						<option>3</option>
+						<option>4</option>
+					</select>
+				</div>
+			</div>
+			<div class="col">
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-sizing-default">Image</span>
+					</div>
+					<select class="custom-select">
+						<option>Base</option>
+					</select>
+				</div>
+			</div>
+			<div class="col">
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-sizing-default">Name</span>
+					</div>
+					<input type="text" class="form-control" aria-label="Sizing example input"
+						aria-describedby="inputGroup-sizing-default">
+				</div>
+			</div>
+			<div class="col">
+				<button class="btn btn-primary" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
+			</div>
+		</div>
+
+	</form>
+</div>
 {% else %}
 <h3>{{ settings.CARME_FRONTEND_TITLE }}</h3>
 Cluster Access is ristricted to authorized users.<BR><BR>
 Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
 {% endif %}
-
-

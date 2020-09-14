@@ -1,181 +1,293 @@
-<!---
-								# ---------------------------------------------- 
-								# Carme
-								# ----------------------------------------------
-								# home.html                                                                                                                                                                      
-								#               
-								# see Carme development guide for documentation: 
-								# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
-								#
-								# Copyright 2019 by Fraunhofer ITWM  
-								# License: http://open-carme.org/LICENSE.md 
-								# Contact: info@open-carme.org
-								# ---------------------------------------------
--->
-
 {% extends 'base.html' %}
+{% comment %}
+# ----------------------------------------------
+# Carme
+# ----------------------------------------------
+# home.html
+#
+# see Carme development guide for documentation:
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM
+# License: http://open-carme.org/LICENSE.md
+# Contact: info@open-carme.org
+# ---------------------------------------------
+{% endcomment %}
+
 {% load static %}
-{% load staticfiles %} 
 {% block title %}Carme Home{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+<script type="text/javascript">
+	$.get('{% url 'line_chart_json' %}',
+		function (data) {
+			//Chart.defaults.global.defaultFontSize = '12';
+			var ctx = $("#myChart").get(0).getContext("2d");
+			new Chart(ctx, {
+				type: 'line',
+				data: data,
+				options: {
+					scales: {
+						xAxes: [{
+							ticks: {
+								display: true //this will remove only the label
+							},
+							scaleLabel: {
+								labelString: 'time',
+								display: false
+							}
+
+						}],
+						yAxes: [{
+							stacked: true,
+							scaleLabel: {
+								labelString: '#GPUs (stacked)',
+								display: true
+							}
+
+						}]
+					},
+					elements: {
+						line: {
+							tension: 1, // disables bezier curves
+						}
+					},
+					responsive: true,
+					maintainAspectRatio: false
+				}
+			});
+		});
+</script>
+<script type="text/javascript">
+	if (!$) console.error('jQuery is required!');
+	else {
+		function update_content(url, id) {
+			var elem = document.getElementById(id);
+
+			if (!elem) return console.error('No element found to update content!');
+
+			$.get(url, function (data) {
+				var timeout_reg = /Session time out!/gmi;
+				var timeout_match = timeout_reg.exec(data);
+
+				if (timeout_match) {
+					return window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+				}
+
+				var content_reg;
+
+				if (id == 'messages' || id == 'jobtable') {
+					content_reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
+				} else if (id == 'news') {
+					content_reg = /<div class="wiki-article">([\S\s]*?)(?:<\/div>)/gmi;
+				}
+
+				var match = content_reg.exec(data);
+
+				if (!match) return console.error('No match in ajax response to update content!');
+
+				elem.innerHTML = match[1];
+			});
+		}
+
+		function update_jobtable() {
+			$.get('/carme-base/JobTable/', function(data) {
+				var content_reg = /<tbody.*?>([\S\s]*?)(?:<\/tbody>)/gmi;
+				var match = content_reg.exec(data);
+
+				if(match && match.length > 1) {
+					var entries = $(match[1]).filter('tr');
+
+					entries.each(function( index ) {
+						var jobid = $(this).data('jobid');
+						//console.log(jobid);
+						var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
+						//console.log(existing);
+
+						if(existing.length > 0) {
+							if($(this).text() == existing.text()) {
+								// update csrf
+								var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
+									existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
+									$(this).val(newTokens[index].value);
+								});
+							} else {
+								$(this).replaceAll(existing);
+							}
+						} else {
+							$('#jobtable').append($(this));
+						}
+
+						//console.log( index + ": " + $( this ).text() );
+					});
+
+					//var a = $(entries[0]).find('input[name="csrfmiddlewaretoken"]').remove();
+					//var b = $($('#jobtable').children()[0]).find('input[name="csrfmiddlewaretoken"]').remove();
+
+					//console.log(a == b);
+
+					//console.log(entries[0]);
+					//console.log($('#jobtable').children()[0]);;
+					//console.log($(entries[0]).text() == $($('#jobtable').children()[0]).text());
+					//console.log(entries[0].isEqualNode($('#jobtable').children()[0]));
+				}
+			});
+		}
+
+		//update_content('/carme-base/JobTable/', 'jobtable');
+		//update_jobtable();
+		update_content('/carme-base/Messages/', 'messages');
+		update_content('/wiki/cluster_news/', 'news');
+
+		setInterval(function () {
+			//update_jobtable();
+			//update_content('/carme-base/JobTable/', 'jobtable');
+			//update_content('/carme-base/Messages/', 'messages');
+		}, 2000);
+
+		$(document).on('submit', 'form.ajax', function (event) {
+			// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
+			event.preventDefault(); //prevent default action
+
+			var post_url = $(this).attr("action"); //get form action url
+			var request_method = $(this).attr("method"); //get form GET/POST method
+			var form_data = $(this).serialize(); //Encode form elements for submission
+
+			$.ajax({
+				url: post_url,
+				type: request_method,
+				data: form_data
+			}).fail(function () {
+				console.error('Request to ' + post_url + ' failed. Please try again.');
+			}).always(function () {
+				update_content('/carme-base/JobTable/', 'jobtable');
+				update_content('/carme-base/Messages/', 'messages');
+			});
+		});
+	}
+</script>
+{% endblock %}
+
 {% block content %}
 
 <!-- <meta http-equiv="refresh" content="60" /> -->
 {% if user.is_authenticated %}
 
 {% include "blocks/maintenance.html" %}
-<div class="double-container">
-								<div class="news-container">
-																<div>
-																								<h3>
-																																<img src="{% static "info.jpg" %}" style="width:1.1em;"/>
-																																Cluster News
-																								</h3>
-																</div>
-																<div id="news" style="height: 200px; border: 0px solid #D5CC5A; overflow-y: scroll; margin: 15px auto; "></div>
+<div class="container">
+	<div class="card-deck mt-4">
+		<div class="card mb-4">
+			<div class="card-header font-weight-bold"><i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i>&nbsp; News</div>
+			<div class="card-body" id="news">
+				
+			</div>
+		</div>
+		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
+		<div class="card mb-4">
+			<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Status</div>
+			<div class="card-body" style="height: 250px;">
+				<canvas id="myChart"></canvas>
+			</div>
+		</div>
+		<div class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
+		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
+		<div class="card mb-4">
+			<div class="card-header font-weight-bold"><i class="fa fa-envelope-o fa-fw" aria-hidden="true"></i>&nbsp; Messages</div>
+			<div class="card-body" style="height: 250px; overflow-y: scroll;">
+				<div id="messages"class="card-text"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row mt-2">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; Jobs</div>
+				<div class="card-body">
+					<form class="form ajax" action="{% url 'start_job' %}" method="post">
+						{% csrf_token %}
+						<div class="form-row">
+							<div class="col">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span>
+									</div>
+									<select name="{{ start_job_form.nodes.html_name }}" class="custom-select">
+										{% for choice in start_job_form.nodes.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
 								</div>
-								<div class="double-space"></div>
-								<div class="news-container">
-																<div >
-																								<h3>
-																																<img src="{% static "status2.jpg" %}" style="width:1.1em;"/> 
-																																Status 
-																								</h3>
-																								<div class="chart-container" style="position: relative; height:15vh; width:20vw"> 							
-																																<canvas id="myChart" ></canvas>
-																								</div> 
-																								<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
-																								<script type="text/javascript"> 
-$.get('{% url 'line_chart_json' %}', function(data) {
-								var ctx = $("#myChart").get(0).getContext("2d");  
-								new Chart(ctx, { 
-																type: 'line', data: data, 
-																options: {
-																								scales: {
-																																xAxes: [{
-																																								ticks: {
-																																																display: true //this will remove only the label
-																																								},
-																																								scaleLabel: { 
-																																																labelString: 'time',
-																																																display: false
-																																								}
-
-																																}],
-																																yAxes: [{
-																																								stacked: true,
-																																								scaleLabel: {
-																																														labelString: '#GPUs (stacked)',
-																																														display: true
-																																								}
-
-																																}]							
-																								},
-																								elements: {
-																																line: {
-																																								tension: 1, // disables bezier curves
-																																								}
-																										        }
-
-																}	
-								});      
-});
-																								</script>   
-																</div>
-
+							</div>
+							<div class="col">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
+									</div>
+									<select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select">
+										{% for choice in start_job_form.gpu_type.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
 								</div>
-								<div class="double-space"></div>
-								<div class="news-container">
-																<div > 
-																								<h3> 
-																																<img src="{% static "warning.jpg" %}" style="width:1.1em;"/> 
-																																Messages   
-																								</h3> 
-																</div>
-															 <div id="messages" style="height: 200px; border: 0px solid #D5CC5A; overflow-y: scroll; margin: 15px auto; padding: 5px;"></div>
+							</div>
+							<div class="col">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
+									</div>
+									<select name="{{ start_job_form.gpus.html_name }}" class="custom-select">
+										{% for choice in start_job_form.gpus.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="col">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
+									</div>
+									<select name="{{ start_job_form.image.html_name }}" class="custom-select">
+										{% for choice in start_job_form.image.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="col">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
+									</div>
+									<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control" aria-label="Sizing example input"
+										aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
+								</div>
+							</div>
+							<div class="col">
+								<button class="btn btn-primary" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
+							</div>
+						</div>
 
-								</div>           
+					</form>
+					<div class="mt-2 table-responsive">
+						{% include "blocks/job_table.html" %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
 </div>
-<BR>
-<div class="main-container">
 
-								{% include "blocks/start_job.html" %} 
-								<div id="jobtable" style="border: 0px solid #D5CC5A; overflow: hidden; margin: 15px auto; "></div>
-</div>
-<BR>
-{% if user.is_superuser %}
-{% include "blocks/admin_footer.html" %} 
-<BR>  
-{% endif %}
-{% include "blocks/footer.html" %}
 {% else %}
 <div class="main-container">
-								<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
-								Cluster Access is ristricted to authorized users.<BR><BR>
-								Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
+	<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
+	Cluster Access is ristricted to authorized users.<BR><BR>
+	Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
 </div>
 {% endif %}
-
-<script type="text/javascript">
-if(!$) console.error('jQuery is required!');
-else {
-	function update_content(url, id) {
-		var elem = document.getElementById(id);
-
-		if(!elem) return console.error('No element found to update content!');
-
-		$.get(url, function(data) {
-			var timeout_reg = /Session time out!/gmi;
-			var timeout_match = timeout_reg.exec(data);
-
-			if(timeout_match) {
-				return window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
-			}
-			
-			var content_reg;
-
-			if(id == 'messages' || id == 'jobtable') {
-				content_reg = /<body>([\S\s]*?)(?:<\/body>)/gmi;
-			} else if(id == 'news') {
-				content_reg = /<div class="wiki-article">([\S\s]*?)(?:<\/div>)/gmi;
-			}
-
-			var match = content_reg.exec(data);
-
-			if(!match) return console.error('No match in ajax response to update content!');
-
-			elem.innerHTML = match[1];
-		});
-	}
-
-	update_content('/carme-base/JobTable/', 'jobtable');
-	update_content('/carme-base/Messages/', 'messages');
-	update_content('/wiki/cluster_news/', 'news');
-
-	setInterval(function() {
-		update_content('/carme-base/JobTable/', 'jobtable');
-		update_content('/carme-base/Messages/', 'messages');
-	}, 2000);
-
-	$(document).on('submit', 'form.ajax', function (event) {
-		// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
-		event.preventDefault(); //prevent default action
-
-		var post_url = $(this).attr("action"); //get form action url
-		var request_method = $(this).attr("method"); //get form GET/POST method
-		var form_data = $(this).serialize(); //Encode form elements for submission
-		
-		$.ajax({
-			url : post_url,
-			type: request_method,
-			data : form_data
-		}).fail(function(){
-			console.error('Request to ' + post_url + ' failed. Please try again.');
-		}).always(function() {
-			update_content('/carme-base/JobTable/', 'jobtable');
-			update_content('/carme-base/Messages/', 'messages');
-		});
-	});
-}
-</script>
 
 {% endblock %}
