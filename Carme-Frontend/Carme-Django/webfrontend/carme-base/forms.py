@@ -37,15 +37,15 @@ class StartJobForm(forms.Form):
         gpu_type_choices = kwargs.pop('gpu_type_choices')
         super(StartJobForm, self).__init__(*args, **kwargs)
         self.fields["nodes"] = forms.ChoiceField(
-            label=mark_safe('<strong>#(nodes)</strong>'), choices=node_choices)
-        self.fields["gpu-type"] = forms.ChoiceField(
-            label=mark_safe('<strong>GPU-Type</strong>'), choices=gpu_type_choices)
+            label="#(nodes)", choices=node_choices)
+        self.fields["gpu_type"] = forms.ChoiceField(
+            label="GPU-Type", choices=gpu_type_choices)
         self.fields["gpus"] = forms.ChoiceField(
-            label=mark_safe('<strong>GPUs/node</strong>'), choices=gpu_choices)
+            label="GPUs/node", choices=gpu_choices)
         self.fields["image"] = forms.ChoiceField(
-            label=mark_safe('<strong>IMAGE</strong>'), choices=image_choices)
-        self.fields["name"] = forms.CharField(label=mark_safe('<strong>Job-Name</strong>'))
-        self.fields["name"].initial = str('My Job')
+            label="Image", choices=image_choices)
+        self.fields["name"] = forms.CharField(label="Name")
+        self.fields["name"].initial = "My Job"
 
 """ stop jobs
 

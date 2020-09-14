@@ -15,95 +15,187 @@
 
 {% extends 'base.html' %}
 {% load static %}
-{% load staticfiles %} 
 {% block title %}Carme Home{% endblock %}
 {% block content %}
 
 {% include "blocks/java_scripts.html" %}
 {% if user.is_authenticated %}
-<div class="main-container">
-								<h2>Admin View: All Running Jobs</h2>
-
-								{% if user.is_superuser %}
-								{% if slurm_list %}
-								<table class="JobHistTable">
-																<thead>
-																<tr>
-																								<td><b>User</b></td>
-																								<td><b>JobID</b></td>
-																								<td><b>Job Name</b></td>
-																								<td align="center"><b>#(Nodes)</b></td>
-																								<td><b>Master</b></td>
-																								<td><b>GPU Type</b></td>
-																								<td><b>#(GPUs)</b></td>
-																								<td><b>IMAGE</b></td>
-																								<td><b>Entry Points</b></td>
-																								<td><b>Info</b></td>
-																								<td><b>Stop</b></td>
-																</tr>
-																</thead>
-																{% for job in slurm_list %}
-																<tr>
-																								<td>{{job.user}}</td><td align="center">{{job.slurm_id}}</td><td align="center">{{job.name}}</td><td align="center">{{ job.num_nodes }}</td><td align="center">{{ job.ip }}</td><td align="center">{{ job.gpu_type }}</td><td align="center">{{ job.num_gpus }}</td><td>{{ job.image_name }}</td>
-																								<td>
-																																<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" target="_new"><img src="{% static "jupyter.png" %}" alt="Jupyter" height=40/></A>                                                     
-																																<a href="/tb_{{ job.url_suffix }}/" target="_new"><img src="{% static "tensorflow.jpg" %}" alt="TensorBoard" height=40/></A>  
-																								</td>
-																								<td>
-																																<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}{{ job_info_form }}
-																																								<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-																																								<input type="image" src="{% static "info.jpg" %}" alt="Job Info" width=40 />  
-																																</form>
-																								</td>             											   
-																								<td>
-																																<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
-																																								<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-																																								<input type="hidden" name="jobName" value="{{job.name}}">
-																																								<input type="hidden" name="jobUser" value="{{job.user}}">
-																																								<input type="image" src="{% static "stop.jpg" %}" alt="Stop" width=40 />
-																																</form>
-																								</td>
-																</tr>
-																{% endfor %}
-								</table>
-								{% else %}
-								No jobs.
-								{% endif %}
+<div class="container">
+	<div class="row mt-2">
+		<div class="col-12 mt-4">
+			<div class="card">
+				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; All jobs</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table mb-0">
+							<thead>
+								<tr>
+									<th scope="col">Slurm-ID</th>
+									<th scope="col">User</th>
+									<th scope="col">Name</th>
+									<th scope="col">#(nodes)</th>
+									<th scope="col">Master</td>
+									<th scope="col">GPU-Type</th>
+									<th scope="col">#(GPUs)</th>
+									<th scope="col">IMAGE</th>
+									<th scope="col">Status</th>
+									<th scope="col">Entry Points</th>
+									<th scope="col">Details</th>
+									<th scope="col">Stop</th>
+								</tr>
+							</thead>
+							<tbody id="jobtable" class="text-center">
+								{% for job in slurm_list %}
+								<tr data-jobid="{{ job.slurm_id }}">
+									<th class="align-middle" scope="row">{{ job.slurm_id }}</th>
+									<td class="align-middle">{{job.user}}</td>
+									<td class="align-middle">{{ job.name }}</td>
+									<td class="align-middle">{{ job.num_nodes }}</td>
+									<td class="align-middle">{{ job.ip }}</td>
+									<td class="align-middle">{{ job.gpu_type }}</td>
+									<td class="align-middle">{{ job.num_gpus }}</td>
+									<td class="align-middle">{{ job.image_name }}</td>
+									<td class="text-center align-middle">
+										{% ifequal job.status "running" %}
+											<i class="fa fa-check fa-2x fa-fw text-success"></i>
+											<span class="sr-only">Running</span>
+										{% else %}
+											<i class="fa fa-cog fa-spin fa-2x fa-fw text-secondary"></i>
+											<span class="sr-only">Queued</span>
+										{% endifequal %}
+									</td>
+									<td class="text-center align-middle">
+										{% ifequal job.status 'running' %}
+											<a href="/ta_{{ job.url_suffix }}/"
+												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
+												target="_blank"><img src="{% static "theia.svg" %}" alt="TheiaIDE" style="width: 48px; height: 48px;" /></a>
+											<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
+												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
+												target="_blank"><img src="{% static "jupyter.svg" %}" alt="JupyterLab" style="width: 48px; height: 48px;" /></a>
+											<a href="/tb_{{ job.url_suffix }}/"
+												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
+												target="_blank"><img src="{% static "tensorflow.svg" %}" alt="TensorBoard" style="width: 48px; height: 48px;" /></a>
+										{% else %}
+											---
+										{% endifequal %}
+									</td>
+									<td class="text-center align-middle">
+										{% ifequal job.status 'running' %}
+										<form action="/carme-base/JobInfo/" method="post" target="_blank">
+											{% csrf_token %}
+											<input type="hidden" name="jobID" value="{{job.slurm_id}}">
+											<button class="btn btn-secondary" type="submit"><i class="fa fa-info fa-fw" aria-hidden="true"></i></button>
+										</form>
+										{% else %}
+											---
+										{% endifequal %}
+									</td>
+									<td class="align-middle">
+										<form class="ajax" action="/carme-base/StopJob/" method="post">
+											{% csrf_token %}
+											<input type="hidden" name="jobID" value="{{job.slurm_id}}">
+											<input type="hidden" name="jobName" value="{{job.name}}">
+											<input type="hidden" name="jobUser" value="{{job.user}}">
+											<button class="btn btn-primary" type="submit"><i class="fa fa-stop fa-fw" aria-hidden="true"></i></button>
+										</form>
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			{% if user.is_superuser %}
+			{% if slurm_list %}
+			<!--<table class="JobHistTable">
+				<thead>
+					<tr>
+						<td><b>User</b></td>
+						<td><b>JobID</b></td>
+						<td><b>Job Name</b></td>
+						<td align="center"><b>#(Nodes)</b></td>
+						<td><b>Master</b></td>
+						<td><b>GPU Type</b></td>
+						<td><b>#(GPUs)</b></td>
+						<td><b>IMAGE</b></td>
+						<td><b>Entry Points</b></td>
+						<td><b>Info</b></td>
+						<td><b>Stop</b></td>
+					</tr>
+				</thead>
+				{% for job in slurm_list %}
+				<tr>
+					<td>{{job.user}}</td>
+					<td align="center">{{job.slurm_id}}</td>
+					<td align="center">{{job.name}}</td>
+					<td align="center">{{ job.num_nodes }}</td>
+					<td align="center">{{ job.ip }}</td>
+					<td align="center">{{ job.gpu_type }}</td>
+					<td align="center">{{ job.num_gpus }}</td>
+					<td>{{ job.image_name }}</td>
+					<td>
+						<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" target="_new"><img
+								src="{% static "jupyter.png" %}" alt="Jupyter" height=40 /></A>
+						<a href="/tb_{{ job.url_suffix }}/" target="_new"><img src="{% static "tensorflow.jpg" %}"
+								alt="TensorBoard" height=40 /></A>
+					</td>
+					<td>
+						<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}{{ job_info_form }}
+							<input type="hidden" name="jobID" value="{{job.slurm_id}}">
+							<input type="image" src="{% static "info.jpg" %}" alt="Job Info" width=40 />
+						</form>
+					</td>
+					<td>
+						<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
+							<input type="hidden" name="jobID" value="{{job.slurm_id}}">
+							<input type="hidden" name="jobName" value="{{job.name}}">
+							<input type="hidden" name="jobUser" value="{{job.user}}">
+							<input type="image" src="{% static "stop.jpg" %}" alt="Stop" width=40 />
+						</form>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>-->
+			{% else %}
+			No jobs.
+			{% endif %}
+		</div>
+	</div>
 </div>
-<script type="text/javascript">
-if(!$) console.error('jQuery is required!');
-else {
-	$(document).on('submit', 'form.ajax', function (event) {
-		// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
-		event.preventDefault(); //prevent default action
-
-		var post_url = $(this).attr("action"); //get form action url
-		var request_method = $(this).attr("method"); //get form GET/POST method
-		var form_data = $(this).serialize(); //Encode form elements for submission
-		
-		$.ajax({
-			url : post_url,
-			type: request_method,
-			data : form_data
-		}).fail(function(){
-			console.error('Request to ' + post_url + ' failed. Please try again.');
-		}).always(function() {
-			setTimeout(function() {
-				document.location.reload();
-			}, 1000);
-		});
-	});
-}
-</script>
-<BR>
-{% include "blocks/admin_footer.html" %}  
-<BR> 
 {% endif %}
-{% include "blocks/footer.html" %}
 {% else %}
 <h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
 Cluster Access is ristricted to authorized users.<BR><BR>
 Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
 {% endif %}
 
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+	if (!$) console.error('jQuery is required!');
+	else {
+		$(document).on('submit', 'form.ajax', function (event) {
+			// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
+			event.preventDefault(); //prevent default action
+
+			var post_url = $(this).attr("action"); //get form action url
+			var request_method = $(this).attr("method"); //get form GET/POST method
+			var form_data = $(this).serialize(); //Encode form elements for submission
+
+			$.ajax({
+				url: post_url,
+				type: request_method,
+				data: form_data
+			}).fail(function () {
+				console.error('Request to ' + post_url + ' failed. Please try again.');
+			}).always(function () {
+				setTimeout(function () {
+					//document.location.reload();
+				}, 1000);
+			});
+		});
+	}
+</script>
 {% endblock %}

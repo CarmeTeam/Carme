@@ -20,6 +20,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
 from django.contrib import messages as dj_messages
 from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -113,10 +114,13 @@ def index(request):
         lastStat = None
     
     if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
-        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"]) 
+        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
+
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
 
     # render template
     context = {
+        'slurm_list_user': slurm_list_user,
         'start_job_form': startForm,
         'CARME_VERSION': settings.CARME_VERSION,
         'DEBUG': settings.DEBUG,
@@ -131,7 +135,7 @@ def admin_job_table(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     # get all jobs
-    slurm_list = SlurmJobs.objects.all()
+    slurm_list = SlurmJobs.objects.order_by("-slurm_id")
     numjobs = len(slurm_list)
     jobheight = calculate_jobheight(numjobs)
 
@@ -198,7 +202,7 @@ def start_job(request):
 
             # gen unique job name
             chars = string.ascii_uppercase + string.digits
-            gpus_type = str(form.cleaned_data['gpu-type'])
+            gpus_type = str(form.cleaned_data['gpu_type'])
 
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
@@ -336,6 +340,13 @@ def job_info(request):
 
     # render template
     return render(request, 'job_info.html', context)
+
+@login_required(login_url='/login')
+def logout(request):
+    """custom logout"""
+
+    auth_logout(request)
+    return HttpResponseRedirect('/login/?logout=1')
 
 @login_required(login_url='/login')
 def stop_job(request):
