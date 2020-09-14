@@ -141,7 +141,7 @@
 		update_content('/wiki/cluster_news/', 'news');
 
 		setInterval(function () {
-			//update_jobtable();
+			update_jobtable();
 			//update_content('/carme-base/JobTable/', 'jobtable');
 			//update_content('/carme-base/Messages/', 'messages');
 		}, 2000);
@@ -161,7 +161,7 @@
 			}).fail(function () {
 				console.error('Request to ' + post_url + ' failed. Please try again.');
 			}).always(function () {
-				update_content('/carme-base/JobTable/', 'jobtable');
+				update_jobtable();
 				update_content('/carme-base/Messages/', 'messages');
 			});
 		});
