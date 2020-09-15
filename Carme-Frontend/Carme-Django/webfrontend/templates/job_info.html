@@ -57,18 +57,18 @@
 </div>
 <div class="container">
 	<div class="card mt-4">
-		<div class="card-header font-weight-bold"><i class="fa fa-key fa-fw" aria-hidden="true"></i>&nbsp; Entry points</div>
+		<div class="card-header font-weight-bold"><i class="fa fa-sign-in fa-fw" aria-hidden="true"></i>&nbsp; Entry points</div>
 		<div class="card-body">
 			{% ifequal job.status 'running' %}
 				<a href="/ta_{{ job.url_suffix }}/"
 					onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-					target="_blank"><img src="{% static "theia.svg" %}" alt="TheiaIDE" style="width: 48px; height: 48px;" /></a>
+					target="_blank"><img src="{% static "theia.svg" %}" alt="TheiaIDE" style="width: 48px; height: 48px;" class="m-2" /></a>
 				<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
 					onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-					target="_blank"><img src="{% static "jupyter.svg" %}" alt="JupyterLab" style="width: 48px; height: 48px;" /></a>
+					target="_blank"><img src="{% static "jupyter.svg" %}" alt="JupyterLab" style="width: 48px; height: 48px;" class="m-2" /></a>
 				<a href="/tb_{{ job.url_suffix }}/"
 					onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-					target="_blank"><img src="{% static "tensorflow.svg" %}" alt="TensorBoard" style="width: 48px; height: 48px;" /></a>
+					target="_blank"><img src="{% static "tensorflow.svg" %}" alt="TensorBoard" style="width: 48px; height: 48px;" class="m-2" /></a>
 			{% else %}
 				---
 			{% endifequal %}
