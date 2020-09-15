@@ -476,7 +476,9 @@ def proxy_auth(request):
         elif "HTTP_X_FORWARDED_URI" in request.META:
             path = request.META["HTTP_X_FORWARDED_URI"] # in normal cases the uri is used
 
-        if len(path) > 0:
+        if request.user.is_superuser: # superusers can access every job
+            return HttpResponse(status=200) # ok
+        elif len(path) > 0:
             first = path[1:].split("/")[0] # [1:] removes / from beginning
 
             if first.startswith("nb_") or first.startswith("ta_") or first.startswith("tb_"):
