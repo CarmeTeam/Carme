@@ -22,9 +22,9 @@
 <body>
 	{% if message_list %}
 		{% for message in message_list %}
-			{% ifequal message.color "red" %}
+			{% if message.color == "red" %}
 				<div class="alert alert-danger" role="alert">{{ message.message }}</div>
-			{% elifequal message.color "#e8be17" %}
+			{% elif message.color == "#e8be17" %}
 				<div class="alert alert-warning" role="alert">{{ message.message }}</div>
 			{% else %}
 				<div class="alert alert-success" role="alert">{{ message.message }}</div>
