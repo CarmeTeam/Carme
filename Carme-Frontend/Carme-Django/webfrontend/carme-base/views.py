@@ -39,6 +39,7 @@ from django.views.generic import TemplateView
 from chartjs.views.lines import BaseLineChartView
 import re
 from maintenance_mode.decorators import force_maintenance_mode_off
+from maintenance_mode.core import get_maintenance_mode
 
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
@@ -347,7 +348,9 @@ def job_info(request):
 @force_maintenance_mode_off
 def login(request):
     """custom login"""
-
+    if get_maintenance_mode() and request.method == 'POST':
+        return HttpResponseRedirect('/login')
+    
     return LoginView.as_view(template_name='login.html')(request)
 
 @login_required(login_url='/login')
