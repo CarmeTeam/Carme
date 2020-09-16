@@ -24,6 +24,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
@@ -347,7 +348,7 @@ def job_info(request):
 def login(request):
     """custom login"""
 
-    return auth_login(request)
+    return LoginView(request)
 
 @login_required(login_url='/login')
 def logout(request):
