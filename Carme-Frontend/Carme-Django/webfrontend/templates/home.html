@@ -207,7 +207,7 @@
 					<form class="form ajax" action="{% url 'start_job' %}" method="post">
 						{% csrf_token %}
 						<div class="form-row">
-							<div class="col">
+							<div class="col-2">
 								<div class="input-group mb-3">
 									<div class="input-group-prepend">
 										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span>
@@ -219,7 +219,7 @@
 									</select>
 								</div>
 							</div>
-							<div class="col">
+							<div class="col-2">
 								<div class="input-group mb-3">
 									<div class="input-group-prepend">
 										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
@@ -231,7 +231,7 @@
 									</select>
 								</div>
 							</div>
-							<div class="col">
+							<div class="col-2">
 								<div class="input-group mb-3">
 									<div class="input-group-prepend">
 										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
@@ -243,7 +243,7 @@
 									</select>
 								</div>
 							</div>
-							<div class="col">
+							<div class="col-2">
 								<div class="input-group mb-3">
 									<div class="input-group-prepend">
 										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
@@ -255,7 +255,7 @@
 									</select>
 								</div>
 							</div>
-							<div class="col">
+							<div class="col-3">
 								<div class="input-group mb-3">
 									<div class="input-group-prepend">
 										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
@@ -264,7 +264,7 @@
 										aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
 								</div>
 							</div>
-							<div class="col">
+							<div class="col-1">
 								<button class="btn btn-primary" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
 							</div>
 						</div>
