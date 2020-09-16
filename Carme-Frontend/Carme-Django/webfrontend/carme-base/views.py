@@ -348,7 +348,7 @@ def job_info(request):
 def login(request):
     """custom login"""
 
-    return LoginView(request)
+    return LoginView.as_view()(request)
 
 @login_required(login_url='/login')
 def logout(request):
