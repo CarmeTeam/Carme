@@ -190,7 +190,7 @@ def job_table(request):
         'jobheight': jobheight,
     }
     
-    return render(request, 'jobtable.html', context)
+    return render(request, 'blocks/job_table.html', context)
 
 def job_table_json(request):
     """renders the user job table and add new slurm jobs after starting"""
