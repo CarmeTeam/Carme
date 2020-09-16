@@ -394,6 +394,8 @@ class Backend(Service):
         else:
             print("error exposed_cancel - scancel failed for job {} from user {}".format(job_id, user))
             self.send_notification("Error: Cancelling job {} failed!  - Please contact your admin.".format(job_id), user, "red")
+
+        return ret
     
     def exposed_prolog(self, job_id, user):
         """global prolog for job
