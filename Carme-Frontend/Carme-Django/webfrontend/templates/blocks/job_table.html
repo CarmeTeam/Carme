@@ -1,5 +1,5 @@
 {% load static %}
-<table class="table mb-0">
+<table class="table mb-0 text-center">
     <thead>
         <tr>
             <th scope="col">Slurm-ID</th>
@@ -14,7 +14,7 @@
             <th scope="col">Stop</th>
         </tr>
     </thead>
-    <tbody id="jobtable" class="text-center">
+    <tbody id="jobtable">
         {% for job in slurm_list_user %}
             <tr data-jobid="{{ job.slurm_id }}">
                     <th class="align-middle" scope="row">{{ job.slurm_id }}</th>
