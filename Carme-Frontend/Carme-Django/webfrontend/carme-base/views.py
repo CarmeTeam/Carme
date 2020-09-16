@@ -155,16 +155,19 @@ def admin_job_table(request):
 
     return render(request, 'admin_job_table.html', context)
 
-@login_required(login_url='/TimeOut')
 def admin_job_table_json(request):
     """renders the user job table and add new slurm jobs after starting"""
 
     # NOTE: no update of session ex time here!
 
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        ret_json = json.loads('{"success":false,"error":"Unauthorized access."}')
+        return JsonResponse()
+
     # get all jobs
     slurm_list = SlurmJobs.objects.order_by("-slurm_id")
     
-    jobs_str = '{"jobs":' + serialize('json', slurm_list, cls=DjangoJSONEncoder) + '}'
+    jobs_str = '{"success":true,"jobs":' + serialize('json', slurm_list, cls=DjangoJSONEncoder) + '}'
     jobs_json = json.loads(jobs_str)
 
     return JsonResponse(jobs_json)
@@ -195,10 +198,14 @@ def job_table_json(request):
 
     # NOTE: no update of session ex time here!
 
+    if not request.user.is_authenticated:
+        ret_json = json.loads('{"success":false,"error":"Unauthorized access."}')
+        return JsonResponse()
+
     # get all jobs by user
     slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
     
-    jobs_str = '{"jobs":' + serialize('json', slurm_list_user, cls=DjangoJSONEncoder) + '}'
+    jobs_str = '{"success":true,"jobs":' + serialize('json', slurm_list_user, cls=DjangoJSONEncoder) + '}'
     jobs_json = json.loads(jobs_str)
 
     return JsonResponse(jobs_json)
