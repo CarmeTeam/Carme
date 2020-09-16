@@ -27,7 +27,7 @@
 		<div class="card-body">
 			<div class="container">
 				<dl class="row mb-0">
-					<dt class="col-md-3">Total GPU hours used</dt>
+					<dt class="col-md-3">Total job runtime</dt>
 					<dd class="col-md-3">{{job_time}}</dd>
 
 					<dt class="col-md-3">Partitions</dt>
@@ -39,7 +39,7 @@
 					<dt class="col-md-3">Max jobs running</dt>
 					<dd class="col-md-3">{{ max_jobs }}</dd>
 
-					<dt class="col-md-3">Max GPUs</dt>
+					<dt class="col-md-3">Max gpus</dt>
 					<dd class="col-md-3">{{ max_gpus }}</dd>
 
 					<dt class="col-md-3">Max nodes</dt>
@@ -56,14 +56,14 @@
 			<table class="table mb-0 text-center">
 				<thead>
 					<tr>
-						<th scope="col">Slurm-id</th>
+						<th scope="col">Slurm id</th>
 						<th scope="col">Name</th>
 						<th scope="col">Partition</th>
 						<th scope="col">Submitted</th>
 						<th scope="col">Ended</th>
 						<th scope="col">Exit code</th>
-						<th scope="col">Cores</th>
-						<th scope="col">Memory</th>
+						<th scope="col">CPU cores / node</th>
+						<th scope="col">Main memory</th>
 						<th scope="col">Nodes</th>
 					</tr>
 				</thead>
