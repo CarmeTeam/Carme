@@ -66,6 +66,6 @@ class JobInfoForm(forms.Form):
 """
 class ChangePasswd(forms.Form):
     new_password1 = forms.CharField(
-        required=True, label='New Password', widget=forms.PasswordInput())
+        required=True, label='New password', widget=forms.PasswordInput())
     new_password2 = forms.CharField(
         required=True, label='Repeat', widget=forms.PasswordInput())
