@@ -32,7 +32,7 @@
 		<div class="card mb-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Status</div>
 			<div class="card-body" style="height: 250px;">
-				<canvas id="myChart"></canvas>
+				<canvas id="status"></canvas>
 			</div>
 		</div>
 		<div class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
@@ -127,11 +127,11 @@
 {% endblock %}
 
 {% block javascript %}
-<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/Chart-2.9.3.bundle.min.js' %}"></script>
 <script type="text/javascript">
 	$.get('{% url 'line_chart_json' %}',
 		function (data) {
-			var ctx = $("#myChart").get(0).getContext("2d");
+			var ctx = $("#status").get(0).getContext("2d");
 			new Chart(ctx, {
 				type: 'line',
 				data: data,
