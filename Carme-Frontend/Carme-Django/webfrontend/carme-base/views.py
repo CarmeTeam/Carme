@@ -16,7 +16,7 @@ from django.http import HttpResponse
 from django.template import loader
 from .models import CarmeMessages, SlurmJobs, Images, CarmeJobTable, ClusterStat, GroupResources
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
 from django.contrib import messages as dj_messages
 from django.contrib.auth import update_session_auth_hash
