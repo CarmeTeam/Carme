@@ -353,6 +353,7 @@ def login(request):
     
     return LoginView.as_view(template_name='login.html')(request)
 
+@force_maintenance_mode_off
 @login_required(login_url='/login')
 def logout(request):
     """custom logout"""
