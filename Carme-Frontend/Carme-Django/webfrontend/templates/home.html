@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% comment %}
 # ----------------------------------------------
 # Carme
@@ -15,14 +16,121 @@
 {% endcomment %}
 
 {% load static %}
+
 {% block title %}Carme Home{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+	<div class="card-deck">
+		<div class="card mb-4">
+			<div class="card-header font-weight-bold"><i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i>&nbsp; News</div>
+			<div class="card-body" id="news">
+				
+			</div>
+		</div>
+		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
+		<div class="card mb-4">
+			<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Status</div>
+			<div class="card-body" style="height: 250px;">
+				<canvas id="myChart"></canvas>
+			</div>
+		</div>
+		<div class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
+		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
+		<div class="card mb-4">
+			<div class="card-header font-weight-bold"><i class="fa fa-envelope-o fa-fw" aria-hidden="true"></i>&nbsp; Messages</div>
+			<div class="card-body" style="height: 250px; overflow-y: scroll;">
+				<div id="messages"class="card-text"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row mt-2">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; Jobs</div>
+				<div class="card-body">
+					<form class="form ajax" action="{% url 'start_job' %}" method="post">
+						{% csrf_token %}
+						<div class="form-row">
+							<div class="col-2">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span>
+									</div>
+									<select name="{{ start_job_form.nodes.html_name }}" class="custom-select">
+										{% for choice in start_job_form.nodes.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="col-2">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
+									</div>
+									<select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select">
+										{% for choice in start_job_form.gpu_type.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="col-2">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
+									</div>
+									<select name="{{ start_job_form.gpus.html_name }}" class="custom-select">
+										{% for choice in start_job_form.gpus.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="col-2">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
+									</div>
+									<select name="{{ start_job_form.image.html_name }}" class="custom-select">
+										{% for choice in start_job_form.image.field.choices %}
+										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="col-3">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
+									</div>
+									<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control" aria-label="Sizing example input"
+										aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
+								</div>
+							</div>
+							<div class="col-1">
+								<button class="btn btn-primary" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
+							</div>
+						</div>
+
+					</form>
+					<div class="mt-2 table-responsive">
+						{% include "blocks/job_table.html" %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
 
 {% block javascript %}
 <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
 <script type="text/javascript">
 	$.get('{% url 'line_chart_json' %}',
 		function (data) {
-			//Chart.defaults.global.defaultFontSize = '12';
 			var ctx = $("#myChart").get(0).getContext("2d");
 			new Chart(ctx, {
 				type: 'line',
@@ -145,148 +253,6 @@
 			//update_content('/carme-base/JobTable/', 'jobtable');
 			//update_content('/carme-base/Messages/', 'messages');
 		}, 2000);
-
-		$(document).on('submit', 'form.ajax', function (event) {
-			// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
-			event.preventDefault(); //prevent default action
-
-			var post_url = $(this).attr("action"); //get form action url
-			var request_method = $(this).attr("method"); //get form GET/POST method
-			var form_data = $(this).serialize(); //Encode form elements for submission
-
-			$.ajax({
-				url: post_url,
-				type: request_method,
-				data: form_data
-			}).fail(function () {
-				console.error('Request to ' + post_url + ' failed. Please try again.');
-			}).always(function () {
-				update_jobtable();
-				update_content('/carme-base/Messages/', 'messages');
-			});
-		});
 	}
 </script>
-{% endblock %}
-
-{% block content %}
-
-<!-- <meta http-equiv="refresh" content="60" /> -->
-{% if user.is_authenticated %}
-
-<div class="container my-4">
-	<div class="card-deck">
-		<div class="card mb-4">
-			<div class="card-header font-weight-bold"><i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i>&nbsp; News</div>
-			<div class="card-body" id="news">
-				
-			</div>
-		</div>
-		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
-		<div class="card mb-4">
-			<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Status</div>
-			<div class="card-body" style="height: 250px;">
-				<canvas id="myChart"></canvas>
-			</div>
-		</div>
-		<div class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
-		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
-		<div class="card mb-4">
-			<div class="card-header font-weight-bold"><i class="fa fa-envelope-o fa-fw" aria-hidden="true"></i>&nbsp; Messages</div>
-			<div class="card-body" style="height: 250px; overflow-y: scroll;">
-				<div id="messages"class="card-text"></div>
-			</div>
-		</div>
-	</div>
-
-	<div class="row mt-2">
-		<div class="col-12">
-			<div class="card">
-				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; Jobs</div>
-				<div class="card-body">
-					<form class="form ajax" action="{% url 'start_job' %}" method="post">
-						{% csrf_token %}
-						<div class="form-row">
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span>
-									</div>
-									<select name="{{ start_job_form.nodes.html_name }}" class="custom-select">
-										{% for choice in start_job_form.nodes.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
-									</div>
-									<select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select">
-										{% for choice in start_job_form.gpu_type.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
-									</div>
-									<select name="{{ start_job_form.gpus.html_name }}" class="custom-select">
-										{% for choice in start_job_form.gpus.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
-									</div>
-									<select name="{{ start_job_form.image.html_name }}" class="custom-select">
-										{% for choice in start_job_form.image.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-3">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
-									</div>
-									<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control" aria-label="Sizing example input"
-										aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
-								</div>
-							</div>
-							<div class="col-1">
-								<button class="btn btn-primary" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
-							</div>
-						</div>
-
-					</form>
-					<div class="mt-2 table-responsive">
-						{% include "blocks/job_table.html" %}
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	
-	
-</div>
-
-{% else %}
-<div class="main-container">
-	<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
-	Cluster Access is ristricted to authorized users.<BR><BR>
-	Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
-</div>
-{% endif %}
-
 {% endblock %}
