@@ -1,31 +1,32 @@
-<!---
-# ---------------------------------------------- 
+{% extends 'base.html' %}
+
+{% comment %}
+# ----------------------------------------------
 # Carme
 # ----------------------------------------------
-# 404.html                                                                                                                                                                     
-#                                                                                                                                                                                                            
-# see Carme development guide for documentation: 
+# 404.html
+#
+# see Carme development guide for documentation:
 # * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
 #
-# Copyright 2019 by Fraunhofer ITWM  
-# License: http://open-carme.org/LICENSE.md 
+# Copyright 2019 by Fraunhofer ITWM
+# License: http://open-carme.org/LICENSE.md
 # Contact: info@open-carme.org
 # ---------------------------------------------
--->
+{% endcomment %}
 
-{% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Carme Home{% endblock %}
+
 {% block content %}
-<div class="main-container"> 
-<h2>Requested Page is not available!</h2>
-<ul>
-								<li> The job that you are trying to reach might have ended. Check your <A HREF="/carme-base/JobHist/"><b>JobHistory</b></A> and <A HREF="/"><b>Running Jobs</b></A></li>
-								<li> Check the URL for typos </li>
-								<li> System might be in maintenance - see possible admin messages below </li>  
-</ul>
+<div class="container">
+	<h1 class="h1">Requested Page is not available!</h1>
+	<ul>
+		<li> The job that you are trying to reach might have ended. Check your <a
+				href="/carme-base/JobHist/"><b>history</b></a> and <a href="/"><b>running jobs</b></a></li>
+		<li> Check the URL for typos </li>
+		<li> System might be in maintenance - see possible admin messages below </li>
+	</ul>
 </div>
-{% endif %}
-
-
 {% endblock %}

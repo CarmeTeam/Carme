@@ -1,4 +1,6 @@
-<!---
+{% extends 'base.html' %}
+
+{% comment %}
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
@@ -11,17 +13,14 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
--->
+{% endcomment %}
 
-{% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Carme Home{% endblock %}
+
 {% block content %}
-<div class="main-container"> 
-<h2>Error - this page does not exits.</h2>
+<div class="container"> 
+	<h1 class="h1">Error - this page does not exits.</h1>
 </div>
-{% if message_list %}
-{% endif %}
-
-
 {% endblock %}
