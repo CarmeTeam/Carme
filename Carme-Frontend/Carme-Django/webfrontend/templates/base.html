@@ -78,6 +78,7 @@
                         aria-hidden="true"></i> -->History</a>
                 </li>
 
+                {% if user.is_superuser %}
                 <li class="nav-item dropdown{% if '/carme-base/AdminJobTable' in request.path %} active{% endif %}">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown-admin" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false"><!--<i class="fa fa-cogs"
@@ -108,9 +109,11 @@
                         {% if CARME_VERSION %}
                         <div class="dropdown-divider"></div>
                         <p class="mb-0 px-4 py-1"><b>Version</b> {{ CARME_VERSION }}</p>
-                        {%endif%}
+                        {% endif %}
                     </div>
                 </li>
+                {% endif %}
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown-external" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false"><!--<i class="fa fa-external-link"
