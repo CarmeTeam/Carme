@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^JobHist/$', views.job_hist, name='job_hist'),
     url(r'^auth/$', views.auth, name='job_auth'),
     url(r'^logout/$', views.logout, name='logout'),
+    url(r'^login/$', views.login, name='login'),
     url(r'^proxy_auth/$', views.proxy_auth, name='proxy_auth'),
     url(r'^AdminJobTable/$', views.admin_job_table, name='admin_job_table'),
     url(r'^TimeOut/$', views.time_out, name='time_out'),

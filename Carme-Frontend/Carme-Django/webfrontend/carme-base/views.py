@@ -21,6 +21,7 @@ from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, Ch
 from django.contrib import messages as dj_messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -340,6 +341,12 @@ def job_info(request):
 
     # render template
     return render(request, 'job_info.html', context)
+
+@force_maintenance_mode_off
+def login(request):
+    """custom login"""
+
+    return auth_login(request)
 
 @login_required(login_url='/login')
 def logout(request):
