@@ -1,4 +1,6 @@
-<!---
+{% extends 'base.html' %}
+
+{% comment %}
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
@@ -11,15 +13,13 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
--->
+{% endcomment %}
 
-{% extends 'base.html' %}
 {% load static %}
-{% block title %}Carme Home{% endblock %}
-{% block content %}
 
-{% include "blocks/java_scripts.html" %}
-{% if user.is_authenticated %}
+{% block title %}Carme Home{% endblock %}
+
+{% block content %}
 <div class="container my-4">
 	<div class="row">
 		<div class="col-12">
@@ -103,96 +103,7 @@
 					</div>
 				</div>
 			</div>
-			{% if user.is_superuser %}
-			{% if slurm_list %}
-			<!--<table class="JobHistTable">
-				<thead>
-					<tr>
-						<td><b>User</b></td>
-						<td><b>JobID</b></td>
-						<td><b>Job Name</b></td>
-						<td align="center"><b>#(Nodes)</b></td>
-						<td><b>Master</b></td>
-						<td><b>GPU Type</b></td>
-						<td><b>#(GPUs)</b></td>
-						<td><b>IMAGE</b></td>
-						<td><b>Entry Points</b></td>
-						<td><b>Info</b></td>
-						<td><b>Stop</b></td>
-					</tr>
-				</thead>
-				{% for job in slurm_list %}
-				<tr>
-					<td>{{job.user}}</td>
-					<td align="center">{{job.slurm_id}}</td>
-					<td align="center">{{job.name}}</td>
-					<td align="center">{{ job.num_nodes }}</td>
-					<td align="center">{{ job.ip }}</td>
-					<td align="center">{{ job.gpu_type }}</td>
-					<td align="center">{{ job.num_gpus }}</td>
-					<td>{{ job.image_name }}</td>
-					<td>
-						<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" target="_new"><img
-								src="{% static "jupyter.png" %}" alt="Jupyter" height=40 /></A>
-						<a href="/tb_{{ job.url_suffix }}/" target="_new"><img src="{% static "tensorflow.jpg" %}"
-								alt="TensorBoard" height=40 /></A>
-					</td>
-					<td>
-						<form action="/carme-base/JobInfo/" method="post" target="_blank">{% csrf_token %}{{ job_info_form }}
-							<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-							<input type="image" src="{% static "info.jpg" %}" alt="Job Info" width=40 />
-						</form>
-					</td>
-					<td>
-						<form class="ajax" action="/carme-base/StopJob/" method="post">{% csrf_token %}{{ delete_job_form }}
-							<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-							<input type="hidden" name="jobName" value="{{job.name}}">
-							<input type="hidden" name="jobUser" value="{{job.user}}">
-							<input type="image" src="{% static "stop.jpg" %}" alt="Stop" width=40 />
-						</form>
-					</td>
-				</tr>
-				{% endfor %}
-			</table>-->
-			{% else %}
-			No jobs.
-			{% endif %}
 		</div>
 	</div>
 </div>
-{% endif %}
-{% else %}
-<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
-Cluster Access is ristricted to authorized users.<BR><BR>
-Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
-{% endif %}
-
-{% endblock %}
-
-{% block javascript %}
-<script type="text/javascript">
-	if (!$) console.error('jQuery is required!');
-	else {
-		$(document).on('submit', 'form.ajax', function (event) {
-			// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
-			event.preventDefault(); //prevent default action
-
-			var post_url = $(this).attr("action"); //get form action url
-			var request_method = $(this).attr("method"); //get form GET/POST method
-			var form_data = $(this).serialize(); //Encode form elements for submission
-
-			$.ajax({
-				url: post_url,
-				type: request_method,
-				data: form_data
-			}).fail(function () {
-				console.error('Request to ' + post_url + ' failed. Please try again.');
-			}).always(function () {
-				setTimeout(function () {
-					//document.location.reload();
-				}, 1000);
-			});
-		});
-	}
-</script>
 {% endblock %}

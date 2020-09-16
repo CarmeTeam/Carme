@@ -1,4 +1,6 @@
-<!---
+{% extends 'base.html' %}
+
+{% comment %}
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
@@ -11,16 +13,14 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
--->
+{% endcomment %}
 
-{% extends 'base.html' %}
 {% load static %}
 {% load timetags %}
-{% block title %}Carme Home{% endblock %}
-{% block content %}
 
-{% include "blocks/java_scripts.html" %}
-{% if user.is_authenticated %}
+{% block title %}Carme Home{% endblock %}
+
+{% block content %}
 <div class="container my-4">
 	<div class="card">
 		<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Slurm statistics</div>
@@ -88,11 +88,4 @@
 		</div>
 	</div>
 </div>
-
-{% else %}
-<h2>{{ settings.CARME_FRONTEND_TITLE }}</h2>
-Cluster Access is ristricted to authorized users.<BR><BR>
-Please <a href="{% url 'login' %}"><b>LOG IN</b></a>
-{% endif %}
-
 {% endblock %}

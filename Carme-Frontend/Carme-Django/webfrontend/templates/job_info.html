@@ -1,108 +1,76 @@
 {% extends 'base.html' %}
+
 {% load static %}
 
-
-{% block title %}Job Info{% endblock %}
+{% block title %}Job info{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-
-{% if job_details %}
 {% for job in job_details %}
-<div class="container my-4">
-	<div class="card">
-		<div class="card-header font-weight-bold"><i class="fa fa-info fa-fw" aria-hidden="true"></i>&nbsp; Job {{ job.slurm_id }} - {{ job.name }}</div>
-		<div class="card-body">
-			<div class="container">
-				<dl class="row mb-0">
-					<dt class="col-md-3">User</dt>
-					<dd class="col-md-3">{{ job.user }}</dd>
+	<div class="container my-4">
+		<div class="card">
+			<div class="card-header font-weight-bold"><i class="fa fa-info fa-fw" aria-hidden="true"></i>&nbsp; Job {{ job.slurm_id }} - {{ job.name }}</div>
+			<div class="card-body">
+				<div class="container">
+					<dl class="row mb-0">
+						<dt class="col-md-3">User</dt>
+						<dd class="col-md-3">{{ job.user }}</dd>
 
-					<dt class="col-md-3">Submit time</dt>
-					<dd class="col-md-3">{{ job_submit_time }}</dd>
+						<dt class="col-md-3">Submit time</dt>
+						<dd class="col-md-3">{{ job_submit_time }}</dd>
 
-					<dt class="col-md-3">Nodes</dt>
-					<dd class="col-md-3">{{ job_nodes }}: {{job_node_list}}</dd>
+						<dt class="col-md-3">Nodes</dt>
+						<dd class="col-md-3">{{ job_nodes }}: {{job_node_list}}</dd>
 
-					<dt class="col-md-3">Start time</dt>
-					<dd class="col-md-3">{{ job_start_time }}</dd>
+						<dt class="col-md-3">Start time</dt>
+						<dd class="col-md-3">{{ job_start_time }}</dd>
 
-					<dt class="col-md-3">Master node</dt>
-					<dd class="col-md-3">{{ job.ip }}</dd>
+						<dt class="col-md-3">Master node</dt>
+						<dd class="col-md-3">{{ job.ip }}</dd>
 
-					<dt class="col-md-3">End time</dt>
-					<dd class="col-md-3">{{ job_timelimit }}</dd>
+						<dt class="col-md-3">End time</dt>
+						<dd class="col-md-3">{{ job_timelimit }}</dd>
 
-					<dt class="col-md-3">CPU cores / node</dt>
-					<dd class="col-md-3">{{ job_cores }}</dd>
+						<dt class="col-md-3">CPU cores / node</dt>
+						<dd class="col-md-3">{{ job_cores }}</dd>
 
-					<dt class="col-md-3">Main memory</dt>
-					<dd class="col-md-3">{{ job_mem }}</dd>
+						<dt class="col-md-3">Main memory</dt>
+						<dd class="col-md-3">{{ job_mem }}</dd>
 
-					<dt class="col-md-3">GPU type</dt>
-					<dd class="col-md-3">{{ job.gpu_type }}</dd>
+						<dt class="col-md-3">GPU type</dt>
+						<dd class="col-md-3">{{ job.gpu_type }}</dd>
 
-					<dt class="col-md-3">GPUs / node</dt>
-					<dd class="col-md-3">{{ job.num_gpus }}</dd>
+						<dt class="col-md-3">GPUs / node</dt>
+						<dd class="col-md-3">{{ job.num_gpus }}</dd>
 
-					<dt class="col-md-3">Image</dt>
-					<dd class="col-md-3">{{ job.image_name }}</dd>
+						<dt class="col-md-3">Image</dt>
+						<dd class="col-md-3">{{ job.image_name }}</dd>
 
-					<dt class="col-md-3">Partition</dt>
-					<dd class="col-md-3">{{ job_partition }}</dd>
-				</dl>
+						<dt class="col-md-3">Partition</dt>
+						<dd class="col-md-3">{{ job_partition }}</dd>
+					</dl>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-<div class="container">
-	<div class="card mt-4">
-		<div class="card-header font-weight-bold"><i class="fa fa-sign-in fa-fw" aria-hidden="true"></i>&nbsp; Entry points</div>
-		<div class="card-body">
-			{% ifequal job.status 'running' %}
-				<a href="/ta_{{ job.url_suffix }}/"
-					onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-					target="_blank"><img src="{% static "theia.svg" %}" alt="TheiaIDE" style="width: 48px; height: 48px;" class="m-2" /></a>
-				<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
-					onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-					target="_blank"><img src="{% static "jupyter.svg" %}" alt="JupyterLab" style="width: 48px; height: 48px;" class="m-2" /></a>
-				<a href="/tb_{{ job.url_suffix }}/"
-					onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-					target="_blank"><img src="{% static "tensorflow.svg" %}" alt="TensorBoard" style="width: 48px; height: 48px;" class="m-2" /></a>
-			{% else %}
-				---
-			{% endifequal %}
+	<div class="container">
+		<div class="card mt-4">
+			<div class="card-header font-weight-bold"><i class="fa fa-sign-in fa-fw" aria-hidden="true"></i>&nbsp; Entry points</div>
+			<div class="card-body">
+				{% ifequal job.status 'running' %}
+					<a href="/ta_{{ job.url_suffix }}/"
+						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
+						target="_blank"><img src="{% static "theia.svg" %}" alt="TheiaIDE" style="width: 48px; height: 48px;" class="m-2" /></a>
+					<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
+						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
+						target="_blank"><img src="{% static "jupyter.svg" %}" alt="JupyterLab" style="width: 48px; height: 48px;" class="m-2" /></a>
+					<a href="/tb_{{ job.url_suffix }}/"
+						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
+						target="_blank"><img src="{% static "tensorflow.svg" %}" alt="TensorBoard" style="width: 48px; height: 48px;" class="m-2" /></a>
+				{% else %}
+					---
+				{% endifequal %}
+			</div>
 		</div>
 	</div>
-</div>
-<!--<div class="main-container">
-	<table>
-		<tr>
-			<td><b>Enter Job:</b></td>
-			<td><a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}" target="_new"><img
-						src="{% static "jupyter.png" %}" alt="Jupyter" height=40 /></A></td>
-			<td><a href="/tb_{{ job.url_suffix }}/" target="_new"><img src="{% static "tensorflow.jpg" %}"
-						alt="TensorBoard" height=40 /></A></td>
-		</tr>
-	</table>
-	{% endfor %}
-	{% else %}
-	<div class="main-container">
-		<h3> Error: no such job: {{ job.name }} </H3>
-		The job you requested must have been terminated...
-	</div>
-	{% endif %}
-	{% if graph_list %}
-	{% for graph in graph_list %}
-	<BR><BR>
-	<img src="{% static graph %}" alt="graph"><BR>
-	{% endfor %}
-	{% else %}
-	<div class="main-container">
-		<h3> Error: no graphs for this job.</H3>
-
-	</div>
-	{% endif %}
-	{% endif %}
-</div>-->
+{% endfor %}
 {% endblock %}
