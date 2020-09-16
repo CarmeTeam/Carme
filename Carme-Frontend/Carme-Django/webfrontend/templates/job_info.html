@@ -11,7 +11,7 @@
 {% for job in job_details %}
 <div class="container">
 	<div class="card mt-4">
-		<div class="card-header font-weight-bold"><i class="fa fa-key fa-fw" aria-hidden="true"></i>&nbsp; Job {{ job.slurm_id }} - {{ job.name }}</div>
+		<div class="card-header font-weight-bold"><i class="fa fa-info fa-fw" aria-hidden="true"></i>&nbsp; Job {{ job.slurm_id }} - {{ job.name }}</div>
 		<div class="card-body">
 			<div class="container">
 				<dl class="row mb-0">
@@ -30,19 +30,19 @@
 					<dt class="col-md-3">Entry node</dt>
 					<dd class="col-md-3">{{ job.ip }}</dd>
 
-					<dt class="col-md-3">Timelimit</dt>
+					<dt class="col-md-3">End time</dt>
 					<dd class="col-md-3">{{ job_timelimit }}</dd>
 
-					<dt class="col-md-3">CPU Cores/Node</dt>
+					<dt class="col-md-3">CPU cores / node</dt>
 					<dd class="col-md-3">{{ job_cores }}</dd>
 
 					<dt class="col-md-3">Memory</dt>
 					<dd class="col-md-3">{{ job_mem }}</dd>
 
-					<dt class="col-md-3">GPU-Type</dt>
+					<dt class="col-md-3">GPU-type</dt>
 					<dd class="col-md-3">{{ job.gpu_type }}</dd>
 
-					<dt class="col-md-3">GPUs/Node</dt>
+					<dt class="col-md-3">GPUs / node</dt>
 					<dd class="col-md-3">{{ job.num_gpus }}</dd>
 
 					<dt class="col-md-3">Image</dt>
