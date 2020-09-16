@@ -140,12 +140,6 @@
                             aria-hidden="true"></i>&nbsp; Change password</a>
                         <div class="dropdown-divider"></div>
                         <dl class="row no-gutters mb-0 px-4 py-1" style="width: 250px">
-                            <dt class="col-sm-5">Staff</dt>
-                            <dd class="col-sm-7">{{user.is_staff}}</dd>
-
-                            <dt class="col-sm-5">Admin</dt>
-                            <dd class="col-sm-7">{{user.is_superuser}}</dd>
-
                             <dt class="col-sm-5">Group</dt>
                             <dd class="col-sm-7">{% for g in user.ldap_user.group_names %}{{g}} {%endfor%}</dd>
 
