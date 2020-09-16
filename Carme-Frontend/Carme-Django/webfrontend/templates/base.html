@@ -143,7 +143,7 @@
                             <dt class="col-sm-5">Group</dt>
                             <dd class="col-sm-7">{% for g in user.ldap_user.group_names %}{{g}} {%endfor%}</dd>
 
-                            <dt class="col-sm-5">Session Timeout</dt>
+                            <dt class="col-sm-5">Session timeout</dt>
                             <dd class="col-sm-7">{{request.session.get_expiry_date}}</dd>
                         </dl>
                     </div>
