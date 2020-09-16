@@ -27,7 +27,7 @@
 				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; All jobs</div>
 				<div class="card-body">
 					<div class="table-responsive">
-						<table class="table mb-0">
+						<table class="table mb-0 text-center">
 							<thead>
 								<tr>
 									<th scope="col">Slurm-ID</th>
@@ -44,7 +44,7 @@
 									<th scope="col">Stop</th>
 								</tr>
 							</thead>
-							<tbody id="jobtable" class="text-center">
+							<tbody>
 								{% for job in slurm_list %}
 								<tr data-jobid="{{ job.slurm_id }}">
 									<th class="align-middle" scope="row">{{ job.slurm_id }}</th>
@@ -55,7 +55,7 @@
 									<td class="align-middle">{{ job.gpu_type }}</td>
 									<td class="align-middle">{{ job.num_gpus }}</td>
 									<td class="align-middle">{{ job.image_name }}</td>
-									<td class="text-center align-middle">
+									<td class="align-middle">
 										{% ifequal job.status "running" %}
 											<i class="fa fa-check fa-2x fa-fw text-success"></i>
 											<span class="sr-only">Running</span>
@@ -64,7 +64,7 @@
 											<span class="sr-only">Queued</span>
 										{% endifequal %}
 									</td>
-									<td class="text-center align-middle">
+									<td class="align-middle">
 										{% ifequal job.status 'running' %}
 											<a href="/ta_{{ job.url_suffix }}/"
 												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
@@ -76,7 +76,7 @@
 											---
 										{% endifequal %}
 									</td>
-									<td class="text-center align-middle">
+									<td class="align-middle">
 										{% ifequal job.status 'running' %}
 										<form action="/carme-base/JobInfo/" method="post" target="_blank">
 											{% csrf_token %}
