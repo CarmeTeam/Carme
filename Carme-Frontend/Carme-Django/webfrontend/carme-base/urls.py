@@ -29,7 +29,6 @@ urlpatterns = [
     url(r'^proxy_auth/$', views.proxy_auth, name='proxy_auth'),
     url(r'^AdminJobTable/$', views.admin_job_table, name='admin_job_table'),
     url(r'^AdminJobTableJson/$', views.admin_job_table_json, name='admin_job_table_json'),
-    url(r'^TimeOut/$', views.time_out, name='time_out'),
     url(r'^maintenance-mode/', include('maintenance_mode.urls')),
     url(r'^line_chart/$', views.line_chart, name='line_chart'),
     url(r'^line_chart_json/$', views.line_chart_json, name='line_chart_json'),

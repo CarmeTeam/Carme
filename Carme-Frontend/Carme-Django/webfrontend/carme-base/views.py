@@ -135,7 +135,7 @@ def index(request):
 
     return render(request, 'home.html', context)
 
-@login_required(login_url='/TimeOut')
+@login_required(login_url='/login')
 def admin_job_table(request):
     """renders the admin job table"""
 
@@ -172,7 +172,7 @@ def admin_job_table_json(request):
 
     return JsonResponse(jobs_json)
 
-@login_required(login_url='/TimeOut')
+@login_required(login_url='/login')
 def job_table(request):
     """renders the user job table and add new slurm jobs after starting"""
 
@@ -192,7 +192,6 @@ def job_table(request):
     
     return render(request, 'jobtable.html', context)
 
-@login_required(login_url='/TimeOut')
 def job_table_json(request):
     """renders the user job table and add new slurm jobs after starting"""
 
