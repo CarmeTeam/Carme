@@ -25,6 +25,8 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
@@ -40,6 +42,7 @@ from chartjs.views.lines import BaseLineChartView
 import re
 from maintenance_mode.decorators import force_maintenance_mode_off
 from maintenance_mode.core import get_maintenance_mode
+import json
 
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
@@ -153,6 +156,20 @@ def admin_job_table(request):
     return render(request, 'admin_job_table.html', context)
 
 @login_required(login_url='/TimeOut')
+def admin_job_table_json(request):
+    """renders the user job table and add new slurm jobs after starting"""
+
+    # NOTE: no update of session ex time here!
+
+    # get all jobs
+    slurm_list = SlurmJobs.objects.order_by("-slurm_id")
+    
+    jobs_str = '{"jobs":' + serialize('json', slurm_list, cls=DjangoJSONEncoder) + '}'
+    jobs_json = json.loads(jobs_str)
+
+    return JsonResponse(jobs_json)
+
+@login_required(login_url='/TimeOut')
 def job_table(request):
     """renders the user job table and add new slurm jobs after starting"""
 
@@ -171,6 +188,20 @@ def job_table(request):
     }
     
     return render(request, 'jobtable.html', context)
+
+@login_required(login_url='/TimeOut')
+def job_table_json(request):
+    """renders the user job table and add new slurm jobs after starting"""
+
+    # NOTE: no update of session ex time here!
+
+    # get all jobs by user
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
+    
+    jobs_str = '{"jobs":' + serialize('json', slurm_list_user, cls=DjangoJSONEncoder) + '}'
+    jobs_json = json.loads(jobs_str)
+
+    return JsonResponse(jobs_json)
 
 @login_required(login_url='/login')
 def start_job(request):
