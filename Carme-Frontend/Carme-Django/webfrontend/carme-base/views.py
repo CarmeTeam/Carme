@@ -37,6 +37,7 @@ from random import randint
 from django.views.generic import TemplateView
 from chartjs.views.lines import BaseLineChartView
 import re
+from maintenance_mode.decorators import force_maintenance_mode_off
 
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
