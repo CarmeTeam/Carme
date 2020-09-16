@@ -27,8 +27,8 @@
 				{% csrf_token %}
 
 				<div class="text-center mb-4">
-					<img src="{% static settings.CARME_FRONTEND_LOGO_TOP_LEFT %}" alt="logo" style="max-width: 80%" class="mb-4" />
-					<h1 class="h3 mb-3 font-weight-normal">{{ settings.CARME_FRONTEND_TITLE }}</h1>
+					<img src="{% static 'carme.svg' %}" alt="logo" style="width: 96px; height: 96px;" class="mb-4" />
+					<h1 class="h3 mb-3 font-weight-normal">Carme</h1>
 				</div>
 
 				<div id="timeout-message" class="alert alert-warning" role="alert" style="display: none;"><i class="fa fa-warning"></i>&nbsp; You have been logged out, because your session has expired!</div>
@@ -48,6 +48,20 @@
 
 				<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
 			</form>
+		</div>
+
+		<div class="row my-4">
+			<div class="col">
+				<img src="{% static 'itwm.svg' %}" alt="logo" style="width: 100%;" />
+			</div>
+
+			<div class="col">
+				<img src="{% static 'bmbf.svg' %}" alt="logo" style="width: 100%;" />
+			</div>
+
+			<div class="col">
+				<img src="{% static 'rlp.svg' %}" alt="logo" style="width: 100%;" />
+			</div>
 		</div>
 	</div>
 </div>
