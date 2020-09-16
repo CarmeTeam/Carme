@@ -379,9 +379,7 @@ def job_info(request):
 @force_maintenance_mode_off
 def login(request):
     """custom login"""
-    if get_maintenance_mode() and request.method == 'POST':
-        return HttpResponseRedirect('/login')
-    
+
     return LoginView.as_view(template_name='login.html')(request)
 
 @force_maintenance_mode_off
