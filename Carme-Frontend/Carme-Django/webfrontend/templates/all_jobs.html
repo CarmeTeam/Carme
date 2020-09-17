@@ -44,60 +44,8 @@
 									<th scope="col">Stop</th>
 								</tr>
 							</thead>
-							<tbody>
-								{% for job in slurm_list %}
-								<tr data-jobid="{{ job.slurm_id }}">
-									<th class="align-middle" scope="row">{{ job.slurm_id }}</th>
-									<td class="align-middle">{{job.user}}</td>
-									<td class="align-middle">{{ job.name }}</td>
-									<td class="align-middle">{{ job.num_nodes }}</td>
-									<td class="align-middle">{{ job.ip }}</td>
-									<td class="align-middle">{{ job.gpu_type }}</td>
-									<td class="align-middle">{{ job.num_gpus }}</td>
-									<td class="align-middle">{{ job.image_name }}</td>
-									<td class="align-middle">
-										{% ifequal job.status "running" %}
-											<i class="fa fa-check fa-2x fa-fw text-success"></i>
-											<span class="sr-only">Running</span>
-										{% else %}
-											<i class="fa fa-cog fa-spin fa-2x fa-fw text-secondary"></i>
-											<span class="sr-only">Queued</span>
-										{% endifequal %}
-									</td>
-									<td class="align-middle">
-										{% ifequal job.status 'running' %}
-											<a href="/ta_{{ job.url_suffix }}/"
-												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-												target="_blank"><img src="{% static 'img/theia.svg' %}" alt="TheiaIDE" style="width: 48px; height: 48px;" /></a>
-											<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
-												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
-												target="_blank"><img src="{% static 'img/jupyter.svg' %}" alt="JupyterLab" style="width: 48px; height: 48px;" /></a>
-										{% else %}
-											---
-										{% endifequal %}
-									</td>
-									<td class="align-middle">
-										{% ifequal job.status 'running' %}
-										<form action="/carme-base/JobInfo/" method="post" target="_blank">
-											{% csrf_token %}
-											<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-											<button class="btn btn-secondary" type="submit"><i class="fa fa-info fa-fw" aria-hidden="true"></i></button>
-										</form>
-										{% else %}
-											---
-										{% endifequal %}
-									</td>
-									<td class="align-middle">
-										<form class="ajax" action="/carme-base/StopJob/" method="post">
-											{% csrf_token %}
-											<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-											<input type="hidden" name="jobName" value="{{job.name}}">
-											<input type="hidden" name="jobUser" value="{{job.user}}">
-											<button class="btn btn-primary" type="submit"><i class="fa fa-stop fa-fw" aria-hidden="true"></i></button>
-										</form>
-									</td>
-								</tr>
-								{% endfor %}
+							<tbody id="jobtable">
+								{% include "blocks/admin_job_table.html" %}
 							</tbody>
 						</table>
 					</div>
@@ -106,4 +54,65 @@
 		</div>
 	</div>
 </div>
+{% endblock %}
+
+
+{% block javascript %}
+<script type="text/javascript">
+	if (!$) console.error('jQuery is required!');
+	else {
+		function update_jobtable() {
+			$.ajax('/carme-base/AdminJobTable/', {
+				type: "GET",
+				statusCode: {
+					401: function (response) {
+						window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+					}
+				}, success: function (data) {
+					var entries = $(data);
+
+					entries.each(function( index ) {
+						var jobid = $(this).data('jobid');
+						var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
+
+
+
+						if(existing.length > 0) {
+							if($(this).text() == existing.text()) {
+								// content equals, just update csrf
+								var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
+									existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
+									$(this).val(newTokens[index].value);
+								});
+							} else {
+								// content changed, replace element
+								$(this).replaceAll(existing);
+							}
+						} else {
+							// job not existing, remove element
+							$('#jobtable').append($(this));
+						}
+					});
+
+					var sel = $(data).map(function() {
+						var jobid = $(this).data('jobid');
+						return 'tr[data-jobid="' + jobid + '"]';
+					}).get().join(',');
+
+					$('#jobtable tr').not(sel).remove();
+				}
+			});
+		}
+
+		setInterval(function () {
+			update_jobtable();
+		}, 2000);
+
+		$( document ).on( "click", "button.stop-job", function() {
+			setTimeout(function() {
+				update_jobtable();
+			}, 175);
+		});
+	}
+</script>
 {% endblock %}
