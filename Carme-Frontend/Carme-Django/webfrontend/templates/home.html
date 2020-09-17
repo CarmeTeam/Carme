@@ -245,6 +245,8 @@
 						var jobid = $(this).data('jobid');
 						var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
 
+
+
 						if(existing.length > 0) {
 							if($(this).text() == existing.text()) {
 								// content equals, just update csrf
@@ -261,6 +263,13 @@
 							$('#jobtable').append($(this));
 						}
 					});
+
+					var sel = $(data).map(function() {
+						var jobid = $(this).data('jobid');
+						return 'tr[data-jobid="' + jobid + '"]';
+					}).get().join(',');
+
+					$('#jobtable tr').not(sel).remove();
 				}
 			});
 		}
