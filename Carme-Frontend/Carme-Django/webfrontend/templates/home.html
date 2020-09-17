@@ -216,22 +216,17 @@
 						window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
 					}
 				}, success: function (data) {
-					var content_reg = /<body.*?>([\S\s]*?)(?:<\/body>)/gmi;
-					var match = content_reg.exec(data);
+					var entries = $(data);
+					
+					entries.each(function( index ) {
+						var msgid = $(this).data('msgid');
+						var existing = $('#messages div[data-msgid="' + msgid + '"]');
 
-					if(match && match.length > 1) {
-						var entries = $(match[1]).filter('div');
-                        
-						entries.each(function( index ) {
-							var msgid = $(this).data('msgid');
-							var existing = $('#messages div[data-msgid="' + msgid + '"]');
-
-							if(existing.length == 0) {
-								// message not existing, prepend element
-								$('#messages').prepend($(this));
-							}
-						});
-					}
+						if(existing.length == 0) {
+							// message not existing, prepend element
+							$('#messages').prepend($(this));
+						}
+					});
 				}
 			});
 		}
@@ -244,33 +239,28 @@
 						window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
 					}
 				}, success: function (data) {
-					var content_reg = /<tbody.*?>([\S\s]*?)(?:<\/tbody>)/gmi;
-					var match = content_reg.exec(data);
+					var entries = $(data);
 
-					if(match && match.length > 1) {
-						var entries = $(match[1]).filter('tr');
+					entries.each(function( index ) {
+						var jobid = $(this).data('jobid');
+						var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
 
-						entries.each(function( index ) {
-							var jobid = $(this).data('jobid');
-							var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
-
-							if(existing.length > 0) {
-								if($(this).text() == existing.text()) {
-									// content equals, just update csrf
-									var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
-										existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
-										$(this).val(newTokens[index].value);
-									});
-								} else {
-									// content changed, replace element
-									$(this).replaceAll(existing);
-								}
+						if(existing.length > 0) {
+							if($(this).text() == existing.text()) {
+								// content equals, just update csrf
+								var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
+									existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
+									$(this).val(newTokens[index].value);
+								});
 							} else {
-								// job not existing, remove element
-								$('#jobtable').append($(this));
+								// content changed, replace element
+								$(this).replaceAll(existing);
 							}
-						});
-					}
+						} else {
+							// job not existing, remove element
+							$('#jobtable').append($(this));
+						}
+					});
 				}
 			});
 		}
