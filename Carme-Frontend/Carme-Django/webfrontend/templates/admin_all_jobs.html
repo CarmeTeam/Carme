@@ -89,8 +89,8 @@
 								$(this).replaceAll(existing);
 							}
 						} else {
-							// job not existing, remove element
-							$('#jobtable').append($(this));
+							// job not existing, add element
+							$('#jobtable').prepend($(this));
 						}
 					});
 
