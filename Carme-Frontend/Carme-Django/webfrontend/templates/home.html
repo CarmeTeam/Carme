@@ -215,15 +215,17 @@
 
 						if(existing.length > 0) {
 							if($(this).text() == existing.text()) {
-								// update csrf
+								// content equals, just update csrf
 								var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
 									existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
 									$(this).val(newTokens[index].value);
 								});
 							} else {
+								// content changed, replace element
 								$(this).replaceAll(existing);
 							}
 						} else {
+							// job not existing, remove element
 							$('#jobtable').append($(this));
 						}
 
@@ -251,7 +253,7 @@
 		setInterval(function () {
 			update_jobtable();
 			//update_content('/carme-base/JobTable/', 'jobtable');
-			//update_content('/carme-base/Messages/', 'messages');
+			update_content('/carme-base/Messages/', 'messages');
 		}, 2000);
 	}
 </script>
