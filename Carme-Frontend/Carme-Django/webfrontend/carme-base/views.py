@@ -50,11 +50,6 @@ def ldap_username(request):
 def ldap_home(request):
     return request.user.ldap_user.attrs['homeDirectory'][0]
 
-def calculate_jobheight(numjobs):
-    """calculate the approximate job table height"""
-
-    return 200 + numjobs * 60
-
 # no view, should be a model
 def generateChoices(request):
     """generates the list of items for the image drop down menue"""
@@ -137,6 +132,25 @@ def index(request):
 
     return render(request, 'home.html', context)
 
+@login_required(login_url='/login')
+def admin_all_jobs(request):
+    """renders the admin job table"""
+
+    request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
+
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
+
+    # get all jobs
+    slurm_list = SlurmJobs.objects.order_by("-slurm_id")
+
+    # render template
+    context = {
+        'slurm_list': slurm_list
+    }
+
+    return render(request, 'admin_job_table.html', context)
+
 def admin_job_table(request):
     """renders the admin job table"""
 
@@ -147,17 +161,13 @@ def admin_job_table(request):
 
     # get all jobs
     slurm_list = SlurmJobs.objects.order_by("-slurm_id")
-    numjobs = len(slurm_list)
-    jobheight = calculate_jobheight(numjobs)
 
     # render template
     context = {
-        'slurm_list': slurm_list,
-        'numjobs': numjobs,
-        'jobheight': jobheight,
+        'slurm_list': slurm_list
     }
 
-    return render(request, 'admin_job_table.html', context)
+    return render(request, 'blocks/admin_job_table.html', context)
 
 def job_table(request):
     """renders the user job table and add new slurm jobs after starting"""
@@ -169,14 +179,10 @@ def job_table(request):
 
     # get all jobs by user
     slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
-    numjobs = len(slurm_list_user)
-    jobheight = calculate_jobheight(numjobs)
 
     # render template
     context = {
-        'slurm_list_user': slurm_list_user,
-        'numjobs': numjobs,
-        'jobheight': jobheight,
+        'slurm_list_user': slurm_list_user
     }
     
     return render(request, 'blocks/job_table.html', context)

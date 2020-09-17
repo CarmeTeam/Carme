@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^login/$', views.login, name='login'),
     url(r'^proxy_auth/$', views.proxy_auth, name='proxy_auth'),
     url(r'^AdminJobTable/$', views.admin_job_table, name='admin_job_table'),
+    url(r'^AdminAllJobs/$', views.admin_all_jobs, name='admin_all_jobs'),
     url(r'^maintenance-mode/', include('maintenance_mode.urls')),
     url(r'^line_chart_json/$', views.line_chart_json, name='line_chart_json'),
     url(r'^Messages/$', views.messages, name='messages'), 
