@@ -124,10 +124,12 @@ def index(request):
         ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
 
     slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
-
+    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
+    
     # render template
     context = {
         'slurm_list_user': slurm_list_user,
+        'message_list': message_list,
         'start_job_form': startForm,
         'CARME_VERSION': settings.CARME_VERSION,
         'DEBUG': settings.DEBUG,
