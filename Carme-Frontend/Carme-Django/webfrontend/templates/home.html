@@ -199,6 +199,52 @@
 			});
 		}
 
+		function update_messages() {
+			$.get('/carme-base/JobTable/', function(data) {
+				var content_reg = /<tbody.*?>([\S\s]*?)(?:<\/tbody>)/gmi;
+				var match = content_reg.exec(data);
+
+				if(match && match.length > 1) {
+					var entries = $(match[1]).filter('tr');
+
+					entries.each(function( index ) {
+						var jobid = $(this).data('jobid');
+						//console.log(jobid);
+						var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
+						//console.log(existing);
+
+						if(existing.length > 0) {
+							if($(this).text() == existing.text()) {
+								// content equals, just update csrf
+								var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
+									existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
+									$(this).val(newTokens[index].value);
+								});
+							} else {
+								// content changed, replace element
+								$(this).replaceAll(existing);
+							}
+						} else {
+							// job not existing, remove element
+							$('#jobtable').append($(this));
+						}
+
+						//console.log( index + ": " + $( this ).text() );
+					});
+
+					//var a = $(entries[0]).find('input[name="csrfmiddlewaretoken"]').remove();
+					//var b = $($('#jobtable').children()[0]).find('input[name="csrfmiddlewaretoken"]').remove();
+
+					//console.log(a == b);
+
+					//console.log(entries[0]);
+					//console.log($('#jobtable').children()[0]);;
+					//console.log($(entries[0]).text() == $($('#jobtable').children()[0]).text());
+					//console.log(entries[0].isEqualNode($('#jobtable').children()[0]));
+				}
+			});
+		}
+
 		function update_jobtable() {
 			$.get('/carme-base/JobTable/', function(data) {
 				var content_reg = /<tbody.*?>([\S\s]*?)(?:<\/tbody>)/gmi;

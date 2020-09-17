@@ -135,11 +135,13 @@ def index(request):
 
     return render(request, 'home.html', context)
 
-@login_required(login_url='/login')
 def admin_job_table(request):
     """renders the admin job table"""
 
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
+
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
     slurm_list = SlurmJobs.objects.order_by("-slurm_id")
@@ -172,11 +174,13 @@ def admin_job_table_json(request):
 
     return JsonResponse(jobs_json)
 
-@login_required(login_url='/login')
 def job_table(request):
     """renders the user job table and add new slurm jobs after starting"""
 
     # NOTE: no update of session ex time here!
+
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
 
     # get all jobs by user
     slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
@@ -488,6 +492,9 @@ def change_password(request):
 
 def messages(request):
     """generate list of user messages"""
+
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
 
     message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
     
