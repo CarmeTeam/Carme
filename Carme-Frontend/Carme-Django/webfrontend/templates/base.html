@@ -71,11 +71,11 @@
 				</li>
 
 				{% if user.is_superuser %}
-				<li class="nav-item dropdown{% if '/carme-base/AdminJobTable' in request.path %} active{% endif %}">
+				<li class="nav-item dropdown{% if '/carme-base/AdminAllJobs/' in request.path %} active{% endif %}">
 					<a class="nav-link dropdown-toggle" href="#" id="dropdown-admin" data-toggle="dropdown"
 						aria-haspopup="true" aria-expanded="false">Admin</a>
 					<div class="dropdown-menu" aria-labelledby="dropdown-admin">
-						<a class="dropdown-item" href="/carme-base/AdminJobTable/"><i class="fa fa-tasks fa-fw"
+						<a class="dropdown-item" href="/carme-base/AdminAllJobs/"><i class="fa fa-tasks fa-fw"
 								aria-hidden="true"></i>&nbsp; All jobs</a>
 						{% if maintenance_mode %}
 						<a class="dropdown-item" href="/carme-base/maintenance-mode/off/"><i class="fa fa-unlock fa-fw"
