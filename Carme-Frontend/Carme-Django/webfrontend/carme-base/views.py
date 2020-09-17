@@ -498,7 +498,7 @@ def messages(request):
     if not request.user.is_authenticated:
         return HttpResponse('Unauthorized', status=401)
 
-    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('id'))[:10] #select only 10 latest messages
+    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10].reverse() #select only 10 latest messages
     
     # render template
     context = {
