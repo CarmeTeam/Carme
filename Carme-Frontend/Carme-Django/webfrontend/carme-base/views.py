@@ -149,7 +149,7 @@ def admin_all_jobs(request):
         'slurm_list': slurm_list
     }
 
-    return render(request, 'admin_job_table.html', context)
+    return render(request, 'admin_all_jobs.html', context)
 
 def admin_job_table(request):
     """renders the admin job table"""
