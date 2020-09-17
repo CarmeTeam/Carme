@@ -202,7 +202,7 @@
 					var match = content_reg.exec(data);
 
 					if(match && match.length > 1) {
-						document.getElementById('news').innerHTML = match[1];
+						document.getElementById('news').innerHTML = $(match[1]).filter('.wiki-article').first().innerHTML;
 					}
 				}
 			});
@@ -243,7 +243,7 @@
 					401: function (response) {
 						window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
 					}
-				}, success: function () {
+				}, success: function (data) {
 					var content_reg = /<tbody.*?>([\S\s]*?)(?:<\/tbody>)/gmi;
 					var match = content_reg.exec(data);
 
