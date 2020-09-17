@@ -556,12 +556,12 @@ class LineChartJSONView(BaseLineChartView):
         now = datetime.now()
         stat_gpus = np.asarray(ClusterStat.objects.values_list('date').order_by('id'))
 
-        rawdates = stat_gpus[-16:] 
+        rawdates = stat_gpus[-13:] 
         dates = list(map(lambda x: str(x[0].hour )+":"+str(x[0].minute).zfill(2), rawdates))
         lables=[]
 
-        for i in range(np.shape(stat_gpus[-16:,0])[0]-1):
-            lables.append("t"+str(i-np.shape(stat_gpus[-16:,0])[0]+1))
+        for i in range(np.shape(stat_gpus[-13:,0])[0]-1):
+            lables.append("t"+str(i-np.shape(stat_gpus[-13:,0])[0]+1))
         
         lables.append("now")
 
@@ -576,10 +576,10 @@ class LineChartJSONView(BaseLineChartView):
         """provides actual data"""
 
         stat_gpus = np.asarray(ClusterStat.objects.values_list('used','free','queued','reserved').order_by('id'))
-        used_gpus = list(stat_gpus[-16:,0]) 
-        free_gpus = list(stat_gpus[-16:,1]) 
-        queued_gpus = list(stat_gpus[-16:,2]) 
-        reserved_gpus = list(stat_gpus[-16:,3])
+        used_gpus = list(stat_gpus[-13:,0]) 
+        free_gpus = list(stat_gpus[-13:,1]) 
+        queued_gpus = list(stat_gpus[-13:,2]) 
+        reserved_gpus = list(stat_gpus[-13:,3])
 
         return [
             reserved_gpus,
