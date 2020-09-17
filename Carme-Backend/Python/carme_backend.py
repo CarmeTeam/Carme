@@ -378,7 +378,7 @@ class Backend(Service):
 
             # delete job if status is queued
             if job is None:
-                print("error exposed_cancel - no job found for slurm_id {} and user {}".format(slurm_id, user))
+                print("error exposed_cancel - no job found for slurm_id {} and user {}".format(job_id, user))
             else:
                 if job[0] == "queued":
                     try:
