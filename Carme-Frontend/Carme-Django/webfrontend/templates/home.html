@@ -202,7 +202,7 @@
 					var match = content_reg.exec(data);
 
 					if(match && match.length > 1) {
-						document.getElementById('news').innerHTML = $(match[1]).filter('.wiki-article').first().innerHTML;
+						document.getElementById('news').innerHTML = $(match[1]).find('.wiki-article').first().html();
 					}
 				}
 			});
