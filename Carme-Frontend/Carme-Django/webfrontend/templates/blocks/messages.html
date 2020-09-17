@@ -20,17 +20,15 @@
 <head></head>
 
 <body>
-	{% if message_list %}
-		{% for message in message_list %}
-			{% if message.color == "red" %}
-				<div class="alert alert-danger" role="alert">{{ message.message }}</div>
-			{% elif message.color == "#e8be17" %}
-				<div class="alert alert-info" role="alert">{{ message.message }}</div>
-			{% else %}
-				<div class="alert alert-success" role="alert">{{ message.message }}</div>
-			{% endif %}
-		{% endfor %}
-	{% endif %}
+	{% for message in message_list %}
+		{% if message.color == "red" %}
+			<div data-messageid="{{ message.id }}" class="alert alert-danger" role="alert">{{ message.message }}</div>
+		{% elif message.color == "#e8be17" %}
+			<div data-messageid="{{ message.id }}" class="alert alert-info" role="alert">{{ message.message }}</div>
+		{% else %}
+			<div data-messageid="{{ message.id }}" class="alert alert-success" role="alert">{{ message.message }}</div>
+		{% endif %}
+	{% endfor %}
 </body>
 
 </html>
