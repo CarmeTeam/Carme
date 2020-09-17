@@ -270,8 +270,15 @@
 
 		setInterval(function () {
 			update_jobtable();
+		}, 2000);
+
+		setInterval(function () {
 			update_messages();
 		}, 2000);
+
+		setInterval(function () {
+			update_chart();
+		}, 30000);
 	}
 </script>
 {% endblock %}
