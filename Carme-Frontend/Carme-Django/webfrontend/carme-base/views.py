@@ -160,7 +160,7 @@ def admin_job_table(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
-    slurm_list = SlurmJobs.objects.order_by("-slurm_id")
+    slurm_list = SlurmJobs.objects.order_by("slurm_id")
 
     # render template
     context = {
