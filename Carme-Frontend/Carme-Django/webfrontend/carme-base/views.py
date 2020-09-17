@@ -159,23 +159,6 @@ def admin_job_table(request):
 
     return render(request, 'admin_job_table.html', context)
 
-def admin_job_table_json(request):
-    """renders the user job table and add new slurm jobs after starting"""
-
-    # NOTE: no update of session ex time here!
-
-    if not request.user.is_authenticated or not request.user.is_superuser:
-        ret_json = json.loads('{"success":false,"error":"Unauthorized access."}')
-        return JsonResponse()
-
-    # get all jobs
-    slurm_list = SlurmJobs.objects.order_by("-slurm_id")
-    
-    jobs_str = '{"success":true,"jobs":' + serialize('json', slurm_list, cls=DjangoJSONEncoder) + '}'
-    jobs_json = json.loads(jobs_str)
-
-    return JsonResponse(jobs_json)
-
 def job_table(request):
     """renders the user job table and add new slurm jobs after starting"""
 
@@ -197,23 +180,6 @@ def job_table(request):
     }
     
     return render(request, 'blocks/job_table.html', context)
-
-def job_table_json(request):
-    """renders the user job table and add new slurm jobs after starting"""
-
-    # NOTE: no update of session ex time here!
-
-    if not request.user.is_authenticated:
-        ret_json = json.loads('{"success":false,"error":"Unauthorized access."}')
-        return JsonResponse()
-
-    # get all jobs by user
-    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
-    
-    jobs_str = '{"success":true,"jobs":' + serialize('json', slurm_list_user, cls=DjangoJSONEncoder) + '}'
-    jobs_json = json.loads(jobs_str)
-
-    return JsonResponse(jobs_json)
 
 @login_required(login_url='/login')
 def start_job(request):
@@ -508,23 +474,6 @@ def messages(request):
 
     return render(request, 'blocks/messages.html', context)
 
-def time_out(request):
-    """rendering time out"""
-    
-    # render template
-    context = {}
-
-    return render(request, 'time_out.html', context)
-
-
-def auth(request):
-    """authenticates connection requests (called py proxy)"""
-
-    if not request.user.is_authenticated:
-        return redirect('login')
-    else:
-        return HttpResponse(status=200)
-
 def proxy_auth(request):
     """authenticates connection requests (called py proxy)"""
 
@@ -617,5 +566,4 @@ class LineChartJSONView(BaseLineChartView):
         
         return datasets
 
-line_chart = TemplateView.as_view(template_name='line_chart.html')
 line_chart_json = LineChartJSONView.as_view()
