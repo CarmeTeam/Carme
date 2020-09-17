@@ -34,7 +34,7 @@
 			</td>
 			<td class="align-middle">
 				{% ifequal job.status 'running' %}
-				<form action="{% url 'job_info' %}" method="post" target="_blank">
+				<form action="{% url 'job_info' %}" method="post">
 					{% csrf_token %}
 					<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 					<button class="btn btn-secondary" type="submit"><i class="fa fa-info fa-fw" aria-hidden="true"></i></button>
