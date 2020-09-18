@@ -16,12 +16,17 @@ from django.http import HttpResponse
 from django.template import loader
 from .models import CarmeMessages, SlurmJobs, Images, CarmeJobTable, ClusterStat, GroupResources
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
 from django.contrib import messages as dj_messages
 from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
@@ -35,17 +40,15 @@ from random import randint
 from django.views.generic import TemplateView
 from chartjs.views.lines import BaseLineChartView
 import re
+from maintenance_mode.decorators import force_maintenance_mode_off
+from maintenance_mode.core import get_maintenance_mode
+import json
 
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
 
 def ldap_home(request):
     return request.user.ldap_user.attrs['homeDirectory'][0]
-
-def calculate_jobheight(numjobs):
-    """calculate the approximate job table height"""
-
-    return 200 + numjobs * 60
 
 # no view, should be a model
 def generateChoices(request):
@@ -113,10 +116,15 @@ def index(request):
         lastStat = None
     
     if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
-        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"]) 
+        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
 
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
+    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
+    
     # render template
     context = {
+        'slurm_list_user': slurm_list_user,
+        'message_list': message_list,
         'start_job_form': startForm,
         'CARME_VERSION': settings.CARME_VERSION,
         'DEBUG': settings.DEBUG,
@@ -124,45 +132,60 @@ def index(request):
 
     return render(request, 'home.html', context)
 
-@login_required(login_url='/TimeOut')
+@login_required(login_url='/login')
+def admin_all_jobs(request):
+    """renders the admin job table"""
+
+    request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
+
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
+
+    # get all jobs
+    slurm_list = SlurmJobs.objects.order_by("-slurm_id")
+
+    # render template
+    context = {
+        'slurm_list': slurm_list
+    }
+
+    return render(request, 'admin_all_jobs.html', context)
+
 def admin_job_table(request):
     """renders the admin job table"""
 
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
+
     # get all jobs
-    slurm_list = SlurmJobs.objects.all()
-    numjobs = len(slurm_list)
-    jobheight = calculate_jobheight(numjobs)
+    slurm_list = SlurmJobs.objects.order_by("slurm_id")
 
     # render template
     context = {
-        'slurm_list': slurm_list,
-        'numjobs': numjobs,
-        'jobheight': jobheight,
+        'slurm_list': slurm_list
     }
 
-    return render(request, 'admin_job_table.html', context)
+    return render(request, 'blocks/admin_job_table.html', context)
 
-@login_required(login_url='/TimeOut')
 def job_table(request):
     """renders the user job table and add new slurm jobs after starting"""
 
     # NOTE: no update of session ex time here!
 
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
+
     # get all jobs by user
     slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
-    numjobs = len(slurm_list_user)
-    jobheight = calculate_jobheight(numjobs)
 
     # render template
     context = {
-        'slurm_list_user': slurm_list_user,
-        'numjobs': numjobs,
-        'jobheight': jobheight,
+        'slurm_list_user': slurm_list_user
     }
     
-    return render(request, 'jobtable.html', context)
+    return render(request, 'blocks/job_table.html', context)
 
 @login_required(login_url='/login')
 def start_job(request):
@@ -198,7 +221,7 @@ def start_job(request):
 
             # gen unique job name
             chars = string.ascii_uppercase + string.digits
-            gpus_type = str(form.cleaned_data['gpu-type'])
+            gpus_type = str(form.cleaned_data['gpu_type'])
 
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
@@ -337,6 +360,20 @@ def job_info(request):
     # render template
     return render(request, 'job_info.html', context)
 
+@force_maintenance_mode_off
+def login(request):
+    """custom login"""
+
+    return LoginView.as_view(template_name='login.html')(request)
+
+@force_maintenance_mode_off
+@login_required(login_url='/login')
+def logout(request):
+    """custom logout"""
+
+    auth_logout(request)
+    return HttpResponseRedirect('/login/?logout=1')
+
 @login_required(login_url='/login')
 def stop_job(request):
     """stopping a job (handing request to backend)"""
@@ -430,7 +467,11 @@ def change_password(request):
 def messages(request):
     """generate list of user messages"""
 
-    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
+
+    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] # select only 10 latest messages
+    message_list.reverse() # reverse message list for correct appendance on update
     
     # render template
     context = {
@@ -438,23 +479,6 @@ def messages(request):
     }
 
     return render(request, 'blocks/messages.html', context)
-
-def time_out(request):
-    """rendering time out"""
-    
-    # render template
-    context = {}
-
-    return render(request, 'time_out.html', context)
-
-
-def auth(request):
-    """authenticates connection requests (called py proxy)"""
-
-    if not request.user.is_authenticated:
-        return redirect('login')
-    else:
-        return HttpResponse(status=200)
 
 def proxy_auth(request):
     """authenticates connection requests (called py proxy)"""
@@ -465,7 +489,9 @@ def proxy_auth(request):
         elif "HTTP_X_FORWARDED_URI" in request.META:
             path = request.META["HTTP_X_FORWARDED_URI"] # in normal cases the uri is used
 
-        if len(path) > 0:
+        if request.user.is_superuser: # superusers can access every job
+            return HttpResponse(status=200) # ok
+        elif len(path) > 0:
             first = path[1:].split("/")[0] # [1:] removes / from beginning
 
             if first.startswith("nb_") or first.startswith("ta_") or first.startswith("tb_"):
@@ -485,12 +511,12 @@ class LineChartJSONView(BaseLineChartView):
         now = datetime.now()
         stat_gpus = np.asarray(ClusterStat.objects.values_list('date').order_by('id'))
 
-        rawdates = stat_gpus[-16:] 
+        rawdates = stat_gpus[-13:] 
         dates = list(map(lambda x: str(x[0].hour )+":"+str(x[0].minute).zfill(2), rawdates))
         lables=[]
 
-        for i in range(np.shape(stat_gpus[-16:,0])[0]-1):
-            lables.append("t"+str(i-np.shape(stat_gpus[-16:,0])[0]+1))
+        for i in range(np.shape(stat_gpus[-13:,0])[0]-1):
+            lables.append("t"+str(i-np.shape(stat_gpus[-13:,0])[0]+1))
         
         lables.append("now")
 
@@ -505,10 +531,10 @@ class LineChartJSONView(BaseLineChartView):
         """provides actual data"""
 
         stat_gpus = np.asarray(ClusterStat.objects.values_list('used','free','queued','reserved').order_by('id'))
-        used_gpus = list(stat_gpus[-16:,0]) 
-        free_gpus = list(stat_gpus[-16:,1]) 
-        queued_gpus = list(stat_gpus[-16:,2]) 
-        reserved_gpus = list(stat_gpus[-16:,3])
+        used_gpus = list(stat_gpus[-13:,0]) 
+        free_gpus = list(stat_gpus[-13:,1]) 
+        queued_gpus = list(stat_gpus[-13:,2]) 
+        reserved_gpus = list(stat_gpus[-13:,3])
 
         return [
             reserved_gpus,
@@ -546,5 +572,4 @@ class LineChartJSONView(BaseLineChartView):
         
         return datasets
 
-line_chart = TemplateView.as_view(template_name='line_chart.html')
 line_chart_json = LineChartJSONView.as_view()
