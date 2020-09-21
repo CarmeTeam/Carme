@@ -370,10 +370,13 @@ def login(request):
 def logout(request):
     """custom logout"""
 
+    path = '/login/'
+
     if request.user.is_authenticated:
         auth_logout(request)
+        path += '?logout=1'
     
-    return HttpResponseRedirect('/login/?logout=1')
+    return HttpResponseRedirect(path)
 
 @login_required(login_url='/login')
 def stop_job(request):
