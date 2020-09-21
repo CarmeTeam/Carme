@@ -82,7 +82,7 @@ function carme_start_tensorboard () {
         sleep 1
       done
       echo "you can now access TensorBoard via"
-      echo "${CARME_URL}/tb_${CARME_HASH}"
+      echo "${CARME_URL}/tb_${CARME_HASH}/"
       echo ""
       echo "in order to visualize your data use carme_tensorboard_visualize"
       echo "if you want to stop TensorBoard run carme_stop_tensorboard"
