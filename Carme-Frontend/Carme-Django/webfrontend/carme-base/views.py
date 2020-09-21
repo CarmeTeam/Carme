@@ -367,12 +367,16 @@ def login(request):
     return LoginView.as_view(template_name='login.html')(request)
 
 @force_maintenance_mode_off
-@login_required(login_url='/login')
 def logout(request):
     """custom logout"""
 
-    auth_logout(request)
-    return HttpResponseRedirect('/login/?logout=1')
+    path = '/login/'
+
+    if request.user.is_authenticated:
+        auth_logout(request)
+        path += '?logout=1'
+    
+    return HttpResponseRedirect(path)
 
 @login_required(login_url='/login')
 def stop_job(request):

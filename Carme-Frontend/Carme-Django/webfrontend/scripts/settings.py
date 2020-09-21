@@ -298,7 +298,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #MAINTENANCE_MODE = None
 MAINTENANCE_MODE_IGNORE_SUPERUSER = True
 
-#MAINTENANCE_MODE_REDIRECT_URL = '/logout'
+MAINTENANCE_MODE_REDIRECT_URL = '/logout'
 
 # Auto logout
 # SESSION_COOKIE_AGE = 60*60 # logout aufter one hour - regardless of activity
