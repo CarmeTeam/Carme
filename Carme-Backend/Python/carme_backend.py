@@ -45,7 +45,7 @@ queries = {
     "select_job_status_by_id": "SELECT status FROM `{}` WHERE slurm_id = %s LIMIT 1".format(tables["jobs"]),
     "update_job_set_queued_running": "UPDATE `{}` SET status = \"running\", ip = %s, url_suffix = %s, nb_port = %s, tb_port = %s, ta_port = %s, gpu_ids = %s WHERE slurm_id = %s AND status = \"queued\"".format(tables["jobs"]),
     "update_job_cancelled": "UPDATE `{}` SET status = \"cancelled\" WHERE slurm_id = %s".format(tables["jobs"]),
-    "delete_job_queued": "DELETE FROM `{}` WHERE slurm_id = %s AND status = \"queued\"".format(tables["jobs"])
+    "delete_job": "DELETE FROM `{}` WHERE slurm_id = %s".format(tables["jobs"])
 }
 
 def proxy_config_str(url_suffix, entrypoint, ip, nb_port, tb_port, ta_port):
