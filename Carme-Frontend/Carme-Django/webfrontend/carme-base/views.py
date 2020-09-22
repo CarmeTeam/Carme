@@ -151,6 +151,7 @@ def admin_all_jobs(request):
 
     return render(request, 'admin_all_jobs.html', context)
 
+@force_maintenance_mode_off
 def admin_job_table(request):
     """renders the admin job table"""
 
@@ -169,6 +170,7 @@ def admin_job_table(request):
 
     return render(request, 'blocks/admin_job_table.html', context)
 
+@force_maintenance_mode_off
 def job_table(request):
     """renders the user job table and add new slurm jobs after starting"""
 
@@ -468,6 +470,7 @@ def change_password(request):
 
     return render(request, 'change_password.html', context)
 
+@force_maintenance_mode_off
 def messages(request):
     """generate list of user messages"""
 
