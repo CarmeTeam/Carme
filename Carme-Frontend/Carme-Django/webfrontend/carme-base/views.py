@@ -118,7 +118,7 @@ def index(request):
     if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
         ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
 
-    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
     message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
     
     # render template
@@ -178,7 +178,7 @@ def job_table(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs by user
-    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username)
+    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
 
     # render template
     context = {
@@ -500,7 +500,7 @@ def proxy_auth(request):
 
             if first.startswith("nb_") or first.startswith("ta_") or first.startswith("tb_"):
                 url_suffix = first[3:] # remove prefix part
-                jobs = SlurmJobs.objects.filter(url_suffix__exact=url_suffix, user__exact=request.user)
+                jobs = SlurmJobs.objects.filter(url_suffix__exact=url_suffix, user__exact=request.user, status__exact="running")
 
                 if(len(jobs) > 0):
                     return HttpResponse(status=200) # ok
