@@ -43,7 +43,10 @@ queries = {
     "insert_notification": "INSERT INTO `{}` (user, message, color) VALUES (%s, %s, %s)".format(tables["notifications"]),
     "select_job_by_id_and_user": "SELECT * FROM `{}` WHERE slurm_id = %s AND user = %s LIMIT 1".format(tables["jobs"]),
     "select_job_status_by_id": "SELECT status FROM `{}` WHERE slurm_id = %s LIMIT 1".format(tables["jobs"]),
-    "update_job": "UPDATE `{}` SET status = \"running\", ip = %s, url_suffix = %s, nb_port = %s, tb_port = %s, ta_port = %s, gpu_ids = %s WHERE slurm_id = %s".format(tables["jobs"]),
+    "update_job_details": "UPDATE `{}` SET ip = %s, url_suffix = %s, nb_port = %s, tb_port = %s, ta_port = %s, gpu_ids = %s WHERE slurm_id = %s".format(tables["jobs"]),
+    "update_queued_job_status_running": "UPDATE `{}` SET status = \"running\" WHERE slurm_id = %s AND status = \"queued\"".format(tables["jobs"]),
+    "update_job_status_cancelled": "UPDATE `{}` SET status = \"cancelled\" WHERE slurm_id = %s".format(tables["jobs"]),
+    "update_job_status_finished": "UPDATE `{}` SET status = \"finished\" WHERE slurm_id = %s".format(tables["jobs"]),
     "delete_job": "DELETE FROM `{}` WHERE slurm_id = %s".format(tables["jobs"])
 }
 
@@ -239,18 +242,46 @@ class Backend(Service):
             print("error exposed_update - route file could not be created for job {}".format(job_id))
             return ret
 
-        # update job in database
+        # update job details
         try:
             cur = self.db.cursor()
-            cur.execute(queries["update_job"], (ip, url_suffix, nb_port, tb_port, ta_port, gpu_ids, job_id,))
+            cur.execute(queries["update_job_details"], (ip, url_suffix, nb_port, tb_port, ta_port, gpu_ids, job_id,))
 
             self.db.commit()  
-        except: 
-            print("error exposed_update - sql statement update_job failed")
-            traceback.print_exc()
-
+        except:
             self.db.rollback()
 
+            print("error exposed_update - sql statement update_job_details failed")
+            traceback.print_exc()
+
+            return 1
+
+        # set job running, if queued
+        try:
+            cur = self.db.cursor()
+            cur.execute(queries["update_queued_job_status_running"], (job_id,))
+
+            self.db.commit()  
+        except:
+            self.db.rollback()
+
+            try:
+                cur = self.db.cursor()
+                cur.execute(queries["select_job_status_by_id"], (job_id,))
+
+                job = cur.fetchone()
+
+                if not job or job[0] is not "cancelled":
+                    print("error exposed_update - sql statement update_queued_job_status_running failed")
+                    traceback.print_exc()
+
+                    return 1
+            except:
+                print("error exposed_update - sql statement select_job_status_by_id failed")
+                traceback.print_exc()
+
+                return 1
+            
         return 0
 
     def exposed_schedule(self, user, home, image, mounts, partition, num_gpus, num_nodes, name, gpu_type):
@@ -364,30 +395,16 @@ class Backend(Service):
         ret = os.system(com)
         
         if ret == 0:
-            job = None
-
-            # select job from database
+            # set job to cancelled in database
             try:
                 cur = self.db.cursor()
-                cur.execute(queries["select_job_status_by_id"], (job_id,))
-
-                job = cur.fetchone()
+                cur.execute(queries["update_job_status_cancelled"], (job_id,))
             except:
-                print("error exposed_cancel - sql statement select_job_status_by_id failed")
+                print("error exposed_cancel - sql statement update_job_status_cancelled failed")
                 traceback.print_exc()
 
-            # delete job if status is queued
-            if job is None:
-                print("error exposed_cancel - no job found for slurm_id {} and user {}".format(job_id, user))
-            else:
-                if job[0] == "queued":
-                    try:
-                        cur.execute(queries["delete_job"], (job_id,))
+                return 1
 
-                        self.db.commit()
-                    except:
-                        print("error exposed_cancel - sql statement delete_job failed")
-                        traceback.print_exc()
 
             print("cancelled job {} for user {}".format(job_id, user))
             self.send_notification("Cancelled job {}".format(job_id), user, "#e8be17")
@@ -440,12 +457,12 @@ class Backend(Service):
         # delete job from database
         try:
             cur = self.db.cursor()
-            cur.execute(queries["delete_job"], (job_id,))
+            cur.execute(queries["update_job_status_finished"], (job_id,))
 
             self.db.commit()
-            self.send_notification("Terminated job {}".format(job_id), user, "#00B5FF")
+            self.send_notification("Finished job {}".format(job_id), user, "#00B5FF")
         except:
-            print("error exposed_epilog - sql statement delete_job failed")
+            print("error exposed_epilog - sql statement update_job_status_finished failed")
             traceback.print_exc()
 
             self.db.rollback() 
