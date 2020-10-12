@@ -142,7 +142,7 @@ def admin_all_jobs(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
-    slurm_list = SlurmJobs.objects.filter(status__in=["queued", "running"]).order_by("-slurm_id")
+    slurm_list = SlurmJobs.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
 
     # render template
     context = {
@@ -161,7 +161,7 @@ def admin_job_table(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
-    slurm_list = SlurmJobs.objects.filter(status__in=["queued", "running"]).order_by("-slurm_id")
+    slurm_list = SlurmJobs.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
 
     # render template
     context = {
