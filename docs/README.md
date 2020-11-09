@@ -100,6 +100,6 @@ _NOTE:_ We are open for contributions!
 ## **Sponsors**
 **The development of *Carme* is financed by research grants from**
 
-<img src="Images/BMBF.png" width="200" height="100">  
+<img src="Images/logo-bmbf.png" width="200" height="100">  
 
-<img src="Images/RLP.png" width="200" height="100">
+<img src="Images/logo-rlp.png" width="200" height="100">
