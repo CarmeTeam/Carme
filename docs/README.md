@@ -1,4 +1,4 @@
-<img src="Images/Carme-Stage--dark--symmetric.jpg" width="925">
+<img src="Images/Carme-Stage--dark--symmetric.jpg" width="740">
 
 
 ## **HPC meets interactive Data Science and Machine Learning**
@@ -34,7 +34,7 @@ _We combine established open source ML and DS tools with HPC backends and use th
 
 _Job submission scheme_
 
-<img src="Images/carme-run.png" width="700">
+<img src="Images/carme-run.png" width="740">
 
 
 ## **Key Features**
