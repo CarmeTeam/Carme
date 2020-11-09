@@ -1,4 +1,4 @@
-![carme_stage](Images/Carme-Stage--dark--symmetric.jpg)
+<img src="Images/Carme-Stage--dark--symmetric.jpg" width="925">
 
 
 ## **HPC meets interactive Data Science and Machine Learning**
@@ -14,23 +14,23 @@ an open source framework to manage resources for **multiple users** running **in
 
 
 ## **Presentations**
-_Selection_
+_Selection_ (not complete)
 * [Slides from our talk at ISC18 06/2018](https://www.researchgate.net/publication/325967129_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 * [Slides from our talk at LRZ 10/2018](https://www.researchgate.net/publication/328161743_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 * [Slides from ISC 06/2019](https://www.researchgate.net/publication/334319039_Carme_-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 
 
 ## **Core Idea**
-_Combine established open source ML and DS tools with HPC backends_
-* uses [Singularity containers](https://sylabs.io)
-* uses [Anaconda environments](https://www.anaconda.com/distribution)
-* uses e.g. [Theia-IDE](https://theia-ide.org) and [JupyterLab](https://github.com/jupyterlab/jupyterlab) as web based GUI-Frontends  
-  (extension to other GUIs is planed)
+_We combine established open source ML and DS tools with HPC backends and use therefore_
+* [Singularity containers](https://sylabs.io)
+* [Anaconda environments](https://www.anaconda.com/distribution)
+* web based GUI frontends e.g. [Theia-IDE](https://theia-ide.org) and [JupyterLab](https://github.com/jupyterlab/jupyterlab)
 * completely web frontend based  
-  (OS independent, no installation on user side needed)   
-* uses HPC job management and scheduler ([SLURM](https://slurm.schedmd.com))
-* uses HPC data I/O technologies like [Fraunhofer’s BeeGFS](https://www.beegfs.io)
-* uses HPC maintenance and monitoring tools
+  (OS independent, no installation on user side needed)
+* HPC job management and schedulers ([SLURM](https://slurm.schedmd.com))
+* HPC data I/O technologies like [Fraunhofer’s BeeGFS](https://www.beegfs.io)
+* HPC maintenance and monitoring tools
+
 
 _Job submission scheme_
 
@@ -39,32 +39,44 @@ _Job submission scheme_
 
 ## **Key Features**
 * **Open source**
-  * *Carme* uses only opensource components that allow commercial usage
-  * *Carme* is open source, allowing commercial usage  
-* **User Management**
-  * User quotas (GPU time, priority, GPUs per job, jobs per time, Disk quota)
-  * Different User Roles (Quotas, right to add containers) 
-* **Container Management**
-  * Container store (user selects from predefined containers)
-  * Adding of user defined containers
-* **Scheduler**
-  * Resource reservation
-  * instant access for interactive jobs   
-* **Data Management and I/O**
-  * Redundant, global file system (BeeGFS), mounts directly into container
-  * Temporary job FS on local SSDs for max performance (BeeOND) 
-* **Web-Interface**
-  * HTTPS and SSH (if allowed) access via proxy 
-  * Web frontend (management and IDE)   
+  * we use only opensource components that allow commercial usage
+  * *Carme* is open source, allowing commercial usage
+* **Seamless integration with available HPC tools**
+  * Job scheduling via **SLURM**
+  * Native **LDAP** support for user authentication
+  * Integrate existing distributed file systems like **BeeGFS**
+* **Access via web-interface**
+  * **OS independent** (only web browser needed)
+  * Full user **information** (running jobs, cluster usage, news /  messages)
+  * **Start/Stop jobs** within the web-interface
+* **Interactive jobs**
+  * **Flexible access to GPUs**
+  * Access via **web driven GUIs** like Theia-IDE or JupyterLab
+  * Job specific **monitoring information** in the web-interface  
+    (GPU/CPU utilization, memory usage, access to TensorBoard)
+* **Distributed multi-node and/or multi-gpu jobs**
+  * **Easy** and **intuitive** job scheduling
+  * Directly use **GPI**, **GPI-Space**, **MPI**, **HP-DLF** and **Horovod** within the jobs
+* **Full control about accounting and resource management**
+  * Job scheduling according to **user specific roles**
+  * **Compute resources** are **user exclusive**
+* **User maintained, containerized environments**
+  * **Singularity containers**  
+    (runs as normal user, GPU, Ethernet and Infiband support)
+  * **Anaconda Environments**  
+    (easy updates, project / user specific environments)
+  * **Built-in matching between GPU driver and ML/DL tools**
 
- 
+
 ## **Roadmap**
 * [x] since 04/2018: _Carme prototype_ is up and running on our Cluster 
-* [x] 03/2019: release r0.3.0 (first public release)
-* [x] 07/2019: release r0.4.0
-* [x] 11/2019: release r0.5.0 (latest)
-* [ ] 12/2019: release r0.6.0 (development)
-* [ ] 02/2020: release r0.7.0 (upcomming)
+* [x] 03/2019: r0.3.0 (first public release)
+* [x] 07/2019: r0.4.0
+* [x] 11/2019: r0.5.0
+* [x] 12/2019: r0.6.0
+* [x] 07/2020: r0.7.0
+* [x] 11/2020: **r0.8.0** (latest)
+* [ ] 02/2021: *r0.9.0* (development)
 
 
 ## **Documentation**
@@ -74,7 +86,9 @@ Visit our documentation at [doc.open-carme.org](http://doc.open-carme.org).
 ## **Who is behind Carme?**
 _Carme_ is developed at the [machine learning group](http://itwm.fraunhofer.de/ml) of the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
 
-![](Images/FhG-ITWM.png)
+
+<img src="Images/logo-itwm.png" width="200">
+
 
 _NOTE:_ We are open for contributions!
 
@@ -84,7 +98,8 @@ _NOTE:_ We are open for contributions!
 
 
 ## **Sponsors**
-The development of _Carme_ is financed by research grants from
+**The development of *Carme* is financed by research grants from**
 
-<a href="https://www.bmbf.de"><img src="Images/BMBF.jpeg"></a>
-<a href="https://mwwk.rlp.de"><img src="Images/RLP.jpg"></a>
+<img src="Images/BMBF.png" width="200" height="100">  
+
+<img src="Images/RLP.png" width="200" height="100">
