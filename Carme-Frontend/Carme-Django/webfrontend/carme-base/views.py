@@ -49,7 +49,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 check_password_file = os.path.join(BASE_DIR, 'scripts/check_password.py')
 
 if not os.path.isfile(check_password_file):
-    raise "check password module is missing in {}".format(check_password_file)
+    raise Exception("check password module is missing in {}".format(check_password_file))
 
 SourceFileLoader('check_password', check_password_file).load_module()
 from check_password import check_password, password_criteria_html
