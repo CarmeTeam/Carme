@@ -9,8 +9,8 @@ password_criteria_html = """
     <li>contains characters from three of the following four categories:<br>
         - English uppercase characters (A through Z)<br>
         - English lowercase characters (a through z)<br>
-        - Base 10 digits (0 through 9)</li>
-    - Non-alphanumeric characters (for example, :, #, %)
+        - Base 10 digits (0 through 9)<br>
+        - Non-alphanumeric characters (for example, :, #, %)</li>
 </ul>
 """
 
