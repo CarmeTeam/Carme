@@ -27,10 +27,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SourceFileLoader('CarmeConfigFrontend', BASE_DIR+'/../../CarmeConfig.frontend').load_module()
 from CarmeConfigFrontend import *
 
-check_password_file = os.path.join(BASE_DIR, '/scripts/check_password.py')
-if os.path.isfile(check_password_file):
-    SourceFileLoader('check_password', check_password_file).load_module()
-
 LOAD_CUSTOM_SETTINGS=os.path.isfile(BASE_DIR+'/scripts/custom.py')
 
 if LOAD_CUSTOM_SETTINGS:
