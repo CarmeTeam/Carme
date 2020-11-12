@@ -46,28 +46,13 @@ import json
 
 from importlib.machinery import SourceFileLoader
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-check_password_file = os.path.join(BASE_DIR, '/scripts/check_password.py')
+check_password_file = os.path.join(BASE_DIR, 'scripts/check_password.py')
 
-if os.path.isfile(check_password_file):
-    SourceFileLoader('check_password', check_password_file).load_module()
-    from check_password import check_password
-else:
-    def check_password(pw1, pw2):
-        # check results
-        valid_length = len(pw1) >= 13  # length
-        valid_equality = pw1 == pw2 # equality
+if not os.path.isfile(check_password_file):
+    raise "Check password module is missing in {}" % check_password_file
 
-        char_types = []
-        char_types.append(re.search(r"[0-9]", pw1) is not None)  # digits
-        char_types.append(re.search(r"[A-Z]", pw1) is not None)  # uppercase
-        char_types.append(re.search(r"[a-z]", pw1) is not None)  # lowercase
-        char_types.append(re.search(r"[^0-9a-zA-Z]", pw1) is not None) # other
-
-        valid_chars = sum(char_types) >= 3 # character types
-        
-        # whether the password passed all checks
-        return valid_length and valid_equality and valid_chars
-
+SourceFileLoader('check_password', check_password_file).load_module()
+from check_password import check_password, password_criteria_html
 
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
@@ -477,7 +462,8 @@ def change_password(request):
     
     # render template
     context = {
-        'form': form
+        'form': form,
+        'password_criteria': password_criteria_html
     }
 
     return render(request, 'change_password.html', context)

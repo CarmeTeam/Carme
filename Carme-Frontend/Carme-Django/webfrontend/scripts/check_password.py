@@ -1,5 +1,19 @@
 import re
 
+password_criteria_html = """
+<h5 class="mb-2">Password criteria</h5>
+<ul class="mb-2">
+    <li>must have a length of at least 13 characters</li>
+    <li>contains neither your account name nor parts of your full name that exceed two consecutive
+        characters</li>
+    <li>contains characters from three of the following four categories:<br>
+        - English uppercase characters (A through Z)<br>
+        - English lowercase characters (a through z)<br>
+        - Base 10 digits (0 through 9)</li>
+    - Non-alphanumeric characters (for example, :, #, %)
+</ul>
+"""
+
 def check_password(pw1, pw2):
     # check results
     valid_length = len(pw1) >= 13  # length
@@ -15,3 +29,4 @@ def check_password(pw1, pw2):
     
     # whether the password passed all checks
     return valid_length and valid_equality and valid_chars
+
