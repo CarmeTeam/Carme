@@ -43,6 +43,7 @@ import re
 from maintenance_mode.decorators import force_maintenance_mode_off
 from maintenance_mode.core import get_maintenance_mode
 import json
+from check_password import check_password
 
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
@@ -421,31 +422,18 @@ def change_password(request):
         if form.is_valid():
             # init
             user_dn = request.user.ldap_user.dn
-            password = str(form.cleaned_data['new_password1'])
-            
-            # check results
-            valid_length = len(password) >= 13  # length
-            valid_equality = str(form.cleaned_data['new_password1']) == str(
-                form.cleaned_data['new_password2']) # equality
-
-            char_types = []
-            char_types.append(re.search(r"[0-9]", password) is not None)  # digits
-            char_types.append(re.search(r"[A-Z]", password) is not None)  # uppercase
-            char_types.append(re.search(r"[a-z]", password) is not None)  # lowercase
-            char_types.append(re.search(r"[^0-9a-zA-Z]", password) is not None) # other
-
-            valid_chars = sum(char_types) >= 3 # character types
+            pw1 = str(form.cleaned_data['new_password1'])
+            pw2 = str(form.cleaned_data['new_password2'])
             
             # whether the password passed all checks
-            valid_password = valid_length and valid_equality and valid_chars
+            valid_password = check_password(pw1, pw2)
 
             if valid_password:
                 # backend call
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                         certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-                password = str(form.cleaned_data['new_password2'])
 
-                if conn.root.change_password(str(user_dn), ldap_username(request), password):
+                if conn.root.change_password(str(user_dn), ldap_username(request), pw1):
                     mess = "Password update for user: "+str(user_dn)
                     dj_messages.success(request, mess)
                 else:
