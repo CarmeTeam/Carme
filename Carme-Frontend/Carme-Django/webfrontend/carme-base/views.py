@@ -44,6 +44,16 @@ from maintenance_mode.decorators import force_maintenance_mode_off
 from maintenance_mode.core import get_maintenance_mode
 import json
 
+from importlib.machinery import SourceFileLoader
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+check_password_file = os.path.join(BASE_DIR, 'scripts/check_password.py')
+
+if not os.path.isfile(check_password_file):
+    raise Exception("check password module is missing in {}".format(check_password_file))
+
+SourceFileLoader('check_password', check_password_file).load_module()
+from check_password import check_password, password_criteria
+
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
 
@@ -421,31 +431,18 @@ def change_password(request):
         if form.is_valid():
             # init
             user_dn = request.user.ldap_user.dn
-            password = str(form.cleaned_data['new_password1'])
-            
-            # check results
-            valid_length = len(password) >= 13  # length
-            valid_equality = str(form.cleaned_data['new_password1']) == str(
-                form.cleaned_data['new_password2']) # equality
-
-            char_types = []
-            char_types.append(re.search(r"[0-9]", password) is not None)  # digits
-            char_types.append(re.search(r"[A-Z]", password) is not None)  # uppercase
-            char_types.append(re.search(r"[a-z]", password) is not None)  # lowercase
-            char_types.append(re.search(r"[^0-9a-zA-Z]", password) is not None) # other
-
-            valid_chars = sum(char_types) >= 3 # character types
+            pw1 = str(form.cleaned_data['new_password1'])
+            pw2 = str(form.cleaned_data['new_password2'])
             
             # whether the password passed all checks
-            valid_password = valid_length and valid_equality and valid_chars
+            valid_password = check_password(pw1, pw2)
 
             if valid_password:
                 # backend call
                 conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                         certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-                password = str(form.cleaned_data['new_password2'])
 
-                if conn.root.change_password(str(user_dn), ldap_username(request), password):
+                if conn.root.change_password(str(user_dn), ldap_username(request), pw1):
                     mess = "Password update for user: "+str(user_dn)
                     dj_messages.success(request, mess)
                 else:
@@ -465,7 +462,8 @@ def change_password(request):
     
     # render template
     context = {
-        'form': form
+        'form': form,
+        'password_criteria': password_criteria
     }
 
     return render(request, 'change_password.html', context)
