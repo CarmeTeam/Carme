@@ -52,7 +52,7 @@ if not os.path.isfile(check_password_file):
     raise Exception("check password module is missing in {}".format(check_password_file))
 
 SourceFileLoader('check_password', check_password_file).load_module()
-from check_password import check_password, password_criteria_html
+from check_password import check_password, password_criteria
 
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
@@ -463,7 +463,7 @@ def change_password(request):
     # render template
     context = {
         'form': form,
-        'password_criteria': password_criteria_html
+        'password_criteria': password_criteria
     }
 
     return render(request, 'change_password.html', context)

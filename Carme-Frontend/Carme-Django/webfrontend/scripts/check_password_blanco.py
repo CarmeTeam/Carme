@@ -1,6 +1,6 @@
 import re
 
-password_criteria_html = """
+password_criteria = """
 <h5 class="mb-2">Password criteria</h5>
 <ul class="mb-2">
     <li>must have a length of at least 13 characters</li>
