@@ -1,29 +1,23 @@
-<!---
-								# ---------------------------------------------- 
-								# Carme
-								# ----------------------------------------------
-								#
-								# see Carme development guide for documentation: 
-								# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
-								#
-								# Copyright 2019 by Fraunhofer ITWM  
-								# License: http://open-carme.org/LICENSE.md 
-								# Contact: info@open-carme.org
-								# ---------------------------------------------
--->
-{% load static %}
-<HTML>
-								<head>                
-																<link rel="stylesheet" type="text/css" href="{% static "home.css" %}">  
-								</head>                
-								<Body>
-																{% if message_list %}
-																{% for message in message_list %}
-																<div style="width=300px; background-color: {{ message.color }}; border-radius: 5px; box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7); padding: 5px 10px;  text-align: left; margin-top: 5px ">
-																								<b>{{ message.message }}</b>
-																</div>
-																{% endfor %}
-																<BR>
-																{% endif %}
-								</body>
-</HTML>
+{% comment %}
+# ---------------------------------------------- 
+# Carme
+# ----------------------------------------------
+#
+# see Carme development guide for documentation: 
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM  
+# License: http://open-carme.org/LICENSE.md 
+# Contact: info@open-carme.org
+# ---------------------------------------------
+{% endcomment %}
+
+{% for message in message_list %}
+	{% if message.color == "red" %}
+		<div data-msgid="{{ message.id }}" class="alert alert-danger" role="alert">{{ message.message }}</div>
+	{% elif message.color == "#e8be17" %}
+		<div data-msgid="{{ message.id }}" class="alert alert-info" role="alert">{{ message.message }}</div>
+	{% else %}
+		<div data-msgid="{{ message.id }}" class="alert alert-success" role="alert">{{ message.message }}</div>
+	{% endif %}
+{% endfor %}

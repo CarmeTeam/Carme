@@ -77,12 +77,12 @@ function carme_start_tensorboard () {
     TB_VERSION="$(conda list | grep tensorboard | awk '{ print $2 }')"
     if [[ -n "${TB_VERSION}" && -n $(which tensorboard) ]];then
       echo "starting TensorBoard (${TB_VERSION})"
-      (LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --host="$(hostname)" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" >>"${CARME_LOGDIR}/${SLURM_JOB_ID}.out" 2>>"${CARME_LOGDIR}/${SLURM_JOB_ID}.err" & echo "$!" > "${PID_FILE}")
+      (LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --host="$(hostname)" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" >>"${CARME_LOGDIR}/${CARME_JOB_ID}.out" 2>>"${CARME_LOGDIR}/${CARME_JOB_ID}.err" & echo "$!" > "${PID_FILE}")
       while ! wget -q -O/dev/null "http://$(hostname):${TB_PORT}/tb_${CARME_HASH}/"; do
         sleep 1
       done
       echo "you can now access TensorBoard via"
-      echo "${CARME_URL}/tb_${CARME_HASH}"
+      echo "${CARME_URL}/tb_${CARME_HASH}/"
       echo ""
       echo "in order to visualize your data use carme_tensorboard_visualize"
       echo "if you want to stop TensorBoard run carme_stop_tensorboard"

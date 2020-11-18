@@ -1,0 +1,67 @@
+{
+ "theia": {
+   "frontend": {
+     "config": {
+       "applicationName": "CARME IDE",
+       "preferences": {
+          "terminal.integrated.cursorBlinking": true
+       } 
+     }
+   }
+ },
+ "private": true,
+ "dependencies": {
+   "@theia/callhierarchy": "next",
+   "@theia/file-search": "next",
+   "@theia/git": "next",
+   "@theia/keymaps": "next",
+   "@theia/markers": "next",
+   "@theia/messages": "next",
+   "@theia/mini-browser": "next",
+   "@theia/navigator": "next",
+   "@theia/outline-view": "next",
+   "@theia/plugin-ext-vscode": "next",
+   "@theia/preferences": "next",
+   "@theia/preview": "next",
+   "@theia/search-in-workspace": "next",
+   "@theia/terminal": "next"
+ },
+ "devDependencies": {
+   "@theia/cli": "next"
+ },
+ "scripts": {
+   "prepare": "yarn run clean && yarn build && yarn run download:plugins",
+   "clean": "theia clean",
+   "build": "theia build --mode development",
+   "start": "theia start --plugins=local-dir:plugins",
+   "download:plugins": "theia download:plugins"
+ },
+ "theiaPluginsDir": "plugins",
+ "theiaPlugins": {
+   "vscode-builtin-configuration-editing": "http://open-vsx.org/api/vscode/configuration-editing/1.50.0/file/vscode.configuration-editing-1.50.0.vsix",
+   "vscode-builtin-debug-auto-launch": "http://open-vsx.org/api/vscode/debug-auto-launch/1.49.0/file/vscode.debug-auto-launch-1.49.0.vsix",
+   "vscode-builtin-cpp": "http://open-vsx.org/api/vscode/cpp/1.50.0/file/vscode.cpp-1.50.0.vsix",
+   "vscode-builtin-css": "http://open-vsx.org/api/vscode/css/1.50.0/file/vscode.css-1.50.0.vsix",
+   "vscode-builtin-go": "http://open-vsx.org/api/vscode/go/1.50.0/file/vscode.go-1.50.0.vsix",
+   "vscode-builtin-html": "http://open-vsx.org/api/vscode/html/1.50.0/file/vscode.html-1.50.0.vsix",
+   "vscode-builtin-javascript": "http://open-vsx.org/api/vscode/javascript/1.50.0/file/vscode.javascript-1.50.0.vsix",
+   "vscode-builtin-json": "http://open-vsx.org/api/vscode/json/1.50.0/file/vscode.json-1.50.0.vsix",
+   "vscode-builtin-log": "http://open-vsx.org/api/vscode/log/1.50.0/file/vscode.log-1.50.0.vsix",
+   "vscode-builtin-lua": "http://open-vsx.org/api/vscode/lua/1.50.0/file/vscode.lua-1.50.0.vsix",
+   "vscode-builtin-make": "http://open-vsx.org/api/vscode/make/1.50.0/file/vscode.make-1.50.0.vsix",
+   "vscode-builtin-markdown": "http://open-vsx.org/api/vscode/markdown/1.50.0/file/vscode.markdown-1.50.0.vsix",
+   "vscode-builtin-merge-conflict": "http://open-vsx.org/api/vscode/merge-conflict/1.50.0/file/vscode.merge-conflict-1.50.0.vsix",
+   "vscode-builtin-perl": "http://open-vsx.org/api/vscode/perl/1.50.0/file/vscode.perl-1.50.0.vsix",
+   "vscode-builtin-python": "http://open-vsx.org/api/vscode/python/1.50.0/file/vscode.python-1.50.0.vsix",
+   "vscode-builtin-r": "http://open-vsx.org/api/vscode/r/1.50.0/file/vscode.r-1.50.0.vsix",
+   "vscode-builtin-ruby": "http://open-vsx.org/api/vscode/ruby/1.50.0/file/vscode.ruby-1.50.0.vsix",
+   "vscode-builtin-shellscript": "http://open-vsx.org/api/vscode/shellscript/1.50.0/file/vscode.shellscript-1.50.0.vsix",
+   "vscode-builtin-sql": "http://open-vsx.org/api/vscode/sql/1.50.0/file/vscode.sql-1.50.0.vsix",
+   "vscode-builtin-xml": "http://open-vsx.org/api/vscode/xml/1.50.0/file/vscode.xml-1.50.0.vsix",
+   "vscode-builtin-yaml": "http://open-vsx.org/api/vscode/yaml/1.50.0/file/vscode.yaml-1.50.0.vsix",
+   "vscode-editorconfig": "https://open-vsx.org/api/EditorConfig/EditorConfig/0.15.1/file/EditorConfig.EditorConfig-0.15.1.vsix",
+   "vscode-references-view": "http://open-vsx.org/api/ms-vscode/references-view/0.0.47/file/ms-vscode.references-view-0.0.47.vsix",
+   "vscode-shellcheck": "https://open-vsx.org/api/timonwong/shellcheck/0.10.1/file/timonwong.shellcheck-0.10.1.vsix",
+   "vscode-sortlines": "https://open-vsx.org/api/Tyriar/sort-lines/1.9.0/file/Tyriar.sort-lines-1.9.0.vsix"
+ }
+}

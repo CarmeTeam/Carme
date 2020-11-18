@@ -6,12 +6,17 @@ CarmeConfig.backend*
 *.bak
 *.new
 
+*.bak
+*.new
+
 *.crt
 *.csr
 *.key
 
 *~
 *.swp
+
+*.DS_Store
 
 tmp
 
@@ -30,3 +35,4 @@ __pycache__/
 local_bash_functions/
 
 local-messages/
+

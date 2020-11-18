@@ -1,4 +1,4 @@
-<!---
+{% comment %}
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
@@ -10,14 +10,15 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
--->
+{% endcomment %}
 
-{% load static %}
 {% if maintenance_mode %}
-<div class="main-container">
-								<h3><font color="red">Maintenace Mode Active</font></h3>
+<div class="container">
+	<div class="row my-4 text-center">
+		<div class="col-md-8 offset-md-2 col-12">
+			<div class="alert alert-warning mb-0" style="display: inline-block;" role="alert"><i class="fa fa-exclamation-triangle fa-fw" aria-hidden="true"></i>&nbsp; Maintenance mode activated - user access denied.</div>
+		</div>
+	</div>
 </div>
-
-<BR>
 {% endif %} 
 

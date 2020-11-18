@@ -17,12 +17,12 @@ CARME_BASH_FUNCTIONS="${CARME_SCRIPTS_DIR}/carme_bash_functions.sh"
 
 
 # add job specific bash settings
-CARME_JOB_DIR="${HOME}/.local/share/carme/job/${SLURM_JOB_ID}"
-[[ -f "${CARME_JOB_DIR}/bashrc" ]] && source "${CARME_JOB_DIR}/bashrc"
+[[ -n ${SLURM_JOB_ID} ]] && CARME_JOBDIR="${HOME}/.local/share/carme/job/${SLURM_JOB_ID}"
+[[ -f "${CARME_JOBDIR}/bashrc" ]] && source "${CARME_JOBDIR}/bashrc"
 
 
 # add variables that should be availabe in ssh
-[[ -f "${CARME_JOB_DIR}/ssh/envs/$(hostname)" ]] && source "${CARME_JOB_DIR}/ssh/envs/$(hostname)"
+[[ -f "${CARME_JOBDIR}/ssh/envs/$(hostname)" ]] && source "${CARME_JOBDIR}/ssh/envs/$(hostname)"
 
 set +e
 set +o pipefail
@@ -73,21 +73,52 @@ fi
 
 
 # redefine mpirun ------------------------------------------------------------------------------------------------------------------
-if [[ -f "/usr/bin/mpirun" ]];then
+if [[ -f "/usr/bin/mpirun" && -x "/usr/bin/mpirun" ]];then
   function carme_mpirun () {
-    if [[ $# -eq 0 ]] ; then
-      /usr/bin/mpirun
-    elif [[ "${1}" == "--help" ]];then
-      /usr/bin/mpirun --help
-    elif [[ "${1}" == "-h" ]];then
-      /usr/bin/mpirun -h
-    elif [[ "${1}" == "--version" ]];then
-      /usr/bin/mpirun --version
-    elif [[ "${1}" == "-V" ]];then
-      /usr/bin/mpirun -V
+
+    local OPTERR
+    local OPTIND
+    local options=""
+
+    while getopts ":hV-:" options;do
+      case "${options}" in
+        h)
+          "/usr/bin/mpirun" -h
+          return
+        ;;
+        V)
+          "/usr/bin/mpirun" -V
+          return
+        ;;
+        -)
+          case "${OPTARG}" in
+            help)
+              if [[ -z "${2}" ]];then
+                "/usr/bin/mpirun" --help
+              else
+                "/usr/bin/mpirun" --help "${2}"
+              fi
+              return
+            ;;
+            version)
+              "/usr/bin/mpirun" --version
+              return
+            ;;
+          esac
+        ;;
+        *)
+          continue
+        ;;
+      esac
+    done
+
+    if [[ ${#} -eq 0 ]];then
+      echo "ERROR: No parameter(s) specified"
+      echo "Type 'carme_mpirun --help' for usage"
     else
-      /usr/bin/mpirun --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
+      "/usr/bin/mpirun" --mca plm rsh --mca plm_rsh_args "-F ${HOME}/.local/share/carme/job/${CARME_JOB_ID:?"not set"}/ssh/ssh_config" --mca btl_openib_warn_default_gid_prefix 0 --wdir "${TMP}" --mca orte_tmpdir_base "${TMP}" --use-hwthread-cpus "${@}"
     fi
+
   }
   complete -f -d -c carme_mpirun
   export -f carme_mpirun

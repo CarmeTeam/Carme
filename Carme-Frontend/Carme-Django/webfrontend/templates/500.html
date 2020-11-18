@@ -1,4 +1,6 @@
-<!---
+{% extends 'base.html' %}
+
+{% comment %}
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
@@ -11,17 +13,15 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
--->
+{% endcomment %}
 
-{% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Carme Home{% endblock %}
+
 {% block content %}
-<div class="main-container"> 
-<h2>Error - this page does not exits.</h2>
+<div class="container">
+	<h1 class="display-3">500 - Internal server error</h1>
+	<p class="lead">An internal server error occured, please contact your administrator for further support.</p>
 </div>
-{% if message_list %}
-{% endif %}
-
-
 {% endblock %}
