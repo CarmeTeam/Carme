@@ -216,6 +216,9 @@ CARME_LDAP_DC2=""
 CARME_LDAP_ADMIN=""
 #e.g. admin
 
+CARME_LDAP_SERVER_PROTO="ldaps://"
+#e.g. ldaps://
+
 CARME_LDAP_SERVER_IP=""
 #e.g. 123.456.789.180
 
