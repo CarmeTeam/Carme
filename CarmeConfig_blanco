@@ -336,22 +336,3 @@ CARME_BEEGFS_HOMEMOUNT_NODES=""
 CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/Carme-Django/static/zabbix-graphs"
 #default: /opt/Carme/Carme-Frontend/static/zabbix-graphs
 #-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# MatterMost specific variables ----------------------------------------------------------------------------------------------------
-CARME_MATTERMOST_TRIGGER=""
-#yes or no
-
-CARME_MATTERMOST_PATH=""
-#e.g. /opt/mattermost
-
-CARME_MATTERMOST_COMMAND=""
-#mattermost or platform [depends on mattermost version]
-
-CARME_MATTERMOST_EMAIL_BASE=""
-#e.g. mymail.com
-
-CARME_MATTERMOST_DEFAULT_TEAM=""
-#note: do not use uppercases
-#e.g. myteam [do not use uppercases]
-#-----------------------------------------------------------------------------------------------------------------------------------

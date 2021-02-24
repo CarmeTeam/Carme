@@ -63,11 +63,6 @@ CARME_LDAP_PASSWD_LENGTH=$(get_variable CARME_LDAP_PASSWD_LENGTH)
 CARME_LDAP_ADMIN=$(get_variable CARME_LDAP_ADMIN)
 CARME_LDAP_DC1=$(get_variable CARME_LDAP_DC1)
 CARME_LDAP_DC2=$(get_variable CARME_LDAP_DC2)
-CARME_MATTERMOST_TRIGGER=$(get_variable CARME_MATTERMOST_TRIGGER)
-CARME_MATTERMOST_PATH=$(get_variable CARME_MATTERMOST_PATH)
-CARME_MATTERMOST_COMMAND=$(get_variable CARME_MATTERMOST_COMMAND)
-CARME_MATTERMOST_EMAIL_BASE=$(get_variable CARME_MATTERMOST_EMAIL_BASE)
-CARME_MATTERMOST_DEFAULT_TEAM=$(get_variable CARME_MATTERMOST_DEFAULT_TEAM)
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -216,24 +211,12 @@ groubid: ${GROUPID}
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
-  # add to mattermost --------------------------------------------------------------------------------------------------------------
-  if [ "${CARME_MATTERMOST_TRIGGER}" = "yes" ];then
-    [[ -z ${CARME_MATTERMOST_PATH} ]] && die "CARME_MATTERMOST_PATH not set"
-    cd "${CARME_MATTERMOST_PATH}/bin" || die "cannot change directory to ${CARME_MATTERMOST_PATH}/bin"
-
-    [[ -z ${CARME_MATTERMOST_COMMAND} ]] && die "CARME_MATTERMOST_COMMAND not set"
-    "./${CARME_MATTERMOST_COMMAND}" user create --email "${LDAPUSER}"@"${CARME_MATTERMOST_EMAIL_BASE}" --username "${LDAPUSER}" --password "${LDAP_PASSWD}"
-    "./${CARME_MATTERMOST_COMMAND}" team add "${CARME_MATTERMOST_DEFAULT_TEAM}" "${LDAPUSER}"@"${CARME_MATTERMOST_EMAIL_BASE}" "${LDAPUSER}"
-    cd || die "cannot change directory"
-  fi
-  #---------------------------------------------------------------------------------------------------------------------------------
-
-
   # note ---------------------------------------------------------------------------------------------------------------------------
   echo "user credentials are stored in"
   echo "${CARME_LDAP_DEFAULTPASSWD_FOLDER}/${LDAP_FILENAME}"
   echo ""
   #---------------------------------------------------------------------------------------------------------------------------------
+
 
   # reminder -----------------------------------------------------------------------------------------------------------------------
   echo "remember to"
