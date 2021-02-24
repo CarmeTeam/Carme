@@ -131,7 +131,7 @@ CARME_URL=""
 CARME_TIMEZONE=""
 #e.g. Europe/Berlin
 
-CARME_FRONTEND_ID=""
+CARME_FRONTEND_ID="Carme"
 #e.g. unique name for the frontend (needed when running multiple frontends)
 
 CARME_FRONTEND_PATH="/opt/Carme/Carme-Frontend"
@@ -143,15 +143,15 @@ CARME_FRONTEND_DEBUG=
 CARME_FRONTEND_KEY=''
 #needs to be secret and different for each install
 
-#Admin pannel
-CARME_ADMIN_HEADER=""
-#e.g.
+#Admin portal
+CARME_ADMIN_HEADER="Carme Admin"
+#e.g. "Carme Admin"
 
-CARME_ADMIN_SITE_NAME=""
-#e.g.
+CARME_ADMIN_SITE_NAME="Carme Admin Portal"
+#e.g. "Carme Admin Portal"
 
-CARME_ADMIN_SITE_INDEX=""
-#e.g.
+CARME_ADMIN_SITE_INDEX="Welcome to the Carme Admin Portal"
+#e.g. "Welcome to the Carme Admin Portal"
 
 CARME_FRONTEND_LINK_PROXY=""
 #e.g. https://my-proxy.my-carme-cluster.institute.com/
@@ -165,33 +165,11 @@ CARME_FRONTEND_LINK_SWITCH=""
 CARME_FRONTEND_LINK_LDAP=""
 #e.g. https://my-ldap.my-carme-cluster.institute.com/
 
-CARME_FRONTEND_LINK_MATTERMOST=""
-#e.g. https://my-mattermost.my-carme-cluster.institute.com/
-
 CARME_FRONTEND_LINK_DISCLAIMER=""
 #link to your usage disclaimer
 
 CARME_FRONTEND_LINK_PRIVACY=""
 #link to your data privacy disclaimer
-
-CARME_FRONTEND_LINK_ORGA_URL=""
-#link to your university|department|institute|company
-
-CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR=""
-#e.g.
-
-CARME_FRONTEND_LOGO_TOP_LEFT=""
-#e.g. the logo of your department
-#must bee in static
-
-CARME_FRONTEND_LOGO_TOP_RIGHT_1=""
-#e.g. the logo of your univerity
-
-CARME_FRONTEND_LOGO_TOP_RIGHT_2=""
-#e.g. the logo of some founding
-
-CARME_FRONTEND_TITLE=""
-#e.g.
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
