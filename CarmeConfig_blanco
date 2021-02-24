@@ -330,9 +330,3 @@ CARME_BEEGFS_STORAGENODES=""
 CARME_BEEGFS_HOMEMOUNT_NODES=""
 #e.g. node01 node02 node03 ...
 #-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# Zabbix specific variables --------------------------------------------------------------------------------------------------------
-CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/Carme-Django/static/zabbix-graphs"
-#default: /opt/Carme/Carme-Frontend/static/zabbix-graphs
-#-----------------------------------------------------------------------------------------------------------------------------------
