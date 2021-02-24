@@ -83,9 +83,6 @@ CARME_BASE_MOUNTS='_-B_/opt/Carme/Carme-Scripts/InsideContainer:/home/.CarmeScri
 
 
 # CARME backend specific variables -------------------------------------------------------------------------------------------------
-CARME_BACKEND_DEBUG=
-#True or False (note: do not use double quotes)
-
 CARME_BACKEND_PATH="/opt/Carme/Carme-Backend/"
 #default: /opt/Carme/Carme-Backend/
 

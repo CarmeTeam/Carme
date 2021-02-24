@@ -29,7 +29,7 @@ from importlib.machinery import SourceFileLoader
 SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig.backend').load_module()
 
 from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
-from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT, CARME_BACKEND_DEBUG
+from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT
 from CarmeConfig import CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
 from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
 from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS

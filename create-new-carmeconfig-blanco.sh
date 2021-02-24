@@ -90,7 +90,7 @@ echo "copied ${CONFIG_FILE} to ${CONFIG_FILE_BLANCO_NEW}"
 # delete non default values in CarmeConfig_blanco.new ------------------------------------------------------------------------------
 echo "stripping the set non default variable values from ${CONFIG_FILE_BLANCO_NEW}"
 for ENTRIES in "${VARIABLE_ARRAY[@]}";do
-  if [[ "${ENTRIES}" =~ CARME_BACKEND_DEBUG|CARME_BACKEND_PORT|CARME_FRONTEND_DEBUG|CARME_HARDWARE_NUM_GPUS ]];then
+  if [[ "${ENTRIES}" =~ CARME_BACKEND_PORT|CARME_FRONTEND_DEBUG|CARME_HARDWARE_NUM_GPUS ]];then
     sed -i -e 's/'"${ENTRIES}"'=.*/'"${ENTRIES}"'=/g' ${CONFIG_FILE_BLANCO_NEW}
   elif [[ "${ENTRIES}" =~ CARME_PROXY_PATH|CARME_BASE_MOUNTS|CARME_FRONTEND_KEY ]];then
     sed -i -e 's/'"${ENTRIES}"'=\x27.*\x27/'"${ENTRIES}"'=\x27\x27/g' ${CONFIG_FILE_BLANCO_NEW}
