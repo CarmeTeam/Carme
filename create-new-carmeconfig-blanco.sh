@@ -42,7 +42,7 @@ is_root
 CONFIG_FILE="/opt/Carme/CarmeConfig"
 CONFIG_FILE_BLANCO_NEW="/opt/Carme/CarmeConfig_blanco.new"
 
-DEFAULT_VARIABLES=("CARME_VERSION" "CARME_BACKEND_PATH" "CARME_MESSAGE_PATH" "CARME_FRONTEND_PATH" "CARME_SLURM_CONFIG_FILE" "CARME_SCRIPTS_PATH" "CARME_TMPDIR")
+DEFAULT_VARIABLES=("CARME_VERSION" "CARME_BACKEND_PATH" "CARME_FRONTEND_PATH" "CARME_SLURM_CONFIG_FILE" "CARME_SCRIPTS_PATH" "CARME_TMPDIR")
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
