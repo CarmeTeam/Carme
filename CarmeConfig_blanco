@@ -83,7 +83,7 @@ CARME_GATEWAY=""
 CARME_MESSAGE_PATH="/home/.CarmeScripts/Carme-Messages"
 #default: /home/.CarmeScripts/Carme-Messages
 
-CARME_BASE_MOUNTS=''
+CARME_BASE_MOUNTS='_-B_/opt/Carme/Carme-Scripts/InsideContainer:/home/.CarmeScripts'
 #e.g.
 #-----------------------------------------------------------------------------------------------------------------------------------
 
