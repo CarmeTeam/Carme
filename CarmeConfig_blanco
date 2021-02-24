@@ -116,11 +116,11 @@ CARME_SSL_EMAIL_BASE=""
 
 
 # CARME proxy specific variables ---------------------------------------------------------------------------------------------------
-CARME_PROXY_PATH_BACKEND=''
-#e.g. '/opt/Carme/Carme-Proxy/'
+CARME_PROXY_PATH_BACKEND='/opt/Carme-Proxy-Routes/'
+#default: /opt/Carme-Proxy-Routes/
 
-CARME_PROXY_PATH_FRONTEND=''
-#e.g. '/opt/traefik/'
+CARME_PROXY_PATH_FRONTEND='/opt/traefik/'
+#default: /opt/traefik/
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
