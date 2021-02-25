@@ -1,0 +1,26 @@
+/var/log/carme/apache/*.log {
+  daily
+  rotate 7
+  missingok
+  compress
+  compresscmd /usr/bin/xz
+  uncompresscmd /usr/bin/unxz
+  compressext .xz
+  compressoptions -9
+  delaycompress
+  notifempty
+}
+
+/var/log/carme/proxy/*.log {
+  daily
+  rotate 7
+  missingok
+  maxsize 100M
+  compress
+  compresscmd /usr/bin/xz
+  uncompresscmd /usr/bin/unxz
+  compressext .xz
+  compressoptions -9
+  delaycompress
+  notifempty
+}
