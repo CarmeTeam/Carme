@@ -68,7 +68,7 @@ complete -f carme_unarchive
 
 
 # define function to start tensorboard ---------------------------------------------------------------------------------------------
-function carme_start_tensorboard () {
+function carme_tensorboard_start () {
   PID_FILE="${CARME_JOBDIR}/tensorboard.pid"
   if [[ -f "${PID_FILE}" ]];then
     echo "ERROR: TensorBoard is already running."
@@ -96,7 +96,7 @@ function carme_start_tensorboard () {
 
 
 # define function to stop tensorboard ----------------------------------------------------------------------------------------------
-function carme_stop_tensorboard () {
+function carme_tensorboard_stop () {
   PID_FILE="${CARME_JOBDIR}/tensorboard.pid"
   if [[ -f "${PID_FILE}" ]];then
     read -r PID < "${PID_FILE}"
