@@ -37,6 +37,10 @@ MirrorURL: http://ftp.de.debian.org/debian/
     # install basig python libs
     apt install -y python3-pip default-libmysqlclient-dev python-dev python3-pyldap libsasl2-dev libldap2-dev libssl-dev
 
+    # install django stuff
+    pip3 install django
+    pip3 install django-auth-ldap django-auth-ldap django-bootstrap-themes django-chartjs django-classy-tags django-db-logger django-filter django-js-asset django-logtailer django-maintenance-mode django-material django-material django-mptt django-nyt django-sekizai django-settings-export django-todo django-viewflow django-viewflow mysqlclient numpy rpyc whitenoise wiki
+
     # set timezone
     rm /etc/localtime
     ln -snf /usr/share/zoneinfo/Europe/Berlin /etc/localtime     # change to your preferred timezone
