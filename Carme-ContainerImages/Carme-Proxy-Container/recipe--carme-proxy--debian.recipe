@@ -16,18 +16,21 @@ MirrorURL: http://ftp.de.debian.org/debian/
     echo "deb-src http://ftp.de.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list 
 
     # base stuff -------------------------------------------------------------------------------------------------------------------
-    apt install -y sudo
-    apt install -y wget
-    mkdir /opt/traefik && cd /opt/traefik
-    wget https://github.com/containous/traefik/releases/download/v1.7.12/traefik_linux-amd64
-    chmod 700 traefik_linux-amd64
-    cd && apt purge -y wget
-    
-    ln -s /opt/Carme-Traefik-Logs /var/log/traefik
-    ln -s /opt/Carme/Carme-Proxy/traefik-conf/traefik.toml /opt/traefik/traefik.toml
-    ln -s /opt/Carme/Carme-Proxy/SSL /opt/traefik/SSL
+    apt update
 
-    chown -R www-data:www-data /opt/traefik
+    apt install -y sudo less vim nano htop
+
+    if [ ! -f "/opt/traefik/traefik" ];then
+        apt install -y wget
+        mkdir /opt/traefik && cd /opt/traefik
+        wget https://github.com/containous/traefik/releases/download/v2.4.3/traefik_v2.4.3_linux_amd64.tar.gz
+        tar -xvf traefik_v2.4.3_linux_amd64.tar.gz traefik
+        rm traefik_v2.4.3_linux_amd64.tar.gz
+        chmod 700 traefik
+        cd && apt purge -y wget
+    
+        chown -R www-data:www-data /opt/traefik
+    fi
 
     # set timezone
     rm /etc/localtime
@@ -52,8 +55,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
     export XDG_RUNTIME_DIR=""
 
 %runscript
-    echo "This is a Singularity container for Traefik (Debian Version)"
+    echo "This is a singularity container for traefik 2.4.3 (Debian version)"
 
 %startscript
-sudo -u www-data /opt/traefik/traefik_linux-amd64 --configfile=/opt/traefik/traefik.toml
-
+    sudo -u www-data /opt/traefik/traefik --configfile=/opt/traefik/traefik.toml
