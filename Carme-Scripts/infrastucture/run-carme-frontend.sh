@@ -36,7 +36,7 @@ function die () {
 # define paramters -----------------------------------------------------------------------------------------------------------------
 IMAGE_NAME="carme-frontend"
 INSTANCE_NAME="CarmeFrontend"
-APACHE_LOGS_DIR="/var/log/Carme/Carme-Apache-Logs"
+APACHE_LOGS_DIR="/var/log/carme/apache"
 PROXY_ROUTES_DIR="/opt/Carme-Proxy-Routes"
 CARME_FRONTEND_DIR="/opt/Carme/Carme-Frontend"
 #-----------------------------------------------------------------------------------------------------------------------------------
