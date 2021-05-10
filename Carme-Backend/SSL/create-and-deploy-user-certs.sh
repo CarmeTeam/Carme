@@ -86,39 +86,52 @@ if [ "${RESP}" = "y" ]; then
     [[ -z ${CLUSTER_USER_GROUP} ]] && die "CLUSTER_USER_GROUP not set"
     #-------------------------------------------------------------------------------------------------------------------------------
 
-
-    # create new user keys ---------------------------------------------------------------------------------------------------------
-    echo "creating certs for ${CLUSTER_USER}:${CLUSTER_USER_GROUP}"
-
-    openssl genrsa -out "${CLUSTER_USER}.key" 4096
-
-    openssl req -new -key "${CLUSTER_USER}.key" -out "${CLUSTER_USER}.csr" -days 3652 -subj "/C=$CARME_SSL_C/ST=$CARME_SSL_ST/L=$CARME_SSL_L/O=$CARME_SSL_O/OU=${CARME_SSL_OU}/CN=${CLUSTER_USER}/emailAddress=${CLUSTER_USER}${CARME_SSL_EMAIL_BASE}" -passin pass:"" 
-
-    openssl x509 -req -days 3652 -in "${CLUSTER_USER}.csr" -CA backend.crt -CAkey backend.key -set_serial 01 -out "${CLUSTER_USER}.crt"
-    #-------------------------------------------------------------------------------------------------------------------------------
-
-
-    # change ownership of new certificates -----------------------------------------------------------------------------------------
-    chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CLUSTER_USER}.crt"
-    chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CLUSTER_USER}.csr"
-    chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CLUSTER_USER}.key"
-    #-------------------------------------------------------------------------------------------------------------------------------
-
-
-    # move new certificates to /home/$USER/.config/carme ---------------------------------------------------------------------------
+    # determine user home ----------------------------------------------------------------------------------------------------------
     USER_HOME=$(getent passwd "${CLUSTER_USER}" | cut -d: -f6)
     [[ -z ${USER_HOME} ]] && die "USER_HOME not set"
+    #-------------------------------------------------------------------------------------------------------------------------------
 
-    CERT_STORE="${USER_HOME}/.config/carme"
-    if [ ! -d "${CERT_STORE}" ]; then
-      mkdir "${CERT_STORE}"
+
+    # check for config and cert folder ---------------------------------------------------------------------------------------------
+    USER_CONFIG_FOLDER="${USER_HOME}/.config"
+    if [ ! -d "${USER_CONFIG_FOLDER}" ];then
+      mkdir "${USER_CONFIG_FOLDER}"
+      chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CONFIG_FOLDER}"
     fi
 
-    echo "move new user certs to ${USER_HOME}/.config/carme"
-    mv -v "${CLUSTER_USER}.crt" "${CERT_STORE}/${CLUSTER_USER}.crt"
-    mv -v "${CLUSTER_USER}.csr" "${CERT_STORE}/${CLUSTER_USER}.csr"
-    mv -v "${CLUSTER_USER}.key" "${CERT_STORE}/${CLUSTER_USER}.key"
+    CERT_STORE="${USER_CONFIG_FOLDER}/carme"
+    if [ ! -d "${CERT_STORE}" ];then
+      mkdir "${CERT_STORE}"
+      chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CERT_STORE}"
+    fi
     #-------------------------------------------------------------------------------------------------------------------------------
+
+
+    # create new user keys ---------------------------------------------------------------------------------------------------------
+    USER_KEY="${CERT_STORE}/${CLUSTER_USER}.key"
+    USER_CSR="${CERT_STORE}/${CLUSTER_USER}.csr"
+    USER_CRT="${CERT_STORE}/${CLUSTER_USER}.crt"
+
+    KEY_BIT="4096"
+    VALIDATION_TIME="3652"
+
+    # create user key file
+    openssl genrsa -out "${USER_KEY}" ${KEY_BIT}
+
+    # create user csr file
+    openssl req -new -key "${USER_KEY}" -out "${USER_CSR}" -days ${VALIDATION_TIME} -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=${CLUSTER_USER}/emailAddress=${CLUSTER_USER}${CARME_SSL_EMAIL_BASE}" -passin pass:""
+
+    # create user crt file
+    openssl x509 -req -days ${VALIDATION_TIME} -in "${USER_CSR}" -CA ${BACKEND_CERT} -CAkey ${BACKEND_KEY} -set_serial 01 -out "${USER_CRT}"
+    #-------------------------------------------------------------------------------------------------------------------------------
+
+
+    # change ownership of new certificates ---------------------------------------------------------------------------------------------
+    [[ -f "${USER_CSR}" ]] && rm "${USER_CSR}"
+    chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CRT}"
+    chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_KEY}"
+    #-----------------------------------------------------------------------------------------------------------------------------------
+
   done
 
 else
@@ -126,3 +139,5 @@ else
   echo "Bye Bye..."
 
 fi
+
+exit 0
