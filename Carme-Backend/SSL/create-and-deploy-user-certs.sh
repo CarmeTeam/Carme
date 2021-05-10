@@ -59,10 +59,15 @@ CARME_SSL_EMAIL_BASE=$(get_variable CARME_SSL_EMAIL_BASE)
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# define backend cert and key file -------------------------------------------------------------------------------------------------
+PATH_TO_BACKEND_CERT_AND_KEY="/opt/Carme/Carme-Backend/SSL"
+BACKEND_CERT="${PATH_TO_BACKEND_CERT_AND_KEY}/backend.crt"
+BACKEND_KEY="${PATH_TO_BACKEND_CERT_AND_KEY}/backend.key"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # check if backend cert exists -----------------------------------------------------------------------------------------------------
-if [[ ! -f backend.crt && ! -f backend.key ]]; then
-  die "ERROR: backend.crt and backend.key have to be in this directory"
-fi
+[[ ! -f ${BACKEND_CERT} && ! -f ${BACKEND_KEY} ]] && die "backend.crt and backend.key have to be in '${PATH_TO_BACKEND_CERT_AND_KEY}'"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
