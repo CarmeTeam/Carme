@@ -1,9 +1,12 @@
 #!/bin/bash
 # ----------------------------------------------------------------------------------------------------------------------------------
-# script to create user certificates needed in carme
+# script to create user certificates needed in carme modified to be used in scripts
 # ----------------------------------------------------------------------------------------------------------------------------------
 #
-# Copyright 2019 by Fraunhofer ITWM
+# USAGE:
+# bash create-and-deploy-user-certs--single-user.sh USERNAME
+#
+# Copyright 2021 by Fraunhofer ITWM
 # License: http://open-carme.org/LICENSE.md
 # Contact: info@open-carme.org
 # ----------------------------------------------------------------------------------------------------------------------------------
@@ -28,7 +31,7 @@ PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
 if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  die "ERROR: carme-basic-bash-functions.sh not found but needed"
+  die "carme-basic-bash-functions.sh not found but needed"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -71,73 +74,58 @@ BACKEND_KEY="${PATH_TO_BACKEND_CERT_AND_KEY}/backend.key"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-read -rp "Do you want to create a new user certificate (validity 10 years)? [y/N] " RESP
-echo ""
+CLUSTER_USER="${1}"
 
-if [ "${RESP}" = "y" ]; then
-
-  read -rp "enter ldap-username(s) of users that need a new certificate [multiple users separated by space] " CLUSTER_USER_HELPER
-  echo ""
-
-  for CLUSTER_USER in ${CLUSTER_USER_HELPER}; do
-
-    # determine user group ---------------------------------------------------------------------------------------------------------
-    CLUSTER_USER_GROUP=$(id -gn "$CLUSTER_USER")
-    [[ -z ${CLUSTER_USER_GROUP} ]] && die "CLUSTER_USER_GROUP not set"
-    #-------------------------------------------------------------------------------------------------------------------------------
-
-    # determine user home ----------------------------------------------------------------------------------------------------------
-    USER_HOME=$(getent passwd "${CLUSTER_USER}" | cut -d: -f6)
-    [[ -z ${USER_HOME} ]] && die "USER_HOME not set"
-    #-------------------------------------------------------------------------------------------------------------------------------
+# determine user group -------------------------------------------------------------------------------------------------------------
+CLUSTER_USER_GROUP=$(id -gn "$CLUSTER_USER")
+[[ -z ${CLUSTER_USER_GROUP} ]] && die "CLUSTER_USER_GROUP not set"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-    # check for config and cert folder ---------------------------------------------------------------------------------------------
-    USER_CONFIG_FOLDER="${USER_HOME}/.config"
-    if [ ! -d "${USER_CONFIG_FOLDER}" ];then
-      mkdir "${USER_CONFIG_FOLDER}"
-      chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CONFIG_FOLDER}"
-    fi
-
-    CERT_STORE="${USER_CONFIG_FOLDER}/carme"
-    if [ ! -d "${CERT_STORE}" ];then
-      mkdir "${CERT_STORE}"
-      chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CERT_STORE}"
-    fi
-    #-------------------------------------------------------------------------------------------------------------------------------
+# determine user home --------------------------------------------------------------------------------------------------------------
+USER_HOME=$(getent passwd "${CLUSTER_USER}" | cut -d: -f6)
+[[ -z ${USER_HOME} ]] && die "USER_HOME not set"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 
-    # create new user keys ---------------------------------------------------------------------------------------------------------
-    USER_KEY="${CERT_STORE}/${CLUSTER_USER}.key"
-    USER_CSR="${CERT_STORE}/${CLUSTER_USER}.csr"
-    USER_CRT="${CERT_STORE}/${CLUSTER_USER}.crt"
-
-    KEY_BIT="4096"
-    VALIDATION_TIME="3652"
-
-    # create user key file
-    openssl genrsa -out "${USER_KEY}" ${KEY_BIT}
-
-    # create user csr file
-    openssl req -new -key "${USER_KEY}" -out "${USER_CSR}" -days ${VALIDATION_TIME} -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=${CLUSTER_USER}/emailAddress=${CLUSTER_USER}${CARME_SSL_EMAIL_BASE}" -passin pass:""
-
-    # create user crt file
-    openssl x509 -req -days ${VALIDATION_TIME} -in "${USER_CSR}" -CA ${BACKEND_CERT} -CAkey ${BACKEND_KEY} -set_serial 01 -out "${USER_CRT}"
-    #-------------------------------------------------------------------------------------------------------------------------------
-
-
-    # change ownership of new certificates ---------------------------------------------------------------------------------------------
-    [[ -f "${USER_CSR}" ]] && rm "${USER_CSR}"
-    chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CRT}"
-    chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_KEY}"
-    #-----------------------------------------------------------------------------------------------------------------------------------
-
-  done
-
-else
-
-  echo "Bye Bye..."
-
+# check for config and cert folder -------------------------------------------------------------------------------------------------
+USER_CONFIG_FOLDER="${USER_HOME}/.config"
+if [ ! -d "${USER_CONFIG_FOLDER}" ];then
+  mkdir "${USER_CONFIG_FOLDER}"
+  chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CONFIG_FOLDER}"
 fi
+
+CERT_STORE="${USER_CONFIG_FOLDER}/carme"
+if [ ! -d "${CERT_STORE}" ];then
+  mkdir "${CERT_STORE}"
+  chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CERT_STORE}"
+fi
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# create new user keys -------------------------------------------------------------------------------------------------------------
+USER_KEY="${CERT_STORE}/${CLUSTER_USER}.key"
+USER_CSR="${CERT_STORE}/${CLUSTER_USER}.csr"
+USER_CRT="${CERT_STORE}/${CLUSTER_USER}.crt"
+
+KEY_BIT="4096"
+VALIDATION_TIME="3652"
+
+# create user key file
+openssl genrsa -out "${USER_KEY}" ${KEY_BIT}
+
+# create user csr file
+openssl req -new -key "${USER_KEY}" -out "${USER_CSR}" -days ${VALIDATION_TIME} -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=${CLUSTER_USER}/emailAddress=${CLUSTER_USER}${CARME_SSL_EMAIL_BASE}" -passin pass:""
+
+# create user crt file
+openssl x509 -req -days ${VALIDATION_TIME} -in "${USER_CSR}" -CA ${BACKEND_CERT} -CAkey ${BACKEND_KEY} -set_serial 01 -out "${USER_CRT}"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# change ownership of new certificates ---------------------------------------------------------------------------------------------
+[[ -f "${USER_CSR}" ]] && rm "${USER_CSR}"
+chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CRT}"
+chown "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_KEY}"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0
