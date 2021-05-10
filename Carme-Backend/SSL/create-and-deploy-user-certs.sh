@@ -83,9 +83,7 @@ if [ "${RESP}" = "y" ]; then
 
     # determine user group ---------------------------------------------------------------------------------------------------------
     CLUSTER_USER_GROUP=$(id -gn "$CLUSTER_USER")
-    if [[ -z ${CLUSTER_USER_GROUP} ]];then
-      die "CLUSTER_USER_GROUP not set"
-    fi
+    [[ -z ${CLUSTER_USER_GROUP} ]] && die "CLUSTER_USER_GROUP not set"
     #-------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -109,9 +107,7 @@ if [ "${RESP}" = "y" ]; then
 
     # move new certificates to /home/$USER/.config/carme ---------------------------------------------------------------------------
     USER_HOME=$(getent passwd "${CLUSTER_USER}" | cut -d: -f6)
-    if [[ -z ${USER_HOME} ]];then
-      die "USER_HOME not set"
-    fi
+    [[ -z ${USER_HOME} ]] && die "USER_HOME not set"
 
     CERT_STORE="${USER_HOME}/.config/carme"
     if [ ! -d "${CERT_STORE}" ]; then
