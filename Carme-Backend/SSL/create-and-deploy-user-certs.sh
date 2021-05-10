@@ -49,6 +49,13 @@ CARME_SSL_L=$(get_variable CARME_SSL_L)
 CARME_SSL_O=$(get_variable CARME_SSL_O)
 CARME_SSL_OU=$(get_variable CARME_SSL_OU)
 CARME_SSL_EMAIL_BASE=$(get_variable CARME_SSL_EMAIL_BASE)
+
+[[ -z ${CARME_SSL_C} ]] && die "CARME_SSL_C not set"
+[[ -z ${CARME_SSL_ST} ]] && die "CARME_SSL_ST not set"
+[[ -z ${CARME_SSL_L} ]] && die "CARME_SSL_L not set"
+[[ -z ${CARME_SSL_O} ]] && die "CARME_SSL_O not set"
+[[ -z ${CARME_SSL_OU} ]] && die "CARME_SSL_OU not set"
+[[ -z ${CARME_SSL_EMAIL_BASE} ]] && die "CARME_SSL_EMAIL_BASE not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -79,12 +86,6 @@ if [ "${RESP}" = "y" ]; then
 
     # create new user keys ---------------------------------------------------------------------------------------------------------
     echo "creating certs for ${CLUSTER_USER}:${CLUSTER_USER_GROUP}"
-    [[ -z ${CARME_SSL_C} ]] && die "CARME_SSL_C not set"
-    [[ -z ${CARME_SSL_ST} ]] && die "CARME_SSL_ST not set"
-    [[ -z ${CARME_SSL_L} ]] && die "CARME_SSL_L not set"
-    [[ -z ${CARME_SSL_O} ]] && die "CARME_SSL_O not set"
-    [[ -z ${CARME_SSL_OU} ]] && die "CARME_SSL_OU not set"
-    [[ -z ${CARME_SSL_EMAIL_BASE} ]] && die "CARME_SSL_EMAIL_BASE not set"
 
     openssl genrsa -out "${CLUSTER_USER}.key" 4096
 
