@@ -15,13 +15,20 @@ set -o pipefail
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# define function die that is called if a command fails ----------------------------------------------------------------------------
+function die () {
+  echo "ERROR: ${1}"
+  exit 200
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
 if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  echo "ERROR: carme-basic-bash-functions.sh not found but needed"
-  exit 200
+  die "ERROR: carme-basic-bash-functions.sh not found but needed"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -47,8 +54,7 @@ CARME_SSL_EMAIL_BASE=$(get_variable CARME_SSL_EMAIL_BASE)
 
 # check if backend cert exists -----------------------------------------------------------------------------------------------------
 if [[ ! -f backend.crt && ! -f backend.key ]]; then
-  echo "ERROR: backend.crt and backend.key have to be in this directory"
-  exit 200
+  die "ERROR: backend.crt and backend.key have to be in this directory"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -66,8 +72,7 @@ if [ "${RESP}" = "y" ]; then
     # determine user group ---------------------------------------------------------------------------------------------------------
     CLUSTER_USER_GROUP=$(id -gn "$CLUSTER_USER")
     if [[ -z ${CLUSTER_USER_GROUP} ]];then
-      echo "CLUSTER_USER_GROUP not set"
-      exit 200
+      die "CLUSTER_USER_GROUP not set"
     fi
     #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -99,8 +104,7 @@ if [ "${RESP}" = "y" ]; then
     # move new certificates to /home/$USER/.config/carme ---------------------------------------------------------------------------
     USER_HOME=$(getent passwd "${CLUSTER_USER}" | cut -d: -f6)
     if [[ -z ${USER_HOME} ]];then
-      echo "USER_HOME not set"
-      exit 200
+      die "USER_HOME not set"
     fi
 
     CERT_STORE="${USER_HOME}/.config/carme"
