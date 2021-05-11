@@ -40,9 +40,7 @@ function die () {
 # define logfile -------------------------------------------------------------------------------------------------------------------
 LOG_DIR="/var/log/carme/slurmd/epilog"
 if [[ ! -d "${LOG_DIR}" ]];then
-  mkdir -p "${LOG_DIR}"
-else
-  die "cannot create ${LOG_DIR}"
+  mkdir -p "${LOG_DIR}" || die "cannot create ${LOG_DIR}"
 fi
 
 LOG_FILE="${LOG_DIR}/${SLURM_JOB_ID}.log"
