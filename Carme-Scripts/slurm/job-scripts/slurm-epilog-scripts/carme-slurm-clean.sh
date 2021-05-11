@@ -64,9 +64,9 @@ function log () {
 
 
 # Don't try to kill user root or system daemon jobs --------------------------------------------------------------------------------
-[[ -z "$SYS_UID_MAX" ]] && SYS_UID_MAX=999
+[[ -z "${SYS_UID_MAX}" ]] && SYS_UID_MAX=999
 
-[[ "$SLURM_JOB_UID" -lt "$SYS_UID_MAX" ]] && die "SLURM_JOB_UID (${SLURM_JOB_UID}) is lower than SYS_UID_MAX (${SYS_UID_MAX})"
+[[ "${SLURM_JOB_UID}" -lt "${SYS_UID_MAX}" ]] && die "SLURM_JOB_UID (${SLURM_JOB_UID}) is lower than SYS_UID_MAX (${SYS_UID_MAX})"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
