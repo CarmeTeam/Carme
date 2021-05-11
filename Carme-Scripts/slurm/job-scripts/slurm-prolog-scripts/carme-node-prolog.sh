@@ -24,18 +24,21 @@ function currenttime () {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# define logfile -------------------------------------------------------------------------------------------------------------------
-LOG_FILE="/var/log/carme/slurmd/prolog/${SLURM_JOB_ID}.log"
-{ # start command grouping for output redirection
-echo "$(currenttime) start slurm prolog"
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # define function die that is called if a command fails ----------------------------------------------------------------------------
 function die () {
   echo "$(currenttime) ERROR: ${1}"
   exit 200
 }
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define logfolder and -file -------------------------------------------------------------------------------------------------------
+LOG_DIR="/var/log/carme/slurmd/prolog"
+mkdir -p "${LOG_DIR}" || die "cannot create ${LOG_DIR}"
+
+LOG_FILE="${LOG_DIR}/${SLURM_JOB_ID}.log"
+{ # start command grouping for output redirection
+echo "$(currenttime) start slurm prolog"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -66,7 +69,7 @@ function get_free_port () {
     then
       echo "export ${3}=${NEW_PORT}" >> "${JOBDIR}/ports/$(hostname -s)"
       log "${3}: ${NEW_PORT}"
-      export ${3}=${NEW_PORT}
+      export "${3}"=${NEW_PORT}
       break
     fi
 

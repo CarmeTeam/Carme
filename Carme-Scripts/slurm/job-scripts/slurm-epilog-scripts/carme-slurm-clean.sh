@@ -29,18 +29,21 @@ function currenttime () {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# define logfile -------------------------------------------------------------------------------------------------------------------
-LOG_FILE="/var/log/carme/slurmd/epilog/${SLURM_JOB_ID}.log"
-{ # start command grouping for output redirection
-echo "$(currenttime) start slurm epilog"
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # define function die that is called if a command fails ----------------------------------------------------------------------------
 function die () {
   echo "$(currenttime) ERROR: ${1}"
   exit 200
 }
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# define logfile -------------------------------------------------------------------------------------------------------------------
+LOG_DIR="/var/log/carme/slurmd/epilog"
+mkdir -p "${LOG_DIR}" || die "cannot create ${LOG_DIR}"
+
+LOG_FILE="${LOG_DIR}/${SLURM_JOB_ID}.log"
+{ # start command grouping for output redirection
+echo "$(currenttime) start slurm epilog"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -57,9 +60,9 @@ function log () {
 
 
 # Don't try to kill user root or system daemon jobs --------------------------------------------------------------------------------
-[[ -z "$SYS_UID_MAX" ]] && SYS_UID_MAX=999
+[[ -z "${SYS_UID_MAX}" ]] && SYS_UID_MAX=999
 
-[[ "$SLURM_JOB_UID" -lt "$SYS_UID_MAX" ]] && die "SLURM_JOB_UID (${SLURM_JOB_UID}) is lower than SYS_UID_MAX (${SYS_UID_MAX})"
+[[ "${SLURM_JOB_UID}" -lt "${SYS_UID_MAX}" ]] && die "SLURM_JOB_UID (${SLURM_JOB_UID}) is lower than SYS_UID_MAX (${SYS_UID_MAX})"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
