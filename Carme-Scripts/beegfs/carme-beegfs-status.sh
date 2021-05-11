@@ -58,7 +58,7 @@ echo ""
 if [ "$RESP" = "y" ]; then
 
   # status of the beegfs-mgmtd -----------------------------------------------------------------------------------------------------
-  echo "status of the beegfs-mgmtd on $(hostname)"
+  echo "status of the beegfs-mgmtd on $(hostname -s)"
   systemctl --no-pager -l status beegfs-mgmtd
   #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,7 +83,7 @@ if [ "$RESP" = "y" ]; then
 
   # status of the beegfs-helperd ---------------------------------------------------------------------------------------------------
   echo ""
-  echo "status of the beegfs-helperd on $(hostname)"
+  echo "status of the beegfs-helperd on $(hostname -s)"
   systemctl --no-pager -l status beegfs-helperd
 
   for HOST in ${CARME_NODES_LIST}; do
@@ -95,7 +95,7 @@ if [ "$RESP" = "y" ]; then
 
   # status of the beegfs-client ----------------------------------------------------------------------------------------------------
   echo ""
-  echo "status of the beegfs-client on $(hostname)"
+  echo "status of the beegfs-client on $(hostname -s)"
   systemctl --no-pager -l status beegfs-client
 
   for HOST in ${CARME_NODES_LIST}; do
@@ -107,7 +107,7 @@ if [ "$RESP" = "y" ]; then
 
   # ls -lah /home ------------------------------------------------------------------------------------------------------------------
   echo ""
-  echo "list home on $(hostname)"
+  echo "list home on $(hostname -s)"
   ls -lah /home
 
   for HOSTS in ${CARME_NODES_LIST}; do

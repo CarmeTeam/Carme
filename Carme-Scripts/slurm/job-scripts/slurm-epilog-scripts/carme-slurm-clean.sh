@@ -92,7 +92,7 @@ MASTER_NODE=$(scontrol show job "${SLURM_JOB_ID}" | grep BatchHost | cut -d "=" 
 log "master node: ${MASTER_NODE}"
 log "distributed file system: ${CARME_DISTRIBUTED_FS}"
 
-if [[ "$(hostname)" == "${MASTER_NODE}" && "${CARME_DISTRIBUTED_FS}" == "yes" ]];then
+if [[ "$(hostname -s)" == "${MASTER_NODE}" && "${CARME_DISTRIBUTED_FS}" == "yes" ]];then
   CARME_NODEID="0"
 elif [[ "${CARME_DISTRIBUTED_FS}" == "no" ]];then
   CARME_NODEID="0"
@@ -116,9 +116,9 @@ fi
 
 
 # delete job tmp folder
-if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)" ]];then
-  log "remove ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
-  rm -r "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)" ]];then
+  log "remove ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
+  rm -r "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
 fi
 
 
