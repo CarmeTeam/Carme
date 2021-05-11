@@ -22,7 +22,7 @@ function currenttime () {
 
 # define function die that is called if a command fails ----------------------------------------------------------------------------
 function die () {
-  echo "$(currenttime) $(hostname): ERROR: ${1}"
+  echo "$(currenttime) $(hostname -s): ERROR: ${1}"
   exit 200
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ function die () {
 
 # define function for output -------------------------------------------------------------------------------------------------------
 function log () {
-  echo "$(currenttime) $(hostname): ${1}"
+  echo "$(currenttime) $(hostname -s): ${1}"
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ function check_command () {
 
 # write LD_LIBRARY_PATH to local hostname specific env file ------------------------------------------------------------------------
 echo "export LD_LIBRARY_PATH=\"${LD_LIBRARY_PATH}\"
-" >> "${CARME_SSHDIR}/envs/$(hostname)"
+" >> "${CARME_SSHDIR}/envs/$(hostname -s)"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -60,13 +60,13 @@ fi
 
 
 # start the default applications ---------------------------------------------------------------------------------------------------
-if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
+if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
 
   # start SSHD server --------------------------------------------------------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     if check_command sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
-      /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+      /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname -s).log" -f "${CARME_SSHDIR}/sshd/$(hostname -s).conf" &
     else
       die "cannot start SSHD (no executable found)"
     fi
@@ -85,7 +85,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
   # start Theia IDE ----------------------------------------------------------------------------------------------------------------
   THEIA_BASE_DIR="/opt/theia-ide/"
   if [[ -d "${THEIA_BASE_DIR}" ]]; then
-    cd "${THEIA_BASE_DIR}" || die "ERROR: $(hostname): cannot open ${THEIA_BASE_DIR}"
+    cd "${THEIA_BASE_DIR}" || die "ERROR: $(hostname -s): cannot open ${THEIA_BASE_DIR}"
     if [[ -f "node_modules/.bin/theia" ]];then
       if check_command node;then
         log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
@@ -116,7 +116,7 @@ else
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     if check_command sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
-      /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname).log" -f "${CARME_SSHDIR}/sshd/$(hostname).conf" &
+      /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname -s).log" -f "${CARME_SSHDIR}/sshd/$(hostname -s).conf" &
     else
       die "cannot start SSHD (no executable found)"
     fi

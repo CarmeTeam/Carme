@@ -29,7 +29,7 @@ function currenttime () {
 
 # define function die that is called if a command fails ----------------------------------------------------------------------------
 function die () {
-  echo "$(currenttime) $(hostname): ERROR: ${1}"
+  echo "$(currenttime) $(hostname -s): ERROR: ${1}"
   exit 200
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ MOUNTSTR=$2
 
 # define function for regular node output ------------------------------------------------------------------------------------------
 function log () {
-  echo "$(currenttime) $(hostname): ${1}"
+  echo "$(currenttime) $(hostname -s): ${1}"
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -62,14 +62,14 @@ source "${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/bashrc" || die "cannot so
 
 
 #source job ports ------------------------------------------------------------------------------------------------------------------
-if [[ "$(hostname)" == "${CARME_MASTER}" || ("${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1")) ]];then
-  source "${CARME_JOBDIR}/ports/$(hostname)" || die "cannot source job ports"
+if [[ "$(hostname -s)" == "${CARME_MASTER}" || ("${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1")) ]];then
+  source "${CARME_JOBDIR}/ports/$(hostname -s)" || die "cannot source job ports"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # things that should only be done on master node -----------------------------------------------------------------------------------
-if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
+if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
 
   # check if hash is set
   [[ -z ${CARME_HASH} ]] && die "hash not set"
@@ -101,7 +101,7 @@ if [[ "$(hostname)" == "${CARME_MASTER}" ]];then
 
   # add job to global job-log-file
   [[ -z ${CARME_LOGDIR} ]] && die "CARME_LOGDIR not set"
-  echo -e "${SLURM_JOB_ID}\t${SLURM_JOB_NAME}\t$(hostname)\t${CARME_NODES}\t${STARTTIME}\t${ENDTIME}" >> "${CARME_LOGDIR}/job-log.dat"
+  echo -e "${SLURM_JOB_ID}\t${SLURM_JOB_NAME}\t$(hostname -s)\t${CARME_NODES}\t${STARTTIME}\t${ENDTIME}" >> "${CARME_LOGDIR}/job-log.dat"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && 
 
   [[ -z ${CARME_SSHDIR} ]] && die "CARME_SSHDIR not set"
 
-  log "create ssh env file ${CARME_SSHDIR}/envs/$(hostname)"
+  log "create ssh env file ${CARME_SSHDIR}/envs/$(hostname -s)"
   echo "#!/bin/bash
 export SLURM_CHECKPOINT_IMAGE_DIR=\"${SLURM_CHECKPOINT_IMAGE_DIR}\"
 export SLURM_CLUSTER_NAME=\"${SLURM_CLUSTER_NAME}\"
@@ -177,7 +177,7 @@ export SLURM_TOPOLOGY_ADDR_PATTERN=\"${SLURM_TOPOLOGY_ADDR_PATTERN}\"
 export SLURM_UMASK=\"${SLURM_UMASK}\"
 export SLURM_WORKING_CLUSTER=\"${SLURM_WORKING_CLUSTER}\"
 export CUDA_VISIBLE_DEVICES=\"${CUDA_VISIBLE_DEVICES}\"
-export GPU_DEVICE_ORDINAL=\"${GPU_DEVICE_ORDINAL}\"" > "${CARME_SSHDIR}/envs/$(hostname)"
+export GPU_DEVICE_ORDINAL=\"${GPU_DEVICE_ORDINAL}\"" > "${CARME_SSHDIR}/envs/$(hostname -s)"
 
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -203,9 +203,9 @@ fi
 
 
 [[ -z ${CARME_TMPDIR} ]] && die "CARME_TMPDIR not set"
-if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)" ]];then
-  log "using tmp dir ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
-  MOUNTS="${MOUNTS} -B ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname):/tmp"
+if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)" ]];then
+  log "using tmp dir ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
+  MOUNTS="${MOUNTS} -B ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s):/tmp"
 else
   die "no tmp directory found"
 fi

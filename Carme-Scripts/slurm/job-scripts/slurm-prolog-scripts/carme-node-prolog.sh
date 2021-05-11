@@ -64,7 +64,7 @@ function get_free_port () {
 
     if ! ss -tln -4 | grep -q "${NEW_PORT}"
     then
-      echo "export ${3}=${NEW_PORT}" >> "${JOBDIR}/ports/$(hostname)"
+      echo "export ${3}=${NEW_PORT}" >> "${JOBDIR}/ports/$(hostname -s)"
       log "${3}: ${NEW_PORT}"
       export ${3}=${NEW_PORT}
       break
@@ -124,7 +124,7 @@ MASTER_NODE="$(scontrol show job "${SLURM_JOB_ID}" | grep BatchHost | cut -d "="
 log "master node: ${MASTER_NODE}"
 log "distributed file system: ${CARME_DISTRIBUTED_FS}"
 
-if [[ "$(hostname)" == "${MASTER_NODE}" && "${CARME_DISTRIBUTED_FS}" == "yes" ]];then
+if [[ "$(hostname -s)" == "${MASTER_NODE}" && "${CARME_DISTRIBUTED_FS}" == "yes" ]];then
   CARME_NODEID="0"
 elif [[ "${CARME_DISTRIBUTED_FS}" == "no" ]];then
   CARME_NODEID="0"
@@ -272,7 +272,7 @@ fi
 
 
 # do only once on master node ------------------------------------------------------------------------------------------------------
-if [[ "$(hostname)" == "${MASTER_NODE}" ]];then
+if [[ "$(hostname -s)" == "${MASTER_NODE}" ]];then
 
   #determine jupyterlab port
   get_free_port "6000" "7000" "NB_PORT"
@@ -310,7 +310,7 @@ if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && 
   mkdir -p "${JOBDIR}/ssh/sshd" || die "cannot create ${JOBDIR}/ssh/sshd"
 
   # create node specific sshd_configs
-  log "create sshd config for $(hostname)"
+  log "create sshd config for $(hostname -s)"
 
   echo "PermitRootLogin no
 PasswordAuthentication no
@@ -318,7 +318,7 @@ PubkeyAuthentication yes
 ChallengeResponseAuthentication no
 UsePAM no
 AuthorizedKeysFile ${JOBDIR}/ssh/authorized_keys
-PidFile ${JOBDIR}/ssh/sshd/$(hostname).pid
+PidFile ${JOBDIR}/ssh/sshd/$(hostname -s).pid
 LoginGraceTime 30s
 MaxAuthTries 3
 ClientAliveInterval 60
@@ -328,8 +328,8 @@ PrintMotd no
 AcceptEnv LANG LC_* SLURM_JOB_ID ENVIRONMENT GIT* XDG_RUNTIME_DIR
 AllowUsers ${SLURM_JOB_USER}
 PermitUserEnvironment no
-" >> "${JOBDIR}/ssh/sshd/$(hostname).conf"
-  chmod 640 "${JOBDIR}/ssh/sshd/$(hostname).conf"
+" >> "${JOBDIR}/ssh/sshd/$(hostname -s).conf"
+  chmod 640 "${JOBDIR}/ssh/sshd/$(hostname -s).conf"
 
   # create folder for ports
   log "create ${JOBDIR}/ports"
@@ -343,12 +343,12 @@ PermitUserEnvironment no
   get_free_port "2000" "3000" "SSHD_PORT"
 
   log "create node specific ssh config"
-  echo "Host $(hostname)
-  HostName $(hostname)
+  echo "Host $(hostname -s)
+  HostName $(hostname -s)
   User ${SLURM_JOB_USER}
   Port ${SSHD_PORT}
   IdentityFile ${JOBDIR}/ssh/id_rsa_${SLURM_JOB_ID}
-" >> "${JOBDIR}/ssh/ssh_config.d/$(hostname)"
+" >> "${JOBDIR}/ssh/ssh_config.d/$(hostname -s)"
 
   log "change ownership of ${JOBDIR}"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JOBDIR}"
@@ -359,11 +359,11 @@ fi
 
 # create a tmp folder for this job -------------------------------------------------------------------------------------------------
 if [[ -d "${CARME_TMPDIR}" ]];then
-  log "create job tmp directory ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
-  mkdir "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+  log "create job tmp directory ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
+  mkdir "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
 
-  log "change ownership of ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
-  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname)"
+  log "change ownership of ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
+  chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
 else
   die "cannot access CARME_TMPDIR=\"${CARME_TMPDIR}\" to create job tmp directory"
 fi
@@ -376,7 +376,7 @@ if [[ -n ${CARME_LOCAL_SSD_PATH} && -d ${CARME_LOCAL_SSD_PATH} ]];then
   log "create ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}"
   mkdir -p "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" || die "cannot create ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}"
 
-  echo "/home/SSD is a mount point to an SSD installed on this node ($(hostname)) and not available via network.
+  echo "/home/SSD is a mount point to an SSD installed on this node ($(hostname -s)) and not available via network.
 
 NOTE: This folder only exists as long as your job is running. As soon as it is completed, all data in it will be deleted!
       Remember to copy relevant results before your job ends as this folder cannot be restored afterwards!
