@@ -34,9 +34,7 @@ function die () {
 
 # define logfolder and -file -------------------------------------------------------------------------------------------------------
 LOG_DIR="/var/log/carme/slurmd/prolog"
-if [[ ! -d "${LOG_DIR}" ]];then
-  mkdir -p "${LOG_DIR}" || die "cannot create ${LOG_DIR}"
-fi
+mkdir -p "${LOG_DIR}" || die "cannot create ${LOG_DIR}"
 
 LOG_FILE="${LOG_DIR}/${SLURM_JOB_ID}.log"
 { # start command grouping for output redirection
