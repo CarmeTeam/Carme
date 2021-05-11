@@ -73,7 +73,7 @@ function get_free_port () {
     then
       echo "export ${3}=${NEW_PORT}" >> "${JOBDIR}/ports/$(hostname -s)"
       log "${3}: ${NEW_PORT}"
-      export ${3}=${NEW_PORT}
+      export "${3}"=${NEW_PORT}
       break
     fi
 
