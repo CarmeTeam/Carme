@@ -42,6 +42,7 @@ is_root
 # check essential commands ---------------------------------------------------------------------------------------------------------
 check_command grep
 check_command getent
+check_command awk
 check_command ldapadd
 check_command ldappasswd
 #-----------------------------------------------------------------------------------------------------------------------------------
