@@ -36,7 +36,7 @@ function log () {
 
 
 # define function to check if command is available on PATH -------------------------------------------------------------------------
-function verfy_command () {
+function command_exists () {
   command -v "${1}" >/dev/null 2>&1
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
 
   # start SSHD server --------------------------------------------------------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
-    if verfy_command sshd;then
+    if command_exists sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
       /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname -s).log" -f "${CARME_SSHDIR}/sshd/$(hostname -s).conf" &
     else
@@ -75,7 +75,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
 
 
   # start TensorBoard --------------------------------------------------------------------------------------------------------------
-  if verfy_command tensorboard;then
+  if command_exists tensorboard;then
     log "start TensorBoard at ${CARME_MASTER_IP}:${TB_PORT}"
     LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" & 
   fi
@@ -87,7 +87,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
   if [[ -d "${THEIA_BASE_DIR}" ]]; then
     cd "${THEIA_BASE_DIR}" || die "ERROR: $(hostname -s): cannot open ${THEIA_BASE_DIR}"
     if [[ -f "node_modules/.bin/theia" ]];then
-      if verfy_command node;then
+      if command_exists node;then
         log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
         node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 --plugins=local-dir:plugins &
       else
@@ -102,7 +102,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
 
 
   # start JupyterLab ---------------------------------------------------------------------------------------------------------------
-  if verfy_command jupyter; then
+  if command_exists jupyter; then
     log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"
     jupyter lab --ip="${CARME_MASTER_IP}" --port="${NB_PORT}" --notebook-dir=/home --no-browser --NotebookApp.base_url="/nb_${CARME_HASH}" --LabApp.workspaces_dir="${CARME_JUPYTERLAB_WORKSPACESDIR}" --LabApp.quit_button=False --LabApp.disable_check_xsrf=True --LabApp.token='' --LabApp.log_datefmt="%Y-%m-%d %H:%M:%S" &
   else
@@ -114,7 +114,7 @@ else
 
   # start SSHD ---------------------------------------------------------------------------------------------------------------------
   if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
-    if verfy_command sshd;then
+    if command_exists sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
       /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname -s).log" -f "${CARME_SSHDIR}/sshd/$(hostname -s).conf" &
     else
