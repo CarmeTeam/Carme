@@ -45,6 +45,7 @@ check_command getent
 check_command awk
 check_command ldapadd
 check_command ldappasswd
+check_command hostname
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
