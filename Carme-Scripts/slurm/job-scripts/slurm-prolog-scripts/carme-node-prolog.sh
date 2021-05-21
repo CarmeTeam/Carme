@@ -102,6 +102,7 @@ check_command getent
 check_command ssh-keygen
 check_command runuser
 check_command ss
+check_command hostname
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
