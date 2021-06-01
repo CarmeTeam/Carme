@@ -22,8 +22,13 @@ function die () {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# define path to carme installation ------------------------------------------------------------------------------------------------
+PATH_TO_CARME="/opt/Carme"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # source basic bash functions ------------------------------------------------------------------------------------------------------
-PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
+PATH_TO_SCRIPTS_FOLDER="${PATH_TO_CARME}/Carme-Scripts"
 if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
@@ -42,7 +47,7 @@ is_root
 
 
 # define function to extract parameters from another file --------------------------------------------------------------------------
-VARIABLES_PARAMETER_FILE="variables.conf"
+VARIABLES_PARAMETER_FILE="${PATH_TO_CARME}/variables.conf"
 if [[ -f ${VARIABLES_PARAMETER_FILE} ]];then
   function get_parameter () {
     PARAMETER=$(grep --color=never -Po "^${1}=\K.*" "${VARIABLES_PARAMETER_FILE}")
@@ -85,7 +90,7 @@ fi
 
 
 # define carme config file ---------------------------------------------------------------------------------------------------------
-CONFIG_FILE="CarmeConfig"
+CONFIG_FILE="${PATH_TO_CARME}/CarmeConfig"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
