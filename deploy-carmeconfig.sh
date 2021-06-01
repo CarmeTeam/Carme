@@ -65,13 +65,22 @@ BACKEND_VARIABLES=$(get_parameter BACKEND_VARIABLES)
 # source needed variables /opt/Carme/CarmeConfig -----------------------------------------------------------------------------------
 CARME_FRONTEND_PATH=$(get_variable CARME_FRONTEND_PATH)
 CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH)
+CARME_HEADNODE_NAME=$(get_variable CARME_HEADNODE_NAME)
 CARME_LOGINNODE_NAME=$(get_variable CARME_LOGINNODE_NAME)
 CARME_NODES_LIST=$(get_variable CARME_NODES_LIST)
 
 [[ -z ${CARME_FRONTEND_PATH} ]] && die "CARME_FRONTEND_PATH not set"
 [[ -z ${CARME_SCRIPTS_PATH} ]] && die "CARME_SCRIPTS_PATH not set"
+[[ -z ${CARME_HEADNODE_NAME} ]] && die "CARME_HEADNODE_NAME not set"
 [[ -z ${CARME_LOGINNODE_NAME} ]] && die "CARME_LOGINNODE_NAME not set"
 [[ -z ${CARME_NODES_LIST} ]] && die "CARME_NODES_LIST not set"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# check if node is headnode --------------------------------------------------------------------------------------------------------
+if [[ "$(hostname -s)" -ne "${CARME_HEADNODE_NAME}" ]];then
+  die "your are not on the headnode"
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -107,7 +116,7 @@ chown www-data:www-data "CarmeConfig.frontend.new"
 
 
 # move carme config frontend to right folder
-ssh ${COMPUTE_NODE} -X -t "mv ${CARME_FRONTEND_PATH}/CarmeConfig.frontend ${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
+ssh ${CARME_LOGINNODE_NAME} -X -t "mv ${CARME_FRONTEND_PATH}/CarmeConfig.frontend ${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
 scp -p "CarmeConfig.frontend.new" "${CARME_LOGINNODE_NAME}:${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
 
 
