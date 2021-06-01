@@ -112,12 +112,45 @@ for VARIABLE in ${FRONTEND_VARIABLES};do
 done
 
 
-# change permissions of new CarmeConfig.frontend
-chmod 600 "CarmeConfig.frontend.new" || die "cannot change file permissions of CarmeConfig.frontend.new"
+# check if www-data user and group exist
+if id -u www-data &>/dev/null;then
+  WWW_DATA_USER="true"
+else
+  WWW_DATA_USER="false"
+fi
+
+if id -g www-data &>/dev/null;then
+  WWW_DATA_GROUP="true"
+else
+  WWW_DATA_GROUP="false"
+fi
 
 
-# change ownership of CarmeConfig.frontend
-chown www-data:www-data "CarmeConfig.frontend.new"
+if [[ "${WWW_DATA_USER}" == "true" && "${WWW_DATA_GROUP}" == "true" ]];then
+
+  # change ownership of CarmeConfig.frontend
+  chown www-data:www-data "CarmeConfig.frontend.new"
+
+  # change permissions of new CarmeConfig.frontend
+  chmod 600 "CarmeConfig.frontend.new" || die "cannot change file permissions of CarmeConfig.frontend.new"
+
+else
+
+  if [[ "${WWW_DATA_USER}" == "false" && "${WWW_DATA_GROUP}" == "false" ]];then
+    echo "WARNING: www-data user and group do not exist"
+    echo "         set frontend config permissions as 644 and user root"
+  elif [[ "${WWW_DATA_USER}" == "false" ]];then
+    echo "WARNING: www-data user does not exist"
+    echo "         set frontend config permissions as 644 and user root"
+  elif [[ "${WWW_DATA_GROUP}" == "false" ]];then
+    echo "WARNING: www-data group does not exist"
+    echo "         set frontend config permissions as 644 and user root"
+  fi
+
+  # change permissions of new CarmeConfig.frontend
+  chmod 644 "CarmeConfig.frontend.new" || die "cannot change file permissions of CarmeConfig.frontend.new"
+
+fi
 
 
 # move carme config frontend to right folder
