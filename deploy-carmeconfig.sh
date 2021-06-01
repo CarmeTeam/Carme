@@ -117,10 +117,10 @@ chown www-data:www-data "CarmeConfig.frontend.new"
 
 # move carme config frontend to right folder
 if [[ "${CARME_HEADNODE_NAME}" == "${CARME_LOGINNODE_NAME}" ]];then
-  mv ${CARME_FRONTEND_PATH}/CarmeConfig.frontend ${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak
-  cp -p "CarmeConfig.frontend.new ${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
+  mv "${CARME_FRONTEND_PATH}/CarmeConfig.frontend" "${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
+  cp -p "CarmeConfig.frontend.new" "${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
 else
-  ssh ${CARME_LOGINNODE_NAME} -X -t "mv ${CARME_FRONTEND_PATH}/CarmeConfig.frontend ${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
+  ssh "${CARME_LOGINNODE_NAME}" -X -t "mv ${CARME_FRONTEND_PATH}/CarmeConfig.frontend ${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
   scp -p "CarmeConfig.frontend.new" "${CARME_LOGINNODE_NAME}:${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
 fi
 
@@ -158,7 +158,7 @@ mv "CarmeConfig.container.new" "computenode/Carme-Scripts/InsideContainer/CarmeC
 
 for COMPUTE_NODE in ${CARME_NODES_LIST}; do
   echo -e "${COMPUTE_NODE}:\tcopy computenode files to ${COMPUTE_NODE}:${CARME_INSTALL_DIR}"
-  ssh ${COMPUTE_NODE} -X -t "mv ${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container ${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container.bak"
+  ssh "${COMPUTE_NODE}" -X -t "mv ${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container ${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container.bak"
   scp -p "CarmeConfig.container.new" "${COMPUTE_NODE}:${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container"
   echo ""
 done
