@@ -120,7 +120,7 @@ fi
 
 CARME_DISTRIBUTED_FS=$(get_variable CARME_DISTRIBUTED_FS "${CONFIG_FILE}")
 CARME_LOCAL_SSD_PATH=$(get_variable CARME_LOCAL_SSD_PATH "${CONFIG_FILE}")
-CARME_GATEWAY=$(get_variable CARME_GATEWAY "${CONFIG_FILE}")
+CARME_LOGINNODE_IP=$(get_variable CARME_LOGINNODE_IP "${CONFIG_FILE}")
 CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER "${CONFIG_FILE}")
 CARME_BACKEND_PORT=$(get_variable CARME_BACKEND_PORT "${CONFIG_FILE}")
 CARME_SCRIPTS_PATH=$(get_variable CARME_SCRIPTS_PATH "${CONFIG_FILE}")
@@ -131,7 +131,7 @@ CARME_TMPDIR=$(get_variable CARME_TMPDIR "${CONFIG_FILE}")
 
 [[ -z ${CARME_DISTRIBUTED_FS} ]] && die "CARME_DISTRIBUTED_FS not set"
 [[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
-[[ -z ${CARME_GATEWAY} ]] && die "CARME_GATEWAY not set"
+[[ -z ${CARME_LOGINNODE_IP} ]] && die "CARME_LOGINNODE_IP not set"
 [[ -z ${CARME_BACKEND_SERVER} ]] && die "CARME_BACKEND_SERVER not set"
 [[ -z ${CARME_BACKEND_PORT} ]] && die "CARME_BACKEND_PORT not set"
 [[ -z ${CARME_SCRIPTS_PATH} ]] && die "CARME_SCRIPTS_PATH not set"
@@ -307,7 +307,7 @@ if [[ "$(hostname -s)" == "${MASTER_NODE}" ]];then
   get_free_port "8001" "9000" "TB_PORT"
 
   # get IP of master node and create hash
-  IPADDR="$(ip route get "${CARME_GATEWAY}" | head -1 | awk '{print $5}' | cut -d/ -f1)"
+  IPADDR="$(ip get route "${CARME_LOGINNODE_IP}" | grep -m1 -oP "src\s+\K(\d+\.\d+\.\d+\.\d+)"
   log "master node ip address: ${IPADDR}"
 
   HASH="$(head /dev/urandom | tr -dc a-z0-9 | head -c 30)"
