@@ -55,6 +55,6 @@ fi
 
 # empty trash folder ---------------------------------------------------------------------------------------------------------------
 echo "start cleaning trash folders in /home"
-find /home -path "*.local/share/Trash/files" -exec rm -vr "{}" \;
-find /home -path "*.local/share/Trash/info" -exec rm -vr "{}" \;
+find /home/ -path "*.local/share/Trash/files" -exec rm -vr "{}" \;
+find /home/ -path "*.local/share/Trash/info" -exec rm -vr "{}" \;
 #-----------------------------------------------------------------------------------------------------------------------------------
