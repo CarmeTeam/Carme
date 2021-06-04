@@ -308,9 +308,11 @@ if [[ "$(hostname -s)" == "${MASTER_NODE}" ]];then
 
   # get IP of master node and create hash
   IPADDR="$(ip get route "${CARME_LOGINNODE_IP}" | grep -m1 -oP "src\s+\K(\d+\.\d+\.\d+\.\d+)"
+  [[ -z ${IPADDR} ]] && die "IPADDR not set"
   log "master node ip address: ${IPADDR}"
 
   HASH="$(head /dev/urandom | tr -dc a-z0-9 | head -c 30)"
+  [[ -z ${HASH} ]] && die "HASH not set"
   log "job hash: ${HASH}"
 
   echo "export CARME_MASTER_IP=${IPADDR}
