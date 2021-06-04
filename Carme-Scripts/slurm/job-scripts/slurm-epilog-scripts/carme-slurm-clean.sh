@@ -101,7 +101,6 @@ CARME_LOCAL_SSD_PATH=$(get_variable CARME_LOCAL_SSD_PATH ${CONFIG_FILE})
 CARME_TMPDIR=$(get_variable CARME_TMPDIR "${CONFIG_FILE}")
 
 [[ -z ${CARME_DISTRIBUTED_FS} ]] && die "CARME_DISTRIBUTED_FS not set"
-[[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
 [[ -z ${CARME_TMPDIR} ]] && die "CARME_TMPDIR not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
