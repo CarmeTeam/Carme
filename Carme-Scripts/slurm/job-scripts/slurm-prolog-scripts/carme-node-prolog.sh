@@ -130,7 +130,6 @@ CARME_URL=$(get_variable CARME_URL "${CONFIG_FILE}")
 CARME_TMPDIR=$(get_variable CARME_TMPDIR "${CONFIG_FILE}")
 
 [[ -z ${CARME_DISTRIBUTED_FS} ]] && die "CARME_DISTRIBUTED_FS not set"
-[[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
 [[ -z ${CARME_LOGINNODE_IP} ]] && die "CARME_LOGINNODE_IP not set"
 [[ -z ${CARME_BACKEND_SERVER} ]] && die "CARME_BACKEND_SERVER not set"
 [[ -z ${CARME_BACKEND_PORT} ]] && die "CARME_BACKEND_PORT not set"

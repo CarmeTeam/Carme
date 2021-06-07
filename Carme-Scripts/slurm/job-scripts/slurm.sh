@@ -216,8 +216,7 @@ export XDG_RUNTIME_DIR=""
 # NOTE: never double quote this variable!
 MOUNTS=${MOUNTSTR//[_]/ }
 
-[[ -z ${CARME_LOCAL_SSD_PATH} ]] && die "CARME_LOCAL_SSD_PATH not set"
-if [[ -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
+if [[ -n ${CARME_LOCAL_SSD_PATH} && -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
   log "using local SSD"
   MOUNTS="${MOUNTS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
 fi
