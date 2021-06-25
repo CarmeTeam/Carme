@@ -76,11 +76,11 @@ _Job submission scheme_
 * [x] 12/2019: r0.6.0
 * [x] 07/2020: r0.7.0
 * [x] 11/2020: **r0.8.0** (latest)
-* [ ] 02/2021: *r0.9.0* (development)
+* [ ] 06/2021: *r0.9.0* (development)
 
 
 ## **Documentation**
-Visit our documentation at [doc.open-carme.org](http://doc.open-carme.org).
+Visit our documentation at [docs.open-carme.org](https://docs.open-carme.org).
 
 
 ## **Who is behind Carme?**
