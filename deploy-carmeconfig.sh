@@ -156,15 +156,11 @@ fi
 # move carme config frontend to right folder
 if [[ "${CARME_HEADNODE_NAME}" == "${CARME_LOGINNODE_NAME}" ]];then
   mv "${CARME_FRONTEND_PATH}/CarmeConfig.frontend" "${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
-  cp -p "CarmeConfig.frontend.new" "${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
+  mv "CarmeConfig.frontend.new" "${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
 else
   ssh "${CARME_LOGINNODE_NAME}" -t "mv ${CARME_FRONTEND_PATH}/CarmeConfig.frontend ${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
   scp -p "CarmeConfig.frontend.new" "${CARME_LOGINNODE_NAME}:${CARME_FRONTEND_PATH}/CarmeConfig.frontend"
 fi
-
-
-# remove helper config
-rm "CarmeConfig.frontend.new"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -200,10 +196,6 @@ for COMPUTE_NODE in ${CARME_NODES_LIST}; do
   scp -p "CarmeConfig.container.new" "${COMPUTE_NODE}:${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container"
   echo ""
 done
-
-
-# remove helper config
-rm "CarmeConfig.container.new"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
