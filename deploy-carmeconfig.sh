@@ -230,5 +230,6 @@ chmod 644 "CarmeConfig.backend.new" || die "cannot change file permissions of Ca
 
 
 # move carme config backend to right folder
+mv "Carme-Backend/CarmeConfig.backend" "Carme-Backend/CarmeConfig.backend.bak"
 mv "CarmeConfig.backend.new" "Carme-Backend/CarmeConfig.backend"
 #-----------------------------------------------------------------------------------------------------------------------------------
