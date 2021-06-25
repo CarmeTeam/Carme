@@ -14,7 +14,7 @@
 import numpy as np
 from django.http import HttpResponse
 from django.template import loader
-from .models import CarmeMessages, SlurmJobs, Images, CarmeJobTable, ClusterStat, GroupResources
+from .models import CarmeMessage, SlurmJob, Image, CarmeJobTable, ClusterStat, GroupResource
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
@@ -65,10 +65,10 @@ def generateChoices(request):
     """generates the list of items for the image drop down menue"""
 
     group = list(request.user.ldap_user.group_names)[0]
-    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
+    group_resources = GroupResource.objects.filter(group_name__exact=group)[0]
 
     # generate image choices
-    image_list = Images.objects.filter(image_group__exact=group, image_status__exact="active")
+    image_list = Image.objects.filter(image_group__exact=group, image_status__exact="active")
     image_choices = set()
     for i in image_list:
         image_choices.add((i.image_name, i.image_name))
@@ -103,7 +103,7 @@ def index(request):
                              node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
 
     # calculate actual stats
-    slurm_list = SlurmJobs.objects.exclude(status__exact="timeout")
+    slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
     stats = {
         "used": 0,
         "queued": 0,
@@ -128,8 +128,8 @@ def index(request):
     if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
         ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
 
-    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
-    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
+    slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
+    message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
     
     # render template
     context = {
@@ -152,7 +152,7 @@ def admin_all_jobs(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
-    slurm_list = SlurmJobs.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
+    slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
 
     # render template
     context = {
@@ -171,7 +171,7 @@ def admin_job_table(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
-    slurm_list = SlurmJobs.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
+    slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
 
     # render template
     context = {
@@ -190,7 +190,7 @@ def job_table(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs by user
-    slurm_list_user = SlurmJobs.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
+    slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
 
     # render template
     context = {
@@ -206,7 +206,7 @@ def start_job(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     group = list(request.user.ldap_user.group_names)[0]
-    partition = GroupResources.objects.filter(group_name__exact=group)[0].group_partition
+    partition = GroupResource.objects.filter(group_name__exact=group)[0].group_partition
 
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
 
@@ -219,7 +219,7 @@ def start_job(request):
         # check whether it's valid:
         if form.is_valid():
             # get image path and mounts from choices
-            image_db = Images.objects.filter(image_group__exact=group,
+            image_db = Image.objects.filter(image_group__exact=group,
                                                    image_name__exact=form.cleaned_data['image'])[0]
             mounts = settings.CARME_BASE_MOUNTS  # set in carme settings
             mounts += str(image_db.image_mounts)
@@ -241,7 +241,7 @@ def start_job(request):
             job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
             
             if int(job_id) > 0:
-                SlurmJobs.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
+                SlurmJob.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
                                          user=request.user.username, slurm_id=int(job_id), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
                 print("Queued job {} for user {} on {} nodes".format(job_id, ldap_username(request), num_nodes))
             else:
@@ -285,7 +285,7 @@ def job_hist(request):
     if (job_time_start and job_time_end):
         job_time = round((job_time_end-job_time_start)/3600)
 
-    group_resources = GroupResources.objects.filter(group_name__exact=group)[0]
+    group_resources = GroupResource.objects.filter(group_name__exact=group)[0]
 
     # render template
     context = {
@@ -314,7 +314,7 @@ def job_info(request):
 
         # check whether it's valid:
         if form.is_valid():
-            job_details = SlurmJobs.objects.filter(
+            job_details = SlurmJob.objects.filter(
                 slurm_id__exact=form.cleaned_data['jobID'], status__exact="running")
             job_slurm = CarmeJobTable.objects.filter(
                 id_job__exact=form.cleaned_data['jobID'])
@@ -475,7 +475,7 @@ def messages(request):
     if not request.user.is_authenticated:
         return HttpResponse('Unauthorized', status=401)
 
-    message_list = list(CarmeMessages.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] # select only 10 latest messages
+    message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] # select only 10 latest messages
     message_list.reverse() # reverse message list for correct appendance on update
     
     # render template
@@ -501,7 +501,7 @@ def proxy_auth(request):
 
             if first.startswith("nb_") or first.startswith("ta_") or first.startswith("tb_"):
                 url_suffix = first[3:] # remove prefix part
-                jobs = SlurmJobs.objects.filter(url_suffix__exact=url_suffix, user__exact=request.user, status__exact="running")
+                jobs = SlurmJob.objects.filter(url_suffix__exact=url_suffix, user__exact=request.user, status__exact="running")
 
                 if(len(jobs) > 0):
                     return HttpResponse(status=200) # ok

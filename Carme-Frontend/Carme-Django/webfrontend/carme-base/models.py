@@ -23,7 +23,7 @@ from CarmeConfigFrontend import CARME_SLURM_ClusterName
 """ User Messages
 
 """
-class CarmeMessages(models.Model):
+class CarmeMessage(models.Model):
     user = models.CharField(max_length=64)
     message = models.CharField(max_length=512, default='message')
     color = models.CharField(max_length=16, default='gray')
@@ -41,7 +41,7 @@ class ClusterStat(models.Model):
 """ list of running and queued jobs
 
 """
-class SlurmJobs(models.Model):
+class SlurmJob(models.Model):
     user = models.CharField(max_length=64)
     num_nodes = models.IntegerField(default=1)
     num_gpus = models.IntegerField(default=1)
@@ -61,7 +61,7 @@ class SlurmJobs(models.Model):
 """ avalable images
 
 """
-class Images(models.Model):
+class Image(models.Model):
     image_name = models.CharField(max_length=128)
     image_path = models.CharField(max_length=512)
     image_group = models.CharField(max_length=64)
@@ -71,7 +71,7 @@ class Images(models.Model):
     image_status = models.CharField(max_length=128, default="active")
     image_owner = models.CharField(max_length=64, default="admin")
 
-class GroupResources(models.Model):
+class GroupResource(models.Model):
     group_name = models.CharField(max_length=128)
     group_partition = models.CharField(max_length=128)
     group_default = models.BooleanField() 
