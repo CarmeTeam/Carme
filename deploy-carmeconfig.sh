@@ -191,7 +191,7 @@ chmod 644 CarmeConfig.container.new || die "cannot change file permissions of Ca
 
 
 # move carme config frontend to right folder
-mv "CarmeConfig.container.new" "computenode/Carme-Scripts/InsideContainer/CarmeConfig.container"
+mv "CarmeConfig.container.new" "${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container"
 
 
 for COMPUTE_NODE in ${CARME_NODES_LIST}; do
