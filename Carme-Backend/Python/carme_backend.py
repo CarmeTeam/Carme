@@ -35,8 +35,8 @@ from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_A
 from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
 
 tables = {
-    "notifications": "carme-base_carmemessages",
-    "jobs": "carme-base_slurmjobs"
+    "notifications": "carme-base_carmemessage",
+    "jobs": "carme-base_slurmjob"
 }
 
 queries = {

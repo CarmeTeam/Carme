@@ -11,11 +11,11 @@
 # Contact: info@open-carme.org
 # ---------------------------------------------
 from django.contrib import admin
-from .models import SlurmJobs
-from .models import Images
-from .models import CarmeMessages
+from .models import SlurmJob
+from .models import Image
+from .models import CarmeMessage
 from .models import ClusterStat
-from .models import GroupResources
+from .models import GroupResource
 from django.conf import settings
 
 admin.site.site_header = settings.CARME_ADMIN_HEADER
@@ -49,7 +49,7 @@ class CarmeMessageAdmin(admin.ModelAdmin):
     list_display = ('user','message','color')
 
 
-""" admin view for from GroupResources
+""" admin view for from GroupResource
 
 """
 class GroupResourcesAdmin(admin.ModelAdmin):
@@ -70,8 +70,8 @@ class RuningJobAdmin(admin.ModelAdmin):
 class StatAdmin(admin.ModelAdmin):
     list_display = ('date', 'free', 'used', 'reserved', 'queued')
 
-admin.site.register(Images, ImageAdmin)
-admin.site.register(SlurmJobs, SlurmJobAdmin)
-admin.site.register(CarmeMessages, CarmeMessageAdmin)
+admin.site.register(Image, ImageAdmin)
+admin.site.register(SlurmJob, SlurmJobAdmin)
+admin.site.register(CarmeMessage, CarmeMessageAdmin)
 admin.site.register(ClusterStat, StatAdmin)
-admin.site.register(GroupResources, GroupResourcesAdmin)
+admin.site.register(GroupResource, GroupResourcesAdmin)
