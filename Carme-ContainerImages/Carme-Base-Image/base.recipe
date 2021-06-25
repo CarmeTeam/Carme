@@ -1,0 +1,129 @@
+BootStrap: debootstrap
+OSVersion: stable
+MirrorURL: http://ftp.de.debian.org/debian/
+%help
+    If you need any help you should ask the maintainer of this image.
+
+%labels
+    MAINTAINER CC-HPC Fraunhofer ITWM
+
+%setup
+    # hack to fix miniconda3 in singularity
+    if [ -L /dev/shm ]; then
+        if [ ! -d /run/shm ]; then exit 1; fi
+        mkdir -p /dev/manual
+        ln -s /dev/manual ${SINGULARITY_ROOTFS}/run/shm
+        touch ${SINGULARITY_ROOTFS}/rm_run_shm
+    fi
+
+    mkdir "${SINGULARITY_ROOTFS}/opt/theia-ide"
+
+%files
+    includes/theia--package.json /opt/theia-ide/package.json
+    includes/theia--index-html-fix.html /opt/theia-ide/index-html-fix.html
+    includes/jupyterlab--overrides.json /opt/overrides.json
+    includes/jupyterlab--page_config.json /opt/page_config.json
+
+%post
+    # base stuff ---------------------------------------------------------------------------------------------------
+
+    # update and upgrade
+    apt update
+    apt upgrade -y
+
+    # install basic programs
+    apt install -y bash-completion htop less locales nano rsync shellcheck time unzip vim wget zip
+
+    # install dependencies of build tools
+    apt install -y automake build-essential cmake colordiff fd-find fzf g++ gawk gawk gcc gdb gfortran git glances man-dbsed 
+
+    # install openmpi
+    apt install -y openmpi-bin
+
+    # install openssh for multi-node jobs and ssh-keygen
+    apt install -y openssh-server
+
+    # install ib
+    apt install -y libibverbs1 libibverbs-dev librdmacm1 libibmad5 libibumad3 librdmacm1 ibverbs-providers rdmacm-utils infiniband-diags libfabric1 ibverbs-utils
+
+    # regenerate locales
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+    dpkg-reconfigure --frontend=noninteractive locales
+
+    # install conda
+    CONDA_DIR="/opt/miniconda3"
+    rm -rf "${CONDA_DIR}" # ensure folder is removed
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+    bash /tmp/miniconda.sh -b -p "${CONDA_DIR}"
+    rm /tmp/miniconda.sh
+
+    # activate conda
+    . "${CONDA_DIR}/etc/profile.d/conda.sh"
+    conda activate base
+    #---------------------------------------------------------------------------------------------------------------
+
+
+    # install theia.ide and basic plugins --------------------------------------------------------------------------
+    conda install -y -c conda-forge jupyterlab yarn=1 nodejs=10 nb_conda_kernels
+
+    mkdir "${CONDA_DIR}/share/jupyter/lab/settings"
+
+    mv /opt/overrides.json "${CONDA_DIR}/share/jupyter/lab/settings/overrides.json"
+    mv /opt/page_config.json "${CONDA_DIR}/share/jupyter/lab/settings/page_config.json"
+    #---------------------------------------------------------------------------------------------------------------
+
+
+    # install theia.ide and basic plugins --------------------------------------------------------------------------
+    THEIA_DIR="/opt/theia-ide"
+    
+    apt install -y python2.7-minimal
+    ln -s "/usr/bin/python2.7" "${THEIA_DIR}/python"
+
+    cd ${THEIA_DIR}
+    PATH="${THEIA_DIR}:${PATH}" yarn
+    apt purge -y python2.7-minimal
+    rm "${THEIA_DIR}/python"
+
+    yarn theia build
+    cd
+
+    mv "${THEIA_DIR}/index-html-fix.html" "${THEIA_DIR}/lib/index.html"
+    #---------------------------------------------------------------------------------------------------------------
+
+
+    # build and install gpi ----------------------------------------------------------------------------------------
+    GPI_DIR=/opt/GPI
+    GPI_SRC_DIR=/opt/GPI-src
+    
+    git clone --branch v1.4.0 --depth 1 https://github.com/cc-hpc-itwm/GPI-2.git "${GPI_SRC_DIR}"
+
+    cd "${GPI_SRC_DIR}"
+    ./autogen.sh
+    CC=gcc CFLAGS="-fPIC" CPPFLAGS="-fPIC" FC=gfortran ./configure --with-infiniband --prefix="${GPI_DIR}"
+    make -j 20
+    make install
+    cd
+
+    rm -rf "${GPI_SRC_DIR}"
+
+    sed -i 's/GASPI_LAUNCHER="ssh"/GASPI_LAUNCHER="ssh -F ${CARME_SSHDIR}\/ssh_config"/g' "${GPI_DIR}/bin/gaspi_run"
+    sed -i 's/ssh/ssh -F ${CARME_SSHDIR}\/ssh_config/g' "${GPI_DIR}/bin/gaspi_cleanup"
+
+    ln -s "${GPI_DIR}/bin/*" /usr/local/bin/
+    ln -s "${GPI_DIR}/include/*" /usr/local/include/
+    mkdir -p /usr/local/lib64
+    ln -s "${GPI_DIR}/lib64/*" /usr/local/lib64/
+    #---------------------------------------------------------------------------------------------------------------
+
+
+    # clean up -----------------------------------------------------------------------------------------------------
+    conda clean --all -y
+    apt autoremove --purge -y
+    apt clean
+
+    # hack to fix miniconda3 in singularity
+    if [ -f /rm_run_shm ]; then 
+        rm /run/shm;
+        rm /rm_run_shm
+    fi
+    #---------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,0 @@
-# install libs and packages 
-
-apt install -y ranger
-
-conda install pandas
