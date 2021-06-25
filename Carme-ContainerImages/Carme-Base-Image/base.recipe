@@ -32,7 +32,10 @@ MirrorURL: http://ftp.de.debian.org/debian/
     apt upgrade -y
 
     # install basic programs
-    apt install -y vim nano less htop wget bash-completion colordiff locales rsync shellcheck time unzip zip
+    apt install -y bash-completion htop less locales nano rsync shellcheck time unzip vim wget zip
+
+    # install dependencies of build tools
+    apt install -y automake build-essential cmake colordiff fd-find fzf g++ gawk gawk gcc gdb gfortran git glances man-dbsed 
 
     # install openmpi
     apt install -y openmpi-bin
@@ -40,14 +43,12 @@ MirrorURL: http://ftp.de.debian.org/debian/
     # install openssh for multi-node jobs and ssh-keygen
     apt install -y openssh-server
 
-    # install iproute2 for socket statistics tools
-    apt install -y iproute2
-
-    # install dependencies of build tools
-    apt install -y build-essential automake gawk sed colordiff fd-find fzf g++ gawk gcc gdb gfortran git glances man-db
-
     # install ib
     apt install -y libibverbs1 libibverbs-dev librdmacm1 libibmad5 libibumad3 librdmacm1 ibverbs-providers rdmacm-utils infiniband-diags libfabric1 ibverbs-utils
+
+    # regenerate locales
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+    dpkg-reconfigure --frontend=noninteractive locales
 
     # install conda
     CONDA_DIR="/opt/miniconda3"
@@ -98,7 +99,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
     cd "${GPI_SRC_DIR}"
     ./autogen.sh
-    CC=gcc FC=gfortran ./configure --with-infiniband --prefix="${GPI_DIR}"
+    CC=gcc CFLAGS="-fPIC" CPPFLAGS="-fPIC" FC=gfortran ./configure --with-infiniband --prefix="${GPI_DIR}"
     make -j 20
     make install
     cd
