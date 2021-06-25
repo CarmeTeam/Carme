@@ -1,0 +1,11 @@
+[Unit]
+Description=Carme Proxy
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/singularity run -B "/opt/Carme/Carme-Proxy/traefik-conf/traefik.toml:/opt/traefik/traefik.toml" -B "/var/log/carme/proxy:/var/log/traefik" -B "/opt/Carme-Proxy-Routes/routes:/opt/traefik/routes" -B "/opt/Carme/Carme-Proxy/traefik-conf/static.toml:/opt/traefik/routes/static.toml" -B "/opt/Carme/Carme-Proxy/SSL:/opt/traefik/SSL" "/opt/Carme/Carme-ContainerImages/Carme-Proxy-Container/proxy.simg"
+
+[Install]
+WantedBy=multi-user.target
