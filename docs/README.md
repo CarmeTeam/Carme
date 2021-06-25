@@ -75,8 +75,9 @@ _Job submission scheme_
 * [x] 11/2019: r0.5.0
 * [x] 12/2019: r0.6.0
 * [x] 07/2020: r0.7.0
-* [x] 11/2020: **r0.8.0** (latest)
-* [ ] 06/2021: *r0.9.0* (development)
+* [x] 11/2020: r0.8.0
+* [x] 06/2021: **r0.9.0** (latest)
+* [] 09/2021: *r1.0.0* (development)
 
 
 ## **Documentation**
