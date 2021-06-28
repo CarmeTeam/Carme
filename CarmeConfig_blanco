@@ -70,12 +70,6 @@ CARME_START_SSHD=""
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# container specific variables -----------------------------------------------------------------------------------------------------
-CARME_BASE_MOUNTS='_-B_/opt/Carme/Carme-Scripts/InsideContainer:/home/.CarmeScripts'
-#default: _-B_/opt/Carme/Carme-Scripts/InsideContainer:/home/.CarmeScripts
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # CARME backend specific variables -------------------------------------------------------------------------------------------------
 CARME_BACKEND_PATH="/opt/Carme/Carme-Backend/"
 #default: /opt/Carme/Carme-Backend/

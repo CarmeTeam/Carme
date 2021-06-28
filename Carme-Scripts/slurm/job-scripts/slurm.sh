@@ -20,6 +20,23 @@ set -o pipefail
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+
+# define variables -----------------------------------------------------------------------------------------------------------------
+
+#SINGULARITY_BIN="/usr/bin/singularity"
+#NOTE: This variable can be used to define a local singularity version that is not part of "${PATH}". If the variable is not used
+#      it is assumed that "singularity" is available via "${PATH}" and respective checks are preformed later in this script.
+#NOTE: If set it has to be the FULL PATH to the singularity binary including the binary itself.
+
+SINGULARITY_FLAGS="--pid --nv"
+# Here we define the flags that singularity should use (these flags are used fo all images)
+#  - "--pid": start everything inside the container within a new namespace
+#  - "--nv": enabling NVIDIA support using drivers from the host system
+#NOTE: If you modify these flags make sure that the flags work with your singularity version.
+
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # define function to print time and date -------------------------------------------------------------------------------------------
 function currenttime () {
   date +"[%F %T.%3N]"
@@ -52,11 +69,11 @@ function log () {
 
 
 # external variables ---------------------------------------------------------------------------------------------------------------
-IMAGE=$1
+IMAGE=${1}
 [[ -z ${IMAGE} ]] && die "no singularity image defined"
 
-MOUNTSTR=$2
-[[ -z ${MOUNTSTR} ]] && die "no mounts defined"
+FLAGS=${2}
+[[ -z ${FLAGS} ]] && die "no flags defined"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -72,8 +89,14 @@ if [[ -n "${SLURM_JOB_GPUS}" ]];then
   check_command nvidia-smi
 fi
 
-check_command singularity
 check_command hostname
+
+if [[ -n "${SINGULARITY_BIN}" ]];then
+  [[ ! -f "${SINGULARITY_BIN}" && ! -x "${SINGULARITY_BIN}" ]] && die "command ${SINGULARITY_BIN} not found"
+else
+  SINGULARITY_BIN="singularity"
+  check_command "${SINGULARITY_BIN}"
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -116,8 +139,6 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
   log "end-time:   ${ENDTIME} (estimated)"
   log "hash: ${CARME_HASH}"
   log "master ip: ${CARME_MASTER_IP}"
-  log "image: ${IMAGE}"
-  log "mount points: ${MOUNTSTR}"
 
 
   # add job to global job-log-file
@@ -212,29 +233,43 @@ cd "${HOME}" || die "cannot change directory to ${HOME}"
 #start singularity -----------------------------------------------------------------------------------------------------------------
 export XDG_RUNTIME_DIR=""
 
-# split predefined mounts (separated by space)
-# NOTE: never double quote this variable!
-MOUNTS=${MOUNTSTR//[_]/ }
 
+# paths outside and inside the container
+SCRIPTS_PATH_HOST="/opt/Carme/Carme-Scripts/InsideContainer"
+SCRIPTS_PATH_CONTAINER="/home/.CarmeScripts"
+
+
+# define singularity default binds
+DEFAULT_BINDS="-B ${SCRIPTS_PATH_HOST}/base_bashrc.sh:/etc/bash.bashrc -B ${SCRIPTS_PATH_HOST}:${SCRIPTS_PATH_CONTAINER}"
+
+
+# add image flags from the DB
+BINDS="${DEFAULT_BINDS} ${FLAGS}"
+
+
+# check if the local ssd variable is set and if the respective path on the ssd exists and if yes add to singularity binds
 if [[ -n ${CARME_LOCAL_SSD_PATH} && -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
   log "using local SSD"
-  MOUNTS="${MOUNTS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
+  BINDS="${BINDS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
 fi
 
 
 [[ -z ${CARME_TMPDIR} ]] && die "CARME_TMPDIR not set"
 if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)" ]];then
   log "using tmp dir ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
-  MOUNTS="${MOUNTS} -B ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s):/tmp"
+  BINDS="${BINDS} -B ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s):/tmp"
 else
   die "no tmp directory found"
 fi
 
 
-# NOTE: never double quote this variable!
-BINDS="-B /opt/Carme/Carme-Scripts/InsideContainer/base_bashrc.sh:/etc/bash.bashrc"
+# put the singularity start command together
+read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS}"
 
 
 log "start container"
-TZ=$(cat /etc/timezone) singularity exec --pid --nv ${BINDS} ${MOUNTS} "${IMAGE}" /bin/bash /home/.CarmeScripts/start_apps.sh
+log "image: ${IMAGE}"
+log "image flags: ${SINGULARITY_FLAGS} ${BINDS}"
+
+TZ=$(cat /etc/timezone) "${SINGULARITY_START[@]}" "${IMAGE}" "/bin/bash /home/.CarmeScripts/start_apps.sh"
 #-----------------------------------------------------------------------------------------------------------------------------------
