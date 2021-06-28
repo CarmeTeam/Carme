@@ -72,8 +72,8 @@ function log () {
 IMAGE=${1}
 [[ -z ${IMAGE} ]] && die "no singularity image defined"
 
-SINGULARITY_DB_FLAGS=${2}
-[[ -z ${SINGULARITY_DB_FLAGS} ]] && die "no flags defined"
+IMAGE_FLAGS=${2}
+[[ -z ${IMAGE_FLAGS} ]] && die "no flags defined"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -242,28 +242,28 @@ SCRIPTS_PATH_CONTAINER="/home/.CarmeScripts"
 
 
 # define singularity default binds
-SINGULARITY_DEFAULT_BINDS="-B ${SCRIPTS_PATH_HOST}/base_bashrc.sh:/etc/bash.bashrc -B ${SCRIPTS_PATH_HOST}:${SCRIPTS_PATH_CONTAINER}"
+DEFAULT_BINDS="-B ${SCRIPTS_PATH_HOST}/base_bashrc.sh:/etc/bash.bashrc -B ${SCRIPTS_PATH_HOST}:${SCRIPTS_PATH_CONTAINER}"
 
 
 # add singularity flags from the DB
-if [[ -n ${SINGULARITY_DB_FLAGS} ]];then
-  SINGULARITY_BINDS="${SINGULARITY_DEFAULT_BINDS} ${SINGULARITY_DB_FLAGS}"
+if [[ -n ${IMAGE_FLAGS} ]];then
+  BINDS="${DEFAULT_BINDS} ${IMAGE_FLAGS}"
 else
-  SINGULARITY_BINDS="${SINGULARITY_DEFAULT_BINDS}"
+  BINDS="${DEFAULT_BINDS}"
 fi
 
 
 # check if the local ssd variable is set and if the respective path on the ssd exists and if yes add to singularity binds
 if [[ -n ${CARME_LOCAL_SSD_PATH} && -d "${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}" ]];then
   log "using local SSD"
-  SINGULARITY_BINDS="${SINGULARITY_BINDS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
+  BINDS="${BINDS} -B ${CARME_LOCAL_SSD_PATH}/${SLURM_JOB_ID}:/home/SSD"
 fi
 
 
 [[ -z ${CARME_TMPDIR} ]] && die "CARME_TMPDIR not set"
 if [[ -d "${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)" ]];then
   log "using tmp dir ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s)"
-  SINGULARITY_BINDS="${SINGULARITY_BINDS} -B ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s):/tmp"
+  BINDS="${BINDS} -B ${CARME_TMPDIR}/carme-job-${SLURM_JOB_ID}-$(hostname -s):/tmp"
 else
   die "no tmp directory found"
 fi
@@ -271,9 +271,9 @@ fi
 
 # put the singularity start command together
 if [[ -n "${SINGULARITY_FLAGS}" ]];then
-  read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${SINGULARITY_BINDS}"
+  read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS}"
 else
-  read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_BINDS}"
+  read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${BINDS}"
 fi
 
 
