@@ -52,7 +52,7 @@ class CarmeMessageAdmin(admin.ModelAdmin):
 """ admin view for from GroupResource
 
 """
-class GroupResourcesAdmin(admin.ModelAdmin):
+class GroupResourceAdmin(admin.ModelAdmin):
     list_display = ('name','partition','default','max_jobs','max_nodes','max_gpus_per_node')
     list_display_links = ('name','partition') 
     search_fields = ('name','partition','default','max_jobs','max_nodes','max_gpus_per_node')
@@ -74,4 +74,4 @@ admin.site.register(Image, ImageAdmin)
 admin.site.register(SlurmJob, SlurmJobAdmin)
 admin.site.register(CarmeMessage, CarmeMessageAdmin)
 admin.site.register(ClusterStat, StatAdmin)
-admin.site.register(GroupResource, GroupResourcesAdmin)
+admin.site.register(GroupResource, GroupResourceAdmin)
