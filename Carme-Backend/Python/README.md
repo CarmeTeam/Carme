@@ -1,14 +1,28 @@
 # Carme Backend
 
+The Carme backend is distributed as a python wheel file and can be installed systemwide or in a python/conda env.
+
 ## Build
 
-$ conda activate carme-backend
-$ python setup.py bdist_wheel
+To build the Carme backend module, an environment with the required dependencies has to be created.
+
+```
+# create conda env and install python and pip
+conda create -n carme-backend python=3 pip
+conda activate carme-backend
+
+# install setuptools and build carme-backend
+pip install --upgrade setuptools
+python setup.py bdist_wheel
+```
+
+The resulting wheel file will be saved to `dist/*.whl`.
 
 ## Known errors
 
-- Installation
+The following error during installation is a known problem with the ``mysqlclient`` dependency.
 
+```
     ERROR: Command errored out with exit status 1:
      command: /home/reusch/.conda/envs/carme-backend/bin/python -c 'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/tmp/pip-install-6jlzjckd/mysqlclient_48f043e64a454648aab07c445615c1aa/setup.py'"'"'; __file__='"'"'/tmp/pip-install-6jlzjckd/mysqlclient_48f043e64a454648aab07c445615c1aa/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' egg_info --egg-base /tmp/pip-pip-egg-info-kzwpawu8
          cwd: /tmp/pip-install-6jlzjckd/mysqlclient_48f043e64a454648aab07c445615c1aa/
@@ -30,8 +44,6 @@ $ python setup.py bdist_wheel
     OSError: mysql_config not found
     ----------------------------------------
 ERROR: Command errored out with exit status 1: python setup.py egg_info Check the logs for full command output.
+```
 
-Solution:
-
-Dependencies for mysql client executables are missing. On Debian this can be solved by installing python-dev libmysqlclient-dev.
-
+The problem is, that dependencies for mysql client executables are missing. On Debian this can be solved by installing ``python-dev libmysqlclient-dev``. For other distributions other dependencies have to be installed.
