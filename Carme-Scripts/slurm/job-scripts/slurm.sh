@@ -245,12 +245,8 @@ SCRIPTS_PATH_CONTAINER="/home/.CarmeScripts"
 DEFAULT_BINDS="-B ${SCRIPTS_PATH_HOST}/base_bashrc.sh:/etc/bash.bashrc -B ${SCRIPTS_PATH_HOST}:${SCRIPTS_PATH_CONTAINER}"
 
 
-# add singularity flags from the DB
-if [[ -n ${IMAGE_FLAGS} ]];then
-  BINDS="${DEFAULT_BINDS} ${IMAGE_FLAGS}"
-else
-  BINDS="${DEFAULT_BINDS}"
-fi
+# add image flags from the DB
+BINDS="${DEFAULT_BINDS} ${IMAGE_FLAGS}"
 
 
 # check if the local ssd variable is set and if the respective path on the ssd exists and if yes add to singularity binds
