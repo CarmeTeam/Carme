@@ -269,7 +269,7 @@ read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} $
 
 log "start container"
 log "image: ${IMAGE}"
-log "image db flags: ${SINGULARITY_FLAGS} ${BINDS}"
+log "image flags: ${SINGULARITY_FLAGS} ${BINDS}"
 
 TZ=$(cat /etc/timezone) "${SINGULARITY_START[@]}" "${IMAGE}" "/bin/bash /home/.CarmeScripts/start_apps.sh"
 #-----------------------------------------------------------------------------------------------------------------------------------
