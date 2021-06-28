@@ -73,7 +73,7 @@ IMAGE=${1}
 [[ -z ${IMAGE} ]] && die "no singularity image defined"
 
 SINGULARITY_DB_FLAGS=${2}
-[[ -z ${SINGULARITY_DB_FLAGS} ]] && die "no mounts defined"
+[[ -z ${SINGULARITY_DB_FLAGS} ]] && die "no flags defined"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
