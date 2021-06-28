@@ -344,7 +344,7 @@ class Backend(Service):
         
         params = template.format(**values)
 
-        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{flags}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "slurm/job-scripts/slurm.sh"), image=image, flags=quote(flags))
+        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" {flags}\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "slurm/job-scripts/slurm.sh"), image=image, flags=quote(flags))
 
         print(com)
 
