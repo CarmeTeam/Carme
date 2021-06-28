@@ -139,8 +139,6 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
   log "end-time:   ${ENDTIME} (estimated)"
   log "hash: ${CARME_HASH}"
   log "master ip: ${CARME_MASTER_IP}"
-  log "image: ${IMAGE}"
-  log "image db flags: ${IMAGE_FLAGS}"
 
 
   # add job to global job-log-file
@@ -266,13 +264,12 @@ fi
 
 
 # put the singularity start command together
-if [[ -n "${SINGULARITY_FLAGS}" ]];then
-  read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS}"
-else
-  read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${BINDS}"
-fi
+read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS}"
 
 
 log "start container"
+log "image: ${IMAGE}"
+log "image db flags: ${SINGULARITY_FLAGS} ${BINDS}"
+
 TZ=$(cat /etc/timezone) "${SINGULARITY_START[@]}" "${IMAGE}" "/bin/bash /home/.CarmeScripts/start_apps.sh"
 #-----------------------------------------------------------------------------------------------------------------------------------
