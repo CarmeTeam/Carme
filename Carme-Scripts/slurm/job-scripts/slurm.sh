@@ -140,7 +140,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
   log "hash: ${CARME_HASH}"
   log "master ip: ${CARME_MASTER_IP}"
   log "image: ${IMAGE}"
-  log "mount points: ${MOUNTSTR}"
+  log "image db flags: ${IMAGE_FLAGS}"
 
 
   # add job to global job-log-file
