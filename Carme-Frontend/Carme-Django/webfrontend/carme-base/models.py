@@ -62,22 +62,22 @@ class SlurmJob(models.Model):
 
 """
 class Image(models.Model):
-    image_name = models.CharField(max_length=128)
-    image_path = models.CharField(max_length=512)
-    image_group = models.CharField(max_length=64)
-    image_mounts = models.CharField(max_length=512)
-    image_comment = models.CharField(
+    name = models.CharField(max_length=128)
+    path = models.CharField(max_length=512)
+    group = models.CharField(max_length=64)
+    flags = models.CharField(max_length=512)
+    comment = models.CharField(
         max_length=1024, default="image description")
-    image_status = models.CharField(max_length=128, default="active")
-    image_owner = models.CharField(max_length=64, default="admin")
+    status = models.CharField(max_length=128, default="active")
+    owner = models.CharField(max_length=64, default="admin")
 
 class GroupResource(models.Model):
-    group_name = models.CharField(max_length=128)
-    group_partition = models.CharField(max_length=128)
-    group_default = models.BooleanField() 
-    group_max_jobs = models.IntegerField()
-    group_max_nodes = models.IntegerField()
-    group_max_gpus_per_node = models.IntegerField()
+    name = models.CharField(max_length=128)
+    partition = models.CharField(max_length=128)
+    default = models.BooleanField() 
+    max_jobs = models.IntegerField()
+    max_nodes = models.IntegerField()
+    max_gpus_per_node = models.IntegerField()
 
 # -- external Slurm DB (read only)
 # python manage.py inspectdb --database slurm

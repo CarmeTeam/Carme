@@ -26,10 +26,10 @@ admin.site.index_title = settings.CARME_ADMIN_SITE_INDEX
 
 """
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('image_name', 'image_path', 'image_group',
-                    'image_mounts', 'image_comment', 'image_status', 'image_owner')
-    list_display_links = ('image_name', 'image_owner')
-    search_fields = ('image_name', 'image_group', 'image_owner')
+    list_display = ('name', 'path', 'group',
+                    'flags', 'comment', 'status', 'owner')
+    list_display_links = ('name', 'owner')
+    search_fields = ('name', 'group', 'owner')
     list_per_page = 25
 
 """ admin view for job db
@@ -52,10 +52,10 @@ class CarmeMessageAdmin(admin.ModelAdmin):
 """ admin view for from GroupResource
 
 """
-class GroupResourcesAdmin(admin.ModelAdmin):
-    list_display = ('group_name','group_partition','group_default','group_max_jobs','group_max_nodes','group_max_gpus_per_node')
-    list_display_links = ('group_name','group_partition') 
-    search_fields = ('group_name','group_partition','group_default','group_max_jobs','group_max_nodes','group_max_gpus_per_node')
+class GroupResourceAdmin(admin.ModelAdmin):
+    list_display = ('name','partition','default','max_jobs','max_nodes','max_gpus_per_node')
+    list_display_links = ('name','partition') 
+    search_fields = ('name','partition','default','max_jobs','max_nodes','max_gpus_per_node')
     list_per_page = 25
 
 """ deprecated
@@ -74,4 +74,4 @@ admin.site.register(Image, ImageAdmin)
 admin.site.register(SlurmJob, SlurmJobAdmin)
 admin.site.register(CarmeMessage, CarmeMessageAdmin)
 admin.site.register(ClusterStat, StatAdmin)
-admin.site.register(GroupResource, GroupResourcesAdmin)
+admin.site.register(GroupResource, GroupResourceAdmin)

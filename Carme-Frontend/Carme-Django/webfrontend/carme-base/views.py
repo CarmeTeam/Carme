@@ -65,22 +65,22 @@ def generateChoices(request):
     """generates the list of items for the image drop down menue"""
 
     group = list(request.user.ldap_user.group_names)[0]
-    group_resources = GroupResource.objects.filter(group_name__exact=group)[0]
+    group_resources = GroupResource.objects.filter(name__exact=group)[0]
 
     # generate image choices
-    image_list = Image.objects.filter(image_group__exact=group, image_status__exact="active")
+    image_list = Image.objects.filter(group__exact=group, status__exact="active")
     image_choices = set()
     for i in image_list:
-        image_choices.add((i.image_name, i.image_name))
+        image_choices.add((i.name, i.name))
 
     # generate num_nodes choices
     node_choices =[]
-    for i in range(1, group_resources.group_max_nodes +1):
+    for i in range(1, group_resources.max_nodes +1):
         node_choices.append( (str(i), i) )
 
     # generate num_gpus choices
     gpu_choices = []
-    for i in range(1, group_resources.group_max_gpus_per_node +1):
+    for i in range(1, group_resources.max_gpus_per_node +1):
         gpu_choices.append( (str(i), i) )
 
     # generate gpu_type choices
@@ -206,7 +206,7 @@ def start_job(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     group = list(request.user.ldap_user.group_names)[0]
-    partition = GroupResource.objects.filter(group_name__exact=group)[0].group_partition
+    partition = GroupResource.objects.filter(name__exact=group)[0].partition
 
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
 
@@ -219,12 +219,12 @@ def start_job(request):
         # check whether it's valid:
         if form.is_valid():
             # get image path and mounts from choices
-            image_db = Image.objects.filter(image_group__exact=group,
-                                                   image_name__exact=form.cleaned_data['image'])[0]
+            image_db = Image.objects.filter(group__exact=group,
+                                                   name__exact=form.cleaned_data['image'])[0]
             mounts = settings.CARME_BASE_MOUNTS  # set in carme settings
-            mounts += str(image_db.image_mounts)
-            image = image_db.image_path
-            name = image_db.image_name
+            mounts += str(image_db.flags)
+            image = image_db.path
+            name = image_db.name
 
             # add job to db
             num_nodes = int(form.cleaned_data['nodes'])
@@ -285,17 +285,17 @@ def job_hist(request):
     if (job_time_start and job_time_end):
         job_time = round((job_time_end-job_time_start)/3600)
 
-    group_resources = GroupResource.objects.filter(group_name__exact=group)[0]
+    group_resources = GroupResource.objects.filter(name__exact=group)[0]
 
     # render template
     context = {
         'myjobhist': myjobhist,
         'uID': uID,
         'job_time': job_time,
-        'partitions': group_resources.group_partition,
-        'max_jobs': group_resources.group_max_jobs,
-        'max_nodes': group_resources.group_max_nodes,
-        'max_gpus': group_resources.group_max_gpus_per_node,
+        'partitions': group_resources.partition,
+        'max_jobs': group_resources.max_jobs,
+        'max_nodes': group_resources.max_nodes,
+        'max_gpus': group_resources.max_gpus_per_node,
     }
 
     return render(request, 'job_hist.html', context)
