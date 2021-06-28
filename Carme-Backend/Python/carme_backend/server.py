@@ -338,7 +338,7 @@ class Backend(Service):
         
         if gpu_type == 'default':
             template += " --gres=\"gpu:{num_gpus}\" --gres-flags=\"enforce-binding\""
-        elif not gpu_type == 'cpu':
+        elif not gpu_type == 'cpu': # this is inconsistent and should be implemented by changing carme-wide "gpu_" variables to "accelerator_"
             template += " --gres=\"gpu:{gpu_type}:{num_gpus}\" --gres-flags=\"enforce-binding\""
         
         params = template.format(**values)
