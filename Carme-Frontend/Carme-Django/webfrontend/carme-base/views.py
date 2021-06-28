@@ -221,8 +221,7 @@ def start_job(request):
             # get image path and mounts from choices
             image_db = Image.objects.filter(group__exact=group,
                                                    name__exact=form.cleaned_data['image'])[0]
-            mounts = settings.CARME_BASE_MOUNTS  # set in carme settings
-            mounts += str(image_db.flags)
+            flags = image_db.flags
             image = image_db.path
             name = image_db.name
 
@@ -238,7 +237,7 @@ def start_job(request):
             # backend call
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(mounts), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
+            job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(flags), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
             
             if int(job_id) > 0:
                 SlurmJob.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
