@@ -24,6 +24,7 @@ import MySQLdb
 from rpyc import Service
 from rpyc.utils.server import ThreadedServer
 from rpyc.utils.authenticators import SSLAuthenticator
+from shlex import quote
 
 tables = {
     "notifications": "carme_carmemessages",
@@ -275,7 +276,7 @@ class Backend(Service):
             
         return 0
 
-    def exposed_schedule(self, user, home, image, mounts, partition, num_gpus, num_nodes, name, gpu_type):
+    def exposed_schedule(self, user, home, image, flags, partition, num_gpus, num_nodes, name, gpu_type):
         """schedule a new job via the batch system
 
         # note 
@@ -285,7 +286,7 @@ class Backend(Service):
             user: username
             home: home directory
             image: image to start
-            mounts: mount points to be set
+            flags: singularity flags
             partition: partition to be used
             num_gpus: number of GPUs to be used
             num_nodes: number of nodes
@@ -343,7 +344,7 @@ class Backend(Service):
         
         params = template.format(**values)
 
-        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "slurm/job-scripts/slurm.sh"), image=image, mounts=mounts)
+        com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{flags}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "slurm/job-scripts/slurm.sh"), image=image, flags=quote(flags))
 
         print(com)
 
