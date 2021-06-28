@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # ----------------------------------------------
 # Carme
 # ----------------------------------------------
@@ -24,19 +25,9 @@ from rpyc import Service
 from rpyc.utils.server import ThreadedServer
 from rpyc.utils.authenticators import SSLAuthenticator
 
-# import needed variables from CarmeConfig
-from importlib.machinery import SourceFileLoader
-SourceFileLoader('CarmeConfig', '/opt/Carme/CarmeConfig.backend').load_module()
-
-from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
-from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT
-from CarmeConfig import CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
-from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2
-from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
-
 tables = {
-    "notifications": "carme-base_carmemessage",
-    "jobs": "carme-base_slurmjob"
+    "notifications": "carme_carmemessages",
+    "jobs": "carme_slurmjobs"
 }
 
 queries = {
@@ -336,16 +327,25 @@ class Backend(Service):
             'partition': partition,
             'job_name': name,
             'num_nodes': num_nodes,
-            'gpus_per_node': ':' + num_gpus,
-            'gpu_type': ('' if (gpu_type == 'default' or gpu_type == 'cpu') else (':' + gpu_type)),
+            'num_gpus': num_gpus,
+            'gpu_type': gpu_type,
             'cores_per_node': cores_per_node,
             'mem_per_node': str(mem_per_node) + 'G',
             'log_dir': os.path.join(home, '.local/share/carme/job-log-dir')
         }
 
-        params = "--parsable --constraint=\"{constraints}\" --partition=\"{partition}\" --job-name=\"{job_name}\" --nodes=\"{num_nodes}\" --ntasks-per-node=\"{cores_per_node}\" --cpus-per-task=\"1\" --mem=\"{mem_per_node}\" --gres=\"gpu{gpu_type}{gpus_per_node}\" --gres-flags=\"enforce-binding\" -o \"{log_dir}/%j.out\" -e \"{log_dir}/%j.err\"".format(**values)
+        template = "--parsable --constraint=\"{constraints}\" --partition=\"{partition}\" --job-name=\"{job_name}\" --nodes=\"{num_nodes}\" --ntasks-per-node=\"{cores_per_node}\" --cpus-per-task=\"1\" --mem=\"{mem_per_node}\" -o \"{log_dir}/%j.out\" -e \"{log_dir}/%j.err\""
         
+        if gpu_type == 'default':
+            template += " --gres=\"gpu:{num_gpus}\" --gres-flags=\"enforce-binding\""
+        elif not gpu_type == 'cpu': # this is inconsistent and should be implemented by changing carme-wide "gpu_" variables to "accelerator_"
+            template += " --gres=\"gpu:{gpu_type}:{num_gpus}\" --gres-flags=\"enforce-binding\""
+        
+        params = template.format(**values)
+
         com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" \"{mounts}\"\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "slurm/job-scripts/slurm.sh"), image=image, mounts=mounts)
+
+        print(com)
 
         # execute sbatch as user
         proc = subprocess.Popen(com, shell=True, stdout=subprocess.PIPE)
@@ -498,7 +498,7 @@ class Backend(Service):
             LDAP_ADMIN_USER = "cn={cn},dc={dc1},dc={dc2}".format(cn=CARME_LDAP_ADMIN, dc1=CARME_LDAP_DC1, dc2=CARME_LDAP_DC2)
 
             s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ldap3.ALL)
-            c = ldap3.Connection(s, user=LDAP_ADMIN_USER, password=CARME_LDAP_SERVER_PW)
+            c = ldap3.Connection(s, user=CARME_LDAP_BIND_DN, password=CARME_LDAP_SERVER_PW)
             
             c.bind()
             c.modify(user, {'userPassword': [(ldap3.MODIFY_REPLACE, password)]})
@@ -513,8 +513,23 @@ class Backend(Service):
 
         return ret
 
+def start(args):
+    # import needed variables from CarmeConfig
+    from importlib.machinery import SourceFileLoader
+    SourceFileLoader('CarmeConfig', args.config).load_module()
 
-if __name__ == "__main__":
+    from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
+    from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT
+    from CarmeConfig import CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
+    from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2, CARME_LDAP_BIND_DN
+    from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
+
+    global CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
+    global CARME_BACKEND_PATH, CARME_BACKEND_PORT
+    global CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
+    global CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2, CARME_LDAP_BIND_DN
+    global CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
+
     auth = SSLAuthenticator(os.path.join(CARME_BACKEND_PATH, "SSL/backend.key"), os.path.join(CARME_BACKEND_PATH, "SSL/backend.crt"),
                                             cert_reqs=ssl.CERT_REQUIRED, ca_certs=os.path.join(CARME_BACKEND_PATH, "SSL/backend.crt"))
     server = ThreadedServer(Backend, port=CARME_BACKEND_PORT,

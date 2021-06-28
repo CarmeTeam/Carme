@@ -1,0 +1,9 @@
+*~
+*.swp
+
+build/
+carme_backend.egg-info/
+dist/
+
+**/.ipynb_checkpoints/
+*Untitled*.ipynb
