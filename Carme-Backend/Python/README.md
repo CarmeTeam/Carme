@@ -16,7 +16,14 @@ pip install --upgrade setuptools
 python setup.py bdist_wheel
 ```
 
-The resulting wheel file will be saved to `dist/*.whl`.
+The resulting wheel file will be saved to `dist/*.whl`. The `.whl` can be installed by running:
+
+```
+conda activate carme-backend
+pip install dist/carme-backend*.whl
+```
+
+The Carme backend is then available as `carme-backend` command.
 
 ## Known errors
 
