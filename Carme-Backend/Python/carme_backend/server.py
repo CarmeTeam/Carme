@@ -27,8 +27,8 @@ from rpyc.utils.authenticators import SSLAuthenticator
 from shlex import quote
 
 tables = {
-    "notifications": "carme_carmemessages",
-    "jobs": "carme_slurmjobs"
+    "notifications": "carme_carmemessage",
+    "jobs": "carme_slurmjob"
 }
 
 queries = {
