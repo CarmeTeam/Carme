@@ -4,7 +4,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('carme-base', '0009_delete_runingjobs'),
+        ('carme', '0009_delete_runingjobs'),
     ]
 
     operations = [

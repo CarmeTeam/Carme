@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('carme-base', '0007_groupresources'),
+        ('carme', '0007_groupresources'),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('carme-base', '0005_clusterstat'),
+        ('carme', '0005_clusterstat'),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('carme-base', '0012_slurmjobs_add_ta_port'),
+        ('carme', '0012_slurmjobs_add_ta_port'),
     ]
 
     operations = [

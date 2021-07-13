@@ -51,7 +51,7 @@ ALLOWED_HOSTS = [CARME_URL, CARME_LOGINNODE_IP]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'carme-base.apps.DbModelConfig',
+    'carme.apps.DbModelConfig',
     'maintenance_mode',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -148,7 +148,7 @@ DATABASES = {
 
 }
 
-DATABASE_ROUTERS = ('carme-base.dbrouters.MyDBRouter',)
+DATABASE_ROUTERS = ('carme.dbrouters.MyDBRouter',)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

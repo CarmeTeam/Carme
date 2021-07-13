@@ -413,7 +413,7 @@ def stop_job(request):
                 print("Error stopping job {} from user {}".format(jobID, jobUser))
                 raise Exception("ERROR stopping job [backend]")
 
-            return HttpResponseRedirect('/carme-base/JobTable/')
+            return HttpResponseRedirect('/carme/JobTable/')
         else:
             return HttpResponse('<h3>Error - Invalid Form: {}</h3>'.format(form.cleaned_data['jobUser']))
 

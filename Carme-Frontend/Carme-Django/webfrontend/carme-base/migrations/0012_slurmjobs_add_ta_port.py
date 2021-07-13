@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('carme-base', '0011_slurmjobs_rename_all'),
+        ('carme', '0011_slurmjobs_rename_all'),
     ]
 
     operations = [

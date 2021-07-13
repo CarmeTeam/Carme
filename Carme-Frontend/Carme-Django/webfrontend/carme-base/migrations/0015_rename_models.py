@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('carme-base', '0014_remove_unused_tables'),
+        ('carme', '0014_remove_unused_tables'),
     ]
 
     operations = [
