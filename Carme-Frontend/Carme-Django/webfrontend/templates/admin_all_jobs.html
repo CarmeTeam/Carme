@@ -62,7 +62,7 @@
 	if (!$) console.error('jQuery is required!');
 	else {
 		function update_jobtable() {
-			$.ajax('/carme-base/AdminJobTable/', {
+			$.ajax('/carme/AdminJobTable/', {
 				type: "GET",
 				statusCode: {
 					401: function (response) {

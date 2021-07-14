@@ -48,7 +48,7 @@
 	</td>
 	<td class="align-middle">
 		{% ifequal job.status 'running' %}
-		<form action="/carme-base/JobInfo/" method="post" target="_blank">
+		<form action="/carmenfo/" method="post" target="_blank">
 			{% csrf_token %}
 			<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 			<button class="btn btn-secondary" type="submit"><i class="fa fa-info fa-fw" aria-hidden="true"></i></button>
@@ -58,7 +58,7 @@
 		{% endifequal %}
 	</td>
 	<td class="align-middle">
-		<form class="ajax" action="/carme-base/StopJob/" method="post">
+		<form class="ajax" action="/carmeJob/" method="post">
 			{% csrf_token %}
 			<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 			<input type="hidden" name="jobName" value="{{job.name}}">

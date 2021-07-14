@@ -16,4 +16,4 @@ from django.apps import AppConfig
 
 """
 class DbModelConfig(AppConfig):
-    name = 'carme-base'
+    name = 'carme'

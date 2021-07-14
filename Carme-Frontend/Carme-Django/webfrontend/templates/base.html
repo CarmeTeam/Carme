@@ -66,22 +66,22 @@
 				<li class="nav-item{% if '/' == request.path %} active{% endif %}">
 					<a class="nav-link" href="/">Dashboard <span class="sr-only">(current)</span></a>
 				</li>
-				<li class="nav-item{% if '/carme-base/JobHist' in request.path %} active{% endif %}">
-					<a class="nav-link" href="/carme-base/JobHist/">History</a>
+				<li class="nav-item{% if '/carme/JobHist' in request.path %} active{% endif %}">
+					<a class="nav-link" href="/carme/JobHist/">History</a>
 				</li>
 
 				{% if user.is_superuser %}
-				<li class="nav-item dropdown{% if '/carme-base/AdminAllJobs/' in request.path %} active{% endif %}">
+				<li class="nav-item dropdown{% if '/carme/AdminAllJobs/' in request.path %} active{% endif %}">
 					<a class="nav-link dropdown-toggle" href="#" id="dropdown-admin" data-toggle="dropdown"
 						aria-haspopup="true" aria-expanded="false">Admin</a>
 					<div class="dropdown-menu" aria-labelledby="dropdown-admin">
-						<a class="dropdown-item" href="/carme-base/AdminAllJobs/"><i class="fa fa-tasks fa-fw"
+						<a class="dropdown-item" href="/carme/AdminAllJobs/"><i class="fa fa-tasks fa-fw"
 								aria-hidden="true"></i>&nbsp; All jobs</a>
 						{% if maintenance_mode %}
-						<a class="dropdown-item" href="/carme-base/maintenance-mode/off/"><i class="fa fa-unlock fa-fw"
+						<a class="dropdown-item" href="/carme/maintenance-mode/off/"><i class="fa fa-unlock fa-fw"
 								aria-hidden="true"></i>&nbsp; Maintenance off</a>
 						{%else %}
-						<a class="dropdown-item" href="/carme-base/maintenance-mode/on/"><i class="fa fa-lock fa-fw"
+						<a class="dropdown-item" href="/carme/maintenance-mode/on/"><i class="fa fa-lock fa-fw"
 								aria-hidden="true"></i>&nbsp; Maintenance on</a>
 						{% endif %}
 						<div class="dropdown-divider"></div>
@@ -132,7 +132,7 @@
 						aria-haspopup="true" aria-expanded="false"><i class="fa fa-user" aria-hidden="true"></i>&nbsp;
 						{{ user.username }}&nbsp;</a>
 					<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-user">
-						<a class="dropdown-item" href="/carme-base/password/"><i class="fa fa-key fa-fw"
+						<a class="dropdown-item" href="/carme/password/"><i class="fa fa-key fa-fw"
 								aria-hidden="true"></i>&nbsp; Change password</a>
 						<div class="dropdown-divider"></div>
 						<dl class="row no-gutters mb-0 px-4 py-1" style="width: 250px">
