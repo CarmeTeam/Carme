@@ -13,6 +13,8 @@ CarmeConfig.backend*
 *.csr
 *.key
 
+*.simg
+
 *~
 *.swp
 
