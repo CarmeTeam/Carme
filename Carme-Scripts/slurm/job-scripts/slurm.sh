@@ -265,7 +265,7 @@ fi
 
 
 # put the singularity start command together
-read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS} ${IMAGE} /bin/bash /home/.CarmeScripts/start_apps.sh"
+read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS} ${IMAGE} /bin/bash ${SCRIPTS_PATH_CONTAINER}/start_apps.sh"
 
 
 log "start container"
