@@ -10,6 +10,13 @@ set -o pipefail
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# define variables -----------------------------------------------------------------------------------------------------------------
+#PYTHON_BIN=
+# NOTE: This variabel has to be set and point to the python binary that can utilies the same rpyc version as the carme backend does.
+#       If this variable is not properly set this script will fail with an respective error code.
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # do nothing if this is not a carme job --------------------------------------------------------------------------------------------
 if ! [[ "${SLURM_JOB_CONSTRAINTS}" =~ "carme" ]];then
   exit 0
@@ -103,6 +110,13 @@ check_command ssh-keygen
 check_command runuser
 check_command ss
 check_command hostname
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# check if PYTHON_BIN is set -------------------------------------------------------------------------------------------------------
+[[ -z  ${PYTHON_BIN} ]] && die "PYTHON_BIN not set"
+[[ ! -f ${PYTHON_BIN} ]] && die "cannot find ${PYTHON_BIN}"
+[[ ! -x ${PYTHON_BIN} ]] && die "${PYTHON_BIN} is not an executable"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -320,7 +334,7 @@ export CARME_HASH=${HASH}
 
   #register job with frontend db
   log "register job with frontend db"
-  runuser -u "${SLURM_JOB_USER}" -- "${CARME_SCRIPTS_PATH}/frontend/dist_alter_jobDB_entry/alter_jobDB_entry" "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${SLURM_JOB_GPUS}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
+  runuser -u "${SLURM_JOB_USER}" -- "${PYTHON_BIN}" "${CARME_SCRIPTS_PATH}/frontend/alter_jobDB_entry.py" "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${SLURM_JOB_GPUS}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
 
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
