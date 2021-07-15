@@ -57,14 +57,14 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 %runscript
     # migrate database
-    /bin/bash -c "cd /opt/Carme/Carme-Frontend/Carme-Django/webfrontend && python3 manage.py migrate carme-base"
+    /bin/bash -c "cd /opt/Carme/Carme-Frontend/Carme-Django/webfrontend && python3 manage.py migrate carme"
 
     # start webserver
     APACHE_STARTED_BY_SYSTEMD=1 apache2ctl start # APACHE_STARTED_BY_SYSTEMD=1 is required to ensure apache2 does not start his service via systemctl, because systemctl is not available in a singularity container
 
 %startscript
     # migrate database
-    /bin/bash -c "cd /opt/Carme/Carme-Frontend/Carme-Django/webfrontend && python3 manage.py migrate carme-base"
+    /bin/bash -c "cd /opt/Carme/Carme-Frontend/Carme-Django/webfrontend && python3 manage.py migrate carme"
 
     # start webserver
     APACHE_STARTED_BY_SYSTEMD=1 apache2ctl start # APACHE_STARTED_BY_SYSTEMD=1 is required to ensure apache2 does not start his service via systemctl, because systemctl is not available in a singularity container
