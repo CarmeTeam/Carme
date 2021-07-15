@@ -74,6 +74,7 @@ IMAGE=${1}
 
 FLAGS=${2}
 [[ -z ${FLAGS} ]] && die "no flags defined"
+FLAGS=${FLAGS//[_]/ }
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -264,12 +265,12 @@ fi
 
 
 # put the singularity start command together
-read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS}"
+read -r -a SINGULARITY_START <<< "${SINGULARITY_BIN} exec ${SINGULARITY_FLAGS} ${BINDS} ${IMAGE} /bin/bash ${SCRIPTS_PATH_CONTAINER}/start_apps.sh"
 
 
 log "start container"
 log "image: ${IMAGE}"
 log "image flags: ${SINGULARITY_FLAGS} ${BINDS}"
 
-TZ=$(cat /etc/timezone) "${SINGULARITY_START[@]}" "${IMAGE}" "/bin/bash /home/.CarmeScripts/start_apps.sh"
+TZ=$(cat /etc/timezone) "${SINGULARITY_START[@]}"
 #-----------------------------------------------------------------------------------------------------------------------------------
