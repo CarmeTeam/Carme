@@ -306,7 +306,7 @@ if [[ "$(hostname -s)" == "${MASTER_NODE}" ]];then
   get_free_port "8001" "9000" "TB_PORT"
 
   # get IP of master node and create hash
-  IPADDR="$(ip get route "${CARME_LOGINNODE_IP}" | grep -m1 -oP "src\s+\K(\d+\.\d+\.\d+\.\d+)"
+  IPADDR="$(ip route get "${CARME_LOGINNODE_IP}" | grep -m1 -oP "src\s+\K(\d+\.\d+\.\d+\.\d+)")"
   [[ -z ${IPADDR} ]] && die "IPADDR not set"
   log "master node ip address: ${IPADDR}"
 
