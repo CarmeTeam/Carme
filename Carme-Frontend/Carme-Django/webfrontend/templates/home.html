@@ -209,7 +209,7 @@
 		}
 
 		function update_messages() {
-			$.ajax('/carme
+			$.ajax('/carme/Messages/',{
 				type: "GET",
 				statusCode: {
 					401: function (response) {
@@ -232,7 +232,7 @@
 		}
 
 		function update_jobtable() {
-			$.ajax('/carme
+			$.ajax('/carme/JobTable/',{
 				type: "GET",
 				statusCode: {
 					401: function (response) {
