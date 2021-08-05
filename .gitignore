@@ -3,6 +3,10 @@ CarmeConfig.frontend*
 CarmeConfig.container*
 CarmeConfig.backend*
 
+carme-node-prolog.sh
+prolog.sh
+epilog.sh
+
 *.bak
 *.new
 
