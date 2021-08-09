@@ -77,14 +77,14 @@
 # The directory where shm and other runtime files will be stored.
 #
 
-DefaultRuntimeDir ${APACHE_RUN_DIR}
+DefaultRuntimeDir /opt/apache2-run
 
 #
 # PidFile: The file in which the server should record its process
 # identification number when it starts.
 # This needs to be set in /etc/apache2/envvars
 #
-PidFile ${APACHE_PID_FILE}
+PidFile /opt/apache2-run/apache2.pid
 
 #
 # Timeout: The number of seconds before receives and sends time out.
