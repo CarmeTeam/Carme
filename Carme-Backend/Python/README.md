@@ -20,7 +20,7 @@ The resulting wheel file will be saved to `dist/*.whl`. The `.whl` can be instal
 
 ```
 conda activate carme-backend
-pip install dist/carme-backend*.whl
+pip install dist/carme_backend*.whl
 ```
 
 The Carme backend is then available as `carme-backend` command.
