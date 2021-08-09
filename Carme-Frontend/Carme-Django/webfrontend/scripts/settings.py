@@ -187,15 +187,17 @@ LOGGING = {
         },
     },
     'handlers': {
-        'db_log': {
-            'level': 'DEBUG',
-            'class': 'django_db_logger.db_log_handler.DatabaseLogHandler'
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/opt/Carme-Apache-Logs/django.log',
         },
     },
     'loggers': {
-        'db': {
-            'handlers': ['db_log'],
-            'level': 'DEBUG'
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
         }
     }
 }
