@@ -32,6 +32,12 @@ is_root
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# check essential commands ---------------------------------------------------------------------------------------------------------
+check_command systemctl
+check_command hostname
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from config
 CARME_BEEGFS_MGMTNODE_IP=$(get_variable CARME_BEEGFS_MGMTNODE_IP)
@@ -58,7 +64,7 @@ echo ""
 if [ "$RESP" = "y" ]; then
 
   # start the beegfs-mgmtd ---------------------------------------------------------------------------------------------------------
-  echo "start the beegfs-mgmtd on $(hostname)"
+  echo "start the beegfs-mgmtd on $(hostname -s)"
   systemctl start beegfs-mgmtd && systemctl --no-pager -l status beegfs-mgmtd
   #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,7 +89,7 @@ if [ "$RESP" = "y" ]; then
 
   # start the beegfs-helperd -------------------------------------------------------------------------------------------------------
   echo ""
-  echo "start the beegfs-helperd on $(hostname)"
+  echo "start the beegfs-helperd on $(hostname -s)"
   systemctl start beegfs-helperd && systemctl --no-pager -l status beegfs-helperd
 
   for HOST in ${CARME_NODES_LIST}; do
@@ -95,7 +101,7 @@ if [ "$RESP" = "y" ]; then
 
   # start the beegfs-client --------------------------------------------------------------------------------------------------------
   echo ""
-  echo "start the beegfs-client on $(hostname)"
+  echo "start the beegfs-client on $(hostname -s)"
   systemctl start beegfs-client && systemctl --no-pager -l status beegfs-client
 
   for HOST in ${CARME_NODES_LIST}; do
@@ -107,7 +113,7 @@ if [ "$RESP" = "y" ]; then
 
   # mount /home --------------------------------------------------------------------------------------------------------------------
   echo ""
-  echo "mount /home on $(hostname)"
+  echo "mount /home on $(hostname -s)"
   mount -v /home && ls -lah /home
 
   for HOST in ${CARME_NODES_LIST}; do

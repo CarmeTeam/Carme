@@ -51,7 +51,7 @@ ALLOWED_HOSTS = [CARME_URL, CARME_LOGINNODE_IP]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'carme-base.apps.DbModelConfig',
+    'carme.apps.DbModelConfig',
     'maintenance_mode',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -115,17 +115,9 @@ SETTINGS_EXPORT = [
             'CARME_FRONTEND_LINK_MONITOR',
             'CARME_FRONTEND_LINK_SWITCH',
             'CARME_FRONTEND_LINK_LDAP',
-            'CARME_FRONTEND_LINK_MATTERMOST',
             'CARME_FRONTEND_LINK_DISCLAIMER',
             'CARME_FRONTEND_LINK_PRIVACY',
-            'CARME_FRONTEND_LINK_ORGA_URL',
-            'CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR',
-            'CARME_FRONTEND_LOGO_TOP_LEFT',
-            'CARME_FRONTEND_LOGO_TOP_RIGHT_1',
-            'CARME_FRONTEND_LOGO_TOP_RIGHT_2',
-            'CARME_FRONTEND_TITLE',
             'CARME_FRONTEND_DEBUG',
-
             ]
 
 
@@ -156,7 +148,9 @@ DATABASES = {
 
 }
 
-DATABASE_ROUTERS = ('carme-base.dbrouters.MyDBRouter',)
+DATABASE_ROUTERS = ('carme.dbrouters.MyDBRouter',)
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -193,15 +187,17 @@ LOGGING = {
         },
     },
     'handlers': {
-        'db_log': {
-            'level': 'DEBUG',
-            'class': 'django_db_logger.db_log_handler.DatabaseLogHandler'
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/opt/Carme-Apache-Logs/django.log',
         },
     },
     'loggers': {
-        'db': {
-            'handlers': ['db_log'],
-            'level': 'DEBUG'
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
         }
     }
 }
@@ -213,7 +209,7 @@ LOGGING = {
 
 LOGIN_URL = reverse_lazy('login')
 
-AUTH_LDAP_SERVER_URI = "ldap://"+CARME_LDAP_SERVER_IP
+AUTH_LDAP_SERVER_URI = CARME_LDAP_SERVER_PROTO + CARME_LDAP_SERVER_IP
 AUTH_LDAP_BIND_DN = CARME_LDAP_BIND_DN
 AUTH_LDAP_BIND_PASSWORD = CARME_LDAP_SERVER_PW
 
@@ -277,10 +273,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    CARME_ZABBIX_GRAPH_PATH,
-]
 
 STATIC_ROOT = CARME_FRONTEND_PATH+'/Carme-Django/static/'
 

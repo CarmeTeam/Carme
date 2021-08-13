@@ -6,8 +6,8 @@
 
 
 # version --------------------------------------------------------------------------------------------------------------------------
-CARME_VERSION="r0.8.0"
-#stable release: r0.8.0
+CARME_VERSION="r0.9.0"
+#stable release: r0.9.0
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -70,28 +70,7 @@ CARME_START_SSHD=""
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# network specific variables -------------------------------------------------------------------------------------------------------
-CARME_NETWORK_BASE=""
-#e.g. 123.456.789.
-
-CARME_GATEWAY=""
-#e.g. 123.456.789.3
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# container specific variables -----------------------------------------------------------------------------------------------------
-CARME_MESSAGE_PATH="/home/.CarmeScripts/Carme-Messages"
-#default: /home/.CarmeScripts/Carme-Messages
-
-CARME_BASE_MOUNTS=''
-#e.g.
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # CARME backend specific variables -------------------------------------------------------------------------------------------------
-CARME_BACKEND_DEBUG=
-#True or False (note: do not use double quotes)
-
 CARME_BACKEND_PATH="/opt/Carme/Carme-Backend/"
 #default: /opt/Carme/Carme-Backend/
 
@@ -125,11 +104,11 @@ CARME_SSL_EMAIL_BASE=""
 
 
 # CARME proxy specific variables ---------------------------------------------------------------------------------------------------
-CARME_PROXY_PATH_BACKEND=''
-#e.g. '/opt/Carme/Carme-Proxy/'
+CARME_PROXY_PATH_BACKEND='/opt/Carme-Proxy-Routes/'
+#default: /opt/Carme-Proxy-Routes/
 
-CARME_PROXY_PATH_FRONTEND=''
-#e.g. '/opt/traefik/'
+CARME_PROXY_PATH_FRONTEND='/opt/traefik/'
+#default: /opt/traefik/
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -140,7 +119,7 @@ CARME_URL=""
 CARME_TIMEZONE=""
 #e.g. Europe/Berlin
 
-CARME_FRONTEND_ID=""
+CARME_FRONTEND_ID="Carme"
 #e.g. unique name for the frontend (needed when running multiple frontends)
 
 CARME_FRONTEND_PATH="/opt/Carme/Carme-Frontend"
@@ -152,15 +131,15 @@ CARME_FRONTEND_DEBUG=
 CARME_FRONTEND_KEY=''
 #needs to be secret and different for each install
 
-#Admin pannel
-CARME_ADMIN_HEADER=""
-#e.g.
+#Admin portal
+CARME_ADMIN_HEADER="Carme Admin"
+#e.g. "Carme Admin"
 
-CARME_ADMIN_SITE_NAME=""
-#e.g.
+CARME_ADMIN_SITE_NAME="Carme Admin Portal"
+#e.g. "Carme Admin Portal"
 
-CARME_ADMIN_SITE_INDEX=""
-#e.g.
+CARME_ADMIN_SITE_INDEX="Welcome to the Carme Admin Portal"
+#e.g. "Welcome to the Carme Admin Portal"
 
 CARME_FRONTEND_LINK_PROXY=""
 #e.g. https://my-proxy.my-carme-cluster.institute.com/
@@ -174,33 +153,11 @@ CARME_FRONTEND_LINK_SWITCH=""
 CARME_FRONTEND_LINK_LDAP=""
 #e.g. https://my-ldap.my-carme-cluster.institute.com/
 
-CARME_FRONTEND_LINK_MATTERMOST=""
-#e.g. https://my-mattermost.my-carme-cluster.institute.com/
-
 CARME_FRONTEND_LINK_DISCLAIMER=""
 #link to your usage disclaimer
 
 CARME_FRONTEND_LINK_PRIVACY=""
 #link to your data privacy disclaimer
-
-CARME_FRONTEND_LINK_ORGA_URL=""
-#link to your university|department|institute|company
-
-CARME_FRONTEND_LINK_ADMIN_CLUSTER_MONITOR=""
-#e.g.
-
-CARME_FRONTEND_LOGO_TOP_LEFT=""
-#e.g. the logo of your department
-#must bee in static
-
-CARME_FRONTEND_LOGO_TOP_RIGHT_1=""
-#e.g. the logo of your univerity
-
-CARME_FRONTEND_LOGO_TOP_RIGHT_2=""
-#e.g. the logo of some founding
-
-CARME_FRONTEND_TITLE=""
-#e.g.
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -246,6 +203,9 @@ CARME_LDAP_DC2=""
 
 CARME_LDAP_ADMIN=""
 #e.g. admin
+
+CARME_LDAP_SERVER_PROTO="ldaps://"
+#e.g. ldaps://
 
 CARME_LDAP_SERVER_IP=""
 #e.g. 123.456.789.180
@@ -329,29 +289,4 @@ CARME_BEEGFS_STORAGENODES=""
 
 CARME_BEEGFS_HOMEMOUNT_NODES=""
 #e.g. node01 node02 node03 ...
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# Zabbix specific variables --------------------------------------------------------------------------------------------------------
-CARME_ZABBIX_GRAPH_PATH="/opt/Carme/Carme-Frontend/Carme-Django/static/zabbix-graphs"
-#default: /opt/Carme/Carme-Frontend/static/zabbix-graphs
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
-# MatterMost specific variables ----------------------------------------------------------------------------------------------------
-CARME_MATTERMOST_TRIGGER=""
-#yes or no
-
-CARME_MATTERMOST_PATH=""
-#e.g. /opt/mattermost
-
-CARME_MATTERMOST_COMMAND=""
-#mattermost or platform [depends on mattermost version]
-
-CARME_MATTERMOST_EMAIL_BASE=""
-#e.g. mymail.com
-
-CARME_MATTERMOST_DEFAULT_TEAM=""
-#note: do not use uppercases
-#e.g. myteam [do not use uppercases]
 #-----------------------------------------------------------------------------------------------------------------------------------

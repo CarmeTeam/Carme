@@ -32,6 +32,12 @@ is_root
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# check essential commands ---------------------------------------------------------------------------------------------------------
+check_command systemctl
+check_command hostname
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from config
 CARME_BEEGFS_MGMTNODE_IP=$(get_variable CARME_BEEGFS_MGMTNODE_IP)
@@ -59,7 +65,7 @@ echo ""
 if [ "$RESP" = "y" ]; then
 
   # umount /home -------------------------------------------------------------------------------------------------------------------
-  echo "umount /home on $(hostname)"
+  echo "umount /home on $(hostname -s)"
   umount -v /home
 
   for HOST in ${CARME_NODES_LIST}; do
@@ -71,7 +77,7 @@ if [ "$RESP" = "y" ]; then
 
   # stop the beegfs-client ---------------------------------------------------------------------------------------------------------
   echo ""
-  echo "stop the beegfs-client on $(hostname)"
+  echo "stop the beegfs-client on $(hostname -s)"
   systemctl stop beegfs-client && systemctl --no-pager -l status beegfs-client
 
   for HOST in ${CARME_NODES_LIST}; do
@@ -83,7 +89,7 @@ if [ "$RESP" = "y" ]; then
 
   # stop the beegfs-helperd --------------------------------------------------------------------------------------------------------
   echo ""
-  echo "stop the beegfs-helperd on $(hostname)"
+  echo "stop the beegfs-helperd on $(hostname -s)"
   systemctl stop beegfs-helperd && systemctl --no-pager -l status beegfs-helperd
 
   for HOST in ${CARME_NODES_LIST}; do
@@ -113,7 +119,7 @@ if [ "$RESP" = "y" ]; then
 
   # stop the beegfs-mgmtd ----------------------------------------------------------------------------------------------------------
   echo ""
-  echo "stop the beegfs-mgmtd on $(hostname)"
+  echo "stop the beegfs-mgmtd on $(hostname -s)"
   systemctl stop beegfs-mgmtd && systemctl --no-pager -l status beegfs-mgmtd
   # --------------------------------------------------------------------------------------------------------------------------------
 

@@ -3,8 +3,9 @@ CarmeConfig.frontend*
 CarmeConfig.container*
 CarmeConfig.backend*
 
-*.bak
-*.new
+carme-node-prolog.sh
+prolog.sh
+epilog.sh
 
 *.bak
 *.new
@@ -12,6 +13,8 @@ CarmeConfig.backend*
 *.crt
 *.csr
 *.key
+
+*.simg
 
 *~
 *.swp
@@ -23,8 +26,6 @@ tmp
 *.out
 
 *.pyc
-
-maintenance_mode_state.txt
 
 dist_*
 

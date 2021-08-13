@@ -68,7 +68,7 @@ complete -f carme_unarchive
 
 
 # define function to start tensorboard ---------------------------------------------------------------------------------------------
-function carme_start_tensorboard () {
+function carme_tensorboard_start () {
   PID_FILE="${CARME_JOBDIR}/tensorboard.pid"
   if [[ -f "${PID_FILE}" ]];then
     echo "ERROR: TensorBoard is already running."
@@ -77,8 +77,8 @@ function carme_start_tensorboard () {
     TB_VERSION="$(conda list | grep tensorboard | awk '{ print $2 }')"
     if [[ -n "${TB_VERSION}" && -n $(which tensorboard) ]];then
       echo "starting TensorBoard (${TB_VERSION})"
-      (LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --host="$(hostname)" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" >>"${CARME_LOGDIR}/${CARME_JOB_ID}.out" 2>>"${CARME_LOGDIR}/${CARME_JOB_ID}.err" & echo "$!" > "${PID_FILE}")
-      while ! wget -q -O/dev/null "http://$(hostname):${TB_PORT}/tb_${CARME_HASH}/"; do
+      (LC_ALL=C tensorboard --logdir="${CARME_TBDIR}" --host="$(hostname -s)" --port="${TB_PORT}" --path_prefix="/tb_${CARME_HASH}" >>"${CARME_LOGDIR}/${CARME_JOB_ID}.out" 2>>"${CARME_LOGDIR}/${CARME_JOB_ID}.err" & echo "$!" > "${PID_FILE}")
+      while ! wget -q -O/dev/null "http://$(hostname -s):${TB_PORT}/tb_${CARME_HASH}/"; do
         sleep 1
       done
       echo "you can now access TensorBoard via"
@@ -96,7 +96,7 @@ function carme_start_tensorboard () {
 
 
 # define function to stop tensorboard ----------------------------------------------------------------------------------------------
-function carme_stop_tensorboard () {
+function carme_tensorboard_stop () {
   PID_FILE="${CARME_JOBDIR}/tensorboard.pid"
   if [[ -f "${PID_FILE}" ]];then
     read -r PID < "${PID_FILE}"

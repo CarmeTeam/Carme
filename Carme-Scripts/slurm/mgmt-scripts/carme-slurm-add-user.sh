@@ -39,6 +39,14 @@ is_root
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# check essential commands ---------------------------------------------------------------------------------------------------------
+check_command grep
+check_command sacctmgr
+check_command sinfo
+check_command scontrol
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # load variables from config -------------------------------------------------------------------------------------------------------
 CARME_SLURM_ControlAddr=$(get_variable CARME_SLURM_ControlAddr)
 CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName)

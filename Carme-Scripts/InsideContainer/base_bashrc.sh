@@ -22,7 +22,7 @@ CARME_BASH_FUNCTIONS="${CARME_SCRIPTS_DIR}/carme_bash_functions.sh"
 
 
 # add variables that should be availabe in ssh
-[[ -f "${CARME_JOBDIR}/ssh/envs/$(hostname)" ]] && source "${CARME_JOBDIR}/ssh/envs/$(hostname)"
+[[ -f "${CARME_JOBDIR}/ssh/envs/$(hostname -s)" ]] && source "${CARME_JOBDIR}/ssh/envs/$(hostname -s)"
 
 set +e
 set +o pipefail
@@ -128,7 +128,7 @@ fi
 
 # activate conda base environment --------------------------------------------------------------------------------------------------
 # NOTE: conda should always be activated not only in interactive shells
-CONDA_INIT_FILE="/opt/anaconda3/etc/profile.d/conda.sh"
+CONDA_INIT_FILE="/opt/miniconda3/etc/profile.d/conda.sh"
 if [[ -f "${CONDA_INIT_FILE}" ]];then
   source "${CONDA_INIT_FILE}"
   conda activate base
