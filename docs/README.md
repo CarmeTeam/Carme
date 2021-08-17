@@ -84,7 +84,7 @@ _Job submission scheme_
 
 
 ## **Documentation**
-Visit our documentation at [docs.open-carme.org](https://docs.open-carme.org).
+Visit our documentation at [github](https://carmeteam.github.io/Carme-Docu/).
 
 
 ## **Who is behind Carme?**
@@ -98,7 +98,7 @@ _NOTE:_ We are open for contributions!
 
 
 ## **Contact**
-&rarr; info@open-carme.org
+&rarr; dominik.strassel@itwm.fraunhofer.de
 
 
 ## **Sponsors**
