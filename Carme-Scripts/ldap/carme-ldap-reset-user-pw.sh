@@ -1,7 +1,6 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------------------------------------------------------
-# Change the password of a given user to a new specific (handed over) value.
-# NOTE: you can also change the password of multiple users at once, but all will get the same new password.
+# script to reset the user password to a random value
 #
 # WEBPAGE:   https://carmeteam.github.io/Carme/
 # COPYRIGHT: Carme Team @Fraunhofer ITWM
@@ -17,6 +16,7 @@ set -o pipefail
 
 # adjustable parameters ------------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
+LDAPUSER_HELPER=( "${@}" )
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -59,9 +59,13 @@ check_command hostname
 # needed variables from config
 CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP)
 CARME_LDAP_BIND_DN=$(get_variable CARME_LDAP_BIND_DN)
+CARME_LDAP_PASSWD_BASESTRING=$(get_variable CARME_LDAP_PASSWD_BASESTRING)
+CARME_LDAP_PASSWD_LENGTH=$(get_variable CARME_LDAP_PASSWD_LENGTH)
 
 [[ -z ${CARME_LDAP_SERVER_IP} ]] && die "CARME_LDAP_SERVER_IP not set"
 [[ -z ${CARME_LDAP_BIND_DN} ]] && die "CARME_LDAP_BIND_DN not set"
+[[ -z ${CARME_LDAP_PASSWD_BASESTRING} ]] && die "CARME_LDAP_PASSWD_BASESTRING not set"
+[[ -z ${CARME_LDAP_PASSWD_LENGTH} ]] && die "CARME_LDAP_PASSWD_LENGTH not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -71,56 +75,42 @@ THIS_NODE_IPS=( "$(hostname -I)" )
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-read -rp "Do you want to change a user password? [y/N] " RESP
+
+# ask for the LDAP admin password --------------------------------------------------------------------------------------------------
+read -s -rp "enter the LDAP admin password: " LDAP_ADMIN_PASSWORD
 echo ""
+[[ -z "${LDAP_ADMIN_PASSWORD}" ]] && die "LDAP admin password cannot be empty"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-if [[ "${RESP}" = "y" ]]; then
 
-  read -rp "enter user name(s) [multiple names separated by space]: " LDAPUSER_HELPER
-  echo ""
+for LDAPUSER in "${LDAPUSER_HELPER[@]}"; do
 
-  # ask for new user password ------------------------------------------------------------------------------------------------------
-  read -rp "enter the new password [multiple users get the same password]: " LDAP_PASSWD
-  echo ""
-  [[ -z "${LDAP_PASSWD}" ]] && die "user password cannot be empty"
+  # check is username contains uppercase characters --------------------------------------------------------------------------------
+  [[ ${LDAPUSER} =~ [A-Z] ]] && die "uppercase user-names not allowed"
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
-  # ask for the LDAP admin password ------------------------------------------------------------------------------------------------
-  read -s -rp "enter the LDAP admin password: " LDAP_ADMIN_PASSWORD
-  echo ""
-  [[ -z "${LDAP_ADMIN_PASSWORD}" ]] && die "LDAP admin password cannot be empty"
+  # check if username is empty -----------------------------------------------------------------------------------------------------
+  [[ -z "${LDAPUSER}" ]] && die "empty user-names not allowed"
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
-  for LDAPUSER in ${LDAPUSER_HELPER}; do
-
-    # check is username contains uppercase characters ------------------------------------------------------------------------------
-    [[ ${LDAPUSER} =~ [A-Z] ]] && die "uppercase user-names not allowed"
-    #-------------------------------------------------------------------------------------------------------------------------------
-
-
-    # check if username is empty ---------------------------------------------------------------------------------------------------
-    [[ -z "${LDAPUSER}" ]] && die "empty user-names not allowed"
-    #-------------------------------------------------------------------------------------------------------------------------------
+  # get LDAP user DN ---------------------------------------------------------------------------------------------------------------
+  LDAP_USER_DN="$(ldapsearch -v -x -D "${CARME_LDAP_BIND_DN}" "uid=${LDAPUSER}" -w "${LDAP_ADMIN_PASSWORD}" | grep "dn: uid=${LDAPUSER}" | awk -F'dn: ' '{ print $2 }')"
+  [[ -z "${LDAP_USER_DN}" ]] && die "could not determine a valid DN for user '${LDAPUSER}'"
+  USER_FOUND_NUMBER=$(echo "${LDAP_USER_DN}" | wc -l)
+  [[ "${USER_FOUND_NUMBER}" -gt "1" ]] && die "found more than one possible DN's for user '${LDAPUSER}'"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
 
-    # get LDAP user DN -------------------------------------------------------------------------------------------------------------
-    LDAP_USER_DN="$(ldapsearch -v -x -D "${CARME_LDAP_BIND_DN}" "uid=${LDAPUSER}" -w "${LDAP_ADMIN_PASSWORD}" | grep "dn: uid=${LDAPUSER}" | awk -F'dn: ' '{ print $2 }')"
-    [[ -z "${LDAP_USER_DN}" ]] && die "could not determine a valid DN for user '${LDAPUSER}'"
-    USER_FOUND_NUMBER=$(echo "${LDAP_USER_DN}" | wc -l)
-    [[ "${USER_FOUND_NUMBER}" -gt "1" ]] && die "found more than one possible DN's for user '${LDAPUSER}'"
-    #-------------------------------------------------------------------------------------------------------------------------------
+  # create random default password -------------------------------------------------------------------------------------------------
+  LDAP_PASSWD=$(head /dev/urandom | tr -dc "${CARME_LDAP_PASSWD_BASESTRING}" | head -c "${CARME_LDAP_PASSWD_LENGTH}")
+  [[ -z ${LDAP_PASSWD} ]] && die "LDAP_PASSWD not set"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
+  # set new password ---------------------------------------------------------------------------------------------------------------
+  ldappasswd -H ldapi:/// -x -D "${CARME_LDAP_BIND_DN}" -w "${LDAP_ADMIN_PASSWORD}" "${LDAP_USER_DN}" -s "${LDAP_PASSWD}"
+  #---------------------------------------------------------------------------------------------------------------------------------
 
-    # set new password -------------------------------------------------------------------------------------------------------------
-    ldappasswd -H ldapi:/// -x -D "${CARME_LDAP_BIND_DN}" -w "${LDAP_ADMIN_PASSWORD}" "${LDAP_USER_DN}" -s "${LDAP_PASSWD}"
-
-    echo "password for ${LDAPUSER} changed to ${LDAP_PASSWD}"
+    echo "password for '${LDAPUSER}' changed to ${LDAP_PASSWD}"
   done
-
-else
-
-  echo "Bye Bye..."
-
-fi
