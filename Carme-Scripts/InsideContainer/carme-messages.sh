@@ -32,7 +32,7 @@ fi
 if [[ -n "${CARME_JOB_GPUS}" ]];then
   echo "GPU-ID(s):    ${CARME_JOB_GPUS}"
 fi
-echo "End-Time:   $(grep "^${CARME_JOB_ID}[[:space:]]${CARME_JOB_NAME}" .local/share/carme/job-log-dir/job-log.dat | awk '{print $6}')"
+echo "End-Time:   $(grep "^${CARME_JOB_ID}[[:space:]]${CARME_JOB_NAME}" "${HOME}/.local/share/carme/job-log-dir/job-log.dat" | awk '{print $6}')"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
