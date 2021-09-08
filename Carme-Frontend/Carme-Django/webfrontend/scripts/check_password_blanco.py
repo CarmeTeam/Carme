@@ -3,7 +3,7 @@ import re
 password_criteria = """
 <h5 class="mb-2">Password criteria</h5>
 <ul class="mb-2">
-    <li>must have a length of at least 13 characters</li>
+    <li>must have a length of at least 25 characters</li>
     <li>contains neither your account name nor parts of your full name that exceed two consecutive
         characters</li>
     <li>contains characters from three of the following four categories:<br>
@@ -16,7 +16,7 @@ password_criteria = """
 
 def check_password(pw1, pw2):
     # check results
-    valid_length = len(pw1) >= 13  # length
+    valid_length = len(pw1) >= 25  # length
     valid_equality = pw1 == pw2 # equality
 
     char_types = []
