@@ -102,7 +102,6 @@ MirrorURL: http://ftp.de.debian.org/debian/
   mv index-html-fix.html "lib/index.html"
 
   rm -r /usr/local/share/.cache
-  rm -r /usr/local/share/.yarnrc
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
