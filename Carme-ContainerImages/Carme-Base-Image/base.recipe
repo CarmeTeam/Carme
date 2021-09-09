@@ -108,7 +108,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
   # build and install gpi2 ---------------------------------------------------------------------------------------------------------
   apt install -y libtool
   cd /opt
-  git clone --branch v1.4.0 --depth 1 https://github.com/cc-hpc-itwm/GPI-2.git GPI-SRC
+  git clone --branch v1.5.1 --depth 1 https://github.com/cc-hpc-itwm/GPI-2.git GPI-SRC
 
   cd /opt/GPI-SRC
   ./autogen.sh
