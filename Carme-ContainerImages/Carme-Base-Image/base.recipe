@@ -150,6 +150,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
 %environment
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}":/opt/GPI/lib64
 
 
 %runscript
