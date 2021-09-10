@@ -51,9 +51,9 @@ if [[ "$-" = *i* ]];then
 
 
   # add bash completion ------------------------------------------------------------------------------------------------------------
-  if [ -f "/usr/share/bash-completion/bash_completion" ]; then
+  if [[ -f "/usr/share/bash-completion/bash_completion" ]]; then
     source "/usr/share/bash-completion/bash_completion"
-  elif [ -f "/etc/bash_completion" ]; then
+  elif [[ -f "/etc/bash_completion" ]]; then
     source "/etc/bash_completion"
   fi
   # --------------------------------------------------------------------------------------------------------------------------------
