@@ -26,11 +26,12 @@ echo ""
 echo -e "\033[1mJob Information ------------------------------\033[0m"
 echo "Job-ID|-Name: ${CARME_JOB_ID} | ${CARME_JOB_NAME}"
 echo "Nodes:        ${CARME_NODES}"
-if [[ -n "$(echo "${CARME_JOB_GPUS}" | tr ',' '\n' | wc -l)" ]];then
-  echo "GPUs/Node:    $(echo "${CARME_JOB_GPUS}" | tr ',' '\n' | wc -l)"
-fi
 if [[ -n "${CARME_JOB_GPUS}" ]];then
+  echo "GPUs/Node:    $(echo "${CARME_JOB_GPUS}" | tr ',' '\n' | wc -l)"
   echo "GPU-ID(s):    ${CARME_JOB_GPUS}"
+elif [[ -z "${CARME_JOB_GPUS}" && -n "${CUDA_VISIBLE_DEVICES}" ]];then
+  echo "GPUs/Node:    $(echo "${CUDA_VISIBLE_DEVICES}" | tr ',' '\n' | wc -l)"
+  echo "GPU-ID(s):    ${CUDA_VISIBLE_DEVICES}"
 fi
 echo "End-Time:   $(grep "^${CARME_JOB_ID}[[:space:]]${CARME_JOB_NAME}" "${HOME}/.local/share/carme/job-log-dir/job-log.dat" | awk '{print $6}')"
 #-----------------------------------------------------------------------------------------------------------------------------------
