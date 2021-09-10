@@ -28,7 +28,7 @@ function die () {
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
   die "carme-basic-bash-functions.sh not found but needed"
@@ -97,13 +97,13 @@ USER_HOME=$(getent passwd "${CLUSTER_USER}" | cut -d: -f6)
 
 # check for config and cert folder -------------------------------------------------------------------------------------------------
 USER_CONFIG_FOLDER="${USER_HOME}/.config"
-if [ ! -d "${USER_CONFIG_FOLDER}" ];then
+if [[ ! -d "${USER_CONFIG_FOLDER}" ]];then
   mkdir "${USER_CONFIG_FOLDER}"
   chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CONFIG_FOLDER}"
 fi
 
 CERT_STORE="${USER_CONFIG_FOLDER}/carme"
-if [ ! -d "${CERT_STORE}" ];then
+if [[ ! -d "${CERT_STORE}" ]];then
   mkdir "${CERT_STORE}"
   chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CERT_STORE}"
 fi

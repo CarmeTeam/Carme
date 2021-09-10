@@ -22,7 +22,7 @@ function die () {
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
   die "carme-basic-bash-functions.sh not found but needed"
@@ -55,7 +55,7 @@ CARME_SLURM_ClusterName=$(get_variable CARME_SLURM_ClusterName)
 
 
 # functions ------------------------------------------------------------------------------------------------------------------------
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh"
 else
   die "carme-slurm-mgmt-functions.sh not found but needed"
@@ -70,7 +70,7 @@ check_if_slurmctld_node "${CARME_SLURM_ControlAddr}"
 
 read -rp "Do you want to delete (a) user(s) from slurm database? [y/N] ${LBR}" RESP
 echo ""
-if [ "$RESP" = "y" ]; then
+if [[ "$RESP" = "y" ]]; then
 
   read -rp "enter slurm-user(s) that you want to delete [multiple users separated by space] ${LBR}" SLURMUSER_HELPER
   echo ""

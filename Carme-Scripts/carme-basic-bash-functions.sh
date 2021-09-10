@@ -8,7 +8,7 @@
 CLUSTER_DIR="/opt/Carme"
 CONFIG_FILE="CarmeConfig"
 
-if [ ! -f ${CLUSTER_DIR}/${CONFIG_FILE} ];then
+if [[ ! -f ${CLUSTER_DIR}/${CONFIG_FILE} ]];then
   echo "ERROR: no config-file found in ${CLUSTER_DIR}"
   exit 200
 fi
@@ -21,7 +21,7 @@ fi
 # check if bash is used to execute the script --------------------------------------------------------------------------------------
 # USAGE: is_bash
 function is_bash () {
-  if [ ! "$BASH_VERSION" ]; then
+  if [[ ! "$BASH_VERSION" ]]; then
     echo "ERROR: This is a bash-script. Please use bash to execute it!"
     exit 200
   fi
@@ -32,7 +32,7 @@ function is_bash () {
 # check if root executes this script -----------------------------------------------------------------------------------------------
 # USAGE: is_root
 function is_root () {
-  if [ ! "$(whoami)" = "root" ]; then
+  if [[ ! "$(whoami)" = "root" ]]; then
     echo "ERROR: you need root privileges to run this script"
     exit 200
   fi

@@ -14,7 +14,7 @@ set -o pipefail
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
   echo "ERROR: carme-basic-bash-functions.sh not found but needed"
@@ -62,7 +62,7 @@ fi
 
 read -rp "Do you want to stop BeeGFS? [y/N] " RESP
 echo ""
-if [ "$RESP" = "y" ]; then
+if [[ "$RESP" = "y" ]]; then
 
   # umount /home -------------------------------------------------------------------------------------------------------------------
   echo "umount /home on $(hostname -s)"
