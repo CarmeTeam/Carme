@@ -25,7 +25,7 @@ function die () {
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
   die "ERROR: carme-basic-bash-functions.sh not found but needed"
@@ -81,7 +81,7 @@ BACKEND_KEY="${PATH_TO_BACKEND_CERT_AND_KEY}/backend.key"
 read -rp "Do you want to create a new user certificate (validity 10 years)? [y/N] " RESP
 echo ""
 
-if [ "${RESP}" = "y" ]; then
+if [[ "${RESP}" = "y" ]]; then
 
   read -rp "enter ldap-username(s) of users that need a new certificate [multiple users separated by space] " CLUSTER_USER_HELPER
   echo ""
@@ -101,13 +101,13 @@ if [ "${RESP}" = "y" ]; then
 
     # check for config and cert folder ---------------------------------------------------------------------------------------------
     USER_CONFIG_FOLDER="${USER_HOME}/.config"
-    if [ ! -d "${USER_CONFIG_FOLDER}" ];then
+    if [[ ! -d "${USER_CONFIG_FOLDER}" ]];then
       mkdir "${USER_CONFIG_FOLDER}"
       chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${USER_CONFIG_FOLDER}"
     fi
 
     CERT_STORE="${USER_CONFIG_FOLDER}/carme"
-    if [ ! -d "${CERT_STORE}" ];then
+    if [[ ! -d "${CERT_STORE}" ]];then
       mkdir "${CERT_STORE}"
       chown -R "${CLUSTER_USER}":"${CLUSTER_USER_GROUP}" "${CERT_STORE}"
     fi
