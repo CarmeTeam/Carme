@@ -14,7 +14,7 @@ set -o pipefail
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
   echo "ERROR: carme-basic-bash-functions.sh not found but needed"
@@ -61,7 +61,7 @@ fi
 
 read -rp "Do you want to check the status of BeeGFS? [y/N] " RESP
 echo ""
-if [ "$RESP" = "y" ]; then
+if [[ "$RESP" = "y" ]]; then
 
   # status of the beegfs-mgmtd -----------------------------------------------------------------------------------------------------
   echo "status of the beegfs-mgmtd on $(hostname -s)"
