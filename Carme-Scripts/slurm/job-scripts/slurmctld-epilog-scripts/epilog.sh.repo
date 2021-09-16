@@ -79,7 +79,6 @@ function get_variable () {
 
 
 # source needed variables
-CONFIG_FILE="/opt/Carme/CarmeConfig.backend"
 if [[ -f ${CONFIG_FILE} ]];then
 
   CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
