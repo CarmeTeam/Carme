@@ -86,7 +86,7 @@ check_command hostname
 
 # source needed variables ----------------------------------------------------------------------------------------------------------
 CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.container"
-if [ -f ${CONFIG_FILE} ];then
+if [[ -f ${CONFIG_FILE} ]];then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")
     variable_value=$(echo "${variable_value}" | tr -d '"')

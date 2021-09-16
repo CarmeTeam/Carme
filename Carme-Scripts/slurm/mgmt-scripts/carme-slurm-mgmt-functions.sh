@@ -27,9 +27,9 @@ function check_if_slurmctld_node () {
 # USAGE: check_if_user_exists "${SLURMUSER}"
 function check_if_user_exists () {
   USEREXISTS=$(id -u "${1}" > /dev/null 2>&1; echo $?)
-  if [ "${USEREXISTS}" = "1" ]; then
-      echo "ERROR: cannot delete ${1} as it does not exist"
-      exit 200
+  if [[ "${USEREXISTS}" = "1" ]]; then
+    echo "ERROR: cannot delete ${1} as it does not exist"
+    exit 200
   fi
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ function put_together_and_check () {
   echo ""
   read -rp "[y|N] ${LBR}" RESP
 
-  if [ "$RESP" = "N" ];then
+  if [[ "$RESP" = "N" ]];then
     exit 200
   elif [[ "$RESP" != "y" && "$RESP" != "N" ]];then
     exit 200

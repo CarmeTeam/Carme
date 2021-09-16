@@ -34,6 +34,8 @@ MirrorURL: http://ftp.de.debian.org/debian/
   export TMPDIR="$(mktemp -d)"
 
   # update and upgrade repos -------------------------------------------------------------------------------------------------------
+  echo "deb http://security.debian.org/debian-security stable-security main" >> /etc/apt/sources.list
+
   apt update
   apt upgrade -y
   #---------------------------------------------------------------------------------------------------------------------------------
@@ -102,13 +104,13 @@ MirrorURL: http://ftp.de.debian.org/debian/
   mv index-html-fix.html "lib/index.html"
 
   rm -r /usr/local/share/.cache
-  rm -r /usr/local/share/.yarnrc
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
   # build and install gpi2 ---------------------------------------------------------------------------------------------------------
+  apt install -y libtool
   cd /opt
-  git clone --branch v1.4.0 --depth 1 https://github.com/cc-hpc-itwm/GPI-2.git GPI-SRC
+  git clone --branch v1.5.1 --depth 1 https://github.com/cc-hpc-itwm/GPI-2.git GPI-SRC
 
   cd /opt/GPI-SRC
   ./autogen.sh
@@ -148,6 +150,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
 %environment
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}":/opt/GPI/lib64
 
 
 %runscript
