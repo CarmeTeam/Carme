@@ -14,6 +14,11 @@ set -e # stop after error
 set -o pipefail # stop if command in pipe failed
 
 
+# define variables -----------------------------------------------------------------------------------------------------------------
+CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.node"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # define function to print time and date -------------------------------------------------------------------------------------------
 function currenttime () {
   date +"[%F %T.%3N]"
@@ -85,7 +90,6 @@ check_command hostname
 # delete CARME specific files and folders ------------------------------------------------------------------------------------------
 
 # source needed variables ----------------------------------------------------------------------------------------------------------
-CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.container"
 if [[ -f ${CONFIG_FILE} ]];then
   function get_variable () {
     variable_value=$(grep --color=never -Po "^${1}=\K.*" "${2}")

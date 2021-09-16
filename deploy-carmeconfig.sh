@@ -125,8 +125,8 @@ FRONTEND_CONFIG_OLD="${CARME_FRONTEND_PATH}/CarmeConfig.frontend.bak"
 
 
 # define container config and backup file
-CONTAINER_CONFIG="${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container"
-CONTAINER_CONFIG_OLD="${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.container.bak"
+CONTAINER_CONFIG="${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.node"
+CONTAINER_CONFIG_OLD="${CARME_SCRIPTS_PATH}/InsideContainer/CarmeConfig.node.bak"
 
 
 # define backend config and backup file
@@ -194,7 +194,7 @@ fi
 
 
 # subroutine: collect variables needed inside the containers -----------------------------------------------------------------------
-echo "CarmeConfig.container: collect variables needed in the job"
+echo "CarmeConfig.node: collect variables needed in the job"
 
 
 echo "
@@ -204,32 +204,32 @@ echo "
 # WARNING: This file is generated automatically by deploy-carmeconfig.sh.
 #          Do not edit manually!
 #-----------------------------------------------------------------------------------------------------------------------------------
-" > CarmeConfig.container.new
+" > CarmeConfig.node.new
 
 
 for VARIABLE in ${CONTAINER_VARIABLES};do
-  grep "^${VARIABLE}=" "${CONFIG_FILE}" >> CarmeConfig.container.new
+  grep "^${VARIABLE}=" "${CONFIG_FILE}" >> CarmeConfig.node.new
 done
 
 
-# change permissions of new CarmeConfig.container
-chmod 644 CarmeConfig.container.new || die "cannot change file permissions of CarmeConfig.container.new"
+# change permissions of new CarmeConfig.node
+chmod 644 CarmeConfig.node.new || die "cannot change file permissions of CarmeConfig.node.new"
 
 
 # move carme config frontend to right folder
-[[ -d "${CARME_SCRIPTS_PATH}/InsideContainer" ]] &&  cp "CarmeConfig.container.new" "${CONTAINER_CONFIG}"
+[[ -d "${CARME_SCRIPTS_PATH}/InsideContainer" ]] &&  cp "CarmeConfig.node.new" "${CONTAINER_CONFIG}"
 
 
 if [[ "${LOCAL}" == "false" ]];then
   for COMPUTE_NODE in ${CARME_NODES_LIST}; do
     echo -e "${COMPUTE_NODE}:\tcopy computenode files to ${COMPUTE_NODE}:${CARME_INSTALL_DIR}"
     ssh "${COMPUTE_NODE}" -t "[[ -f ${CONTAINER_CONFIG} ]] && mv ${CONTAINER_CONFIG} ${CONTAINER_CONFIG_OLD}"
-    scp -p "CarmeConfig.container.new" "${COMPUTE_NODE}:${CONTAINER_CONFIG}"
+    scp -p "CarmeConfig.node.new" "${COMPUTE_NODE}:${CONTAINER_CONFIG}"
     echo ""
   done
 fi
 
-rm "CarmeConfig.container.new" || die "cannot remove CarmeConfig.container.new"
+rm "CarmeConfig.node.new" || die "cannot remove CarmeConfig.node.new"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
