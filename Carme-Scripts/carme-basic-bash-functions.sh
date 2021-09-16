@@ -4,12 +4,14 @@
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# check if config is available -----------------------------------------------------------------------------------------------------
-CLUSTER_DIR="/opt/Carme"
-CONFIG_FILE="CarmeConfig"
+# variables ------------------------------------------------------------------------------------------------------------------------
+CONFIG_FILE="/etc/carme/CarmeConfig"
+#-----------------------------------------------------------------------------------------------------------------------------------
 
-if [[ ! -f ${CLUSTER_DIR}/${CONFIG_FILE} ]];then
-  echo "ERROR: no config-file found in ${CLUSTER_DIR}"
+
+# check if config is available -----------------------------------------------------------------------------------------------------
+if [[ ! -f "${CONFIG_FILE}" ]];then
+  echo "ERROR: no config-file ('${CONFIG_FILE}') not found"
   exit 200
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -21,7 +23,7 @@ fi
 # check if bash is used to execute the script --------------------------------------------------------------------------------------
 # USAGE: is_bash
 function is_bash () {
-  if [[ ! "$BASH_VERSION" ]]; then
+  if [[ ! "${BASH_VERSION}" ]]; then
     echo "ERROR: This is a bash-script. Please use bash to execute it!"
     exit 200
   fi
@@ -43,7 +45,7 @@ function is_root () {
 # get_variable function ------------------------------------------------------------------------------------------------------------
 # USAGE: get_variable CARME_VARIABLE
 function get_variable () {
-  variable_value=$(grep --color=never -Po "^${1}=\K.*" "${CLUSTER_DIR}/${CONFIG_FILE}")
+  variable_value=$(grep --color=never -Po "^${1}=\K.*" "${CONFIG_FILE}")
   variable_value=$(echo "${variable_value}" | tr -d '"')
   echo "${variable_value}"
 }
