@@ -15,7 +15,7 @@ set -o pipefail # stop if command in pipe failed
 
 
 # define variables -----------------------------------------------------------------------------------------------------------------
-CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.node"
+CONFIG_FILE="/etc/carme/CarmeConfig.node"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

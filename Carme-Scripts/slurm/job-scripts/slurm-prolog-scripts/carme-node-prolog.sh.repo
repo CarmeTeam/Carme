@@ -15,7 +15,7 @@ set -o pipefail
 # NOTE: This variabel has to be set and point to the python binary that can utilies the same rpyc version as the carme backend does.
 #       If this variable is not properly set this script will fail with an respective error code.
 
-CONFIG_FILE="/opt/Carme/Carme-Scripts/InsideContainer/CarmeConfig.node"
+CONFIG_FILE="/etc/carme/CarmeConfig.node"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
