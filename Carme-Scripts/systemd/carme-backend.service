@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 Type=simple
 Environment=PYTHONUNBUFFERED=1
-ExecStart=[PATH_TO_PYTHON_ENV]/carme-backend /opt/Carme/Carme-Backend/CarmeConfig.backend
+ExecStart=[PATH_TO_PYTHON_ENV]/carme-backend /etc/carme/CarmeConfig.backend
 
 Restart=on-failure
 RestartSec=1
