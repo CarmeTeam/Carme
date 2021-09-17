@@ -10,11 +10,10 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 %setup
     mkdir -p ${SINGULARITY_ROOTFS}/opt/Carme
+    mkdir -p ${SINGULARITY_ROOTFS}/etc/carme
 
 %files
     Carme-Frontend /opt/Carme/Carme-Frontend
-    #Carme-Backend/SSL/frontend.crt /opt/Carme/Carme-Frontend/Carme-Django/webfrontend/SSL/
-    #Carme-Backend/SSL/frontend.key /opt/Carme/Carme-Frontend/Carme-Django/webfrontend/SSL/
 
 %post
     # update repos -----------------------------------------------------------------------------------------------------------------
