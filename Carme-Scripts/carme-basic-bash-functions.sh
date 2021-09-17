@@ -49,6 +49,7 @@ function get_variable () {
 # USAGE: get_variable CARME_VARIABLE
 
   local CONFIG_FILE="/etc/carme/CarmeConfig"
+  local variable_value
 
   if [[ ! -f "${CONFIG_FILE}" ]];then
     echo "ERROR: no config-file ('${CONFIG_FILE}') not found"
