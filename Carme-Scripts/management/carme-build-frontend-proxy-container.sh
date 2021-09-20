@@ -55,7 +55,7 @@ check_command singularity
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# source needed variables /opt/Carme/CarmeConfig -----------------------------------------------------------------------------------
+# import needed variables from CarmeConfig -----------------------------------------------------------------------------------------
 CARME_HEADNODE_NAME=$(get_variable CARME_HEADNODE_NAME)
 
 [[ -z ${CARME_HEADNODE_NAME} ]] && die "CARME_HEADNODE_NAME not set"

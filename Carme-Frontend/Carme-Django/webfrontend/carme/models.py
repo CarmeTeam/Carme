@@ -17,7 +17,7 @@ from datetime import datetime
 from importlib.machinery import SourceFileLoader
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SourceFileLoader('CarmeConfigFrontend', BASE_DIR + '/../../../CarmeConfig.frontend').load_module()
+SourceFileLoader('CarmeConfigFrontend', '/etc/carme/CarmeConfig.frontend').load_module()
 from CarmeConfigFrontend import CARME_SLURM_ClusterName
 
 """ User Messages

@@ -1,13 +1,27 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------------------------------------------------------
-# helper script to strip information from CarmeConfig and create a new clean CarmeConfig_blanco (CarmeConfig_blanco.new)
-# variables defined in DEFAULT_VARIABLES are not removed in CarmeConfig_blanco.new
+# helper script to strip information from 'CarmeConfig' and create a new clean 'CarmeConfig.repo.new' in '/tmp'
+# variables defined in DEFAULT_VARIABLES are not removed in 'CarmeConfig.repo.new'
+#
+# COPYRIGHT: Fraunhofer ITWM, 2021
+# LICENCE: http://open-carme.org/LICENSE.md 
+# CONTACT: info@open-carme.org
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #bash set buildins -----------------------------------------------------------------------------------------------------------------
 set -e
 set -o pipefail
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# variables ------------------------------------------------------------------------------------------------------------------------
+PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
+
+CONFIG_FILE="/etc/carme/CarmeConfig"
+CONFIG_FILE_BLANCO_NEW="/tmp/CarmeConfig.repo.new"
+
+DEFAULT_VARIABLES=("CARME_VERSION" "CARME_BACKEND_PATH" "CARME_FRONTEND_PATH" "CARME_SLURM_CONFIG_FILE" "CARME_SCRIPTS_PATH" "CARME_TMPDIR")
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -20,7 +34,6 @@ function die () {
 
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
-PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
 if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
@@ -38,21 +51,13 @@ is_root
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# denfine basic parameters ---------------------------------------------------------------------------------------------------------
-CONFIG_FILE="/opt/Carme/CarmeConfig"
-CONFIG_FILE_BLANCO_NEW="/opt/Carme/CarmeConfig_blanco.new"
-
-DEFAULT_VARIABLES=("CARME_VERSION" "CARME_BACKEND_PATH" "CARME_FRONTEND_PATH" "CARME_SLURM_CONFIG_FILE" "CARME_SCRIPTS_PATH" "CARME_TMPDIR")
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # read variables from CarmeConfig in an array and substract the default variables --------------------------------------------------
 VARIABLE_ARRAY=()
 VARIABLE_ARRAY_HELPER=()
 
 while IFS= read -r VARIABLE
 do
-  if [[ "$VARIABLE" =~ ^CARME* ]]; then
+  if [[ "${VARIABLE}" =~ ^CARME* ]]; then
     PURE_VARIABLE=${VARIABLE%%=*}
     VARIABLE_ARRAY_HELPER+=("${PURE_VARIABLE}")
   fi
@@ -60,7 +65,7 @@ done < <(grep -v '^ *#' < ${CONFIG_FILE})
 
 
 for DEFAULT in "${DEFAULT_VARIABLES[@]}";do
-  VARIABLE_ARRAY_HELPER=("${VARIABLE_ARRAY_HELPER[@]/$DEFAULT}")
+  VARIABLE_ARRAY_HELPER=("${VARIABLE_ARRAY_HELPER[@]/${DEFAULT}}")
 done
 
 
@@ -73,22 +78,14 @@ unset DEFAULT_VARIABLES
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# check if there is already a CarmeConfig_blanco.new and if yes delete it ----------------------------------------------------------
-if [[ -f ${CONFIG_FILE_BLANCO_NEW} ]];then
-  rm ${CONFIG_FILE_BLANCO_NEW}
-  echo "removed existing ${CONFIG_FILE_BLANCO_NEW}"
-fi
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # copy the existing CarmeConfig to CarmeConfig_blanco.new --------------------------------------------------------------------------
-cp -p ${CONFIG_FILE} ${CONFIG_FILE_BLANCO_NEW}
-echo "copied ${CONFIG_FILE} to ${CONFIG_FILE_BLANCO_NEW}"
+cp -p "${CONFIG_FILE}" "${CONFIG_FILE_BLANCO_NEW}"
+echo "copied '${CONFIG_FILE}' to '${CONFIG_FILE_BLANCO_NEW}'"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # delete non default values in CarmeConfig_blanco.new ------------------------------------------------------------------------------
-echo "stripping the set non default variable values from ${CONFIG_FILE_BLANCO_NEW}"
+echo "stripping the set non default variable values from '${CONFIG_FILE_BLANCO_NEW}'"
 for ENTRIES in "${VARIABLE_ARRAY[@]}";do
   if [[ "${ENTRIES}" =~ CARME_BACKEND_PORT|CARME_FRONTEND_DEBUG|CARME_HARDWARE_NUM_GPUS ]];then
     sed -i -e 's/'"${ENTRIES}"'=.*/'"${ENTRIES}"'=/g' ${CONFIG_FILE_BLANCO_NEW}
@@ -100,4 +97,4 @@ for ENTRIES in "${VARIABLE_ARRAY[@]}";do
 done
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-echo "created ${CONFIG_FILE_BLANCO_NEW}"
+echo "created '${CONFIG_FILE_BLANCO_NEW}'"
