@@ -1,18 +1,11 @@
-# Carme-Webfrontend Container
+# Carme Proxy Container
 
 In order to create the singularity container containing the webfrontend you need
 
-* to have singularity installed 
-* the corresponding recipe file _"recipe--carme-proxy--debian.recipe"_
+* to have singularity installed (available on `$PATH`)
+* the script `carme-build-frontend-proxy-container.sh` located in `Carme-Scripts/management`
+* `root` access
 
-
-1. create a singularity image using the recipe-file
 ```console
-# singularity build carme-proxy.simg recipe--carme-proxy--debian.recipe
+# bash /opt/Carme/Carme-Scripts/management/carme-build-frontend-proxy-container.sh --proxy
 ```
-
-2. copy the singularity image to you _login-node_ e.g.
-```console
-# scp carme-proxy.simg login-node:/opt/Carme-Proxy-Container
-```
-
