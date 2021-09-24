@@ -57,8 +57,10 @@ check_command singularity
 
 # import needed variables from CarmeConfig -----------------------------------------------------------------------------------------
 CARME_HEADNODE_NAME=$(get_variable CARME_HEADNODE_NAME)
+CARME_FRONTEND_PATH=$(get_variable CARME_FRONTEND_PATH)
 
 [[ -z ${CARME_HEADNODE_NAME} ]] && die "CARME_HEADNODE_NAME not set"
+[[ -z ${CARME_FRONTEND_PATH} ]] && die "CARME_FRONTEND_PATH not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -118,6 +120,23 @@ function build_container () {
 }
 
 
+function frontend_checks () {
+# check for specific files that are needed inside the frontend container
+
+  local DJANGO_SCRIPTS_PATH="${CARME_FRONTEND_PATH}/Carme-Django/webfrontend/scripts"
+  local SERVER_CONF_PATH="${CARME_FRONTEND_PATH}/Carme-Server-Conf"
+
+  [[ ! -f "${DJANGO_SCRIPTS_PATH}/check_password.py" ]] && die "'${DJANGO_SCRIPTS_PATH}/check_password.py' not found"
+  [[ ! -f "${DJANGO_SCRIPTS_PATH}/settings.py" ]] && die "'${DJANGO_SCRIPTS_PATH}/settings.py' not found"
+  [[ ! -f "${SERVER_CONF_PATH}/hosts" ]] && die "'${SERVER_CONF_PATH}/hosts' not found"
+  [[ ! -f "${SERVER_CONF_PATH}/apache2/apache2.conf" ]] && die "'${SERVER_CONF_PATH}/apache2/apache2.conf' not found"
+  [[ ! -f "${SERVER_CONF_PATH}/apache2/ports.conf" ]] && die "'${SERVER_CONF_PATH}/apache2/ports.conf' not found"
+  [[ ! -f "${SERVER_CONF_PATH}/apache2/002-gpu.conf" ]] && die "'${SERVER_CONF_PATH}/apache2/002-gpu.conf' not found"
+
+}
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # main -----------------------------------------------------------------------------------------------------------------------------
 
 if [[ ${#} -eq 0 ]];then
@@ -135,6 +154,7 @@ else
        shift
      ;;
      --frontend)
+       frontend_checks
        build_container "frontend" "${HELPER_FRONTEND_CONTAINER}"
        shift
        shift
