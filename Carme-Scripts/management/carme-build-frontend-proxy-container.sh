@@ -133,6 +133,7 @@ function frontend_checks () {
   [[ ! -f "${SERVER_CONF_PATH}/apache2/ports.conf" ]] && die "'${SERVER_CONF_PATH}/apache2/ports.conf' not found"
   [[ ! -f "${SERVER_CONF_PATH}/apache2/002-gpu.conf" ]] && die "'${SERVER_CONF_PATH}/apache2/002-gpu.conf' not found"
 
+  return 0
 }
 
 
@@ -144,6 +145,7 @@ function proxy_checks () {
   [[ ! -f "${PROXY_CONF_PATH}/static.toml" ]] && die "'${PROXY_CONF_PATH}/static.toml' not found"
   [[ ! -f "${PROXY_CONF_PATH}/traefik.toml" ]] && die "'${PROXY_CONF_PATH}/traefik.toml' not found"
 
+  return 0
 }
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -162,18 +164,15 @@ else
      -h|--help)
        print_help
        shift
-       shift
      ;;
      --frontend)
        frontend_checks
        build_container "frontend" "${HELPER_FRONTEND_CONTAINER}"
        shift
-       shift
      ;;
      --proxy)
        proxy_checks
        build_container "proxy" "${HELPER_PROXY_CONTAINER}"
-       shift
        shift
      ;;
      *)
@@ -184,6 +183,7 @@ else
   done
 
 fi
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 exit 0
