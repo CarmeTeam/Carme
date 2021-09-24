@@ -216,52 +216,6 @@ CARME_LDAP_SERVER_PW=""
 CARME_LDAP_BIND_DN=""
 #combination of CARME_LDAP_ADMIN,CARME_LDAP_DC1 and CARME_LDAP_DC2
 
-# note: if you need more or less groups edit /opt/Carme/Carme-Scripts/carme-ldap-add-user.sh
-CARME_LDAPGROUP_1=""
-#e.g. physics-admin
-
-CARME_LDAPGROUP_ID_1=""
-#e.g. 900
-
-CARME_LDAPINSTANZ_1=""
-#e.g. PHYSICS
-
-CARME_LDAPGROUP_2=""
-#e.g. physics-user
-
-CARME_LDAPGROUP_ID_2=""
-#e.g. 901
-
-CARME_LDAPINSTANZ_2=""
-#e.g. PHYSICS
-
-CARME_LDAPGROUP_3=""
-#e.g. bio-user
-
-CARME_LDAPGROUP_ID_3=""
-#e.g. 902
-
-CARME_LDAPINSTANZ_3=""
-#e.g. BIOLOGY
-
-CARME_LDAPGROUP_4=""
-#e.g. math-user
-
-CARME_LDAPGROUP_ID_4=""
-#e.g. 903
-
-CARME_LDAPINSTANZ_4=""
-#e.g. MATH
-
-CARME_LDAPGROUP_5=""
-#e.g. inf-user
-
-CARME_LDAPGROUP_ID_5=""
-#e.g. 904
-
-CARME_LDAPINSTANZ_5=""
-#e.g. INF
-
 CARME_LDAP_DEFAULTPASSWD_FOLDER=""
 #e.g. /root/defaultpasswords
 
