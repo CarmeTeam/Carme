@@ -55,7 +55,7 @@ check_command singularity
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# import needed variables from CarmeConfig -----------------------------------------------------------------------------------------
+# import needed variables from Car${CARME_PATH}meConfig -----------------------------------------------------------------------------------------
 CARME_HEADNODE_NAME=$(get_variable CARME_HEADNODE_NAME)
 CARME_FRONTEND_PATH=$(get_variable CARME_FRONTEND_PATH)
 
@@ -134,6 +134,17 @@ function frontend_checks () {
   [[ ! -f "${SERVER_CONF_PATH}/apache2/002-gpu.conf" ]] && die "'${SERVER_CONF_PATH}/apache2/002-gpu.conf' not found"
 
 }
+
+
+function proxy_checks () {
+# check for specific files that are needed inside the proxy container
+
+  local PROXY_CONF_PATH="${CARME_PATH}/Carme-Proxy/traefik-conf"
+
+  [[ ! -f "${PROXY_CONF_PATH}/static.toml" ]] && die "'${PROXY_CONF_PATH}/static.toml' not found"
+  [[ ! -f "${PROXY_CONF_PATH}/traefik.toml" ]] && die "'${PROXY_CONF_PATH}/traefik.toml' not found"
+
+}
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -160,6 +171,7 @@ else
        shift
      ;;
      --proxy)
+       proxy_checks
        build_container "proxy" "${HELPER_PROXY_CONTAINER}"
        shift
        shift
