@@ -245,7 +245,7 @@ AUTH_LDAP_BIND_PASSWORD = CARME_LDAP_SERVER_PW
 
 
 # define ldap base dn
-LDAP_BASE_DN = "dc={},dc={}".format(CARME_LDAP_DC1,CARME_LDAP_DC2)
+LDAP_BASE_DN = CARME_LDAP_BASE_DN
 
 
 # set ldap base dn to search for groups

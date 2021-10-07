@@ -496,8 +496,6 @@ class Backend(Service):
 
         # change password via ldap
         try:
-            LDAP_ADMIN_USER = "cn={cn},dc={dc1},dc={dc2}".format(cn=CARME_LDAP_ADMIN, dc1=CARME_LDAP_DC1, dc2=CARME_LDAP_DC2)
-
             s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ldap3.ALL)
             c = ldap3.Connection(s, user=CARME_LDAP_BIND_DN, password=CARME_LDAP_SERVER_PW)
             
@@ -522,13 +520,13 @@ def start(args):
     from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
     from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT
     from CarmeConfig import CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
-    from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2, CARME_LDAP_BIND_DN
+    from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_BIND_DN
     from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
 
     global CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
     global CARME_BACKEND_PATH, CARME_BACKEND_PORT
     global CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
-    global CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2, CARME_LDAP_BIND_DN
+    global CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_BIND_DN
     global CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
 
     auth = SSLAuthenticator(os.path.join(CARME_BACKEND_PATH, "SSL/backend.key"), os.path.join(CARME_BACKEND_PATH, "SSL/backend.crt"),
