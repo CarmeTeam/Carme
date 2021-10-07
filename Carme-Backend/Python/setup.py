@@ -5,9 +5,9 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="carme_backend",
-    version="0.9.0",
-    author="Philipp Reusch",
-    author_email="reusch@itwm.fraunhofer.de",
+    version="1.0.0",
+    author="The Carme Team",
+    author_email="dominik.strassel@itwm.fraunhofer.de",
     description="Backend server for high performance ai suite Carme.",
     long_description=long_description,
     long_description_content_type="text/markdown",
