@@ -37,6 +37,11 @@ VARIABLES_PARAMETER_FILE="${PATH_TO_SCRIPTS_FOLDER}/management/variables.conf"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# check if config file exists ------------------------------------------------------------------------------------------------------
+[[ ! -f "${CONFIG_FILE}" ]] && die "carme config not found in '${CONF_PATH}'."
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
