@@ -142,22 +142,26 @@ def index(request):
 
     return render(request, 'home.html', context)
 
+
 @login_required(login_url='/login')
 def admin_all_jobs(request):
     """renders the admin job table"""
 
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
-    if not request.user.is_authenticated:
-        return HttpResponse('Unauthorized', status=401)
+    if request.user.is_superuser:
+       # return redirect('/carme/403/') # using external link 403.html
 
-    # get all jobs
-    slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
+        # get all jobs
+        slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
 
-    # render template
-    context = {
-        'slurm_list': slurm_list
-    }
+        # render template
+        context = {
+            'slurm_list': slurm_list
+        }
+
+    else:
+        context = {}
 
     return render(request, 'admin_all_jobs.html', context)
 
@@ -372,6 +376,14 @@ def job_info(request):
     return render(request, 'job_info.html', context)
 
 @force_maintenance_mode_off
+def custom_login(request):
+    if request.user.is_authenticated:
+        return redirect('/')
+    else:
+        return login(request)
+
+
+@force_maintenance_mode_off
 def login(request):
     """custom login"""
 
@@ -558,6 +570,7 @@ class LineChartJSONView(BaseLineChartView):
                 dataset["borderColor"]="rgba(62, 249, 61, 1.0)"
                 dataset["pointBackgroundColor"]="rgba(62, 249, 61, 1.0)"
                 dataset["pointBorderColor"]="rgba(0, 125, 0, 1.0)"
+                dataset["fill"]= true
             elif dataset["name"]=="used":
                 dataset["backgroundColor"]="rgba(106, 38, 189, 0.5)"
                 dataset["borderColor"]="rgba(106, 38, 189, 1.0)"
