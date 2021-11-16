@@ -29,6 +29,5 @@ urlpatterns = [
     url(r'^AdminAllJobs/$', views.admin_all_jobs, name='admin_all_jobs'),
     url(r'^maintenance-mode/', include('maintenance_mode.urls')),
     url(r'^line_chart_json/$', views.line_chart_json, name='line_chart_json'),
-    url(r'^Messages/$', views.messages, name='messages'),
-    url(r'^403/$', views.unauthorized, name='unauthorized'), 
+    url(r'^Messages/$', views.messages, name='messages'), 
 ]
