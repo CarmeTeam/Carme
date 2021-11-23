@@ -1,10 +1,6 @@
-body {
-  padding-top: 56px;
-}
-
 .login {
   width: 100%;
-  max-width: 420px;
+  max-width: 450px;
   padding: 15px;
   margin: auto;
 }
@@ -119,3 +115,28 @@ body {
 .error-template {padding: 40px 15px;text-align: center;}
 .error-actions {margin-top:15px;margin-bottom:15px;}
 .error-actions .btn { margin-right:10px; }
+
+/*--- Login Box ---*/
+#login-body {
+    background-color: white;
+    margin-top:100px;
+    box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07); 
+    border-radius: 14px; 
+    padding:15px;
+}
+
+/*--- Main background --- */
+.bg-main {
+    background-color: #f6f8fa;
+}
+
+/*--- Padding top to include navbar. In contrast login page doesn't require this ---*/
+.space-top{
+				padding-top: 56px;
+}
+
+/*--- Font awesome links without underline ---*/
+.text-decoration-none:hover{
+				text-decoration: none;
+}
+

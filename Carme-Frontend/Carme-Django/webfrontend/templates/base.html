@@ -51,9 +51,8 @@
 	<link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
 </head>
 
-<body class="d-flex flex-column h-100">
-
-	{% if user.is_authenticated %}
+{% if user.is_authenticated %}
+<body class="d-flex flex-column h-100 space-top">
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
 		<a class="navbar-brand" href="/">Carme</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
@@ -149,15 +148,72 @@
 			<a class="btn btn-secondary my-2 my-sm-0" href="/logout/">Logout</a>
 		</div>
 	</nav>
-	{% endif %}
+{% else %}
+<body class="d-flex flex-column h-100">
+{% endif %}
 
-	<main role="main" class="flex-shrink-0">
-		{% include "blocks/maintenance.html" %}
 
-		{% block content %}{% endblock %}
-	</main>
+ <section class="container-fluid flex-grow-1 bg-main">
+        <main role="main" class="flex-shrink-0">
+         {% include "blocks/maintenance.html" %}
+         {% block content %} {% endblock %} 
+        </main> 
+ </section>
 
-	<footer class="footer mt-auto py-3">
+
+<footer class="text-center text-lg-start bg-light text-muted mt-auto">
+    <section class="border-top">
+      <div class="mt-3">
+        <div class="row">
+          <div class="col-md-2 col-lg-2 col-xl-2">
+            {% if settings.CARME_FRONTEND_LINK_DISCLAIMER|length > 0 %}
+            <a class="text-reset fw-bold" href="https://mdbootstrap.com/">
+              <h6 class="fw-bold mb-4">Disclaimer</h6>
+            </a>
+            {% endif %}
+          </div>
+
+          <div class="col-md-2 col-lg-2 col-xl-1">
+            {% if settings.CARME_FRONTEND_LINK_PRIVACY|length > 0 %}
+            <a class="text-reset fw-bold" href="{{ settings.CARME_FRONTEND_LINK_PRIVACY }}">
+              <h6 class="fw-bold mb-4">
+              	Data privacy			
+              </h6>
+            </a>
+            {% endif %}
+          </div>
+
+          <div class="col-md-5 col-lg-6 col-xl-7"></div>
+
+          <div class="col-md-2 col-lg-2 col-xl-2 mb-3">
+            <span>
+            <a href="https://twitter.com/open_carme" class="me-4 text-reset text-decoration-none">
+              <i class="fa fa-twitter px-1"></i>
+            </a>
+            </span>
+            <span>
+            <a href="/wiki/" class="me-4 text-reset text-decoration-none">
+              <i class="fa fa-wikipedia-w px-1"></i>
+            </a>
+            </span>
+            <span>
+            <a href="https://github.com/CarmeTeam/Carme" class="me-4 text-reset text-decoration-none">
+              <i class="fa fa-github px-1"></i>
+            </a>
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05)">
+      © 2018-2021:
+      <a class="text-reset fw-bold" href="https://carmeteam.github.io/Carme/" target="_blank">Carme</a>
+    </div>
+</footer>
+
+{% comment %}
+ <footer class="footer mt-auto py-3">
 		<div class="container">
 			<div class="row text-center">
 				<div class="col-md-9">
@@ -183,6 +239,7 @@
 			</div>
 		</div>
 	</footer>
+{% endcomment %}
 
 	<!-- Optional JavaScript -->
 	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
