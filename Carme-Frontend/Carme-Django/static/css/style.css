@@ -1,12 +1,12 @@
+/*------------------*/
+/*--- Login page ---*/
+/*------------------*/
+
 .login {
   width: 100%;
   max-width: 450px;
   padding: 15px;
   margin: auto;
-}
-
-.footer {
-  background-color: #e8e8e8;
 }
 
 .form-label-group {
@@ -92,8 +92,7 @@
   color: #777;
 }
 
-/* Fallback for Edge
--------------------------------------------------- */
+/* Fallback for Edge */
 @supports (-ms-ime-align: auto) {
   .form-label-group {
     display: -ms-flexbox;
@@ -111,32 +110,71 @@
   }
 }
 
-/*--- 403 Unauthorized Error ---*/
-.error-template {padding: 40px 15px;text-align: center;}
-.error-actions {margin-top:15px;margin-bottom:15px;}
-.error-actions .btn { margin-right:10px; }
+/*---------------*/
+/*--- General ---*/
+/*---------------*/
 
-/*--- Login Box ---*/
-#login-body {
+/* 403 unauthorized Error */
+.error-template {
+   padding: 40px 15px;
+   text-align: center;
+}
+.error-actions {
+   margin-top:15px;
+   margin-bottom:15px;
+}
+.error-actions .btn {
+   margin-right:10px;  
+}
+
+/* main background */
+.bg-main {
+   background-color: #f6f8fa;
+}
+
+/* main box frame */
+#boxframe-main {
     background-color: white;
-    margin-top:100px;
+    margin-top: 50px;
     box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07); 
     border-radius: 14px; 
-    padding:15px;
+    padding: 15px;
 }
 
-/*--- Main background --- */
-.bg-main {
-    background-color: #f6f8fa;
+/* footer container */
+.container-footer{
+   padding: 2px 5px 0px 5px;
+   margin: 2px 5px 0px 5px;
 }
 
-/*--- Padding top to include navbar. In contrast login page doesn't require this ---*/
-.space-top{
-				padding-top: 56px;
-}
-
-/*--- Font awesome links without underline ---*/
+/* footer font-awesome w/o underline */
 .text-decoration-none:hover{
-				text-decoration: none;
+   text-decoration: none;
 }
 
+/* footer is fixed to the bottom of the page */
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Padding top to include navbar */
+.space-top{
+   padding-top: 56px;
+}
+
+/*-----------------*/
+/*--- Wiki page ---*/
+/*---------------- */
+
+/* ovewrites sidebar class in wiki-bootstrap.min.css */
+.wiki-article div.article-list {
+  max-width: none;
+}  
+
+/* ovewrites <pre> class in wiki-bootstrap.min.css */
+.wiki-article pre{
+  max-width: none;
+}
