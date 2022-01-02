@@ -24,22 +24,22 @@
 	<div class="card-deck">
 		<div class="card mb-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i>&nbsp; News</div>
-			<div class="card-body" style="height: 300px;">
-				<div id="forecast" style="height: 280px;"></div>				
+			<div class="card-body" id="news">
+				
 			</div>
 		</div>
 		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
 		<div class="card mb-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Status</div>
-			<div class="card-body" style="height: 300px;">
-				<div id="status" style="height: 200px; overflow-y: scroll;"></div>
+			<div class="card-body" style="height: 250px;">
+				<canvas id="status"></canvas>
 			</div>
 		</div>
 		<div class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
 		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
 		<div class="card mb-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-envelope-o fa-fw" aria-hidden="true"></i>&nbsp; Messages</div>
-			<div class="card-body" style="height: 300px; overflow-y: scroll;">
+			<div class="card-body" style="height: 250px; overflow-y: scroll;">
 				<div id="messages"class="card-text">
 					{% include "blocks/messages.html" %}
 				</div>
@@ -147,70 +147,48 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'js/jquery.min.js' %}"></script>
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/highcharts-more.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/modules/export-data.js"></script>
-<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 <script type="text/javascript" src="{% static 'js/chart.min.js' %}"></script>
 <script type="text/javascript">
 	if (!$) console.error('jQuery is required!');
 	else {
 		function update_chart() {
 			$.get('{% url 'line_chart_json' %}', function (data) {
-                data["chart"] = {
-                    type: "areaspline",
-                };
-                data["title"] = {
-                    text: "",
-                };
-                
-                data["plotOptions"] = {
-                    areaspline: {
-                        fillOpacity: 0.2
-                    }
-                };
-                data["legend"] = {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'top',
-                    floating: false,
-                };
+				var ctx = $("#status").get(0).getContext("2d");
+				new Chart(ctx, {
+					type: 'line',
+					data: data,
+					options: {
+						scales: {
+							xAxes: [{
+								ticks: {
+									display: true //this will remove only the label
+								},
+								scaleLabel: {
+									labelString: 'time',
+									display: false
+								}
 
-                $("#status").highcharts(data);
-                
+							}],
+							yAxes: [{
+								stacked: true,
+								scaleLabel: {
+									labelString: '#(GPUs)',
+									display: true
+								}
 
-            });			
+							}]
+						},
+						elements: {
+							line: {
+								tension: 1, // disables bezier curves
+							}
+						},
+						responsive: true,
+						maintainAspectRatio: false
+					}
+				});
+			});
 		}
-  
-		function update_forecast() {
-		 $.get('{% url 'line_chart_json2' %}', function (data) {
-                data["chart"] = {
-                    type: "areaspline"
-                };
-
-                data["title"] = {                                                                                                                                                                      
-                    text: "",                                                                                                                                                                          
-                };   
-
-                data["plotOptions"] = {
-                  areaspline: {
-                      fillOpacity: 0.2
-                  }
-                };
-
-                data["legend"] = {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'top',
-                    floating: false,
-                };
-
-                $("#forecast").highcharts(data);
-            });
-		}
-
 
 		function update_news() {
 			$.ajax('/wiki/cluster_news/', {
@@ -297,7 +275,6 @@
 		}
 
 		update_chart();
-		update_forecast();
 		update_news();
 
 		setInterval(function () {
@@ -307,7 +284,6 @@
 
 		setInterval(function () {
 			update_chart();
-	  update_forecast();
 		}, 1000 * 60 * 5);
 
 		$( document ).on( "click", "button.start-job,button.stop-job", function() {

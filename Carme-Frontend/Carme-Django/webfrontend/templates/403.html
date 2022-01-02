@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% comment %}
+# ----------------------------------------------
+# Carme
+# ----------------------------------------------
+# unauthorized.html
+#
+# see Carme development guide for documentation:
+# * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
+#
+# Copyright 2019 by Fraunhofer ITWM
+# License: http://open-carme.org/LICENSE.md
+# Contact: info@open-carme.org
+# ---------------------------------------------
+{% endcomment %}
+
+{% load static %}
+
+{% block title %}Carme Home{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="error-template">
+                <h1>
+                    Oops!</h1>
+                <h2 class="display-3">
+                    403 Not Authorized</h2>
+                <div class="error-details">
+                    Sorry, an error has occured, Requested page not found!
+                </div>
+                <div class="error-actions">
+                    <a href="{% url 'index' %}" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-home"></span>
+                        Take Me Home </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
