@@ -51,7 +51,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
   # install openmpi
-  apt install -y openmpi-bin
+  apt install -y openmpi-bin libopenmpi-dev
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
