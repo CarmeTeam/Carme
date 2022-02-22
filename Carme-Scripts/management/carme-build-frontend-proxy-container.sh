@@ -65,9 +65,7 @@ CARME_FRONTEND_PATH=$(get_variable CARME_FRONTEND_PATH)
 
 
 # check if node is headnode --------------------------------------------------------------------------------------------------------
-if [[ "$(hostname -s)" -ne "${CARME_HEADNODE_NAME}" ]];then
-  die "your are not on the headnode"
-fi
+[[ "$(hostname -s)" != "${CARME_HEADNODE_NAME}" ]] && die "your are not on the headnode"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

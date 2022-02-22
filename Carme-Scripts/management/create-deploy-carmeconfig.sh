@@ -81,7 +81,7 @@ CARME_NODES_LIST=$(get_variable CARME_NODES_LIST)
 
 
 # check if node is headnode --------------------------------------------------------------------------------------------------------
-[[ "$(hostname -s)" -ne "${CARME_HEADNODE_NAME}" ]] && die "this is not the headnode ('${CARME_HEADNODE_NAME}') specified in '${CONFIG_FILE}'."
+[[ "$(hostname -s)" != "${CARME_HEADNODE_NAME}" ]] && die "this is not the headnode ('${CARME_HEADNODE_NAME}') specified in '${CONFIG_FILE}'."
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -306,7 +306,7 @@ fi
 
 if [[ "${DEPLOY_CONF}" == "true" ]];then
 
-  if [[ "$(hostname -s)" -ne "${CARME_LOGINNODE_NAME}" ]];then
+  if [[ "$(hostname -s)" != "${CARME_LOGINNODE_NAME}" ]];then
     ssh -o LogLevel=QUIET "${CARME_LOGINNODE_NAME}" -t "mkdir -p ${CONF_PATH}"
     scp -o LogLevel=QUIET -p "${FRONTEND_CONFIG}" "${CARME_LOGINNODE_NAME}:${FRONTEND_CONFIG}"
     if [[ "${WWW_DATA_USER}" == "true" && "${WWW_DATA_GROUP}" == "true" ]];then
