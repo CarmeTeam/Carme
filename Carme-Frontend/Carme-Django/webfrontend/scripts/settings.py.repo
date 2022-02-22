@@ -183,6 +183,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # logging --------------------------------------------------------------------------------------------------------------------------
+# https://docs.python.org/3/library/logging.html
 
 LOGGING = {
     'version': 1,
