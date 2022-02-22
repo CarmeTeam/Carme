@@ -89,9 +89,7 @@ CARME_SSL_EMAIL_BASE=$(get_variable CARME_SSL_EMAIL_BASE)
 
 
 # check if node is headnode --------------------------------------------------------------------------------------------------------
-if [[ "$(hostname -s)" -ne "${CARME_HEADNODE_NAME}" ]];then
-  die "This is not the headnode (${CARME_HEADNODE_NAME}) defined in your CARME config."
-fi
+if [[ "$(hostname -s)" != "${CARME_HEADNODE_NAME}" ]] && die "This is not the headnode (${CARME_HEADNODE_NAME}) defined in your CARME config."
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
