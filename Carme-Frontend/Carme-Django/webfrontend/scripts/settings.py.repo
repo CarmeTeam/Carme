@@ -183,17 +183,20 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # logging --------------------------------------------------------------------------------------------------------------------------
-# https://docs.djangoproject.com/en/2.0/topics/logging/
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '[{asctime}]: {levelname}: {module} {process:d} {thread:d} {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
         },
         'simple': {
-            'format': '%(levelname)s %(asctime)s %(message)s'
+            'format': '[{asctime}]: {levelname}: {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
         },
     },
     'handlers': {
@@ -201,6 +204,7 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': '/opt/Carme-Apache-Logs/django.log',
+            'formatter': 'simple'
         },
     },
     'loggers': {
