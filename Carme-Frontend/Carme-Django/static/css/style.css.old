@@ -3,6 +3,15 @@
 /*------------------*/
 
 /*--- centered box ---*/
+.flex-between-center-carme {
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
 .flex-center-carme {
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -19,12 +28,15 @@
 #login-box {
   background-color: white;
   box-shadow: 0 10px 25px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07); 
-  border-radius: 12px;
-		padding: 15px;
-		max-width: 400px;
-		margin: auto; 
+  border-radius: 12px; 
 }
 
+.login {
+    width: 100%;
+    max-width: 450px;
+    padding: 15px;
+    margin: auto;
+}
 /*--- form ---*/
 .form-label-group {
   position: relative;

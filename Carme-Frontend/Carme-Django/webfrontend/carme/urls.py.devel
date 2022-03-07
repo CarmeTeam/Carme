@@ -34,7 +34,6 @@ urlpatterns = [
     re_path(r'^maintenance-mode/', include('maintenance_mode.urls')),
     #path('linechart', line_chart_json, name="line_chart_json"),
     #path('linechart2', line_chart_json2, name="line_chart_json2"),
-    path('line_chart_json_time/', line_chart_json_time, name="line_chart_json_time"),
     re_path(r'^Messages/$', views.messages, name='messages'), 
 ]
 

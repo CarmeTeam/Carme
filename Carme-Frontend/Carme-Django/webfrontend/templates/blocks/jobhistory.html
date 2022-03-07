@@ -1,0 +1,52 @@
+{% load static %}
+{% load timetags %}
+
+{% if myjobhist %}
+
+<p class="mx-2 text-muted pb-4 style-text"><span class="pull-right"><b>Total job runtime:</b>&nbsp;{{job_time}} hours</span></p>
+
+<div class="container my-1">
+	
+	<div class="table-responsive scrollbar">           
+		<table class="table table-sm table-striped mb-0 overflow-hidden border-bottom style-text text-center">
+			<thead>
+				<tr>
+					<th class="align-middle">ID</th>
+					<th class="align-middle">Name</th>
+					<th class="align-middle">Partition</th>
+					<th class="align-middle" style="min-width: 8.7rem;" >Submitted / Ended</th>
+					<th class="align-middle">Exit code</th>
+					<th class="align-middle">Memory</th>
+					<th class="align-middle">Image</th>
+					<th class="align-middle">Node Name</th>
+					<th class="align-middle">Nodes</th>
+					<th class="align-middle"><span class="frac"><sup>CPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+					<th class="align-middle" style="min-width: 6.0rem;"><span class="frac"><sup>GPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for job, slurm in mylist_long %}
+				<tr>
+					<td class="align-middle">{{ job.id_job }}</td>
+					<td class="align-middle">{{ job.job_name }}</td>
+					<td class="align-middle">{{ job.partition }}</td>
+					<td class="align-middle"><p class="mb-0">{{ job.time_submit | print_timestamp }}</p><p class="mb-0">{{ job.time_end | print_timestamp }}</p></td>
+					<td class="align-middle">{{ job.exit_code }}</td>
+					<td class="align-middle">{{ job.mem_req }}</td>
+					<td class="align-middle">{{ slurm.image_name }}</td>
+					<td class="align-middle">{{ job.nodelist }}</td>
+					<td class="align-middle"><span class="i-node">{{ job.nodes_alloc}}</span></td>
+					<td class="align-middle"><span class="i-cpu">{{ job.cpus_req }}</span></td>
+					<td class="align-middle"><span class="i-gpu">{{slurm.num_gpus}}</span> <span class="i-gpu-text">{{ slurm.gpu_type | upper }}</span></td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+  {% if mylist_long|length < 21 %}
+  <p class="mb-0 text-muted pull-left style-text">Table shows all jobs.</p>
+  {% else %}
+		<p class="mb-0 text-muted pull-left style-text">Table shows the last 20 jobs.</p>
+  {% endif %} 
+	</div>
+</div>
+{% endif %}

@@ -101,16 +101,13 @@ def generateChoices(request):
 def index(request):
     """ dashboard page -> generates user job-list, messages and other interactive features"""
 
-    # logout
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
-    
     gpu_loop = range(len(settings.CARME_GPU_TYPE_LIST)+1)
 
-    # ldap
+    # job history card
     group = list(request.user.ldap_user.group_names)[0]
     uID = request.user.ldap_user.attrs['uidNumber'][0]
     
-    # history card (uses ldap uID)
     myjobhist = CarmeJobTable.objects.filter(
         state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
     
@@ -122,15 +119,6 @@ def index(request):
     
     mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
     mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
-
-    # compute total GPU hours in history card  (uses ldap uID)
-    job_time_end = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
-    job_time_start = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
-    job_time = 0
-    if (job_time_start and job_time_end):
-        job_time = round((job_time_end-job_time_start)/3600)
 
     # create start job form
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
@@ -178,7 +166,6 @@ def index(request):
         'CARME_GPU_TYPE_LIST' : settings.CARME_GPU_TYPE_LIST,
         'mylist_short': mylist_short,
         'mylist_long': mylist_long,
-        'job_time' : job_time,
         'gpu_loop' : gpu_loop,
     }
 
@@ -195,15 +182,11 @@ def admin_all_jobs(request):
        # return redirect('/carme/403/') # using external link 403.html
 
         # get all jobs
-        allslurmjobs = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("-slurm_id")
-        allslurmids_list = list(allslurmjobs.values_list("slurm_id", flat=True))
-        allcpujobs = CarmeJobTable.objects.filter(id_job__in=allslurmids_list).order_by("-id_job")
-        slurm_list = zip ( list(allcpujobs), list(allslurmjobs) )
+        slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
+
         # render template
         context = {
-            'slurm_list': slurm_list,
-            'allcpujobs': allcpujobs,
-            'allslurmjobs': allslurmjobs,
+            'slurm_list': slurm_list
         }
 
     else:
@@ -221,16 +204,11 @@ def admin_job_table(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
-    allslurmjobs = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("-slurm_id")
-    allslurmids_list = list(allslurmjobs.values_list('slurm_id', flat=True))
-    allcpujobs = CarmeJobTable.objects.filter(id_job__in=allslurmids_list).order_by('-id_job')
-    slurm_list  = zip( list(allcpujobs), list(allslurmjobs) )
-  
+    slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
+
     # render template
     context = {
-        'slurm_list': slurm_list,
-        'allcpujobs': allcpujobs,
-        'allslurmjobs': allslurmjobs,
+        'slurm_list': slurm_list
     }
 
     return render(request, 'blocks/admin_job_table.html', context)
@@ -261,8 +239,6 @@ def start_job(request):
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
     group = list(request.user.ldap_user.group_names)[0]
-    print('HOLA HOLA')
-    print(group)
     partition = GroupResource.objects.filter(name__exact=group)[0].partition
 
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
@@ -322,26 +298,17 @@ def start_job(request):
 @login_required(login_url='/login')
 def job_hist(request):
     """renders the job history page"""
-   
-     #logout
+
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
-    # ldap
     group = list(request.user.ldap_user.group_names)[0]
     uID = request.user.ldap_user.attrs['uidNumber'][0]
 
-    # history card (used ldap uID)
     myjobhist = CarmeJobTable.objects.filter(
         state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
-    myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
-    
-    cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
-    myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
-        sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
-    
-    mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
 
-    # compute total GPU hours (uses ldap uID)
+    # compute total GPU hours
+    uID = request.user.ldap_user.attrs['uidNumber'][0]
     job_time_end = CarmeJobTable.objects.filter(
         state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
     job_time_start = CarmeJobTable.objects.filter(
@@ -350,12 +317,17 @@ def job_hist(request):
     if (job_time_start and job_time_end):
         job_time = round((job_time_end-job_time_start)/3600)
 
+    group_resources = GroupResource.objects.filter(name__exact=group)[0]
+
     # render template
     context = {
         'myjobhist': myjobhist,
-        'myslurmjob': myslurmjob,
-        'mylist_long': mylist_long,
+        'uID': uID,
         'job_time': job_time,
+        'partitions': group_resources.partition,
+        'max_jobs': group_resources.max_jobs,
+        'max_nodes': group_resources.max_nodes,
+        'max_gpus': group_resources.max_gpus_per_node,
     }
 
     return render(request, 'job_hist.html', context)
@@ -851,6 +823,7 @@ class BaseForecast():
                 forecast_total[0,3] = 'Now'
             else:
                 forecast_total = np.r_[[[sum(free_0), sum(queue_0), sum(used_0), 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]], forecast_total]    
+        print(forecast_total)
 
         if len(forecast_total) < 8:
             count = len(forecast_total)
@@ -862,7 +835,7 @@ class BaseForecast():
                 else:
                     last_time_short=datetime.fromtimestamp(int(datetime.strptime(forecast_total[-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M<br/>%b-%d')
                     last_time_long=datetime.fromtimestamp(int(datetime.strptime(forecast_total[-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M,%b-%d-%y')
-                    forecast_total = np.r_[forecast_total,[[forecast_total[-1,0], forecast_total[-1,1], forecast_total[-1,2], last_time_short, last_time_long]]] 
+                    forecast_total[k] = np.r_[forecast_total,[[forecast_total[-1,0], forecast_total[-1,1], forecast_total[-1,2], last_time_short, last_time_long]]] 
                 count += 1
 
 

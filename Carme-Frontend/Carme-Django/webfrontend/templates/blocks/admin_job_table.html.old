@@ -15,22 +15,22 @@
 
 {% load static %}
 
-{% for cpu, job in slurm_list %}
+{% for job in slurm_list %}
 <tr data-jobid="{{ job.slurm_id }}">
-	<th class="align-middle">{{ job.slurm_id }}</th>
-	<td class="align-middle">{{ job.user }}</td>
+	<th class="align-middle" scope="row">{{ job.slurm_id }}</th>
+	<td class="align-middle">{{job.user}}</td>
 	<td class="align-middle">{{ job.name }}</td>
-	<td class="align-middle">{{ job.image_name }}</td>
+	<td class="align-middle">{{ job.num_nodes }}</td>
 	<td class="align-middle">{{ job.ip }}</td>
-	<td class="align-middle"><span class="i-node">{{ job.num_nodes}}</span></td>
- <td class="align-middle"><span class="i-cpu">{{ cpu.cpus_req }}</span></td>
-	<td class="align-middle"><span class="i-gpu">{{ job.num_gpus }}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
+	<td class="align-middle">{{ job.gpu_type }}</td>
+	<td class="align-middle">{{ job.num_gpus }}</td>
+	<td class="align-middle">{{ job.image_name }}</td>
 	<td class="align-middle">
 		{% if job.status == 'running' %}
-			<i class="fa fa-check fa-fw fa-2x text-success"></i>
+			<i class="fa fa-check fa-2x fa-fw text-success"></i>
 			<span class="sr-only">Running</span>
 		{% else %}
-			<i class="fa fa-cog fa-spin fa-fw fa-2x text-secondary"></i>
+			<i class="fa fa-cog fa-spin fa-2x fa-fw text-secondary"></i>
 			<span class="sr-only">Queued</span>
 		{% endif %}
 	</td>

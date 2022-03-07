@@ -16,6 +16,7 @@
 {% endcomment %}
 
 {% load static %}
+{% load timetags %}
 
 {% block title %}Carme Home{% endblock %}
 
@@ -24,22 +25,22 @@
 	<div class="card-deck">
 		<div class="card mb-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i>&nbsp; News</div>
-			<div class="card-body" id="news">
-				
+			<div class="card-body" style="height: 300px;">
+						
 			</div>
 		</div>
 		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
 		<div class="card mb-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp; Status</div>
-			<div class="card-body" style="height: 250px;">
-				<canvas id="status"></canvas>
+			<div class="card-body" style="height: 300px;">
+				
 			</div>
 		</div>
 		<div class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
 		<div class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 3 on md--></div>
 		<div class="card mb-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-envelope-o fa-fw" aria-hidden="true"></i>&nbsp; Messages</div>
-			<div class="card-body" style="height: 250px; overflow-y: scroll;">
+			<div class="card-body" style="height: 300px; overflow-y: scroll;">
 				<div id="messages"class="card-text">
 					{% include "blocks/messages.html" %}
 				</div>
@@ -47,149 +48,416 @@
 		</div>
 	</div>
 
-	<div class="row mt-2">
-		<div class="col-12">
-			<div class="card">
-				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; Jobs</div>
-				<div class="card-body">
-					<form class="form ajax" action="{% url 'start_job' %}" method="post">
-						{% csrf_token %}
-						<div class="form-row">
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span>
-									</div>
-									<select name="{{ start_job_form.nodes.html_name }}" class="custom-select">
-										{% for choice in start_job_form.nodes.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
-									</div>
-									<select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select">
-										{% for choice in start_job_form.gpu_type.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
-									</div>
-									<select name="{{ start_job_form.gpus.html_name }}" class="custom-select">
-										{% for choice in start_job_form.gpus.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-2">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
-									</div>
-									<select name="{{ start_job_form.image.html_name }}" class="custom-select">
-										{% for choice in start_job_form.image.field.choices %}
-										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="col-3">
-								<div class="input-group mb-3">
-									<div class="input-group-prepend">
-										<span class="input-group-text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
-									</div>
-									<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control" aria-label="Sizing example input"
-										aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
-								</div>
-							</div>
-							<div class="col-1">
-								<button class="btn btn-primary start-job" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
-							</div>
-						</div>
-					</form>
 
-					<div class="mt-2 table-responsive">
-						<table class="table mb-0 text-center">
-							<thead>
-								<tr>
-									<th scope="col">Slurm id</th>
-									<th scope="col">Name</th>
-									<th scope="col">#(Nodes)</th>
-									<th scope="col">GPU type</th>
-									<th scope="col">GPUs / node</th>
-									<th scope="col">Image</th>
-									<th scope="col">Status</th>
-									<th scope="col">Entry points</th>
-									<th scope="col">Details</th>
-									<th scope="col">Stop</th>
-								</tr>
-							</thead>
-							<tbody id="jobtable">
-								{% include "blocks/job_table.html" %}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-{% endblock %}
+          <!-- <middle layer> -->
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="card-deck">
+
+                  <!-- <jobs history> -->
+                  <div class="card mb-4">
+                    <div class="card-header bg-light">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <h6 class="mb-0 style-title"><i class="fa fa-history" aria-hidden="true"></i> History</h6>
+                        </div>
+                        <div class="col-auto text-center pe-card" class"form-select">
+                          <button type="button" class="btn btn-outline-secondary custom-btn" data-toggle="modal" data-target="#exampleModal">
+                            More details
+                          </button>
+                          <!-- <modal> -->
+                          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                              <div class="modal-content">
+                                <div class="modal-header bg-light">
+                                  <h5 class="modal-title" id="exampleModalLabel"><i class="fa fa-history" aria-hidden="true"></i>  History</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  {% include "blocks/jobhistory.html" %} 
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- </modal> -->
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body" style="height: 320px;">
+                      {% comment %} <div style="display: block;"> {% endcomment %}
+                        <div class="table-responsive scrollbar">
+                          <table class="table table-sm table-striped mb-0 overflow-hidden text-center">
+                            <thead>
+                              <tr>
+                                <th class="align-middle style-text">ID</th>
+                                <th class="align-middle style-text" style="min-width: 6.0rem;">Submitted<br> Ended</th>
+                                <th class="align-middle style-text">Image</th>
+                                <th class="align-middle style-text">nodes</th>
+                                <th class="align-middle style-text"><span class="frac"><sup>CPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+                                <th class="align-middle style-text" style="min-width: 6.0rem;"><span class="frac"><sup>GPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+                                <th class="align-middle"></th>
+                              </tr>
+                            </thead>
+                            <tbody class="list" id="table-orders-body">
+                              {% if myjobhist %}
+                                {% for job, slurm in mylist_short %}
+                                <tr> 
+                                  <td class="py-1 align-middle">
+                                      <p class="pt-3 style-text text-underline" data-container="body" data-toggle="popover" data-html="true"  data-placement="left" data-trigger="hover" 
+                                      data-content=' 
+                                        <span class="style-text">Name:<span> <span class="pl-3 style-text">{{job.job_name}} </span> <br>
+                                        <hr class="my-1">
+                                        <span class="style-text">Node:</span> <span class="pl-3 style-text">&nbsp;{{ job.nodelist }}</span> <br>
+                                        <hr class="my-1">
+                                        <span class="style-text">Partition:</span> <span class="pl-1 style-text">{{ job.partition }}</span> <br>
+                                        <hr class="my-1">
+                                        <span class="style-text">Memory:</span> <span class="pl-1 style-text"> {{ job.mem_req }}</span> <br>
+                                        <hr class="my-1">
+                                        <span class="style-text">Exit code:</span> {{ job.exit_code }} '>{{ job.id_job }}
+                                      </p> 
+                                  </td>
+                                  <td class="py-1 align-middle style-text">
+                                    <p class="mb-0">{{ job.time_submit | print_timestamp_small }}</p>
+                                    <p class="mb-0">{{ job.time_end | print_timestamp_small }}</p>
+                                  </td>
+                                  <td class="py-1 align-middle">
+                                    <div class="style-text">
+                                      {{ slurm.image_name | truncatechars:10}}
+                                    </div>
+                                  </td>
+                                  <td class="py-1 align-middle">
+                                    <span class="i-node">{{ job.nodes_alloc}}</span>
+                                  </td>
+                                  <td class="py-1 align-middle">
+                                    <span class="i-cpu">{{ job.cpus_req }}</span>
+                                  </td>
+                                  <td class="py-1 align-middle">
+                                    <span class="i-gpu">{{slurm.num_gpus}}</span> <span class="i-gpu-text">{{ slurm.gpu_type | upper }}</span>
+                                  </td>
+                                  <td class="py-1 align-middle">
+                                    <button type="button" class="btn btn-outline-danger"><i class="fa fa-repeat" aria-hidden="true"></i></button>
+                                  </td>
+                                </tr>
+                                {% endfor %}
+                              {% else %}
+                                <tr>
+                                  <td class="py-2 align-middle style-text">Jobs history is empty</td>
+                                </tr>
+                              {% endif %}
+                            </tbody>
+                          </table>  
+                        </div>
+                      {% comment %} </div> {% endcomment %}
+                    </div>
+                  </div>
+                  <!-- </jobs history> -->
+
+                  <div class="w-100 d-none d-sm-block d-lg-none"><!-- only visible in sm and md --></div>
+                  
+                  <!-- <cluster chart> -->
+                  <div class="card mb-4">
+                    <div class="card-header bg-light">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <h6 class="mb-0 style-title"><i class="fa fa-area-chart" aria-hidden="true"></i> Chart</h6>
+                        </div>
+                        <div class="col-auto text-center pe-card">
+                          <select class="form-select form-select-sm" id="listchart">
+                            <option value="time" selected>Time chart</option>
+                            <option value="forecast">Forecast</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body ml-4 mr-4 px-0 pb-1" style="height: 320px;">
+                      <div id="optionchart-time" class="optionchart" style="display: block;">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                          {% if CARME_GPU_TYPE_LIST|length > 1 %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link active" id="timechart-tab" data-toggle="tab" href="#timechart" role="tab" aria-controls="timechart" aria-selected="true">Total</a>
+                            </li>
+                            {% for gpu in CARME_GPU_TYPE_LIST %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link" id="time-gpu{{forloop.counter}}-tab" data-toggle="tab" href="#time-gpu{{forloop.counter}}" role="tab" aria-controls="time-gpu{{forloop.counter}}" aria-selected="false">{{ CARME_GPU_TYPE_LIST | index:forloop.counter0 | upper }}</a>
+                            </li>
+                            {% endfor %}
+                          {% elif  CARME_GPU_TYPE_LIST|length == 1 %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link active" id="timechart-tab" data-toggle="tab" href="#timechart" role="tab" aria-controls="timechart" aria-selected="true">{{ CARME_GPU_TYPE_LIST | index:0 | upper }}</a>
+                            </li>
+                          {% else %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link active" id="timechart-tab" data-toggle="tab" href="#timechart" role="tab" aria-controls="timechart" aria-selected="true">NONE</a>
+                            </li>
+                          {% endif %}
+                        </ul>
+
+                        <div class="tab-content" id="myTabContent">
+                          {% if CARME_GPU_TYPE_LIST|length > 1 %}
+                            <div class="tab-pane fade show active" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
+                              <div id="myTimeChart" style="height: 230px;" class="ml-0 mr-2"></div>
+                            </div>
+                            {% for gpu in CARME_GPU_TYPE_LIST %}
+                            <div class="tab-pane fade" id="time-gpu{{forloop.counter}}" role="tabpanel" aria-labelledby="time-gpu{{forloop.counter}}-tab">
+                              {{ CARME_GPU_TYPE_LIST | index:forloop.counter0 }}-TIME
+                            </div>
+                            {% endfor %}
+                          {% elif  CARME_GPU_TYPE_LIST|length == 1 %}
+                            <div class="tab-pane fade show active" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
+                              <div id="myTimeChart" style="height: 230px;" class="ml-0 mr-2"></div>
+                            </div>
+                          {% else %}
+                            <div class="tab-pane fade show active" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
+                              GPU_TYPE is empty
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div id="optionchart-forecast" class="optionchart">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                          {% if CARME_GPU_TYPE_LIST|length > 1 %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link active" id="forecastchart-tab" data-toggle="tab" href="#forecastchart" role="tab" aria-controls="forecastchart" aria-selected="true">Total</a>
+                            </li>
+                            {% for gpu in CARME_GPU_TYPE_LIST %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link" id="forecast-gpu{{forloop.counter}}-tab" data-toggle="tab" href="#forecast-gpu{{forloop.counter}}" role="tab" aria-controls="forecast-gpu{{forloop.counter}}" aria-selected="false">{{ CARME_GPU_TYPE_LIST | index:forloop.counter0 | upper }}</a>
+                            </li>
+                            {% endfor %}
+                          {% elif  CARME_GPU_TYPE_LIST|length == 1 %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link active" id="forecastchart-tab" data-toggle="tab" href="#forecastchart" role="tab" aria-controls="forecastchart" aria-selected="true">{{ CARME_GPU_TYPE_LIST | index:0 | upper }}</a>
+                            </li>
+                          {% else %}
+                            <li class="nav-item" role="presentation">
+                              <a class="nav-link active" id="forecastchart-tab" data-toggle="tab" href="#forecastchart" role="tab" aria-controls="forecastchart" aria-selected="true">NONE</a>
+                            </li>
+                          {% endif %}
+                        </ul>
+                        <div class="tab-content " id="myTabContent">
+                          {% if CARME_GPU_TYPE_LIST|length > 1 %}
+                            <div class="tab-pane fade show active" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
+                              <div id="myForecastChart0" style="height: 250px;" class="mr-2 pr-2"></div>
+                            </div>
+                            {% for gpu in CARME_GPU_TYPE_LIST %}
+                            <div class="tab-pane fade" id="forecast-gpu{{forloop.counter}}" role="tabpanel" aria-labelledby="forecast-gpu{{forloop.counter}}-tab">
+                              <div id="myForecastChart{{forloop.counter}}" style="height: 250px;" class="mr-2 pr-2"></div>
+                            </div>
+                            {% endfor %}
+                          {% elif  CARME_GPU_TYPE_LIST|length == 1 %}
+                            <div class="tab-pane fade show active" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
+                              <div id="myForecastChart0" style="height: 250px;" class="mr-2 pr-2"></div>
+                            </div>
+                          {% else %}
+                            <div class="tab-pane fade show active" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
+                              GPU_TYPE is empty
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- </cluster chart> -->
+
+              </div>
+            </div>
+          </div>
+          <!-- </middle layer> -->
+										
+ 									<!-- <bottom layer> -->
+										<div class="row mt-2">
+											<div class="col-12">
+												<div class="card-deck">
+													<div class="card">
+														<div class="card-header bg-light"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; Jobs</div>
+															<div class="card-body">
+																<!-- <form> -->
+																<form class="form ajax" action="{% url 'start_job' %}" method="post">
+																	{% csrf_token %}
+																	<div class="form-row">
+																	
+																		<div class="col-2">
+																			<div class="input-group mb-3">
+																				<div class="input-group-prepend">
+																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span>
+																				</div>
+																				<select name="{{ start_job_form.nodes.html_name }}" class="custom-select style-text">
+																					{% for choice in start_job_form.nodes.field.choices %}
+																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+																					{% endfor %}
+																				</select>
+																			</div>
+																		</div>
+							
+																		<div class="col-2">
+																			<div class="input-group mb-3">
+																				<div class="input-group-prepend">
+																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
+																				</div>
+																				<select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select style-text">
+																					{% for choice in start_job_form.gpu_type.field.choices %}
+																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+																					{% endfor %}
+																				</select>
+																			</div>
+																		</div>
+
+																		<div class="col-2">
+																			<div class="input-group mb-3">
+																				<div class="input-group-prepend">
+																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
+																				</div>
+																				<select name="{{ start_job_form.gpus.html_name }}" class="custom-select style-text">
+																					{% for choice in start_job_form.gpus.field.choices %}
+																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+																					{% endfor %}
+																				</select>
+																			</div>
+																		</div>
+
+																		<div class="col-2">
+																			<div class="input-group mb-3">
+																				<div class="input-group-prepend">
+																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
+																				</div>
+																				<select name="{{ start_job_form.image.html_name }}" class="custom-select style-text">
+																					{% for choice in start_job_form.image.field.choices %}
+																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+																					{% endfor %}
+																				</select>
+																			</div>
+																		</div>
+
+																		<div class="col-3">
+																			<div class="input-group mb-3">
+																				<div class="input-group-prepend">
+																					<span class="input-group-text style.text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
+																				</div>
+																				<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control style-text" aria-label="Sizing example input"
+																				aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
+																			</div>
+																		</div>
+
+																		<div class="col-1">
+																			<button class="btn btn-primary start-job" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
+																		</div>
+																	</div>
+																</form>
+																<!-- </form> -->
+
+																<div class="mt-2 table-responsive">
+																	<table class="table mb-0 table-striped text-center style-text">
+																		<thead>
+																			<tr>
+                   	<th scope="col" class="align-middle">ID</th>
+                    <th scope="col" class="align-middle">Name</th>
+                    <th scope="col" class="align-middle">Image</th>
+                    <th scope="col" class="align-middle">Nodes</th>
+                    <th scope="col" class="align-middle">
+																						<span class="frac">
+																								<sup>CPUs</sup>
+																								<span>&frasl;</span>
+																								<sub>node</sub>
+																						</span>
+																				</th>
+					               <th scope="col" class="align-middle" style="min-width: 6.0rem;">
+																						<span class="frac">
+																								<sup>GPUs</sup>
+																								<span>&frasl;</span>
+																								<sub>node</sub>
+																						</span>
+																				</th>
+                    <th scope="col" class="align-middle">Status</th>
+                    <th scope="col" class="align-middle">Timing</th>
+                    <th scope="col" class="align-middle">Entry points</th>
+                    <th scope="col" class="align-middle">Details</th>
+                    <th scope="col" class="align-middle">Stop</th>
+                   </tr>
+																		</thead>
+																		<tbody id="jobtable">
+																			{% include "blocks/job_table.html" %}
+																		</tbody>
+																	</table>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										{% endblock %}
 
 {% block javascript %}
+{% comment %}  <script src="{% static 'js/jquery.min.js' %}"></script> {% endcomment %}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 <script type="text/javascript" src="{% static 'js/chart.min.js' %}"></script>
+
+
+<script>
+	$("[data-toggle=popover]").popover({
+		container: "body" 
+	});
+</script>
+
+<script>
+	$("ul.nav-tabs a").click(function (e) {
+ 		e.preventDefault();
+  	$(this).tab('show');
+  });
+</script>
+
+<script>
+	var $list = $( '#listchart' );
+	var $options = $( '.optionchart' );
+	
+	$list.on( 'change', function ( e ) {
+ 	$options.hide();
+  $( '#optionchart-' + this.value ).show(); 
+ });
+</script>
+
+{% include "blocks/forecast.html" %}
+
 <script type="text/javascript">
 	if (!$) console.error('jQuery is required!');
 	else {
 		function update_chart() {
-			$.get('{% url 'line_chart_json' %}', function (data) {
-				var ctx = $("#status").get(0).getContext("2d");
-				new Chart(ctx, {
-					type: 'line',
-					data: data,
-					options: {
-						scales: {
-							xAxes: [{
-								ticks: {
-									display: true //this will remove only the label
-								},
-								scaleLabel: {
-									labelString: 'time',
-									display: false
-								}
+												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
+            $.get('{% url 'line_chart_json_time' %}', function (data) {
+                data["chart"] = {
+                    type: "areaspline"
+                };
 
-							}],
-							yAxes: [{
-								stacked: true,
-								scaleLabel: {
-									labelString: '#(GPUs)',
-									display: true
-								}
+                data["title"] = {                                                                                                                                                                      
+                    text: "",                                                                                                                                                                          
+                };   
 
-							}]
-						},
-						elements: {
-							line: {
-								tension: 1, // disables bezier curves
-							}
-						},
-						responsive: true,
-						maintainAspectRatio: false
-					}
-				});
-			});
+                data["plotOptions"] = {
+                  areaspline: {
+                      fillOpacity: 0.2
+                  }
+                };
+
+                data["legend"] = {
+                    layout: 'horizontal',
+                    align: 'center',
+                    verticalAlign: 'top',
+                    floating: false,
+                };
+
+                $("#myTimeChart").highcharts(data);
+            });			
 		}
-
+  
+		
 		function update_news() {
 			$.ajax('/wiki/cluster_news/', {
 				type: "GET",

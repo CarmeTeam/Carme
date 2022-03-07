@@ -1,13 +1,13 @@
 {% load static %}
 
 {% for job in slurm_list_user %}
-	<tr data-jobid="{{ job.slurm_id }}" class="style-text">
-			<td class="align-middle style-text text-underline">{{ job.slurm_id }}</th>
+	<tr data-jobid="{{ job.slurm_id }}">
+			<th class="align-middle" scope="row">{{ job.slurm_id }}</th>
 			<td class="align-middle">{{ job.name }}</td>
-			<td class="align-middle">{{ job.image_name }} </td>
-			<td class="align-middle"><span class="i-node">{{ job.num_nodes }}</span></td>
-			<td class="align-middle"><span class="i-cpu"> 10 </span></td>
-			<td class="align-middle" style="min-width: 6.0rem;"><span class="i-gpu">{{ job.num_gpus }}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
+			<td class="align-middle">{{ job.num_nodes }}</td>
+			<td class="align-middle">{{ job.gpu_type }}</td>
+			<td class="align-middle">{{ job.num_gpus }}</td>
+			<td class="align-middle">{{ job.image_name }}</td>
 			<td class="align-middle">
 				{% if job.status == 'running' %}
 					<i class="fa fa-check fa-2x fa-fw text-success"></i>
@@ -18,15 +18,6 @@
 				{% endif %}
 			</td>
 			<td class="align-middle">
-   	<div class="progress mt-3">
-    	<div class="progress-bar bg-used" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-    <div class="d-flex flex-row justify-content-between">
-    	<div><span class="badge style-text-mini">Jan 18, 21:30</span></div>
-     <div><span class="badge style-text-mini">Jan 19, 21:30</span></div>
-    </div>
-   </td>
-			<td class="align-middle" style="min-width: 8.0rem;">
 				{% if job.status == 'running' %}
 					<a href="/ta_{{ job.url_suffix }}/"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
@@ -34,11 +25,9 @@
 					<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
 						target="_blank"><img src="{% static 'img/jupyter.svg' %}" alt="JupyterLab" style="width: 48px; height: 48px;" /></a>
-					{% comment %}
- 				<a href="/tb_{{ job.url_suffix }}/"
+					<a href="/tb_{{ job.url_suffix }}/"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
 						target="_blank"><img src="{% static 'img/tensorflow.svg' %}" alt="TensorBoard" style="width: 48px; height: 48px;" /></a>
-     {% endcomment %}
 				{% else %}
 					---
 				{% endif %}
