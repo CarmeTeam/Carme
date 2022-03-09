@@ -274,123 +274,129 @@
 										<div class="row mt-2">
 											<div class="col-12">
 												<div class="card-deck">
-													<div class="card">
-														<div class="card-header bg-light"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; Jobs</div>
-															<div class="card-body">
-																<!-- <form> -->
-																<form class="form ajax" action="{% url 'start_job' %}" method="post">
-																	{% csrf_token %}
-																	<div class="form-row">
-																	
-																		<div class="col-2">
-																			<div class="input-group mb-3">
-																				<div class="input-group-prepend">
-																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span>
-																				</div>
-																				<select name="{{ start_job_form.nodes.html_name }}" class="custom-select style-text">
-																					{% for choice in start_job_form.nodes.field.choices %}
-																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-																					{% endfor %}
-																				</select>
-																			</div>
-																		</div>
-							
-																		<div class="col-2">
-																			<div class="input-group mb-3">
-																				<div class="input-group-prepend">
-																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
-																				</div>
-																				<select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select style-text">
-																					{% for choice in start_job_form.gpu_type.field.choices %}
-																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-																					{% endfor %}
-																				</select>
-																			</div>
-																		</div>
-
-																		<div class="col-2">
-																			<div class="input-group mb-3">
-																				<div class="input-group-prepend">
-																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
-																				</div>
-																				<select name="{{ start_job_form.gpus.html_name }}" class="custom-select style-text">
-																					{% for choice in start_job_form.gpus.field.choices %}
-																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-																					{% endfor %}
-																				</select>
-																			</div>
-																		</div>
-
-																		<div class="col-2">
-																			<div class="input-group mb-3">
-																				<div class="input-group-prepend">
-																					<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
-																				</div>
-																				<select name="{{ start_job_form.image.html_name }}" class="custom-select style-text">
-																					{% for choice in start_job_form.image.field.choices %}
-																						<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-																					{% endfor %}
-																				</select>
-																			</div>
-																		</div>
-
-																		<div class="col-3">
-																			<div class="input-group mb-3">
-																				<div class="input-group-prepend">
-																					<span class="input-group-text style.text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
-																				</div>
-																				<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control style-text" aria-label="Sizing example input"
-																				aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
-																			</div>
-																		</div>
-
-																		<div class="col-1">
-																			<button class="btn btn-primary start-job" type="submit"><i class="fa fa-play" aria-hidden="true"></i></button>
-																		</div>
-																	</div>
-																</form>
-																<!-- </form> -->
-
-																<div class="mt-2 table-responsive">
-																	<table class="table mb-0 table-striped text-center style-text">
-																		<thead>
-																			<tr>
-                   	<th scope="col" class="align-middle">ID</th>
-                    <th scope="col" class="align-middle">Name</th>
-                    <th scope="col" class="align-middle">Image</th>
-                    <th scope="col" class="align-middle">Nodes</th>
-                    <th scope="col" class="align-middle">
-																						<span class="frac">
-																								<sup>CPUs</sup>
-																								<span>&frasl;</span>
-																								<sub>node</sub>
-																						</span>
-																				</th>
-					               <th scope="col" class="align-middle" style="min-width: 6.0rem;">
-																						<span class="frac">
-																								<sup>GPUs</sup>
-																								<span>&frasl;</span>
-																								<sub>node</sub>
-																						</span>
-																				</th>
-                    <th scope="col" class="align-middle">Status</th>
-                    <th scope="col" class="align-middle">Timing</th>
-                    <th scope="col" class="align-middle">Entry points</th>
-                    <th scope="col" class="align-middle">Details</th>
-                    <th scope="col" class="align-middle">Stop</th>
-                   </tr>
-																		</thead>
-																		<tbody id="jobtable">
-																			{% include "blocks/job_table.html" %}
-																		</tbody>
-																	</table>
+													<div class="card mb-4">
+														<div class="card-header bg-light">
+															<div class="row align-items-center">
+																<div class="col">
+																	<h6 class="mb-0 style-title"><i class="fa fa-tasks" aria-hidden="true"></i> Jobs</h6>
 																</div>
 															</div>
 														</div>
-													</div>
-												</div>
-											</div>
-										</div>
+														<div class="card-body">
+															<div class="mt-2 table-responsive">
+																<table class="table table-striped mb-0 overflow-hidden text-center style-text">
+																	<thead>
+																		<tr>
+                   <form class="form ajax" action="{% url 'start_job' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-row">
+
+                    	<th scope="col" class="align-middle" colspan="2" style="min-width: 10rem;">
+                     	<div class="input-group my-1 align-middle">
+                      	<div class="input-group-prepend">
+                       	<span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.nodes.label }}</span> 
+                       </div>
+                       <select name="{{ start_job_form.nodes.html_name }}" class="custom-select style-text">
+                       	{% for choice in start_job_form.nodes.field.choices %}
+                        	<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        {% endfor %} 
+                       </select>
+                      </div>
+                     </th>
+
+                     <th scope="col" class="align-middle" colspan="2" style="min-width: 12.2rem;">
+                      <div class="input-group my-1">
+                       <div class="input-group-prepend">
+                        <span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.gpu_type.label }}</span>
+                       </div>
+                       <select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select style-text">
+                        {% for choice in start_job_form.gpu_type.field.choices %}
+                         <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        {% endfor %}
+                       </select> 
+                      </div>
+                     </th>
+
+                     <th scope="col" class="align-middle" colspan="2" style="min-width: 11.3rem;">
+                      <div class="input-group my-1">
+                       <div class="input-group-prepend">
+                        <span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.gpus.label }}</span>
+                       </div>
+                       <select name="{{ start_job_form.gpus.html_name }}" class="custom-select style-text">
+                        {% for choice in start_job_form.gpus.field.choices %}
+                         <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        {% endfor %}
+                       </select>
+                      </div>
+                     </th>
+
+                     <th scope="col" class="align-middle" colspan="2">
+                      <div class="input-group my-1">
+                       <div class="input-group-prepend">
+                        <span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.image.label }}</span>
+                       </div>
+                       <select name="{{ start_job_form.image.html_name }}" class="custom-select style-text">
+                        {% for choice in start_job_form.image.field.choices %}
+                         <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        {% endfor %}
+                       </select>
+                      </div>
+                     </th>
+
+                     <th scope="col" class="align-middle" colspan="2">
+                     	<div class="input-group my-1">
+                       <div class="input-group-prepend">
+                        <span class="input-group-text style-text" id="inputGroup-sizing-default">{{ start_job_form.name.label }}</span>
+                       </div>
+                       <input type="text" name="{{ start_job_form.name.html_name }}" class="form-control style-text" aria-label="Sizing example input"
+                        	aria-describedby="inputGroup-sizing-default" value="{{ start_job_form.name.field.initial }}">
+                      </div>
+                     </th>
+                                  
+                     <th scope="col" class="align-middle">
+                      <button class="btn btn-primary start-job" type="submit"><i class="fa fa-play fa-fw" aria-hidden="true"></i></button>
+                     </th>
+
+                    </div>
+                   </form>
+                  </tr>
+
+																		<tr>
+                   <th scope="col" class="align-middle">ID</th>
+                   <th scope="col" class="align-middle">Name</th>
+                   <th scope="col" class="align-middle">Image</th>
+                   <th scope="col" class="align-middle">Nodes</th>
+                   <th scope="col" class="align-middle">
+																					<span class="frac">
+																							<sup>CPUs</sup>
+																							<span>&frasl;</span>
+																							<sub>node</sub>
+																					</span>
+																			</th>
+					              <th scope="col" class="align-middle" style="min-width: 6.0rem;">
+																					<span class="frac">
+																							<sup>GPUs</sup>
+																							<span>&frasl;</span>
+																							<sub>node</sub>
+																					</span>
+																			</th>
+                   <th scope="col" class="align-middle">Status</th>
+                   <th scope="col" class="align-middle">Timing</th>
+                   <th scope="col" class="align-middle">Entry points</th>
+                   <th scope="col" class="align-middle">Details</th>
+                   <th scope="col" class="align-middle">Stop</th>
+                  </tr>
+																	</thead>
+																	<tbody id="jobtable">
+																		{% include "blocks/job_table.html" %}
+																	</tbody>
+																</table>
+															</div><!--</table responsive>-->
+														</div><!--</card-body>-->
+													</div><!--</card mb-4>-->
+												</div><!--</card-deck>-->
+											</div><!--</col>-->
+										</div><!--</row>-->
 										{% endblock %}
 
 {% block javascript %}

@@ -19,9 +19,9 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
 from django.contrib import messages as dj_messages
-from django.contrib.auth import update_session_auth_hash
+#from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth import login as auth_login
+#from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -39,6 +39,10 @@ from django.db.models import Sum
 from random import randint
 from django.views.generic import TemplateView
 import re
+
+# Login
+from .forms import LoginForm
+#from django.contrib.auth import authenticate, login, logout
 
 # Charts
 from django.utils.translation import gettext_lazy as _
@@ -445,6 +449,28 @@ def login(request):
     """custom login"""
 
     return LoginView.as_view(template_name='login.html')(request)
+
+#@force_maintenance_mode_off
+#def login_page(request):
+#    login_data = LoginForm()
+#    return render(request, 'login.html', {'login_data':login_data})
+
+#@force_maintenance_mode_off
+#def login_validate(request):
+#    login_data = LoginForm(request.POST)
+#
+#    if login_data.is_valid():
+#        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+#        if user is not None:
+#           # if user.is_active:
+#            login(request, user)
+#            return redirect('/')
+#            #return LoginView.as_view(template_name='login.html')(request)
+#
+#        error_message= 'Incorrect password / username. Try again.'
+#        return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
+#    error_message= 'Internal error. Please contact the admin.'
+#    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
 
 @force_maintenance_mode_off
 def logout(request):

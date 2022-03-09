@@ -51,18 +51,23 @@
 	<link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
 </head>
 
-<body class="d-flex flex-column h-100 space-top">
+<body class="d-flex flex-column h-100">
 	<div class="wrapper">
 
-		 <div class="space-top">
-   	<div class="container my-4">
+   	<div class="container">
+
      {% if user.is_authenticated %}
-						{% include "blocks/nav.html" %}
+						<div class="navbar-space">
+							{% include "blocks/nav.html" %}
+						</div>
      {% endif %}
-					{% include "blocks/maintenance.html" %}
-     {% block content %}{% endblock %}         
-    </div>
-  	</div>		
+
+					<main role="main" class="flex-shrink-0">
+						{% include "blocks/maintenance.html" %}
+     	{% block content %}{% endblock %}
+					</main>
+         
+    </div>		
 
 			<!-- Footer -->
 			{% include "blocks/footer.html" %}

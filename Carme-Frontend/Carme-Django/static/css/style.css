@@ -131,6 +131,11 @@
 /*--- General ---*/
 /*---------------*/
 
+/*--- body ---*/
+body {
+    background-color: #f6f8fa;
+}
+
 /* 403 unauthorized Error */
 .error-template {
    padding: 40px 15px;
@@ -186,6 +191,9 @@
 /*---------------*/
 /*--- Navbar ----*/
 /*---------------*/
+.navbar-space {                                                                                                                                        
+  padding-top: 80px;                                                                                                                                 
+} 
 
 i.fa.encircled {
     display: inline-block;

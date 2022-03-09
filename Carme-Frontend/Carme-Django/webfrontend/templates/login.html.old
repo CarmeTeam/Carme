@@ -19,55 +19,53 @@
 
 {% block content %}
 
-<div class="login">
-	<div class="container my-4 pt-4">
-		<div id="boxframe-main">
-  <div class="row">
-			<form class="col-12" method="POST">
+<div class="row flex-center-carme min-vh-90 py-4">
+	<div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+		<div id="login-box">
+  	<div class="row">
+				<form class="col-12" method="POST">
 				{% csrf_token %}
 
-				<div class="text-center mb-4">
-					<img src="{% static 'img/carme.svg' %}" alt="logo" style="width: 96px; height: 96px;" class="mb-4" />
-					<h1 class="h3 mb-3 font-weight-normal">Carme</h1>
-				</div>
+					<div class="text-center mb-4">
+						<img src="{% static 'img/carme.svg' %}" alt="logo" style="width: 96px; height: 96px;" class="mb-4" />
+						<h1 class="h3 mb-3 font-weight-normal">Carme</h1>
+					</div>
 
-				<div id="timeout-message" class="alert alert-warning" role="alert" style="display: none;"><i class="fa fa-warning"></i>&nbsp; Your session has expired! Log in again</div>
-				<div id="logout-message" class="alert alert-success" role="alert" style="display: none;"><i class="fa fa-check"></i>&nbsp; Successfully logged out.</div>
+					<div id="timeout-message" class="alert alert-warning" role="alert" style="display: none;"><i class="fa fa-warning"></i>&nbsp; Your session has expired! Log in again</div>
+					<div id="logout-message" class="alert alert-success" role="alert" style="display: none;"><i class="fa fa-check"></i>&nbsp; Successfully logged out.</div>
 
-				<div class="form-label-group">
-					<input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username"
-						required>
-					<label for="inputUsername">Username</label>
-				</div>
+					<div class="form-label-group">
+						<input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required>
+						<label for="inputUsername">Username</label>
+					</div>
 
-				<div class="form-label-group">
-					<input type="password" name="password" id="inputPassword" class="form-control"
-						placeholder="Password" required>
-					<label for="inputPassword">Password</label>
-				</div>
+					<div class="form-label-group">
+						<input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+						<label for="inputPassword">Password</label>
+					</div>
 
-				{% if maintenance_mode %}
-				<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-				{%else %}
-				<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-				{%endif %}
+					{% if maintenance_mode %}
+					<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+					{%else %}
+					<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+					{%endif %}
 			
-			</form>
-		</div>
-
-		<div class="row my-5">
-			<div class="col">
-				<a href="https://www.itwm.fraunhofer.de/" target="_blank"><img src="{% static 'img/itwm.svg' %}" alt="logo" style="width: 100%;" /></a>
+				</form>
 			</div>
 
-			<div class="col">
-				<a href="https://www.bmbf.de/" target="_blank"><img src="{% static 'img/bmbf.svg' %}" alt="logo" style="width: 100%;" /></a>
-			</div>
+			<div class="row my-5">
+				<div class="col">
+					<a href="https://www.itwm.fraunhofer.de/" target="_blank"><img src="{% static 'img/itwm.svg' %}" alt="logo" style="width: 100%;" /></a>
+				</div>
 
-			<div class="col">
-				<a href="https://mbwwk.rlp.de/" target="_blank"><img src="{% static 'img/rlp.svg' %}" alt="logo" style="width: 100%;" /></a>
+				<div class="col">
+					<a href="https://www.bmbf.de/" target="_blank"><img src="{% static 'img/bmbf.svg' %}" alt="logo" style="width: 100%;" /></a>
+				</div>
+
+				<div class="col">
+					<a href="https://mbwwk.rlp.de/" target="_blank"><img src="{% static 'img/rlp.svg' %}" alt="logo" style="width: 100%;" /></a>
+				</div>
 			</div>
-		</div>
   </div>
 	</div>
 </div>
