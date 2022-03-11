@@ -94,7 +94,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
     if [[ -f "node_modules/.bin/theia" ]];then
       if command_exists node;then
         log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
-        node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 --plugins=local-dir:plugins &
+        THEIA_WEBVIEW_EXTERNAL_ENDPOINT={{hostname}} THEIA_MINI_BROWSER_HOST_PATTERN={{hostname}} node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --plugins=local-dir:plugins --startup-timeout -1 &
       else
         die "cannot start TheiaIDE (no executable found)"
       fi
