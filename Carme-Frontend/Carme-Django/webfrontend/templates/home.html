@@ -280,6 +280,34 @@
 																<div class="col">
 																	<h6 class="mb-0 style-title"><i class="fa fa-tasks" aria-hidden="true"></i> Jobs</h6>
 																</div>
+																<div class="col-auto text-center pe-card" class"form-select">
+                	<button type="button" class="btn btn-outline-secondary custom-btn" data-toggle="modal" data-target="#exampleModal">
+                 	History
+                 </button>
+                 <!-- <modal> -->
+                	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                 	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+                  	<div class="modal-content">
+                   	<div class="modal-header bg-light">
+                    	<h5 class="modal-title" id="exampleModalLabel"><i class="fa fa-history" aria-hidden="true"></i>  History</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                     </button>
+                    </div>
+                    <div class="modal-body">
+                    	{% include "blocks/jobhistory.html" %} 
+                    </div>
+                    <div class="modal-footer">
+                    	<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                   </div>
+                  </div>
+                 </div>
+                 <!-- </modal> -->
+																	<button type="button" id="moredetails" class="btn btn-outline-secondary custom-btn" data-toggle="modal" data-target="#exampleModal">
+                   More
+                 </button>
+                </div>
 															</div>
 														</div>
 														<div class="card-body">
@@ -311,7 +339,7 @@
                        </div>
                        <select name="{{ start_job_form.gpu_type.html_name }}" class="custom-select style-text">
                         {% for choice in start_job_form.gpu_type.field.choices %}
-                         <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                         <option value="{{ choice.0 }}">{{ choice.1 | upper }}</option>
                         {% endfor %}
                        </select> 
                       </div>
