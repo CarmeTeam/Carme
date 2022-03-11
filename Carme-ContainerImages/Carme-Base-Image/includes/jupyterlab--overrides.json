@@ -1,8 +1,0 @@
-{
-  "@jupyterlab/notebook-extension:tracker": {
-    "kernelShutdown": true
-  },
-  "@jupyterlab/terminal-extension:plugin": {
-    "shutdownOnClose": true
-  }
-}
