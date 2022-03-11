@@ -128,9 +128,15 @@ fi
 
 # activate conda base environment --------------------------------------------------------------------------------------------------
 # NOTE: conda should always be activated not only in interactive shells
-CONDA_INIT_FILE="/opt/miniconda3/etc/profile.d/conda.sh"
-if [[ -f "${CONDA_INIT_FILE}" ]];then
-  source "${CONDA_INIT_FILE}"
+CONDA_INIT_FILE="/opt/package-manager/etc/profile.d/conda.sh"
+MAMBA_INIT_FILE="/opt/package-manager/etc/profile.d/mamba.sh"
+
+[[ -f "${CONDA_INIT_FILE}" ]] && source "${CONDA_INIT_FILE}"
+[[ -f "${MAMBA_INIT_FILE}" ]] && source "${MAMBA_INIT_FILE}"
+
+if command -v "mamba" >/dev/null 2>&1 ;then
+  mamba activate base
+elif command -v "conda" >/dev/null 2>&1 ;then
   conda activate base
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
