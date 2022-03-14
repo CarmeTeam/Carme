@@ -725,14 +725,18 @@ class BaseForecast():
         for k in range(len(self.gpus)):
 
             run_gpus = np.asarray(SlurmJob.objects.filter(
-                status__exact='running', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_gpus','gpu_type').order_by('slurm_id') or [('0','0',self.gpus[k])]) 
+                status__exact='running', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',self.gpus[k])])
+            run_gpus[:,2] = run_gpus[:,1].astype(int)*run_gpus[:,2].astype(int)
+            run_gpus = np.delete(run_gpus, 1, 1)  # (slurm_id, num_gpus = num_gpus * num_nodes, gpu_type)  
             run_time = np.asarray(CarmeJobTable.objects.filter(
                 id_job__in=run_gpus[:,0]).values_list('timelimit','time_start').order_by('id_job') or [(0,0)])
             run_future = np.c_[run_gpus[:,1],60*run_time[:,0]+run_time[:,1]] # (num_gpus in run, time_end)
             run_sortedfuture.append(np.array(sorted(run_future.astype(int),key=lambda x: x[1]))) # sorted by time_end 
                 
             queue_gpus = np.asarray(SlurmJob.objects.filter(
-                status__exact='queued', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_gpus','gpu_type').order_by('slurm_id') or [('0','0',self.gpus[k])])
+                status__exact='queued', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',self.gpus[k])])
+            queue_gpus[:,2] = queue_gpus[:,1].astype(int)*queue_gpus[:,2].astype(int)
+            queue_gpus = np.delete(queue_gpus, 1, 1) # (slurm_id, num_gpus = num_spus * num_nodes, gpu_type) 
             queue_time = np.asarray(CarmeJobTable.objects.filter(
                 id_job__in=queue_gpus[:,0]).values_list('timelimit','time_submit').order_by('id_job') or [(0,0)])
             queue_future = np.c_[queue_gpus[:,1],queue_time[:,1],queue_time[:,0]] # (num_gpus in queue, time_submit, timelimit)
