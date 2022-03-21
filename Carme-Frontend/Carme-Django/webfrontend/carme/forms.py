@@ -41,7 +41,7 @@ class StartJobForm(forms.Form):
         gpu_type_choices = kwargs.pop('gpu_type_choices')
         super(StartJobForm, self).__init__(*args, **kwargs)
         self.fields["nodes"] = forms.ChoiceField(
-            label="#(Nodes)", choices=node_choices)
+            label="Nodes", choices=node_choices)
         self.fields["gpu_type"] = forms.ChoiceField(
             label="GPU type", choices=gpu_type_choices)
         self.fields["gpus"] = forms.ChoiceField(

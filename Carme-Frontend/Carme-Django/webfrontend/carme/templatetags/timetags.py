@@ -20,7 +20,7 @@ def print_timestamp_small(timestamp):
         ts = datetime.datetime.fromtimestamp(float(timestamp))
     except ValueError:
         return None
-    return ts.strftime('%b %d, %Y')
+    return ts.strftime('%b %d, %H:%M') # in progress bar. For history card use ('%b, %d, %Y')
 
 register.filter(print_timestamp_small)
 
