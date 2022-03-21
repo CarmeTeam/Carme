@@ -3,7 +3,7 @@
 {% load mathfilters %}
 
 {% for job, slurm in myjobtable_list %}
-	<tr data-jobid="{{ job.slurm_id }}" class="style-text">
+	<tr data-jobid="{{ job.slurm_id }}" class="dashboard-jobtable style-text">
 			<td class="align-middle style-text text-underline">{{ job.slurm_id }}</th>
 			<td class="align-middle">{{ job.name }}</td>
 			<td class="align-middle">{{ job.image_name }} </td>

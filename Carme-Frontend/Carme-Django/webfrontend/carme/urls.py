@@ -16,7 +16,13 @@ from . import views
 from .views import * #line_chart_json, line_chart_json2
 from django.conf import settings
 
-gpus = settings.CARME_GPU_TYPE_LIST
+gputype=[]
+        
+for num in range(len(settings.CARME_GPU_NUM.split())):
+    gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
+        
+gpus = gputype
+
 
 urlpatterns = [
     path('', views.index, name='index'),

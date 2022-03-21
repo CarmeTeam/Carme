@@ -442,6 +442,7 @@
  });
 </script>
 
+{% include "blocks/forecast.html" %}
 
 <script type="text/javascript">
 	if (!$) console.error('jQuery is required!');
@@ -472,50 +473,6 @@
 
                 $("#myTimeChart").highcharts(data);
             });			
-	
-
-												{% if gputype|length > 1 %}
-    								{% for gpu in gpu_loop %}
-            $.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
-                data["chart"] = {
-                type: "areaspline",
-                };
-                data["legend"] = {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'top',
-                    floating: false,
-                };
-                data["plotOptions"] = {
-                    areaspline: {
-                        fillOpacity: 0.2
-                    }    
-                };
-
-                $("#myForecastChart{{forloop.counter0}}").highcharts(data);
-            });
-     							{% endfor %}
-												{% elif  gputype|length == 1 %}
-            $.get('line_chart_json_forecast0', function (data) {
-                data["chart"] = {
-                type: "areaspline",
-                };
-                data["legend"] = {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'top',
-                    floating: false,
-                };
-                data["plotOptions"] = {
-                    areaspline: {
-                        fillOpacity: 0.2
-                    }    
-                };
-                $("#myForecastChart0").highcharts(data);
-            });
-												{% else %}
-            console.log('GPU_TYPE is empty');
-												{% endif %}
 		}
   
 		

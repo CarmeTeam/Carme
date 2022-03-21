@@ -95,14 +95,8 @@ def generateChoices(request):
     for i in range(1, group_resources.max_gpus_per_node +1):
         gpu_choices.append( (str(i), i) )
 
-    # setting gputype
-    gputype=[]
-        
-    for num in range(len(settings.CARME_GPU_NUM.split())):
-        gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
-
     # generate gpu_type choices
-    gpu_type = [(str(i), i) for i in gputype]
+    gpu_type = [(str(i), i) for i in settings.CARME_GPU_TYPE.split(',')]
 
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
@@ -145,6 +139,32 @@ def index(request):
     startForm = StartJobForm(image_choices=imageC,
                              node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
 
+    # calculate actual stats
+    slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
+    stats = {
+        "used": 0,
+        "queued": 0,
+        "reserved": 0,
+        "free": 0
+    }
+    
+    for j in slurm_list:
+        if j.status == "running":
+            stats["used"] += j.num_gpus * j.num_nodes
+        elif j.status == "queued":
+            stats["queued"] += j.num_gpus * j.num_nodes 
+
+    stats["free"] = settings.CARME_HARDWARE_NUM_GPUS - (stats["used"] + stats["reserved"])
+
+    # check if stats have to be updated
+    try:
+        lastStat = ClusterStat.objects.latest('id')
+    except:
+        lastStat = None
+    
+    if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
+        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
+
     # jobs table
     slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
     myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
@@ -180,33 +200,7 @@ def index(request):
     
     # loop gpu type chart
     gpu_loop = range(len(gputype)+1)
-    
-    # calculate actual stats
-    slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
-    stats = {
-        "used": 0,
-        "queued": 0,
-        "reserved": 0,
-        "free": 0
-    }
-    
-    for j in slurm_list:
-        if j.status == "running":
-            stats["used"] += j.num_gpus * j.num_nodes
-        elif j.status == "queued":
-            stats["queued"] += j.num_gpus * j.num_nodes 
-
-    stats["free"] = gpusum - (stats["used"] + stats["reserved"])
-
-    # check if stats have to be updated
-    try:
-        lastStat = ClusterStat.objects.latest('id')
-    except:
-        lastStat = None
-    
-    if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
-        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
-
+ 
     # render template
     context = {
         'myjobtable_list': myjobtable_list,
@@ -728,7 +722,7 @@ class LineChartJSONViewTime(HighchartPlotLineChartView):
         "color": "#aeb1b5",
         "width": "1",
         "value": "9",
-        "dashStyle": "Dash" 
+        "dashStyle": "dot" 
         }]
         }
 
@@ -772,8 +766,8 @@ class BaseForecast():
         "plotLines": [{
         "color": "#aeb1b5",
         "width": "1",
-        "value": "0.5",
-        "dashStyle": "Dash" 
+        "value": "0",
+        "dashStyle": "dot" 
         }]        
         }
 

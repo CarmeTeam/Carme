@@ -1,6 +1,6 @@
 {% load static %}
 
-{% if CARME_GPU_TYPE_LIST|length > 1 %}
+{% if gputype|length > 1 %}
     {% for gpu in gpu_loop %}
         <script>
             $.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
@@ -22,7 +22,7 @@
             });
         </script>
     {% endfor %}
-{% elif  CARME_GPU_TYPE_LIST|length == 1 %}
+{% elif  gputype|length == 1 %}
         <script>
             $.get('line_chart_json_forecast0', function (data) {
                 data["chart"] = {
