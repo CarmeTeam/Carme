@@ -56,7 +56,7 @@
 		<div class="card mt-4">
 			<div class="card-header font-weight-bold"><i class="fa fa-sign-in fa-fw" aria-hidden="true"></i>&nbsp; Entry points</div>
 			<div class="card-body">
-				{% ifequal job.status 'running' %}
+				{% if job.status == 'running' %}
 					<a href="/ta_{{ job.url_suffix }}/"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
 						target="_blank"><img src="{% static 'img/theia.svg' %}" alt="TheiaIDE" style="width: 48px; height: 48px;" class="m-2" /></a>
@@ -68,7 +68,7 @@
 						target="_blank"><img src="{% static 'img/tensorflow.svg' %}" alt="TensorBoard" style="width: 48px; height: 48px;" class="m-2" /></a>
 				{% else %}
 					---
-				{% endifequal %}
+				{% endif %}
 			</div>
 		</div>
 	</div>

@@ -14,28 +14,29 @@
 {% endcomment %}
 
 {% load static %}
+{% load mathfilters %}
 
-{% for job in slurm_list %}
+{% for cpu, job in slurm_list %}
 <tr data-jobid="{{ job.slurm_id }}">
-	<th class="align-middle" scope="row">{{ job.slurm_id }}</th>
-	<td class="align-middle">{{job.user}}</td>
+	<th class="align-middle">{{ job.slurm_id }}</th>
+	<td class="align-middle">{{ job.user }}</td>
 	<td class="align-middle">{{ job.name }}</td>
-	<td class="align-middle">{{ job.num_nodes }}</td>
-	<td class="align-middle">{{ job.ip }}</td>
-	<td class="align-middle">{{ job.gpu_type }}</td>
-	<td class="align-middle">{{ job.num_gpus }}</td>
 	<td class="align-middle">{{ job.image_name }}</td>
+	<td class="align-middle">{{ job.ip }}</td>
+	<td class="align-middle"><span class="i-node">{{ job.num_nodes}}</span></td>
+ <td class="align-middle"><span class="i-cpu">{{ cpu.cpus_req |intdiv:job.num_nodes }}</span></td>
+	<td class="align-middle"><span class="i-gpu">{{ job.num_gpus }}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
 	<td class="align-middle">
-		{% ifequal job.status "running" %}
-			<i class="fa fa-check fa-2x fa-fw text-success"></i>
+		{% if job.status == 'running' %}
+			<i class="fa fa-check fa-fw fa-2x text-success"></i>
 			<span class="sr-only">Running</span>
 		{% else %}
-			<i class="fa fa-cog fa-spin fa-2x fa-fw text-secondary"></i>
+			<i class="fa fa-cog fa-spin fa-fw fa-2x text-secondary"></i>
 			<span class="sr-only">Queued</span>
-		{% endifequal %}
+		{% endif %}
 	</td>
 	<td class="align-middle">
-		{% ifequal job.status 'running' %}
+		{% if job.status == 'running' %}
 			<a href="/ta_{{ job.url_suffix }}/"
 				onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
 				target="_blank"><img src="{% static 'img/theia.svg' %}" alt="TheiaIDE" style="width: 48px; height: 48px;" /></a>
@@ -44,21 +45,21 @@
 				target="_blank"><img src="{% static 'img/jupyter.svg' %}" alt="JupyterLab" style="width: 48px; height: 48px;" /></a>
 		{% else %}
 			---
-		{% endifequal %}
+		{% endif %}
 	</td>
 	<td class="align-middle">
-		{% ifequal job.status 'running' %}
-		<form action="/carmenfo/" method="post" target="_blank">
+		{% if job.status == 'running' %}
+		<form action="{% url 'job_info' %}" method="post" target="_blank">
 			{% csrf_token %}
 			<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 			<button class="btn btn-secondary" type="submit"><i class="fa fa-info fa-fw" aria-hidden="true"></i></button>
 		</form>
 		{% else %}
 			---
-		{% endifequal %}
+		{% endif %}
 	</td>
 	<td class="align-middle">
-		<form class="ajax" action="/carmeJob/" method="post">
+		<form class="ajax" action="{% url 'stop_job' %}" method="post">
 			{% csrf_token %}
 			<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 			<input type="hidden" name="jobName" value="{{job.name}}">

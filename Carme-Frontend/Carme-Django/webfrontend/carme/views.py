@@ -19,9 +19,9 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
 from django.contrib import messages as dj_messages
-from django.contrib.auth import update_session_auth_hash
+#from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth import login as auth_login
+#from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -38,11 +38,23 @@ import rpyc
 from django.db.models import Sum
 from random import randint
 from django.views.generic import TemplateView
-from chartjs.views.lines import BaseLineChartView
 import re
+
+# Login
+from .forms import LoginForm
+#from django.contrib.auth import authenticate, login, logout
+
+# Charts
+from django.utils.translation import gettext_lazy as _
+from .highchart.colors import COLORS, next_color
+from .highchart.lines import HighchartPlotLineChartView
+
+# History Card
+from django.db.models import Case, Value, When, IntegerField 
+
+# Maintenance
 from maintenance_mode.decorators import force_maintenance_mode_off
 from maintenance_mode.core import get_maintenance_mode
-import json
 
 from importlib.machinery import SourceFileLoader
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -62,7 +74,7 @@ def ldap_home(request):
 
 # no view, should be a model
 def generateChoices(request):
-    """generates the list of items for the image drop down menue"""
+    """generates the list of items for the image drop down menu"""
 
     group = list(request.user.ldap_user.group_names)[0]
     group_resources = GroupResource.objects.filter(name__exact=group)[0]
@@ -83,25 +95,92 @@ def generateChoices(request):
     for i in range(1, group_resources.max_gpus_per_node +1):
         gpu_choices.append( (str(i), i) )
 
+    # setting gputype
+    gputype=[]
+        
+    for num in range(len(settings.CARME_GPU_NUM.split())):
+        gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
+
     # generate gpu_type choices
-    gpu_type = [(str(i), i) for i in settings.CARME_GPU_TYPE.split(',')]
+    gpu_type = [(str(i), i) for i in gputype]
 
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
+
 @login_required(login_url='/login') 
 def index(request):
-    """rendering of the website / -> template:home.html
+    """ dashboard page -> generates user job-list, messages and other interactive features"""
 
-    #Details: generates user job-list, messages and other interactive fearutes
-    """
-
+    # logout
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
+
+    # ldap
+    group = list(request.user.ldap_user.group_names)[0]
+    uID = request.user.ldap_user.attrs['uidNumber'][0]
+    
+    # jobs history (uses ldap uID)
+    myjobhist = CarmeJobTable.objects.filter(
+        state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
+    
+    myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
+    
+    cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
+    myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
+        sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
+    
+    mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
+    mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
+
+    # compute total GPU hours in jobs history  (uses ldap uID)
+    job_time_end = CarmeJobTable.objects.filter(
+        state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
+    job_time_start = CarmeJobTable.objects.filter(
+        state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
+    job_time = 0
+    if (job_time_start and job_time_end):
+        job_time = round((job_time_end-job_time_start)/3600)
 
     # create start job form
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
     startForm = StartJobForm(image_choices=imageC,
                              node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
 
+    # jobs table
+    slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
+    myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
+    cases_active = [When(id_job=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_active_list)]
+    jobtable_active = CarmeJobTable.objects.filter(id_job__in=myslurmid_active_list).annotate(
+        sort_order=Case(*cases_active, output_field=IntegerField())).order_by('sort_order')
+    myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) )
+    myjobtable_script = zip ( list(slurm_list_user), list(jobtable_active) )
+
+    # notifications
+    message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
+    
+    # setting variables gpu card
+    gputype=[]
+    cpupergpu=[]
+    rampergpu=[]
+    gpupernode=[]
+    gputotal=[]
+    for num in range(len(settings.CARME_GPU_DEFAULTS.split())):
+        gputype.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[0])
+        cpupergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[1])
+        rampergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[2])
+        
+    for num in range(len(settings.CARME_GPU_NUM.split())):
+        gpupernode.append(settings.CARME_GPU_NUM.split()[num].split(":")[1])
+        gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
+        
+    cpupergpu = list(map(int, cpupergpu))
+    rampergpu = list(map(int, rampergpu))
+    gpupernode = list(map(int, gpupernode))
+    gputotal = list(map(int, gputotal))
+    gpusum = sum(gputotal)
+    
+    # loop gpu type chart
+    gpu_loop = range(len(gputype)+1)
+    
     # calculate actual stats
     slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
     stats = {
@@ -117,7 +196,7 @@ def index(request):
         elif j.status == "queued":
             stats["queued"] += j.num_gpus * j.num_nodes 
 
-    stats["free"] = settings.CARME_HARDWARE_NUM_GPUS - (stats["used"] + stats["reserved"])
+    stats["free"] = gpusum - (stats["used"] + stats["reserved"])
 
     # check if stats have to be updated
     try:
@@ -128,19 +207,28 @@ def index(request):
     if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
         ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
 
-    slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
-    message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
-    
     # render template
     context = {
-        'slurm_list_user': slurm_list_user,
+        'myjobtable_list': myjobtable_list,
+        'myjobtable_script': myjobtable_script,
         'message_list': message_list,
         'start_job_form': startForm,
         'CARME_VERSION': settings.CARME_VERSION,
         'DEBUG': settings.DEBUG,
+        'mylist_short': mylist_short,
+        'mylist_long': mylist_long,
+        'job_time' : job_time,
+        'gpu_loop' : gpu_loop,
+        'gputype': gputype, #gpucard
+        'cpupergpu': cpupergpu, #gpucard
+        'rampergpu': rampergpu, #gpucard
+        'gpupernode':gpupernode, #gpucard
+        'gputotal':gputotal, #gpucard
+        'gpusum': gpusum, #gpucard
     }
 
     return render(request, 'home.html', context)
+
 
 @login_required(login_url='/login')
 def admin_all_jobs(request):
@@ -148,16 +236,23 @@ def admin_all_jobs(request):
 
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
-    if not request.user.is_authenticated:
-        return HttpResponse('Unauthorized', status=401)
+    if request.user.is_superuser:
+       # return redirect('/carme/403/') # using external link 403.html
 
-    # get all jobs
-    slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
+        # get all jobs
+        allslurmjobs = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("-slurm_id")
+        allslurmids_list = list(allslurmjobs.values_list("slurm_id", flat=True))
+        allcpujobs = CarmeJobTable.objects.filter(id_job__in=allslurmids_list).order_by("-id_job")
+        slurm_list = zip ( list(allcpujobs), list(allslurmjobs) )
+        # render template
+        context = {
+            'slurm_list': slurm_list,
+            'allcpujobs': allcpujobs,
+            'allslurmjobs': allslurmjobs,
+        }
 
-    # render template
-    context = {
-        'slurm_list': slurm_list
-    }
+    else:
+        context = {}
 
     return render(request, 'admin_all_jobs.html', context)
 
@@ -171,11 +266,16 @@ def admin_job_table(request):
         return HttpResponse('Unauthorized', status=401)
 
     # get all jobs
-    slurm_list = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("slurm_id")
-
+    allslurmjobs = SlurmJob.objects.filter(status__in=["queued", "running"]).order_by("-slurm_id")
+    allslurmids_list = list(allslurmjobs.values_list('slurm_id', flat=True))
+    allcpujobs = CarmeJobTable.objects.filter(id_job__in=allslurmids_list).order_by('-id_job')
+    slurm_list  = zip( list(allcpujobs), list(allslurmjobs) )
+  
     # render template
     context = {
-        'slurm_list': slurm_list
+        'slurm_list': slurm_list,
+        'allcpujobs': allcpujobs,
+        'allslurmjobs': allslurmjobs,
     }
 
     return render(request, 'blocks/admin_job_table.html', context)
@@ -189,12 +289,20 @@ def job_table(request):
     if not request.user.is_authenticated:
         return HttpResponse('Unauthorized', status=401)
 
-    # get all jobs by user
+    # jobs card
     slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
+    myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
+    cases_active = [When(id_job=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_active_list)]
+    jobtable_active = CarmeJobTable.objects.filter(id_job__in=myslurmid_active_list).annotate(
+        sort_order=Case(*cases_active, output_field=IntegerField())).order_by('sort_order')
+    myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) ) 
+    myjobtable_script = zip( list(slurm_list_user), list(jobtable_active) )    
+
 
     # render template
     context = {
-        'slurm_list_user': slurm_list_user
+        'myjobtable_list': myjobtable_list,
+        'myjobtable_script': myjobtable_script,
     }
     
     return render(request, 'blocks/job_table.html', context)
@@ -265,17 +373,26 @@ def start_job(request):
 @login_required(login_url='/login')
 def job_hist(request):
     """renders the job history page"""
-
+   
+     #logout
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
+    # ldap
     group = list(request.user.ldap_user.group_names)[0]
     uID = request.user.ldap_user.attrs['uidNumber'][0]
 
+    # history card (used ldap uID)
     myjobhist = CarmeJobTable.objects.filter(
         state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
+    myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
+    
+    cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
+    myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
+        sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
+    
+    mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
 
-    # compute total GPU hours
-    uID = request.user.ldap_user.attrs['uidNumber'][0]
+    # compute total GPU hours (uses ldap uID)
     job_time_end = CarmeJobTable.objects.filter(
         state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
     job_time_start = CarmeJobTable.objects.filter(
@@ -284,17 +401,12 @@ def job_hist(request):
     if (job_time_start and job_time_end):
         job_time = round((job_time_end-job_time_start)/3600)
 
-    group_resources = GroupResource.objects.filter(name__exact=group)[0]
-
     # render template
     context = {
         'myjobhist': myjobhist,
-        'uID': uID,
+        'myslurmjob': myslurmjob,
+        'mylist_long': mylist_long,
         'job_time': job_time,
-        'partitions': group_resources.partition,
-        'max_jobs': group_resources.max_jobs,
-        'max_nodes': group_resources.max_nodes,
-        'max_gpus': group_resources.max_gpus_per_node,
     }
 
     return render(request, 'job_hist.html', context)
@@ -372,10 +484,40 @@ def job_info(request):
     return render(request, 'job_info.html', context)
 
 @force_maintenance_mode_off
+def custom_login(request):
+    if request.user.is_authenticated:
+        return redirect('/')
+    else:
+        return login(request)
+
+
+@force_maintenance_mode_off
 def login(request):
     """custom login"""
 
     return LoginView.as_view(template_name='login.html')(request)
+
+#@force_maintenance_mode_off
+#def login_page(request):
+#    login_data = LoginForm()
+#    return render(request, 'login.html', {'login_data':login_data})
+
+#@force_maintenance_mode_off
+#def login_validate(request):
+#    login_data = LoginForm(request.POST)
+#
+#    if login_data.is_valid():
+#        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+#        if user is not None:
+#           # if user.is_active:
+#            login(request, user)
+#            return redirect('/')
+#            #return LoginView.as_view(template_name='login.html')(request)
+#
+#        error_message= 'Incorrect password / username. Try again.'
+#        return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
+#    error_message= 'Internal error. Please contact the admin.'
+#    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
 
 @force_maintenance_mode_off
 def logout(request):
@@ -507,73 +649,364 @@ def proxy_auth(request):
     
     return HttpResponse(status=403) # forbidden
 
-class LineChartJSONView(BaseLineChartView):
-    """data backend for chartjs cluster stats"""
+#####################################
+#####################################
+######## Starts HighCharts ##########
+#####################################
+#####################################
+
+class LineChartJSONViewTime(HighchartPlotLineChartView):
+
+    xAxispoints = 10 # static value chosen
+    
+    def get_providers(self):
+
+        return ["Free", "Used", "Queued"]
 
     def get_labels(self):
-        """provide chart labels"""
-        now = datetime.now()
-        stat_gpus = np.asarray(ClusterStat.objects.values_list('date').order_by('id'))
-
-        rawdates = stat_gpus[-13:] 
-        dates = list(map(lambda x: str(x[0].hour )+":"+str(x[0].minute).zfill(2), rawdates))
-        lables=[]
-
-        for i in range(np.shape(stat_gpus[-13:,0])[0]-1):
-            lables.append("t"+str(i-np.shape(stat_gpus[-13:,0])[0]+1))
+    
+        stat_gpus = np.asarray(ClusterStat.objects.values_list('date').order_by('-id'))
         
-        lables.append("now")
+        dates = []
+        dates.append(stat_gpus[0][0].strftime('%H:%M'))
+        
+        i,j = 1,1
+        while i < self.xAxispoints:
+            if stat_gpus[j][0].strftime('%Y-%m-%d,%H:%M') == stat_gpus[j-1][0].strftime('%Y-%m-%d,%H:%M'):
+                pass
+            else:
+                dates.append(stat_gpus[j][0].strftime('%H:%M'))
+                i+=1
+            j+=1
 
+        dates.reverse()
+        dates[len(dates)-1] = '<b>Now</b>'
+        
         return dates
 
-    def get_providers(self):
-        """provide data set names"""
-
-        return ["reserved","used", "queued", "free"]
-
     def get_data(self):
-        """provides actual data"""
 
-        stat_gpus = np.asarray(ClusterStat.objects.values_list('used','free','queued','reserved').order_by('id'))
-        used_gpus = list(stat_gpus[-13:,0]) 
-        free_gpus = list(stat_gpus[-13:,1]) 
-        queued_gpus = list(stat_gpus[-13:,2]) 
-        reserved_gpus = list(stat_gpus[-13:,3])
+        stat_gpus = np.asarray(ClusterStat.objects.values_list('date','used','free','queued').order_by('-id'))
+        
+        used_gpus = []
+        free_gpus = []
+        queued_gpus = []
+        used_gpus.append(stat_gpus[0][1])
+        free_gpus.append(stat_gpus[0][2])
+        queued_gpus.append(stat_gpus[0][3])
+        
+        i,j = 1,1
+        while i < self.xAxispoints:
+            if stat_gpus[j][0].strftime('%Y-%m-%d,%H:%M') == stat_gpus[j-1][0].strftime('%Y-%m-%d,%H:%M'):
+                pass
+            else:
+                used_gpus.append(stat_gpus[j][1])
+                free_gpus.append(stat_gpus[j][2])
+                queued_gpus.append(stat_gpus[j][3])
+                i+=1
+            j+=1
+
+        
+        used_gpus.reverse()
+        free_gpus.reverse()
+        queued_gpus.reverse()
 
         return [
-            reserved_gpus,
+            free_gpus,
             used_gpus,
-            queued_gpus,
-            free_gpus
+            queued_gpus
         ]
+
+    def get_colors(self):
+
+        color = [(45, 212, 191),(76, 157, 255),(0, 0, 0)]
+        return next_color(color)
+    
+    def get_x_axis_options(self):
+        return {"categories": self.get_labels(), "title": {"text": "Time (CET)", "margin": 15}, "min": 0.3,"max":self.xAxispoints-1.3,
+        "plotLines": [{
+        "color": "#aeb1b5",
+        "width": "1",
+        "value": "9",
+        "dashStyle": "Dash" 
+        }]
+        }
+
+    def get_markers(self):
+        return [{"symbol": 'circle', "radius":4.5},{"symbol": 'square', "radius":3.9},{"symbol": 'diamond', "radius":5}]
+
+    title = _("")
+    y_axis_title = _("GPUs")  
+
+
+    credits = {
+        "enabled": False,
+        "text": "christian ortiz",
+    }
+
+class BaseForecast():
+    xAxispoints = 8 #choose number of points
+    
+    # setting variables gpu card
+    gputype=[]
+    gputotal=[]
         
-    def get_datasets(self):
-        """return datasets configuration"""
-
-        datasets = super(LineChartJSONView, self).get_datasets()
-
-        for dataset in datasets:
-            if dataset["name"]=="free":
-                dataset["backgroundColor"]="rgba(62, 249, 61, 0.5)"
-                dataset["borderColor"]="rgba(62, 249, 61, 1.0)"
-                dataset["pointBackgroundColor"]="rgba(62, 249, 61, 1.0)"
-                dataset["pointBorderColor"]="rgba(0, 125, 0, 1.0)"
-            elif dataset["name"]=="used":
-                dataset["backgroundColor"]="rgba(106, 38, 189, 0.5)"
-                dataset["borderColor"]="rgba(106, 38, 189, 1.0)"
-                dataset["pointBackgroundColor"]="rgba(106, 38, 189, 1.0)"
-                dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
-            elif dataset["name"]=="queued":
-                dataset["backgroundColor"]="rgba(135, 140, 135, 0.5)"
-                dataset["borderColor"]="rgba(135, 140, 135, 1.0)"
-                dataset["pointBackgroundColor"]="rgba(135, 140, 135, 1.0)"
-                dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
-            elif dataset["name"]=="reserved":
-                dataset["backgroundColor"]="rgba(0, 181, 255, 0.5)"
-                dataset["borderColor"]="rgba(0, 181, 255, 1.0)"
-                dataset["pointBackgroundColor"]="rgba(0, 181, 255, 1.0)"
-                dataset["pointBorderColor"]="rgba(255, 255, 255, 1.0)"
+    for num in range(len(settings.CARME_GPU_NUM.split())):
+        gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
+        gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
         
-        return datasets
+    gputotal = list(map(int, gputotal))
 
-line_chart_json = LineChartJSONView.as_view()
+    gpus=gputype # user sets the gpu_type list
+    numgpus = gputotal # user sets the total quantity of gpus available for each type   
+
+    def get_providers(self):
+        return ["Free", "Used", "Queued" ]
+    
+    def get_colors(self):
+        color = [(45, 212, 191),(76, 157, 255),(0, 0, 0)]
+        return next_color(color)
+    
+    def get_x_axis_options(self):
+        return {"categories": self.get_labels(), "title": {"text": "Time (CET)", "margin": 15}, "min": 0.3,"max":self.xAxispoints-1.3,
+        "plotLines": [{
+        "color": "#aeb1b5",
+        "width": "1",
+        "value": "0.5",
+        "dashStyle": "Dash" 
+        }]        
+        }
+
+    def get_markers(self):
+        return [{"symbol": 'circle', "radius":4.5},{"symbol": 'square', "radius":3.9},{"symbol": 'diamond', "radius":5}]
+    
+    title = _("") # Title shows None if removed
+    y_axis_title = _("GPUs")  
+
+    credits = {
+        "enabled": False, # Credits show highcharts.com if removed
+        "text": "Christian Ortiz",
+    }
+
+    def get_base_data(self):
+       
+        run_sortedfuture=[]
+        queue_sortedfuture=[]
+
+        for k in range(len(self.gpus)):
+
+            run_gpus = np.asarray(SlurmJob.objects.filter(
+                status__exact='running', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',self.gpus[k])])
+            run_gpus[:,2] = run_gpus[:,1].astype(int)*run_gpus[:,2].astype(int)
+            run_gpus = np.delete(run_gpus, 1, 1)  # (slurm_id, num_gpus = num_gpus * num_nodes, gpu_type)  
+            run_time = np.asarray(CarmeJobTable.objects.filter(
+                id_job__in=run_gpus[:,0]).values_list('timelimit','time_start').order_by('id_job') or [(0,0)])
+            run_future = np.c_[run_gpus[:,1],60*run_time[:,0]+run_time[:,1]] # (num_gpus in run, time_end)
+            run_sortedfuture.append(np.array(sorted(run_future.astype(int),key=lambda x: x[1]))) # sorted by time_end 
+                
+            queue_gpus = np.asarray(SlurmJob.objects.filter(
+                status__exact='queued', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',self.gpus[k])])
+            queue_gpus[:,2] = queue_gpus[:,1].astype(int)*queue_gpus[:,2].astype(int)
+            queue_gpus = np.delete(queue_gpus, 1, 1) # (slurm_id, num_gpus = num_spus * num_nodes, gpu_type) 
+            queue_time = np.asarray(CarmeJobTable.objects.filter(
+                id_job__in=queue_gpus[:,0]).values_list('timelimit','time_submit').order_by('id_job') or [(0,0)])
+            queue_future = np.c_[queue_gpus[:,1],queue_time[:,1],queue_time[:,0]] # (num_gpus in queue, time_submit, timelimit)
+            queue_sortedfuture.append(np.array(sorted(queue_future.astype(int),key=lambda x: x[1]))) # sorted by time_submit 
+        
+        # Initial state
+        free_0 = []
+        queue_0 = []
+        used_0 = []
+        for k in range(len(self.gpus)):
+            free_0.append(self.numgpus[k] - sum(run_sortedfuture[k][:,0])) # free gpus
+            queue_0.append(sum(queue_sortedfuture[k][:,0])) # queue gpus
+            used_0.append(self.numgpus[k] - free_0[k]) # used gpus
+
+        forecast = [] 
+        for k in range(len(self.gpus)):
+            if queue_sortedfuture[k][0,1]==0: 
+                forecast.append(np.zeros((len(run_sortedfuture[k]), 6)).astype(int))
+            else:
+                forecast.append(np.zeros((len(run_sortedfuture[k])+len(queue_sortedfuture[k]),6)).astype(int))
+
+        # Calculation starts
+        for k in range(len(self.gpus)):
+
+            # time = 0: when first running job ends 
+            run_sortedfuture[k][0,0] = free_0[k] + run_sortedfuture[k][0,0] # free gpus at t=0
+            
+            # time = 0: processing queued jobs
+            for j in range(len(queue_sortedfuture[k])):
+                if queue_sortedfuture[k][j,1] <= run_sortedfuture[k][0,1]: # time_submit <= time_end  
+                    if queue_sortedfuture[k][j,0] <= run_sortedfuture[k][0,0]: # num_gpus_queued <= num_gpus_running
+                        if queue_sortedfuture[k][j,0] != 0:
+                            run_sortedfuture[k][0,0] = run_sortedfuture[k][0,0] - queue_sortedfuture[k][j,0] # free gpus at t=0
+                            # jth-queued job listed in new_run as a new running job
+                            new_run = np.array([[queue_sortedfuture[k][j,0],60*queue_sortedfuture[k][j,2] + run_sortedfuture[k][0,1]]])  
+                            run_sortedfuture[k] = np.r_[run_sortedfuture[k],new_run]
+                            run_sortedfuture[k] = np.array(sorted(run_sortedfuture[k],key=lambda x: x[1])) # jobs running including new_run
+                            queue_sortedfuture[k][j,0] = 0
+
+            # time = 0: after processing queued jobs
+            forecast[k][0,0] = run_sortedfuture[k][0,0] # free gpus at t=0
+            forecast[k][0,1] = sum(queue_sortedfuture[k][:,0]) # queue gpus at t=0
+            forecast[k][0,2] = self.numgpus[k] - forecast[k][0,0] # used gpus at t=0
+            forecast[k][0,3] = forecast[k][0,0] - free_0[k] # free per time 
+            forecast[k][0,4] = forecast[k][0,1] - queue_0[k] # queue per time 
+            forecast[k][0,5] = forecast[k][0,2] - used_0[k] # used per time 
+
+            # time > 0
+            for i in range(1,len(forecast[k])):
+
+                # time > 0: when next running job ends 
+                run_sortedfuture[k][i,0] = run_sortedfuture[k][i-1,0] + run_sortedfuture[k][i,0] # free gpus at t_i
+
+                # time > 0: processing queued jobs
+                for j in range(len(queue_sortedfuture[k])):
+                    if queue_sortedfuture[k][j,1] <= run_sortedfuture[k][i,1]:
+                        if queue_sortedfuture[k][j,0] <= run_sortedfuture[k][i,0]:
+                            if queue_sortedfuture[k][j,0] != 0:
+                                run_sortedfuture[k][i,0] = run_sortedfuture[k][i,0] - queue_sortedfuture[k][j,0] # free gpus at t_i
+                                # jth-queued job listed in new_run as a new running job
+                                new_run = np.array([[queue_sortedfuture[k][j,0],60*queue_sortedfuture[k][j,2] + run_sortedfuture[k][i,1]]])  
+                                run_sortedfuture[k] = np.r_[run_sortedfuture[k],new_run]
+                                run_sortedfuture[k] = np.array(sorted(run_sortedfuture[k],key=lambda x: x[1])) # jobs running including new_run
+                                queue_sortedfuture[k][j,0] = 0
+
+                # time > 0: after processing queued jobs                
+                forecast[k][i,0] = run_sortedfuture[k][i,0] # free gpus at t_i        
+                forecast[k][i,1] = sum(queue_sortedfuture[k][:,0]) # queue gpus at t_i 
+                forecast[k][i,2] = self.numgpus[k] - forecast[k][i,0] # used gpus at t_i 
+                forecast[k][i,3] = forecast[k][i,0] - forecast[k][i-1,0] # free per time
+                forecast[k][i,4] = forecast[k][i,1] - forecast[k][i-1,1] # queue per time
+                forecast[k][i,5] = forecast[k][i,2] - forecast[k][i-1,2] # used per time
+        
+        ### Compute Single Forecast (chart for each GPU) 
+        forecast_single = [np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))] # add time_end (doubled)
+        forecast_single = [forecast_single[k][:,[0,1,2,6,7]] for k in range(len(self.gpus))] # free / queue / used / time_end / time_end
+        forecast_single = [np.array(sorted(forecast_single[k],key=lambda x: x[3])) for k in range(len(self.gpus)) ] # sort by time_end
+        forecast_single = [forecast_single[k].astype(str) for k in range(len(self.gpus)) ] # convert to string
+        
+        
+        for k in range(len(self.gpus)): # Express time in ECT datetime
+            for count, x in enumerate(forecast_single[k][:,3]): 
+                if (forecast_single[k][count,3]) != '0':
+                    forecast_single[k][count,3]=datetime.fromtimestamp(int(x)).strftime('%H:%M<br/>%b-%d')
+                    forecast_single[k][count,4]=datetime.fromtimestamp(int(x)).strftime('%H:%M,%b-%d-%y')
+                else:
+                    forecast_single[k][count,3]='none'
+                    forecast_single[k][count,4]='none'
+            for i in range(1,len(forecast_single[k])): # Remove duplicate times
+                if forecast_single[k][i,3]==forecast_single[k][i-1,3]:
+                    forecast_single[k][i-1,3]=0
+            forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='0', axis=0)
+
+            if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_single[k][0,3]: # Add now() time with initial state data      
+                forecast_single[k][0,3] = 'Now'
+                forecast_single[k][0,4] = 'Now'
+            else:
+                forecast_single[k] = np.r_[[[free_0[k], queue_0[k], used_0[k], 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]], forecast_single[k]] 
+            forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='none', axis=0) 
+        
+        for k in range(len(self.gpus)):
+            if len(forecast_single[k]) < 8:
+                count = len(forecast_single[k])
+                while count < 8:
+                    if forecast_single[k][-1,3] == 'Now':
+                        last_time_short=datetime.fromtimestamp(int(datetime.strptime(forecast_single[k][-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M<br/>%b-%d')
+                        last_time_long=datetime.fromtimestamp(int(datetime.strptime(forecast_single[k][-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M,%b-%d-%y')
+                        forecast_single[k] = np.r_[forecast_single[k],[[forecast_single[k][-1,0], forecast_single[k][-1,1], forecast_single[k][-1,2], last_time_short, last_time_long]]] 
+                    else:
+                        last_time_short=datetime.fromtimestamp(int(datetime.strptime(forecast_single[k][-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M<br/>%b-%d')
+                        last_time_long=datetime.fromtimestamp(int(datetime.strptime(forecast_single[k][-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M,%b-%d-%y')
+                        forecast_single[k] = np.r_[forecast_single[k],[[forecast_single[k][-1,0], forecast_single[k][-1,1], forecast_single[k][-1,2], last_time_short, last_time_long]]] 
+                    count += 1
+
+
+
+        ### Compute Total Forecast (chart for all GPUs) 
+        forecast_total = np.concatenate([np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))]) # add time_end (doubled)
+        forecast_total = np.array(sorted(forecast_total,key=lambda x: x[6])) # sort by time_end
+        forecast_total = np.delete(forecast_total, forecast_total[:,6] == 0, axis=0) # delete empty rows 
+        if forecast_total.size == 0:
+            forecast_total = np.array([[sum(free_0), sum(queue_0), sum(used_0), 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]])
+        else:
+            forecast_total[0,3] = int(forecast_total[0,3]) + sum(free_0) # total free at t=0
+            forecast_total[0,4] = int(forecast_total[0,4]) + sum(queue_0) # total queue at t=0
+            forecast_total[0,5] = int(forecast_total[0,5]) + sum(used_0) # total used at t=0
+
+            for i in range(1,len(forecast_total)):
+                forecast_total[i,3] = int(forecast_total[i,3]) + int(forecast_total[i-1,3]) # total free at t_i
+                forecast_total[i,4] = int(forecast_total[i,4]) + int(forecast_total[i-1,4]) # total queue at t_i
+                forecast_total[i,5] = int(forecast_total[i,5]) + int(forecast_total[i-1,5]) # total used at t_i
+            forecast_total = forecast_total[:,3:].astype(str)
+
+            for count, x in enumerate(forecast_total[:,3]): # Express time in ECT datetime
+                forecast_total[count,3]=datetime.fromtimestamp(int(x)).strftime('%H:%M<br/>%b-%d')
+                forecast_total[count,4]=datetime.fromtimestamp(int(x)).strftime('%H:%M,%b-%d-%y')
+            for i in range(1,len(forecast_total)): # Remove duplicate times
+                if forecast_total[i,3]==forecast_total[i-1,3]:
+                    forecast_total[i-1,3]=0
+            forecast_total = np.delete(forecast_total, forecast_total[:,3]=='0', axis=0)
+            if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_total[0,3]: # Add now() time with initial state data        
+                forecast_total[0,3] = '<b>Now</b>'
+            else:
+                forecast_total = np.r_[[[sum(free_0), sum(queue_0), sum(used_0), '<b>Now</b>', datetime.now().strftime('%H:%M,%b-%d-%y')]], forecast_total]    
+
+        if len(forecast_total) < 8:
+            count = len(forecast_total)
+            while count < 8:
+                if forecast_total[-1,3] == '<b>Now</b>':
+                    last_time_short=datetime.fromtimestamp(int(datetime.strptime(forecast_total[-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M<br/>%b-%d')
+                    last_time_long=datetime.fromtimestamp(int(datetime.strptime(forecast_total[-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M,%b-%d-%y')
+                    forecast_total = np.r_[forecast_total,[[forecast_total[-1,0], forecast_total[-1,1], forecast_total[-1,2], last_time_short, last_time_long]]] 
+                else:
+                    last_time_short=datetime.fromtimestamp(int(datetime.strptime(forecast_total[-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M<br/>%b-%d')
+                    last_time_long=datetime.fromtimestamp(int(datetime.strptime(forecast_total[-1,4], '%H:%M,%b-%d-%y').timestamp())+3600).strftime('%H:%M,%b-%d-%y')
+                    forecast_total = np.r_[forecast_total,[[forecast_total[-1,0], forecast_total[-1,1], forecast_total[-1,2], last_time_short, last_time_long]]] 
+                count += 1
+
+
+        cast = forecast_single
+        cast.insert(0, forecast_total) # all forecasts
+
+        return cast
+
+class LineChartJSONViewForecast(BaseForecast,HighchartPlotLineChartView):
+
+    def get_labels(self):
+        dates = list(BaseForecast().get_base_data()[self.k][:self.xAxispoints,3]) 
+        return dates
+
+    def get_data(self): 
+        
+        free = list(map(int,BaseForecast().get_base_data()[self.k][:self.xAxispoints,0])) 
+        queued = list(map(int,BaseForecast().get_base_data()[self.k][:self.xAxispoints,1]))
+        used = list(map(int,BaseForecast().get_base_data()[self.k][:self.xAxispoints,2]))  
+        
+        return [free,used,queued]
+
+line_chart_json_time = LineChartJSONViewTime.as_view()
+
+if (len(BaseForecast().gpus)) == 0:
+    print('GPU_TYPE is empty')
+elif (len(BaseForecast().gpus)) == 1:
+    for i in range(len(BaseForecast().gpus)):
+            def init_forecast(self,i=i): # equivalent to def __init__(self,i) in Class
+                self.k = i
+                self.xAxispoints = BaseForecast().xAxispoints
+                super(LineChartJSONViewForecast, self)
+
+            exec("LineChartJSONViewForecast"+str(i)+"=type('LineChartJSONViewForecast"+str(i)+"',(LineChartJSONViewForecast,),{'__init__': init_forecast})")
+            exec('line_chart_json_forecast' + str(i) + ' = ' + 'LineChartJSONViewForecast' + str(i)+ '.as_view()')
+else:
+    for i in range(len(BaseForecast().gpus)+1):
+        def init_forecast(self,i=i): # equivalent to def __init__(self,i) in Class
+            self.k = i
+            self.xAxispoints = BaseForecast().xAxispoints
+            super(LineChartJSONViewForecast, self)
+
+        exec("LineChartJSONViewForecast"+str(i)+"=type('LineChartJSONViewForecast"+str(i)+"',(LineChartJSONViewForecast,),{'__init__': init_forecast})")
+        exec('line_chart_json_forecast' + str(i) + ' = ' + 'LineChartJSONViewForecast' + str(i)+ '.as_view()')
+
+

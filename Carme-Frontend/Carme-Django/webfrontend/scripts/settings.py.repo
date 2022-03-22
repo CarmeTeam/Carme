@@ -25,6 +25,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SourceFileLoader('CarmeConfigFrontend', '/etc/carme/CarmeConfig.frontend').load_module()
 from CarmeConfigFrontend import *
 
+CSRF_TRUSTED_ORIGINS=['https://'+CARME_URL,'https://*.127.0.0.1']
+
 LOAD_CUSTOM_SETTINGS=os.path.isfile(BASE_DIR+'/scripts/custom.py')
 
 if LOAD_CUSTOM_SETTINGS:
@@ -58,7 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize.apps.HumanizeConfig',
     'django_nyt.apps.DjangoNytConfig',
     'django_db_logger',
-    'chartjs',
     'mptt',
     'todo',
     'sekizai',
@@ -68,6 +69,12 @@ INSTALLED_APPS = [
     'wiki.plugins.notifications.apps.NotificationsConfig',
     'wiki.plugins.images.apps.ImagesConfig',
     'wiki.plugins.macros.apps.MacrosConfig',
+				'django_otp', 
+    'django_otp.plugins.otp_static', 
+    'django_otp.plugins.otp_totp',   
+    'two_factor',		
+				'otp_yubikey',
+				'mathfilters', 
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,6 +90,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'maintenance_mode.middleware.MaintenanceModeMiddleware',
+				'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -234,7 +243,8 @@ LOGGING = {
 #       This has to be done as django is at this point in thime not able to be so generic to work with every possible LDAP setup.
 
 
-LOGIN_URL = reverse_lazy('login')
+#LOGIN_URL = reverse_lazy('login')
+LOGIN_URL = 'two_factor:login'
 
 
 # set ldap server uri

@@ -46,10 +46,15 @@ CARME_HARDWARE_NUM_GPUS=
 CARME_GPU_TYPE=""
 # comma separated list of GPU types. Names have to be the same as defined in SLURM!
 
+CARME_GPU_NUM=""
+# comma separated list of GPU types, amount per node and the total number of GPUs for this type
+# NOTE: names have to be the same as defined in SLURM!
+# e.g. a100:4:50 titan:4:100
+
 CARME_GPU_DEFAULTS=""
 # defines the by default allocated CPUs and MEM (in GB) according the GPU types
 # it has to have the following form and be written in quotes:
-# default:CPUs:MEM volta:CPUs:MEM titan:CPUs:MEM
+# e.g. a100:CPUs:MEM titan:CPUs:MEM
 
 CARME_DISTRIBUTED_FS=""
 # define if there is a global distributed FS that can be used or not

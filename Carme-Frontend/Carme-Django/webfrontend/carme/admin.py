@@ -16,11 +16,15 @@ from .models import Image
 from .models import CarmeMessage
 from .models import ClusterStat
 from .models import GroupResource
-from django.conf import settings
+#from django.conf import settings
 
-admin.site.site_header = settings.CARME_ADMIN_HEADER
-admin.site.site_title = settings.CARME_ADMIN_SITE_NAME
-admin.site.index_title = settings.CARME_ADMIN_SITE_INDEX
+admin.autodiscover()
+admin.site.enable_nav_sidebar = True
+
+admin.site.site_header = 'EXAMPLETHISISNOTREAL'
+#admin.site.site_header = settings.CARME_ADMIN_HEADER
+#admin.site.site_title = settings.CARME_ADMIN_SITE_NAME
+#admin.site.index_title = settings.CARME_ADMIN_SITE_INDEX
 
 """ admin view for image db
 
