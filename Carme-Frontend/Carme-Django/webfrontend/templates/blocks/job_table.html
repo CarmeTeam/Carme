@@ -148,7 +148,7 @@
                           <td class="align-middle">{{ job.image_name }}</td>
                           <td class="align-middle">{{ slurm.nodelist }}</td>
                           <td class="align-middle"><span class="i-node">{{ slurm.nodes_alloc}}</span></td>
-                          <td class="align-middle"><span class="i-cpu">{{ slurm.cpus_req }}</span></td>
+                          <td class="align-middle"><span class="i-cpu">{{ slurm.cpus_req | intdiv:slurm.nodes_alloc }}</span></td>
                           <td class="align-middle"><span class="i-gpu">{{job.num_gpus}}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
                         </tr>
                       </tbody>

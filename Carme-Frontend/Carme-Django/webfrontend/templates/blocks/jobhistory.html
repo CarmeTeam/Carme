@@ -31,7 +31,15 @@
 					<td class="align-middle">{{ job.job_name }}</td>
 					<td class="align-middle">{{ job.partition }}</td>
 					<td class="align-middle"><p class="mb-0">{{ job.time_submit | print_timestamp }}</p><p class="mb-0">{{ job.time_end | print_timestamp }}</p></td>
-					<td class="align-middle">{{ job.exit_code }}</td>
+					<td class="align-middle">
+						{% if job.exit_code == 0 %}
+						<i class="fa fa-check fa-fw text-success"></i>
+						<span class="sr-only">normal</span>
+						{% else %}
+						<i class="fa fa-times fa-fw text-danger"></i>
+						<span class="sr-only">abnormal</span>
+						{% endif %}
+					</td>
 					<td class="align-middle">{{ job.mem_req }}</td>
 					<td class="align-middle">{{ slurm.image_name }}</td>
 					<td class="align-middle">{{ job.nodelist }}</td>

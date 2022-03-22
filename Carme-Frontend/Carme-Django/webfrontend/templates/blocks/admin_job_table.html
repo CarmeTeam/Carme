@@ -14,6 +14,7 @@
 {% endcomment %}
 
 {% load static %}
+{% load mathfilters %}
 
 {% for cpu, job in slurm_list %}
 <tr data-jobid="{{ job.slurm_id }}">
@@ -23,7 +24,7 @@
 	<td class="align-middle">{{ job.image_name }}</td>
 	<td class="align-middle">{{ job.ip }}</td>
 	<td class="align-middle"><span class="i-node">{{ job.num_nodes}}</span></td>
- <td class="align-middle"><span class="i-cpu">{{ cpu.cpus_req }}</span></td>
+ <td class="align-middle"><span class="i-cpu">{{ cpu.cpus_req |intdiv:job.num_nodes }}</span></td>
 	<td class="align-middle"><span class="i-gpu">{{ job.num_gpus }}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
 	<td class="align-middle">
 		{% if job.status == 'running' %}

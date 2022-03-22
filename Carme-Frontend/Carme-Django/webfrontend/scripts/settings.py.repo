@@ -25,6 +25,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SourceFileLoader('CarmeConfigFrontend', '/etc/carme/CarmeConfig.frontend').load_module()
 from CarmeConfigFrontend import *
 
+CSRF_TRUSTED_ORIGINS=['https://'+CARME_URL,'https://*.127.0.0.1']
+
 LOAD_CUSTOM_SETTINGS=os.path.isfile(BASE_DIR+'/scripts/custom.py')
 
 if LOAD_CUSTOM_SETTINGS:
@@ -67,11 +69,12 @@ INSTALLED_APPS = [
     'wiki.plugins.notifications.apps.NotificationsConfig',
     'wiki.plugins.images.apps.ImagesConfig',
     'wiki.plugins.macros.apps.MacrosConfig',
-				'django_otp',
-    'django_otp.plugins.otp_static',
-    'django_otp.plugins.otp_totp',
-    'two_factor',
+				'django_otp', 
+    'django_otp.plugins.otp_static', 
+    'django_otp.plugins.otp_totp',   
+    'two_factor',		
 				'otp_yubikey',
+				'mathfilters', 
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
 
