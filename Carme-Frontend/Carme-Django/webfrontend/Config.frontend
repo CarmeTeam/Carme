@@ -1,6 +1,0 @@
-#Carme Frontend Config
-#
-# WARNING: This file is generated automatically. Do not edit manually!
-#---------------------------------------------------------------------------
-CARME_GPU_TYPE_LIST=["titan"]
-CARME_HARDWARE_NUM_GPUS_LIST=[8]
