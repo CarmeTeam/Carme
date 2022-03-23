@@ -661,7 +661,7 @@ else
        status_backend
        shift
      ;;
-     --build-frontend)
+     --build-frontend-image)
        build_frontend_image
        shift
      ;;
