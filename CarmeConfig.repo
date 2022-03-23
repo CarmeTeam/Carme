@@ -6,8 +6,8 @@
 
 
 # version --------------------------------------------------------------------------------------------------------------------------
-CARME_VERSION="r1.0.0"
-#stable release: r1.0.0
+CARME_VERSION="r0.9.5"
+#stable release: r0.9.5
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -38,13 +38,6 @@ CARME_LOGINNODE_NAME=""
 
 CARME_NODES_LIST=""
 #e.g. node01 node02 node03 ... [this contains ALL compute AND build nodes]
-
-CARME_HARDWARE_NUM_GPUS=
-#e.g. 100 [this is the total number of GPUs in the Cluster]
-#has to be an integer number! (note: do not use double quotes)
-
-CARME_GPU_TYPE=""
-# comma separated list of GPU types. Names have to be the same as defined in SLURM!
 
 CARME_GPU_NUM=""
 # comma separated list of GPU types, amount per node and the total number of GPUs for this type
