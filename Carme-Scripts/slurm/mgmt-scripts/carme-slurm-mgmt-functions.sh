@@ -45,13 +45,9 @@ function read_and_check_slurm_limitations () {
   local helper_array
   local value
   local ACCOUNT
-  local CARME_SLURM_ACCOUNT
-  local SLURM_ADMIN_LEVEL
   local SLURM_PARTITIONS_AVAIL
-  local SLURM_PARTITION_LIST
   local PARTITION_LIST_HELPER
   local SLURM_PARTITION
-  local SLURM_ADDITIONAL_LIMITS
 
   # list avialbale groups of the user(s) --------------------------------------------------------
   echo "available groups for user '${1}'"
