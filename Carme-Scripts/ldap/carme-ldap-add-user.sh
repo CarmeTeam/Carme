@@ -89,7 +89,6 @@ if [[ "$RESP" = "y" ]];then
 
   # get date and check if default-passwd-folder exists -----------------------------------------------------------------------------
   LDAP_DATE="$(date +%Y-%m-%d)"
-  LDAP_FILENAME="${LDAP_DATE}--${LDAPUSER}.txt"
 
   [[ -z ${CARME_LDAP_DEFAULTPASSWD_FOLDER} ]] && die "CARME_LDAP_DEFAULTPASSWD_FOLDER not set"
   if [[ ! -d "${CARME_LDAP_DEFAULTPASSWD_FOLDER}" ]];then
@@ -213,6 +212,7 @@ ldappasswd -D "${CARME_LDAP_BIND_DN}" "uid=${LDAPUSER},${LDAP_GROUP_BASE[${LDAP_
 
 
     # pipe new user data to file ---------------------------------------------------------------------------------------------------
+    LDAP_FILENAME="${LDAP_DATE}--${LDAPUSER}.txt"
     echo "user: ${LDAPUSER}
 userid: ${NEXTUID}
 default password: ${LDAP_PASSWD}
