@@ -11,6 +11,11 @@
 # Contact: info@open-carme.org
 # ---------------------------------------------
 
+
+#--------------------------------#
+#----- Modules and packages -----#
+#--------------------------------#
+
 import numpy as np
 from django.http import HttpResponse
 from django.template import loader
@@ -66,6 +71,39 @@ if not os.path.isfile(check_password_file):
 SourceFileLoader('check_password', check_password_file).load_module()
 from check_password import check_password, password_criteria
 
+# 2FA 
+from django.shortcuts import redirect, resolve_url
+from django.urls import reverse
+from base64 import b32encode
+from binascii import unhexlify
+from two_factor.views.core import SetupView
+from django_otp.decorators import otp_required
+
+#-------------------------------#
+#----- classes and methods -----#
+#-------------------------------#
+
+# 2FA
+class QRSetup(SetupView):
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        if self.steps.current == 'generator':
+            key = self.get_key('generator')
+            rawkey = unhexlify(key.encode('ascii'))
+            b32key = b32encode(rawkey).decode('utf-8')
+            self.request.session[self.session_key_name] = b32key
+            context.update({
+                'QR_URL': reverse(self.qrcode_url),
+                'secret_key': b32key,
+            })
+        elif self.steps.current == 'validation':
+            context['device'] = self.get_device()
+        context['cancel_url'] = resolve_url(settings.LOGIN_REDIRECT_URL)
+        return context
+
+QRSetup = QRSetup.as_view()
+
+
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
 
@@ -107,127 +145,131 @@ def generateChoices(request):
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
 
-@login_required(login_url='/login') 
+@login_required(login_url='/account/login') 
 def index(request):
     """ dashboard page -> generates user job-list, messages and other interactive features"""
-
-    # logout
-    request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
-
-    # ldap
-    group = list(request.user.ldap_user.group_names)[0]
-    uID = request.user.ldap_user.attrs['uidNumber'][0]
+    if request.user.is_verified():
     
-    # jobs history (uses ldap uID)
-    myjobhist = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
-    
-    myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
-    
-    cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
-    myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
-        sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
-    
-    mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
-    mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
+        # logout
+        request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
-    # compute total GPU hours in jobs history  (uses ldap uID)
-    job_time_end = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
-    job_time_start = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
-    job_time = 0
-    if (job_time_start and job_time_end):
-        job_time = round((job_time_end-job_time_start)/3600)
+        # ldap
+        group = list(request.user.ldap_user.group_names)[0]
+        uID = request.user.ldap_user.attrs['uidNumber'][0]
+    
+        # jobs history (uses ldap uID)
+        myjobhist = CarmeJobTable.objects.filter(
+            state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
+    
+        myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
+    
+        cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
+        myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
+            sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
+    
+        mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
+        mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
 
-    # create start job form
-    nodeC, gpuC, imageC, gpuT = generateChoices(request)
-    startForm = StartJobForm(image_choices=imageC,
-                             node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
+        # compute total GPU hours in jobs history  (uses ldap uID)
+        job_time_end = CarmeJobTable.objects.filter(
+            state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
+        job_time_start = CarmeJobTable.objects.filter(
+            state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
+        job_time = 0
+        if (job_time_start and job_time_end):
+            job_time = round((job_time_end-job_time_start)/3600)
 
-    # jobs table
-    slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
-    myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
-    cases_active = [When(id_job=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_active_list)]
-    jobtable_active = CarmeJobTable.objects.filter(id_job__in=myslurmid_active_list).annotate(
+        # create start job form
+        nodeC, gpuC, imageC, gpuT = generateChoices(request)
+        startForm = StartJobForm(image_choices=imageC,
+                                 node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
+
+        # jobs table
+        slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
+        myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
+        cases_active = [When(id_job=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_active_list)]
+        jobtable_active = CarmeJobTable.objects.filter(id_job__in=myslurmid_active_list).annotate(
         sort_order=Case(*cases_active, output_field=IntegerField())).order_by('sort_order')
-    myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) )
-    myjobtable_script = zip ( list(slurm_list_user), list(jobtable_active) )
+        myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) )
+        myjobtable_script = zip ( list(slurm_list_user), list(jobtable_active) )
 
-    # notifications
-    message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
+        # notifications
+        message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
     
-    # setting variables gpu card
-    gputype=[]
-    cpupergpu=[]
-    rampergpu=[]
-    gpupernode=[]
-    gputotal=[]
-    for num in range(len(settings.CARME_GPU_DEFAULTS.split())):
-        gputype.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[0])
-        cpupergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[1])
-        rampergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[2])
+        # setting variables gpu card
+        gputype=[]
+        cpupergpu=[]
+        rampergpu=[]
+        gpupernode=[]
+        gputotal=[]
+        for num in range(len(settings.CARME_GPU_DEFAULTS.split())):
+            gputype.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[0])
+            cpupergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[1])
+            rampergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[2])
         
-    for num in range(len(settings.CARME_GPU_NUM.split())):
-        gpupernode.append(settings.CARME_GPU_NUM.split()[num].split(":")[1])
-        gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
+        for num in range(len(settings.CARME_GPU_NUM.split())):
+            gpupernode.append(settings.CARME_GPU_NUM.split()[num].split(":")[1])
+            gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
         
-    cpupergpu = list(map(int, cpupergpu))
-    rampergpu = list(map(int, rampergpu))
-    gpupernode = list(map(int, gpupernode))
-    gputotal = list(map(int, gputotal))
-    gpusum = sum(gputotal)
+        cpupergpu = list(map(int, cpupergpu))
+        rampergpu = list(map(int, rampergpu))
+        gpupernode = list(map(int, gpupernode))
+        gputotal = list(map(int, gputotal))
+        gpusum = sum(gputotal)
     
-    # loop gpu type chart
-    gpu_loop = range(len(gputype)+1)
+        # loop gpu type chart
+        gpu_loop = range(len(gputype)+1)
     
-    # calculate actual stats
-    slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
-    stats = {
-        "used": 0,
-        "queued": 0,
-        "reserved": 0,
-        "free": 0
-    }
+        # calculate actual stats
+        slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
+        stats = {
+            "used": 0,
+            "queued": 0,
+            "reserved": 0,
+            "free": 0
+        }
     
-    for j in slurm_list:
-        if j.status == "running":
-            stats["used"] += j.num_gpus * j.num_nodes
-        elif j.status == "queued":
-            stats["queued"] += j.num_gpus * j.num_nodes 
+        for j in slurm_list:
+            if j.status == "running":
+                stats["used"] += j.num_gpus * j.num_nodes
+            elif j.status == "queued":
+                stats["queued"] += j.num_gpus * j.num_nodes 
 
-    stats["free"] = gpusum - (stats["used"] + stats["reserved"])
+        stats["free"] = gpusum - (stats["used"] + stats["reserved"])
 
-    # check if stats have to be updated
-    try:
-        lastStat = ClusterStat.objects.latest('id')
-    except:
-        lastStat = None
+        # check if stats have to be updated
+        try:
+            lastStat = ClusterStat.objects.latest('id')
+        except:
+            lastStat = None
     
-    if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
-        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
+        if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
+            ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
 
-    # render template
-    context = {
-        'myjobtable_list': myjobtable_list,
-        'myjobtable_script': myjobtable_script,
-        'message_list': message_list,
-        'start_job_form': startForm,
-        'CARME_VERSION': settings.CARME_VERSION,
-        'DEBUG': settings.DEBUG,
-        'mylist_short': mylist_short,
-        'mylist_long': mylist_long,
-        'job_time' : job_time,
-        'gpu_loop' : gpu_loop,
-        'gputype': gputype, #gpucard
-        'cpupergpu': cpupergpu, #gpucard
-        'rampergpu': rampergpu, #gpucard
-        'gpupernode':gpupernode, #gpucard
-        'gputotal':gputotal, #gpucard
-        'gpusum': gpusum, #gpucard
-    }
+        # render template
+        context = {
+            'myjobtable_list': myjobtable_list,
+            'myjobtable_script': myjobtable_script,
+            'message_list': message_list,
+            'start_job_form': startForm,
+            'CARME_VERSION': settings.CARME_VERSION,
+            'DEBUG': settings.DEBUG,
+            'mylist_short': mylist_short,
+            'mylist_long': mylist_long,
+            'job_time' : job_time,
+            'gpu_loop' : gpu_loop,
+            'gputype': gputype, #gpucard
+            'cpupergpu': cpupergpu, #gpucard
+            'rampergpu': rampergpu, #gpucard
+            'gpupernode':gpupernode, #gpucard
+            'gputotal':gputotal, #gpucard
+            'gpusum': gpusum, #gpucard
+        }
 
-    return render(request, 'home.html', context)
+        return render(request, 'home.html', context)
+
+    else:
+        return redirect("two_factor:setup")
 
 
 @login_required(login_url='/login')
