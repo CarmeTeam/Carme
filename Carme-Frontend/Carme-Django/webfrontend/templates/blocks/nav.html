@@ -8,11 +8,12 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!--<left links> -->
+    <!-- <brand> -->
     <a class="navbar-brand mr-auto pb-2 px-2 d-md-none" href="/">Carme</a>
     <a class="navbar-brand mr-auto pb-2 px-2 d-none d-md-block" href="/">Carme |</a>
+				<!-- </brand> -->
 
-    <!--<right icons small screen> -->
+    <!--<right icons in small screen> -->
     <div class="d-md-none">
       <ul class="navbar-nav navbar-expand ms-auto flex-row align-items-center">
         {% if user.is_superuser %}
@@ -100,8 +101,7 @@
               	{{ user.username }}
               </dd>
               <dt class="col-12"><i class="fa fa-users" aria-hidden="true"></i>&nbsp; Group</dt>
-              {% comment %} <dd class="col-12">&nbsp; &nbsp; &nbsp; {% for g in user.ldap_user.group_names %}{{g}} {%endfor%}</dd> {% endcomment %}
-              <dd class="col-12">&nbsp; &nbsp; &nbsp; ITWM user</dd>
+              <dd class="col-12">&nbsp; &nbsp; &nbsp; {% for g in user.ldap_user.group_names %}{{g}} {%endfor%}</dd>
 
               <dt class="col-12"><i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp; Session timeout</dt>
               <dd class="col-12">&nbsp; &nbsp; &nbsp;{{request.session.get_expiry_date}}</dd>
@@ -114,7 +114,9 @@
         </li>
       </ul>
     </div>
+				<!-- </right icons in small screen> -->
 
+				<!-- <left links> -->
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item{% if '/' == request.path %} active{% endif %}">
@@ -137,7 +139,7 @@
     </div>
     <!--</left links> -->
 
-    <!--<right icons large screen> -->
+    <!--<right icons in large screen> -->
     <div class="d-none d-md-block">
       <ul class="navbar-nav navbar-expand ms-auto flex-row align-items-center">
         {% if user.is_superuser %}
@@ -221,9 +223,7 @@
             <div class="dropdown-divider"></div>
             <dl class="row no-gutters mb-0 px-4 py-1" style="width: 220px">
               <dt class="col-12"><i class="fa fa-users" aria-hidden="true"></i>&nbsp; Group</dt>
-              {% comment %} <dd class="col-12">&nbsp; &nbsp; &nbsp; {% for g in user.ldap_user.group_names %}{{g}} {%endfor%}</dd> {% endcomment %}
-              <dd class="col-12">&nbsp; &nbsp; &nbsp; ITWM user</dd>
-
+              <dd class="col-12">&nbsp; &nbsp; &nbsp; {% for g in user.ldap_user.group_names %}{{g}} {%endfor%}</dd>
               <dt class="col-12"><i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp; Session timeout</dt>
               <dd class="col-12">&nbsp; &nbsp; &nbsp;{{request.session.get_expiry_date}}</dd>
             </dl>
@@ -235,6 +235,7 @@
         </li>
       </ul>
     </div>
+				<!--</right icons in large screen> -->
     
   </div>  
 </nav>
