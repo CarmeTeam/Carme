@@ -189,6 +189,9 @@ CARME_SLURM_BackupController=""
 
 CARME_SLURM_ClusterName=""
 #e.g. cluster
+
+CARME_SLURM_DB_PORT=""
+#e.g. mysql-default-port
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
