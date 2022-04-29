@@ -272,7 +272,7 @@ def index(request):
         return redirect("two_factor:setup")
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def admin_all_jobs(request):
     """renders the admin job table"""
 
@@ -349,7 +349,7 @@ def job_table(request):
     
     return render(request, 'blocks/job_table.html', context)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def start_job(request):
     """starts a new job (handing request to backend)"""
 
@@ -412,7 +412,7 @@ def start_job(request):
 
     return render(request, 'jobs.html', context)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def job_hist(request):
     """renders the job history page"""
    
@@ -453,7 +453,7 @@ def job_hist(request):
 
     return render(request, 'job_hist.html', context)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def job_info(request):
     """ renders the job info page"""
 
@@ -525,47 +525,47 @@ def job_info(request):
     # render template
     return render(request, 'job_info.html', context)
 
-@force_maintenance_mode_off
-def custom_login(request):
-    if request.user.is_authenticated:
-        return redirect('/')
-    else:
-        return login(request)
+#@force_maintenance_mode_off
+#def custom_login(request):
+#    if request.user.is_authenticated:
+#        return redirect('/')
+#    else:
+#        return login(request)
 
-
-@force_maintenance_mode_off
-def login(request):
-    """custom login"""
-
-    return LoginView.as_view(template_name='login.html')(request)
 
 #@force_maintenance_mode_off
-#def login_page(request):
-#    login_data = LoginForm()
-#    return render(request, 'login.html', {'login_data':login_data})
+#def login(request):
+#    """custom login"""
+#
+#    return LoginView.as_view(template_name='login.html')(request)
 
-#@force_maintenance_mode_off
-#def login_validate(request):
-#    login_data = LoginForm(request.POST)
-#
-#    if login_data.is_valid():
-#        user = authenticate(username=request.POST['username'], password=request.POST['password'])
-#        if user is not None:
-#           # if user.is_active:
-#            login(request, user)
-#            return redirect('/')
-#            #return LoginView.as_view(template_name='login.html')(request)
-#
-#        error_message= 'Incorrect password / username. Try again.'
-#        return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
-#    error_message= 'Internal error. Please contact the admin.'
-#    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
+##@force_maintenance_mode_off
+##def login_page(request):
+##    login_data = LoginForm()
+##    return render(request, 'login.html', {'login_data':login_data})
+
+##@force_maintenance_mode_off
+##def login_validate(request):
+##    login_data = LoginForm(request.POST)
+##
+##    if login_data.is_valid():
+##        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+##        if user is not None:
+##           # if user.is_active:
+##            login(request, user)
+##            return redirect('/')
+##            #return LoginView.as_view(template_name='login.html')(request)
+##
+##        error_message= 'Incorrect password / username. Try again.'
+##        return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
+##    error_message= 'Internal error. Please contact the admin.'
+##    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
 
 @force_maintenance_mode_off
 def logout(request):
     """custom logout"""
 
-    path = '/login/'
+    path = '/account/login/'
 
     if request.user.is_authenticated:
         auth_logout(request)
@@ -573,7 +573,7 @@ def logout(request):
     
     return HttpResponseRedirect(path)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def stop_job(request):
     """stopping a job (handing request to backend)"""
 
@@ -603,7 +603,7 @@ def stop_job(request):
 
     return HttpResponse('')  # HttpResponseRedirect('/')
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def change_password(request):
     """change password site (request handled by backend"""
 
