@@ -1,0 +1,18 @@
+{%load wizardtags %}
+{{ wizard.management_form }}
+
+{% if wizard.steps.current == 'method' %}
+  {% for field in wizard.form %}
+    <div class="form-check mb-2">
+    	{{ field | add_classes:'form-check-input' }}
+    	<label class="form-check-label" for="{{ field.label }}"></label>
+    </div>
+  {% endfor %}
+{% else %}
+  {% for field in wizard.form %}
+    <div class="form-group">
+     {{ field | add_classes:'form-control' }}
+     <label for="{{ field.label }}">{{ field.label }}</label>
+    </div>
+  {% endfor %}
+{% endif %}

@@ -1,0 +1,32 @@
+{% extends "two_factor/_base.html" %}
+{% load i18n %}
+
+{% block subcontent %}
+<div class="row mt-2 mb-4">
+		<div class="col-12">
+	  	<div class="card-deck">
+		  		<div class="card">
+		    		<div class="card-header bg-light style-title">
+										<i class="fa fa-shield" aria-hidden="true"></i>&nbsp; {% block title %}{% trans "Disable Two-factor Authentication" %}{% endblock %}
+								</div>
+		      <div class="card-body">
+
+  							<p>
+											{% blocktrans trimmed %}
+													You are about to disable two-factor authentication (2FA). Once done,
+    									You will be requested to set a new 2FA method. Are you sure?
+											{% endblocktrans %}
+									</p>
+
+  							<form method="post">
+    							{% csrf_token %}
+    							<table>{{ form }}</table>
+    							<button class="btn btn-danger" type="submit">{% trans "Disable" %}</button>
+  							</form>
+
+								</div>
+						</div>
+				</div>
+		</div>
+</div>	
+{% endblock %}

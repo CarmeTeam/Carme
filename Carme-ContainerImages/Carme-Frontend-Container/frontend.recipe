@@ -60,7 +60,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
     # install python dependencies --------------------------------------------------------------------------------------------------
     pip3 install mysqlclient numpy rpyc whitenoise wiki
     pip3 install Django
-    pip3 install django-auth-ldap django-bootstrap-themes django-mathfilters django-two-factor-auth phonenumbers django-otp-yubikey django-classy-tags django-db-logger django-filter
+    pip3 install django-auth-ldap django-bootstrap-themes django-mathfilters django-two-factor-auth phonenumbers django-classy-tags django-db-logger django-filter
     pip3 install django-js-asset django-logtailer django-maintenance-mode django-material django-mptt django-nyt django-sekizai
     pip3 install django-settings-export django-viewflow django-todo
     #-------------------------------------------------------------------------------------------------------------------------------

@@ -2,6 +2,13 @@
 /*--- Login page ---*/
 /*------------------*/
 
+/*--- img logo  ---*/
+.img-logo{
+  width: 96px; 
+  height: 96px; 
+  margin-bottom: 1.5rem; 
+}
+
 /*--- centered box ---*/
 .flex-center-carme {
   -webkit-box-align: center;
@@ -25,7 +32,37 @@
 		margin: auto; 
 }
 
+/*--- qr code ---*/
+.qr-box {
+  --b:5px;   /* thickness of the border */
+  --c:red;   /* color of the border */
+  --w:20px;  /* width of the border */
+
+  border:var(--b) solid transparent; /* space for the border */
+  --g:#0000 90deg,var(--c) 0;
+  background:
+    conic-gradient(from 90deg  at top    var(--b) left  var(--b),var(--g)) 0    0,
+    conic-gradient(from 180deg at top    var(--b) right var(--b),var(--g)) 100% 0,
+    conic-gradient(from 0deg   at bottom var(--b) left  var(--b),var(--g)) 0    100%,
+    conic-gradient(from -90deg at bottom var(--b) right var(--b),var(--g)) 100% 100%;
+  background-size:var(--w) var(--w);
+  background-origin:border-box;
+  background-repeat:no-repeat;
+  
+  margin:5px;
+  display: inline-flex;
+  justify-content: center;
+  align-items:center;
+  box-sizing:border-box;
+}
+
+
 /*--- form ---*/
+.form-check-input{
+  position: relative;
+  margin-left: 0rem!important;
+}
+
 .form-label-group {
   position: relative;
   margin-bottom: 1rem;

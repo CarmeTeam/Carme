@@ -11,6 +11,11 @@
 # Contact: info@open-carme.org
 # ---------------------------------------------
 
+
+#--------------------------------#
+#----- Modules and packages -----#
+#--------------------------------#
+
 import numpy as np
 from django.http import HttpResponse
 from django.template import loader
@@ -66,6 +71,82 @@ if not os.path.isfile(check_password_file):
 SourceFileLoader('check_password', check_password_file).load_module()
 from check_password import check_password, password_criteria
 
+# 2FA 
+from django.shortcuts import redirect, resolve_url
+from django.urls import reverse
+from base64 import b32encode
+from binascii import unhexlify
+from two_factor.views.core import SetupView
+from django_otp.decorators import otp_required
+
+# 2FA-Admin
+from two_factor.admin import AdminSiteOTPRequired
+from two_factor.admin import AdminSiteOTPRequiredMixin
+from django.contrib.admin import AdminSite
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth.views import redirect_to_login
+from django.shortcuts import resolve_url
+from two_factor.utils import monkeypatch_method
+
+try:
+    from django.utils.http import url_has_allowed_host_and_scheme
+except ImportError:
+    from django.utils.http import (
+        is_safe_url as url_has_allowed_host_and_scheme,
+    )
+#-------------------------------#
+#----- classes and methods -----#
+#-------------------------------#
+
+# 2FA
+class QRSetup(SetupView):
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        if self.steps.current == 'generator':
+            key = self.get_key('generator')
+            rawkey = unhexlify(key.encode('ascii'))
+            b32key = b32encode(rawkey).decode('utf-8')
+            self.request.session[self.session_key_name] = b32key
+            context.update({
+                'QR_URL': reverse(self.qrcode_url),
+                'secret_key': b32key,
+            })
+        elif self.steps.current == 'validation':
+            context['device'] = self.get_device()
+        context['cancel_url'] = resolve_url(settings.LOGIN_REDIRECT_URL)
+        return context
+
+QRSetup = QRSetup.as_view()
+
+# 2FA Admin
+class AdminSiteOTPRequiredMixinRedirSetup(AdminSiteOTPRequired):
+    def login(self, request, extra_context=None):
+        redirect_to = request.POST.get(
+            REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME)
+        )
+        # For users not yet verified the AdminSiteOTPRequired.has_permission
+        # will fail. So use the standard admin has_permission check:
+        # (is_active and is_staff) and then check for verification.
+        # Go to index if they pass, otherwise make them setup OTP device.
+        if request.method == "GET" and super(
+            AdminSiteOTPRequiredMixin, self
+        ).has_permission(request):
+            # Already logged-in and verified by OTP
+            if request.user.is_verified():
+                # User has permission
+                index_path = reverse("admin:index", current_app=self.name)
+            else:
+                # User has permission but no OTP set:
+                index_path = reverse("two_factor:setup", current_app=self.name)
+            return HttpResponseRedirect(index_path)
+
+        if not redirect_to or not url_has_allowed_host_and_scheme(
+            url=redirect_to, allowed_hosts=[request.get_host()]
+        ):
+            redirect_to = resolve_url(settings.LOGIN_REDIRECT_URL)
+
+        return redirect_to_login(redirect_to)
+
 def ldap_username(request):
     return request.user.ldap_user.attrs['uid'][0]
 
@@ -107,130 +188,134 @@ def generateChoices(request):
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
 
 
-@login_required(login_url='/login') 
+@login_required(login_url='/account/login') 
 def index(request):
     """ dashboard page -> generates user job-list, messages and other interactive features"""
-
-    # logout
-    request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
-
-    # ldap
-    group = list(request.user.ldap_user.group_names)[0]
-    uID = request.user.ldap_user.attrs['uidNumber'][0]
+    if request.user.is_verified():
     
-    # jobs history (uses ldap uID)
-    myjobhist = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
-    
-    myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
-    
-    cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
-    myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
-        sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
-    
-    mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
-    mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
+        # logout
+        request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
-    # compute total GPU hours in jobs history  (uses ldap uID)
-    job_time_end = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
-    job_time_start = CarmeJobTable.objects.filter(
-        state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
-    job_time = 0
-    if (job_time_start and job_time_end):
-        job_time = round((job_time_end-job_time_start)/3600)
+        # ldap
+        group = list(request.user.ldap_user.group_names)[0]
+        uID = request.user.ldap_user.attrs['uidNumber'][0]
+    
+        # jobs history (uses ldap uID)
+        myjobhist = CarmeJobTable.objects.filter(
+            state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
+    
+        myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
+    
+        cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
+        myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
+            sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
+    
+        mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
+        mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
 
-    # create start job form
-    nodeC, gpuC, imageC, gpuT = generateChoices(request)
-    startForm = StartJobForm(image_choices=imageC,
-                             node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
+        # compute total GPU hours in jobs history  (uses ldap uID)
+        job_time_end = CarmeJobTable.objects.filter(
+            state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
+        job_time_start = CarmeJobTable.objects.filter(
+            state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
+        job_time = 0
+        if (job_time_start and job_time_end):
+            job_time = round((job_time_end-job_time_start)/3600)
 
-    # jobs table
-    slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
-    myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
-    cases_active = [When(id_job=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_active_list)]
-    jobtable_active = CarmeJobTable.objects.filter(id_job__in=myslurmid_active_list).annotate(
+        # create start job form
+        nodeC, gpuC, imageC, gpuT = generateChoices(request)
+        startForm = StartJobForm(image_choices=imageC,
+                                 node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
+
+        # jobs table
+        slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
+        myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
+        cases_active = [When(id_job=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_active_list)]
+        jobtable_active = CarmeJobTable.objects.filter(id_job__in=myslurmid_active_list).annotate(
         sort_order=Case(*cases_active, output_field=IntegerField())).order_by('sort_order')
-    myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) )
-    myjobtable_script = zip ( list(slurm_list_user), list(jobtable_active) )
+        myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) )
+        myjobtable_script = zip ( list(slurm_list_user), list(jobtable_active) )
 
-    # notifications
-    message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
+        # notifications
+        message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
     
-    # setting variables gpu card
-    gputype=[]
-    cpupergpu=[]
-    rampergpu=[]
-    gpupernode=[]
-    gputotal=[]
-    for num in range(len(settings.CARME_GPU_DEFAULTS.split())):
-        gputype.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[0])
-        cpupergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[1])
-        rampergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[2])
+        # setting variables gpu card
+        gputype=[]
+        cpupergpu=[]
+        rampergpu=[]
+        gpupernode=[]
+        gputotal=[]
+        for num in range(len(settings.CARME_GPU_DEFAULTS.split())):
+            gputype.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[0])
+            cpupergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[1])
+            rampergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[2])
         
-    for num in range(len(settings.CARME_GPU_NUM.split())):
-        gpupernode.append(settings.CARME_GPU_NUM.split()[num].split(":")[1])
-        gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
+        for num in range(len(settings.CARME_GPU_NUM.split())):
+            gpupernode.append(settings.CARME_GPU_NUM.split()[num].split(":")[1])
+            gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
         
-    cpupergpu = list(map(int, cpupergpu))
-    rampergpu = list(map(int, rampergpu))
-    gpupernode = list(map(int, gpupernode))
-    gputotal = list(map(int, gputotal))
-    gpusum = sum(gputotal)
+        cpupergpu = list(map(int, cpupergpu))
+        rampergpu = list(map(int, rampergpu))
+        gpupernode = list(map(int, gpupernode))
+        gputotal = list(map(int, gputotal))
+        gpusum = sum(gputotal)
     
-    # loop gpu type chart
-    gpu_loop = range(len(gputype)+1)
+        # loop gpu type chart
+        gpu_loop = range(len(gputype)+1)
     
-    # calculate actual stats
-    slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
-    stats = {
-        "used": 0,
-        "queued": 0,
-        "reserved": 0,
-        "free": 0
-    }
+        # calculate actual stats
+        slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
+        stats = {
+            "used": 0,
+            "queued": 0,
+            "reserved": 0,
+            "free": 0
+        }
     
-    for j in slurm_list:
-        if j.status == "running":
-            stats["used"] += j.num_gpus * j.num_nodes
-        elif j.status == "queued":
-            stats["queued"] += j.num_gpus * j.num_nodes 
+        for j in slurm_list:
+            if j.status == "running":
+                stats["used"] += j.num_gpus * j.num_nodes
+            elif j.status == "queued":
+                stats["queued"] += j.num_gpus * j.num_nodes 
 
-    stats["free"] = gpusum - (stats["used"] + stats["reserved"])
+        stats["free"] = gpusum - (stats["used"] + stats["reserved"])
 
-    # check if stats have to be updated
-    try:
-        lastStat = ClusterStat.objects.latest('id')
-    except:
-        lastStat = None
+        # check if stats have to be updated
+        try:
+            lastStat = ClusterStat.objects.latest('id')
+        except:
+            lastStat = None
     
-    if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
-        ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
+        if (lastStat is None or lastStat.free != stats["free"] or lastStat.queued != stats["queued"]):
+            ClusterStat.objects.create(date=datetime.now(), free=stats["free"], used=stats["used"], reserved=stats["reserved"], queued=stats["queued"])
 
-    # render template
-    context = {
-        'myjobtable_list': myjobtable_list,
-        'myjobtable_script': myjobtable_script,
-        'message_list': message_list,
-        'start_job_form': startForm,
-        'CARME_VERSION': settings.CARME_VERSION,
-        'DEBUG': settings.DEBUG,
-        'mylist_short': mylist_short,
-        'mylist_long': mylist_long,
-        'job_time' : job_time,
-        'gpu_loop' : gpu_loop,
-        'gputype': gputype, #gpucard
-        'cpupergpu': cpupergpu, #gpucard
-        'rampergpu': rampergpu, #gpucard
-        'gpupernode':gpupernode, #gpucard
-        'gputotal':gputotal, #gpucard
-        'gpusum': gpusum, #gpucard
-    }
+        # render template
+        context = {
+            'myjobtable_list': myjobtable_list,
+            'myjobtable_script': myjobtable_script,
+            'message_list': message_list,
+            'start_job_form': startForm,
+            'CARME_VERSION': settings.CARME_VERSION,
+            'DEBUG': settings.DEBUG,
+            'mylist_short': mylist_short,
+            'mylist_long': mylist_long,
+            'job_time' : job_time,
+            'gpu_loop' : gpu_loop,
+            'gputype': gputype, #gpucard
+            'cpupergpu': cpupergpu, #gpucard
+            'rampergpu': rampergpu, #gpucard
+            'gpupernode':gpupernode, #gpucard
+            'gputotal':gputotal, #gpucard
+            'gpusum': gpusum, #gpucard
+        }
 
-    return render(request, 'home.html', context)
+        return render(request, 'home.html', context)
+
+    else:
+        return redirect("two_factor:setup")
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def admin_all_jobs(request):
     """renders the admin job table"""
 
@@ -307,7 +392,7 @@ def job_table(request):
     
     return render(request, 'blocks/job_table.html', context)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def start_job(request):
     """starts a new job (handing request to backend)"""
 
@@ -370,7 +455,7 @@ def start_job(request):
 
     return render(request, 'jobs.html', context)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def job_hist(request):
     """renders the job history page"""
    
@@ -411,7 +496,7 @@ def job_hist(request):
 
     return render(request, 'job_hist.html', context)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def job_info(request):
     """ renders the job info page"""
 
@@ -483,47 +568,50 @@ def job_info(request):
     # render template
     return render(request, 'job_info.html', context)
 
-@force_maintenance_mode_off
-def custom_login(request):
-    if request.user.is_authenticated:
-        return redirect('/')
-    else:
-        return login(request)
+#@force_maintenance_mode_off
+#def custom_login(request):
+#    if request.user.is_authenticated:
+#        return redirect('/')
+#    else:
+#        return login(request)
 
 
+#@force_maintenance_mode_off
+#def login(request):
+#    """custom login"""
+#
+#    return LoginView.as_view(template_name='login.html')(request)
+
+##@force_maintenance_mode_off
+##def login_page(request):
+##    login_data = LoginForm()
+##    return render(request, 'login.html', {'login_data':login_data})
+
+##@force_maintenance_mode_off
+##def login_validate(request):
+##    login_data = LoginForm(request.POST)
+##
+##    if login_data.is_valid():
+##        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+##        if user is not None:
+##           # if user.is_active:
+##            login(request, user)
+##            return redirect('/')
+##            #return LoginView.as_view(template_name='login.html')(request)
+##
+##        error_message= 'Incorrect password / username. Try again.'
+##        return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
+##    error_message= 'Internal error. Please contact the admin.'
+##    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
 @force_maintenance_mode_off
 def login(request):
-    """custom login"""
-
-    return LoginView.as_view(template_name='login.html')(request)
-
-#@force_maintenance_mode_off
-#def login_page(request):
-#    login_data = LoginForm()
-#    return render(request, 'login.html', {'login_data':login_data})
-
-#@force_maintenance_mode_off
-#def login_validate(request):
-#    login_data = LoginForm(request.POST)
-#
-#    if login_data.is_valid():
-#        user = authenticate(username=request.POST['username'], password=request.POST['password'])
-#        if user is not None:
-#           # if user.is_active:
-#            login(request, user)
-#            return redirect('/')
-#            #return LoginView.as_view(template_name='login.html')(request)
-#
-#        error_message= 'Incorrect password / username. Try again.'
-#        return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
-#    error_message= 'Internal error. Please contact the admin.'
-#    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
+    return redirect("two_factor:login")
 
 @force_maintenance_mode_off
 def logout(request):
     """custom logout"""
 
-    path = '/login/'
+    path = '/account/login/'
 
     if request.user.is_authenticated:
         auth_logout(request)
@@ -531,7 +619,7 @@ def logout(request):
     
     return HttpResponseRedirect(path)
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def stop_job(request):
     """stopping a job (handing request to backend)"""
 
@@ -561,7 +649,7 @@ def stop_job(request):
 
     return HttpResponse('')  # HttpResponseRedirect('/')
 
-@login_required(login_url='/login')
+@login_required(login_url='/account/login')
 def change_password(request):
     """change password site (request handled by backend"""
 

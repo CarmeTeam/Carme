@@ -1,0 +1,47 @@
+{% extends "two_factor/_base.html" %}
+{% load i18n %}
+
+{% block subcontent %}
+
+<div class="row mt-2 mb-4">
+	<div class="col-12">
+	  <div class="card-deck">
+		  <div class="card">
+		    <div class="card-header bg-light style-title"><i class="fa fa-shield" aria-hidden="true"></i>&nbsp; {% block title %}{% trans "Backup Tokens" %}{% endblock %}</div>
+		      <div class="card-body">
+
+  								{% if device.token_set.count %}
+    								<p>
+														{% blocktrans trimmed %}
+              		You have backup tokens. Copy these tokens to somewhere safe.
+              {% endblocktrans %}
+												</p>           
+            <ul>
+            		{% for token in device.token_set.all %}
+              		<li><code>{{ token.token }}</code></li>
+              {% endfor %}    
+            </ul>
+           	<p>
+														Only the backup tokens shown above are valid for logging verification. 
+              You have <strong>{{ device.token_set.all|length }}</strong> backup token(s). 
+              If you've used up all your tokens, click the button below to generate a new set.
+												</p>
+          {% else %}
+          		<p>
+														{% trans "You don't have any backup token yet." %}
+												</p>
+          {% endif %}
+
+  								<form method="post">{% csrf_token %}{{ form }}
+    								<a href="{% url 'two_factor:profile'%}" class="float-right btn btn-secondary">{% trans "Back to Account Security" %}</a>
+    								<button class="btn btn-primary" type="submit">{% trans "Generate Tokens" %}</button>
+  								</form>
+
+								</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

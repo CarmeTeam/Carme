@@ -19,6 +19,7 @@
 <html lang="en" class="h-100">
 
 <head>
+	
 	<!-- Required meta tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -49,59 +50,64 @@
 	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
 	<link rel="icon" type="image/png" sizes="96x96" href="{% static 'favicon/favicon-96x96.png' %}">
 	<link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
+	
+	<!-- script -->
+	<script src="{% static 'js/jquery.min.js' %}"></script>
+
 </head>
 
 <body class="d-flex flex-column h-100">
 	<div class="wrapper">
+  <div class="container">
 
-   	<div class="container">
+  	<!-- navbar -->
+  	{% if request.path != "/account/two_factor/setup/complete/" %}
+				{% if user.is_authenticated and user.is_verified %}
+					<div class="navbar-space">
+						{% include "blocks/nav.html" %}
+					</div>
+    {% endif %}
+			{% endif %}
 
-     {% if user.is_authenticated %}
-						<div class="navbar-space">
-							{% include "blocks/nav.html" %}
-						</div>
-     {% endif %}
-
-					<main role="main" class="flex-shrink-0">
-						{% include "blocks/maintenance.html" %}
-     	{% block content %}{% endblock %}
-					</main>
+   <!-- main -->
+			<main role="main" class="flex-shrink-0">
+				{% include "blocks/maintenance.html" %}
+    {% block content %}{% endblock %}
+			</main>
          
-    </div>		
+  </div>		
 
-			<!-- Footer -->
-			{% include "blocks/footer.html" %}
-			<!-- Footer -->
-               
-			<!-- JavaScript -->
-			<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-			<script src="{% static 'js/jquery.min.js' %}"></script>
-			<script src="{% static 'js/popper.min.js' %}"></script>
-			<script src="{% static 'js/bootstrap.min.js' %}"></script>
-			<script type="text/javascript">
-				if (!$) console.error('jQuery is required!');
-				else {
-					$(document).on('submit', 'form.ajax', function (event) {
-						// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
-						event.preventDefault(); //prevent default action
+		<!-- footer -->
+		{% include "blocks/footer.html" %}
+	
+		<!-- script  -->
+		<script src="{% static 'js/jquery.min.js' %}"></script>
+		<script src="{% static 'js/popper.min.js' %}"></script>
+		<script src="{% static 'js/bootstrap.min.js' %}"></script>
+		<script type="text/javascript">
+			if (!$) console.error('jQuery is required!');
+			else {
+				$(document).on('submit', 'form.ajax', function (event) {
+					// source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery
+					event.preventDefault(); //prevent default action
 
-						var post_url = $(this).attr("action"); //get form action url
-						var request_method = $(this).attr("method"); //get form GET/POST method
-						var form_data = $(this).serialize(); //Encode form elements for submission
-						$.ajax({
-							url: post_url,
-							type: request_method,
-							data: form_data
-						}).fail(function () {
-							console.error('Request to ' + post_url + ' failed. Please try again.');
-						}).always(function () {
-							setTimeout(function () {
-								//document.location.reload();
-							}, 1000);
-						});
+					var post_url = $(this).attr("action"); //get form action url
+					var request_method = $(this).attr("method"); //get form GET/POST method
+					var form_data = $(this).serialize(); //Encode form elements for submission
+					$.ajax({
+						url: post_url,
+						type: request_method,
+						data: form_data
+					}).fail(function () {
+						console.error('Request to ' + post_url + ' failed. Please try again.');
+					}).always(function () {
+						setTimeout(function () {
+							//document.location.reload();
+						}, 1000);
 					});
-				}
-			</script>
+				});
+			}
+	 </script>
 			{% block javascript %}{% endblock %}
 
 	</div>
