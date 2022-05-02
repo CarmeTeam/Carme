@@ -27,14 +27,6 @@ from CarmeConfigFrontend import *
 
 CSRF_TRUSTED_ORIGINS=['https://'+CARME_URL,'https://*.127.0.0.1']
 
-LOAD_CUSTOM_SETTINGS=os.path.isfile(BASE_DIR+'/scripts/custom.py')
-
-if LOAD_CUSTOM_SETTINGS:
-    SourceFileLoader('custom', BASE_DIR+'/scripts/custom.py').load_module()
-    from custom import custom_settings
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-
 # quick-start settings -------------------------------------------------------------------------------------------------------------
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = CARME_FRONTEND_KEY
@@ -73,7 +65,7 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_static', 
     'django_otp.plugins.otp_totp',   
     'two_factor',		
-				'otp_yubikey',
+				#'otp_yubikey',
 				'mathfilters', 
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -87,11 +79,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+				'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'maintenance_mode.middleware.MaintenanceModeMiddleware',
-				'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -160,7 +151,7 @@ DATABASES = {
         'USER': CARME_DB_USER,
         'PASSWORD': CARME_DB_PW,
         'HOST': CARME_DB_NODE,
-        'PORT': CARME_DB_PORT,
+        'PORT': CARME_SLURM_DB_PORT,
     },
 
 }
@@ -228,6 +219,13 @@ LOGGING = {
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# Login ----------------------------------------------------------------------------------------------------------------------------
+LOGIN_URL = 'two_factor:login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = 'account/login/'
+#----------------------------------------------------------------------------------------------------------------------------------
+
+
 # LDAP -----------------------------------------------------------------------------------------------------------------------------
 # NOTE: This section has to be modified according to your specific LDAP setup!
 #       In particualar the variables
@@ -241,10 +239,6 @@ LOGGING = {
 #         - AUTH_LDAP_USER_ATTR_MAP
 #       have to be checked and (maybe) adjusted.
 #       This has to be done as django is at this point in thime not able to be so generic to work with every possible LDAP setup.
-
-
-#LOGIN_URL = reverse_lazy('login')
-LOGIN_URL = 'two_factor:login'
 
 
 # set ldap server uri
@@ -397,6 +391,7 @@ MAINTENANCE_MODE_REDIRECT_URL = '/logout'
 # SESSION_COOKIE_AGE = 60*60 # logout aufter one hour - regardless of activity
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # ende session after browser close
 SESSION_AUTO_LOGOUT_TIME = 60*60  # logout aufter one hour od inactivity
+SESSION_TIMEOUT_REDIRECT = 'account/login/'
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -406,27 +401,27 @@ TIME_ZONE = CARME_TIMEZONE
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
-# todo lists -----------------------------------------------------------------------------------------------------------------------
-# restrict access to ALL todo lists/views to `is_staff` users
-# If False or unset, all users can see all views (but more granular permissions are still enforced
-# within views, such as requiring staff for adding and deleting lists).
-TODO_STAFF_ONLY = False
-
-# If you use the "public" ticket filing option, to whom should these tickets be assigned?
-# Must be a valid username in your system. If unset, unassigned tickets go to "Anyone."
-TODO_DEFAULT_ASSIGNEE = 'Team Carme'
-
-# If you use the "public" ticket filing option, to which list should these tickets be saved?
-# Defaults to first list found, which is probably not what you want!
-TODO_DEFAULT_LIST_SLUG = 'tickets'
-
-# If you use the "public" ticket filing option, to which *named URL* should the user be
-# redirected after submitting? (since they can't see the rest of the ticket system).
-# Defaults to "/"
-TODO_PUBLIC_SUBMIT_REDIRECT = '/'
-
-# additionnal classes the comment body should hold
-# adding "text-monospace" makes comment monospace
-TODO_COMMENT_CLASSES = ['class 1','class2']
-#-----------------------------------------------------------------------------------------------------------------------------------
+## todo lists -----------------------------------------------------------------------------------------------------------------------
+## restrict access to ALL todo lists/views to `is_staff` users
+## If False or unset, all users can see all views (but more granular permissions are still enforced
+## within views, such as requiring staff for adding and deleting lists).
+#TODO_STAFF_ONLY = False
+#
+## If you use the "public" ticket filing option, to whom should these tickets be assigned?
+## Must be a valid username in your system. If unset, unassigned tickets go to "Anyone."
+#TODO_DEFAULT_ASSIGNEE = 'Team Carme'
+#
+## If you use the "public" ticket filing option, to which list should these tickets be saved?
+## Defaults to first list found, which is probably not what you want!
+#TODO_DEFAULT_LIST_SLUG = 'tickets'
+#
+## If you use the "public" ticket filing option, to which *named URL* should the user be
+## redirected after submitting? (since they can't see the rest of the ticket system).
+## Defaults to "/"
+#TODO_PUBLIC_SUBMIT_REDIRECT = '/'
+#
+## additionnal classes the comment body should hold
+## adding "text-monospace" makes comment monospace
+#TODO_COMMENT_CLASSES = ['class 1','class2']
+##-----------------------------------------------------------------------------------------------------------------------------------
 
