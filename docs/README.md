@@ -14,7 +14,10 @@ an open source framework to manage resources for **multiple users** running **in
 
 ## **Presentations**
 
-_(selection)_
+### Marketing Slides
+[CARME slides (05/2022)](Slides/[2022-05]--carme--pr-slides.pdf)
+
+### Selected Conference Presentations
 
 * [Slides from our talk at ISC18 06/2018](https://www.researchgate.net/publication/325967129_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 * [Slides from our talk at LRZ 10/2018](https://www.researchgate.net/publication/328161743_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
@@ -48,6 +51,7 @@ _Job submission scheme_
   * Integrate existing distributed file systems like **BeeGFS**
 * **Access via web-interface**
   * **OS independent** (only web browser needed)
+  * requires **2FA**
   * Full user **information** (running jobs, cluster usage, news /  messages)
   * **Start/Stop jobs** within the web-interface
 * **Interactive jobs**
@@ -70,42 +74,19 @@ _Job submission scheme_
 
 ## **Roadmap**
 
-* **03/2022: next stable release**
-  
-  * improvements
-    
-    * web-frontend stability
-    
-    * enhanced security
-  
-  * planed features
-    
-    * `carme-manager` (administration CLI tool)
-
 * **06/2022: ISC release**
-  
   * improvements
-    
     * user dashboard redesign
-  
   * planed features
-    
     * CPU only jobs
-    
     * new job monitoring (for users)
-    
     * batch job support (beta)
 
 * **12/2022: SC release**
-  
   * improvements
-    
     * web-frontend redesign
-  
   * planed features
-    
     * full batch job support
-    
     * FPGA support
 
 ## Releases
@@ -124,7 +105,9 @@ _Job submission scheme_
 
 * 11/2020: r0.8.0
 
-* 08/2021: **r0.9.0** (latest)
+* 08/2021: r0.9.0
+
+* 05/2022: **r0.9.5** (latest)
 
 ## **Documentation**
 
