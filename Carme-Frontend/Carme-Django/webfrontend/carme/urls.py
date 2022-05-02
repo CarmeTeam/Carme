@@ -10,11 +10,15 @@
 # License: http://open-carme.org/LICENSE.md 
 # Contact: info@open-carme.org
 # ---------------------------------------------
+from django.contrib import admin
 from django.urls import path, re_path, include
 #from django.conf.urls import url, include
 from . import views
 from .views import * #line_chart_json, line_chart_json2
 from django.conf import settings
+
+from .views import AdminSiteOTPRequiredMixinRedirSetup
+admin.site.__class__ = AdminSiteOTPRequiredMixinRedirSetup
 
 gputype=[]
         
