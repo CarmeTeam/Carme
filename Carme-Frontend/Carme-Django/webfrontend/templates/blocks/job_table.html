@@ -1,48 +1,171 @@
 {% load static %}
+{% load timetags %}
+{% load mathfilters %}
 
-{% for job in slurm_list_user %}
-	<tr data-jobid="{{ job.slurm_id }}">
-			<th class="align-middle" scope="row">{{ job.slurm_id }}</th>
+{% for job, slurm in myjobtable_list %}
+	<tr data-jobid="{{ job.slurm_id }}" class="dashboard-jobtable style-text">
+			<td class="align-middle style-text text-underline">{{ job.slurm_id }}</th>
 			<td class="align-middle">{{ job.name }}</td>
-			<td class="align-middle">{{ job.num_nodes }}</td>
-			<td class="align-middle">{{ job.gpu_type }}</td>
-			<td class="align-middle">{{ job.num_gpus }}</td>
-			<td class="align-middle">{{ job.image_name }}</td>
+			<td class="align-middle">{{ job.image_name }} </td>
+			<td class="align-middle"><span class="i-node">{{ job.num_nodes }}</span></td>
+			<td class="align-middle"><span class="i-cpu">{{ slurm.cpus_req | intdiv:job.num_nodes }}</span></td>
+			<td class="align-middle" style="min-width: 6.0rem;"><span class="i-gpu">{{ job.num_gpus }}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
 			<td class="align-middle">
-				{% ifequal job.status "running" %}
+				{% if job.status == 'running' %}
 					<i class="fa fa-check fa-2x fa-fw text-success"></i>
 					<span class="sr-only">Running</span>
 				{% else %}
 					<i class="fa fa-cog fa-spin fa-2x fa-fw text-secondary"></i>
 					<span class="sr-only">Queued</span>
-				{% endifequal %}
+				{% endif %}
 			</td>
 			<td class="align-middle">
-				{% ifequal job.status 'running' %}
+     {% if job.status == "running" %}
+      <div class="progress mt-3">
+						{% comment %}
+						<div class="progress mt-3"
+                  data-container="body" 
+                  data-toggle="popover" 
+                  data-html="true"  
+                  data-placement="top" 
+                  data-trigger="hover" 
+                  data-content='<span class="style-text-mini">Start Time:</span> <span class="style-text-mini">{{slurm.time_start | print_timestamp_small }}</span> <br>
+                                <span class="style-text-mini">End&nbsp;&nbsp;Time:</span> <span class="style-text-mini">{{ slurm.timelimit | mul:60 | add:slurm.time_start | print_timestamp_small }}</span> '>
+       {% endcomment %} 
+							<div class="progress-bar bg-used" id="p{{ job.slurm_id }}" role="progressbar" aria-valuemin="0" ></div>
+      </div>
+      {% comment %}
+						<div class="d-flex flex-row-reverse"> 
+          <span class="badge style-text-mini">
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+            <span id="hours{{ job.slurm_id }}"></span>
+            <span id="mins{{ job.slurm_id }}"></span>
+            <span id="secs{{ job.slurm_id }}"></span>
+            <span id="end{{ job.slurm_id }}"></span>
+          </span>
+      </div>
+						{% endcomment %}
+						<div class="d-flex flex-row justify-content-between"> 
+        <div><span class="badge style-text-mini">{{ slurm.time_start | print_timestamp_small }}</span></div>
+        <div><span class="badge style-text-mini">{{ slurm.timelimit | mul:60 | add:slurm.time_start | print_timestamp_small }}</span></div>
+      </div>
+     {% else %}
+      <div class="progress mt-3 mb-3"
+                  data-container="body" 
+                  data-toggle="popover" 
+                  data-html="true"  
+                  data-placement="top" 
+                  data-trigger="hover" 
+                  data-content='<span class="style-text-mini">Submit Time:</span> <span class="style-text-mini">{{slurm.time_submit | print_timestamp_small }}</span>'>
+        <div class="progress-bar bg-used" id="p{{ job.slurm_id }}" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" ></div>
+      </div>
+      <div class="d-flex flex-row justify-content-between"> 
+        <div><span class="badge style-text-mini"></span></div>
+      </div>
+     {% endif %}
+   </td>
+			<td class="align-middle" style="min-width: 8.0rem;">
+				{% if job.status == 'running' %}
 					<a href="/ta_{{ job.url_suffix }}/"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
 						target="_blank"><img src="{% static 'img/theia.svg' %}" alt="TheiaIDE" style="width: 48px; height: 48px;" /></a>
 					<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
 						target="_blank"><img src="{% static 'img/jupyter.svg' %}" alt="JupyterLab" style="width: 48px; height: 48px;" /></a>
-					<a href="/tb_{{ job.url_suffix }}/"
+					{% comment %}
+ 				<a href="/tb_{{ job.url_suffix }}/"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
 						target="_blank"><img src="{% static 'img/tensorflow.svg' %}" alt="TensorBoard" style="width: 48px; height: 48px;" /></a>
+     {% endcomment %}
 				{% else %}
 					---
-				{% endifequal %}
+				{% endif %}
 			</td>
-			<td class="align-middle">
-				{% ifequal job.status 'running' %}
-				<form action="{% url 'job_info' %}" method="post">
-					{% csrf_token %}
-					<input type="hidden" name="jobID" value="{{job.slurm_id}}">
-					<button class="btn btn-secondary" type="submit"><i class="fa fa-info fa-fw" aria-hidden="true"></i></button>
-				</form>
+			<td scope="col" class="align-middle">
+      {% if job.status == 'running' %}
+        <!-- Button trigger modal -->
+        <button class="btn btn-secondary" type="submit" data-toggle="modal" data-target="#jobinfoModal{{ job.slurm_id }}"><i class="fa fa-info fa-fw" aria-hidden="true"></i></button>
+      
+
+        <!-- Modal -->
+        <div class="modal fade" id="jobinfoModal{{ job.slurm_id }}" tabindex="-1" aria-labelledby="jobinfoModalLabel{{ job.slurm_id }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+              <div class="modal-header bg-light">
+                <h5 class="modal-title style-title" id="jobinfoModalLabel{{ job.slurm_id }}"><i class="fa fa-info-circle" aria-hidden="true"></i> Job {{ job.slurm_id }} </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="container my-1">
+                  <p class="mx-2 text-muted pb-4 style-text">
+                    <span class="pull-left">
+                      <b>Time remaining</b>: 
+                      <span id="hours{{ job.slurm_id }}"></span>
+                      <span id="mins{{ job.slurm_id }}"></span>
+                      <span id="secs{{ job.slurm_id }}"></span>
+                      <span id="end{{ job.slurm_id }}"></span>
+                    </span>
+                    <span class="pull-right">
+                      <b>Runtime limit:</b>&nbsp;{{slurm.timelimit | div:60}} hours
+                    </span>
+                  </p>
+                  <div class="table-responsive scrollbar">           
+                    <table class="table table-sm table-striped mb-0 overflow-hidden border-bottom style-text text-center">
+                      <thead>
+                        <tr>
+                          <th class="align-middle">ID</th>
+                          <th class="align-middle">Name</th>
+                          <th class="align-middle">Partition</th>
+                          <th class="align-middle" style="min-width: 8.7rem;" >Submit / Start / End <br></th>
+                          <th class="align-middle">Status</th>
+                          <th class="align-middle">Memory</th>
+                          <th class="align-middle">Image</th>
+                          <th class="align-middle">Node Name</th>
+                          <th class="align-middle">Nodes</th>
+                          <th class="align-middle"><span class="frac"><sup>CPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+                          <th class="align-middle" style="min-width: 6.0rem;"><span class="frac"><sup>GPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+                          
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="align-middle">{{ job.slurm_id }}</td>
+                          <td class="align-middle">{{ job.name }}</td>
+                          <td class="align-middle">{{ slurm.partition }}</td>
+                          <td class="align-middle"><p class="mb-0">{{ slurm.time_submit | print_timestamp }}</p><p class="mb-0">{{ slurm.time_start | print_timestamp }}</p><p class="mb-0">{{ slurm.time_end | print_timestamp }}</p></td>
+                          <td class="align-middle">
+                            {% if job.status == "running" %}
+                              <i class="fa fa-check fa-fw text-success"></i>
+                              <span class="sr-only">Running</span>
+                              {% else %}
+                              <i class="fa fa-cog fa-spin fa-fw text-secondary"></i>
+                              <span class="sr-only">Queued</span>
+                            {% endif %}
+                          </td>
+                          <td class="align-middle">{{ slurm.mem_req }}</td>
+                          <td class="align-middle">{{ job.image_name }}</td>
+                          <td class="align-middle">{{ slurm.nodelist }}</td>
+                          <td class="align-middle"><span class="i-node">{{ slurm.nodes_alloc}}</span></td>
+                          <td class="align-middle"><span class="i-cpu">{{ slurm.cpus_req | intdiv:slurm.nodes_alloc }}</span></td>
+                          <td class="align-middle"><span class="i-gpu">{{job.num_gpus}}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
 				{% else %}
 					---
-				{% endifequal %}
-			</td>
+			{% endif %}
+    </td>
 			<td class="align-middle">
 				<form class="ajax" action="{% url 'stop_job' %}" method="post">
 					{% csrf_token %}
@@ -53,4 +176,76 @@
 				</form>
 			</td>
 	</tr>
+
+{% if job.status == 'running' %}
+<script>
+
+  function setUpProgressBar(selector, startTime, endTime, update) {
+
+    var timer
+    var elem = document.querySelector(selector)
+    var max = endTime - startTime
+    
+    /*elem.max = max*/
+    elem.ariaValueMax = max
+    var setValue = function() {
+      /*var currentTime = new Date().getTime()*/
+      var currentTime = new Date().getTime()/1000 | 0  
+      var ellasped = currentTime - startTime
+
+
+      if (ellasped >= max) {
+        ellasped = max
+        window.clearTimeout(timer)
+      }
+      elem.ariaValueNow = ellasped
+      var prec = ellasped/max * 100
+      elem.setAttribute("style", 'width: ' + prec.toFixed(2) + '%')
+      /*elem.setAttribute("data-label", prec.toFixed(2) + '%')*/
+    }
+  
+    setValue()
+    timer = window.setInterval(setValue, update)
+    return
+  }
+
+  /*var start1 = new Date()*/
+  var start1 = "{{ slurm.time_start }}"
+  
+  /*var end1 = new Date()*/
+  var end1 = "{{ slurm.timelimit | mul:60 | add:slurm.time_start }}"
+ 
+  setUpProgressBar("#p{{ job.slurm_id }}", start1, end1, 1000)
+
+  function n(n){
+    return n > 9 ? "" + n: "0" + n;
+  }
+
+  var myfunc = setInterval(function() {
+    var end1 = "{{ slurm.timelimit | mul:60 | add:slurm.time_start }}"
+    var currentTime = new Date().getTime()/1000 | 0  
+    var remaining = end1 - currentTime
+    var hours = Math.floor(remaining  / ( 60 * 60));
+    var minutes = Math.floor((remaining % (60 * 60)) / (60));
+    var seconds = Math.floor(remaining % 60 );
+
+  
+    // Result is output to the specific element
+    document.getElementById("hours{{ job.slurm_id }}").innerHTML = hours + "h " 
+    document.getElementById("mins{{ job.slurm_id }}").innerHTML = n(minutes) + "m " 
+    document.getElementById("secs{{ job.slurm_id }}").innerHTML = n(seconds) + "s " 
+    
+    // Display the message when countdown is over
+    if (remaining < 0) {
+        clearInterval(myfunc);
+        document.getElementById("hours{{ job.slurm_id }}").innerHTML = "" 
+        document.getElementById("mins{{ job.slurm_id }}").innerHTML = ""
+        document.getElementById("secs{{ job.slurm_id }}").innerHTML = ""
+        document.getElementById("end{{ job.slurm_id }}").innerHTML = "Time up!!";
+    }
+  }, 1000);
+  
+</script>
+{% endif %}
 {% endfor %}
+

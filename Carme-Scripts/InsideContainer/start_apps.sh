@@ -50,10 +50,15 @@ echo "export LD_LIBRARY_PATH=\"${LD_LIBRARY_PATH}\"
 
 # activate conda base environment --------------------------------------------------------------------------------------------------
 # NOTE: conda should always be activated not only in interactive shells
-CONDA_INIT_FILE="/opt/miniconda3/etc/profile.d/conda.sh"
-if [[ -f "${CONDA_INIT_FILE}" ]];then
-  log "activate conda base environment"
-  source "${CONDA_INIT_FILE}"
+CONDA_INIT_FILE="/opt/package-manager/etc/profile.d/conda.sh"
+MAMBA_INIT_FILE="/opt/package-manager/etc/profile.d/mamba.sh"
+
+[[ -f "${CONDA_INIT_FILE}" ]] && source "${CONDA_INIT_FILE}"
+[[ -f "${MAMBA_INIT_FILE}" ]] && source "${MAMBA_INIT_FILE}"
+
+if command -v "mamba" >/dev/null 2>&1 ;then
+  mamba activate base
+elif command -v "conda" >/dev/null 2>&1 ;then
   conda activate base
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -89,7 +94,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
     if [[ -f "node_modules/.bin/theia" ]];then
       if command_exists node;then
         log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
-        node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --startup-timeout -1 --plugins=local-dir:plugins &
+        THEIA_WEBVIEW_EXTERNAL_ENDPOINT={{hostname}} THEIA_MINI_BROWSER_HOST_PATTERN={{hostname}} node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --plugins=local-dir:plugins --startup-timeout -1 &
       else
         die "cannot start TheiaIDE (no executable found)"
       fi

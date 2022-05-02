@@ -125,9 +125,9 @@ class Backend(Service):
         # returns
             nothing
         """
-
+        DB_PORT = int(CARME_DB_PORT.replace('"', ''))
         self.db = MySQLdb.connect(host=CARME_DB_NODE,  user=CARME_DB_USER,
-                                    passwd=CARME_DB_PW,  db=CARME_DB_DB)
+                                    passwd=CARME_DB_PW,  db=CARME_DB_DB,  port=DB_PORT)
         self.user = conn._config['credentials']['subject'][5][0][1]
 
         endpoint = conn._config['endpoints'][1]
@@ -496,8 +496,6 @@ class Backend(Service):
 
         # change password via ldap
         try:
-            LDAP_ADMIN_USER = "cn={cn},dc={dc1},dc={dc2}".format(cn=CARME_LDAP_ADMIN, dc1=CARME_LDAP_DC1, dc2=CARME_LDAP_DC2)
-
             s = ldap3.Server(CARME_LDAP_SERVER_IP, get_info=ldap3.ALL)
             c = ldap3.Connection(s, user=CARME_LDAP_BIND_DN, password=CARME_LDAP_SERVER_PW)
             
@@ -519,16 +517,16 @@ def start(args):
     from importlib.machinery import SourceFileLoader
     SourceFileLoader('CarmeConfig', args.config).load_module()
 
-    from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
+    from CarmeConfig import CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB, CARME_DB_PORT
     from CarmeConfig import CARME_BACKEND_PATH, CARME_BACKEND_PORT
     from CarmeConfig import CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
-    from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2, CARME_LDAP_BIND_DN
+    from CarmeConfig import CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_BIND_DN
     from CarmeConfig import CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
 
-    global CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB
+    global CARME_DB_NODE, CARME_DB_USER, CARME_DB_PW, CARME_DB_DB, CARME_DB_PORT
     global CARME_BACKEND_PATH, CARME_BACKEND_PORT
     global CARME_SCRIPTS_PATH, CARME_PROXY_PATH_BACKEND
-    global CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_ADMIN, CARME_LDAP_DC1, CARME_LDAP_DC2, CARME_LDAP_BIND_DN
+    global CARME_LDAP_SERVER_IP, CARME_LDAP_SERVER_PW, CARME_LDAP_BIND_DN
     global CARME_FRONTEND_ID, CARME_URL, CARME_LOGINNODE_NAME, CARME_GPU_DEFAULTS
 
     auth = SSLAuthenticator(os.path.join(CARME_BACKEND_PATH, "SSL/backend.key"), os.path.join(CARME_BACKEND_PATH, "SSL/backend.crt"),

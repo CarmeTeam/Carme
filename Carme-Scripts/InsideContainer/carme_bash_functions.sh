@@ -15,7 +15,7 @@ function carme_archive (){
   parameter_array=("${@}")
   parameter_array_length=${#parameter_array[@]}
   if [[ "$parameter_array_length" -le "1" ]];then
-    if [ "${parameter_array[0]}" == "--help"  ] || [ "${parameter_array[0]}" == "-h" ]; then
+    if [[ "${parameter_array[0]}" == "--help" || "${parameter_array[0]}" == "-h" ]]; then
       echo "carme-archive creates a compressed tar-file (tar.gz) of"
       echo "the specified folder(s)/file(s) (see USAGE) and after the"
       echo "archive is created deletes the original folder(s)/file(s)."
@@ -43,11 +43,11 @@ complete -f -d carme_archive
 
 # define uncompress function -------------------------------------------------------------------------------------------------------
 function carme_unarchive (){
-  archive_name=$1
+  archive_name=${1}
   if [[ -z ${archive_name} ]];then
       echo "You did not specify an archive to extract!"
       echo "Use carme-unarchive --help or carme-unarchive -h for more information."
-  elif [ "${archive_name}" == "--help"  ] || [ "${archive_name}" == "-h" ]; then
+  elif [[ "${archive_name}" == "--help" || "${archive_name}" == "-h" ]]; then
       echo "carme-unarchive extracts a compressed tar-file (tar.gz)"
       echo "in the local folder and then removes the original archive."
       echo ""
@@ -114,7 +114,7 @@ function carme_tensorboard_visualize () {
   if [[ "${parameter_array_length}" -gt "1" ]];then
     echo "You can only link one folder, use --help or -h for more information"
   elif [[ "${parameter_array_length}" -le "1" ]];then
-    if [ "${parameter_array[0]}" == "--help"  ] || [ "${parameter_array[0]}" == "-h" ]; then
+    if [[ "${parameter_array[0]}" == "--help" || "${parameter_array[0]}" == "-h" ]]; then
       echo "With carme_tensorboard_visualize you can add previous results to your running tensorboard."
       echo "You should only add the results you need (and not your entire home folder)!! Per default a"
       echo "job starts with an empty tensorboard folder in HOME/tensorboard/tensorboad_JOBID and only"
@@ -147,7 +147,7 @@ function carme_tensorboard_unvisualize () {
   if [[ "${parameter_array_length}" -gt "1" ]];then
     echo "You can only remove one link, use --help or -h for more information"
   elif [[ "${parameter_array_length}" -le "1" ]];then
-    if [ "${parameter_array[0]}" == "--help"  ] || [ "${parameter_array[0]}" == "-h" ]; then
+    if [[ "${parameter_array[0]}" == "--help" || "${parameter_array[0]}" == "-h" ]]; then
       echo "With carme_tensorboard_unvisualize you can remove results so that they are no longer"
       echo "visible within tensorboard in your runinng job."
       echo ""
@@ -167,13 +167,13 @@ complete -f -d carme_tensorboard_unvisualize
 
 # define function to see the results added to tensorboard --------------------------------------------------------------------------
 function carme_tensorboard_ls () {
-  if [ "$1" == "--help"  ] || [ "$1" == "-h" ];then
+  if [[ "${1}" == "--help" || "${1}" == "-h" ]];then
     echo "With carme_tensorboard_ls you can see which folders"
     echo "are linked to your current tensorboard job-folder."
     echo ""
     echo "USAGE:"
     echo "carme_tensorboard_ls"
-  elif [ -z "$1" ];then
+  elif [[ -z "${1}" ]];then
     ls -lah "${CARME_TBDIR}"
   else
     echo "Use --help or -h to get more information."

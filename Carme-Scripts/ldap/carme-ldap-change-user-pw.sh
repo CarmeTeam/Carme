@@ -1,14 +1,22 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------------------------------------------------------
-# script to chnage the user password to a new value
+# Change the password of a given user to a new specific (handed over) value.
+# NOTE: you can also change the password of multiple users at once, but all will get the same new password.
 #
-# Copyright (C) 2018 by Dr. Dominik Straßel
+# WEBPAGE:   https://carmeteam.github.io/Carme/
+# COPYRIGHT: Carme Team @Fraunhofer ITWM
+# CONTACT:   dominik.strassel@itwm.fraunhofer.de
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 #bash set buildins -----------------------------------------------------------------------------------------------------------------
 set -e
 set -o pipefail
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
+# adjustable parameters ------------------------------------------------------------------------------------------------------------
+PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -21,11 +29,10 @@ function die () {
 
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
-PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
-  die "carme-basic-bash-functions.sh not found but needed"
+  die "'${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh' not found"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -51,28 +58,10 @@ check_command hostname
 #-----------------------------------------------------------------------------------------------------------------------------------
 # needed variables from config
 CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP)
-CARME_LDAPGROUP_1=$(get_variable CARME_LDAPGROUP_1)
-CARME_LDAPGROUP_2=$(get_variable CARME_LDAPGROUP_2)
-CARME_LDAPGROUP_3=$(get_variable CARME_LDAPGROUP_3)
-CARME_LDAPGROUP_4=$(get_variable CARME_LDAPGROUP_4)
-CARME_LDAPGROUP_5=$(get_variable CARME_LDAPGROUP_5)
-CARME_LDAPGROUP_ID_1=$(get_variable CARME_LDAPGROUP_ID_1)
-CARME_LDAPGROUP_ID_2=$(get_variable CARME_LDAPGROUP_ID_2)
-CARME_LDAPGROUP_ID_3=$(get_variable CARME_LDAPGROUP_ID_3)
-CARME_LDAPGROUP_ID_4=$(get_variable CARME_LDAPGROUP_ID_4)
-CARME_LDAPGROUP_ID_5=$(get_variable CARME_LDAPGROUP_ID_5)
-CARME_LDAPINSTANZ_1=$(get_variable CARME_LDAPINSTANZ_1)
-CARME_LDAPINSTANZ_2=$(get_variable CARME_LDAPINSTANZ_2)
-CARME_LDAPINSTANZ_3=$(get_variable CARME_LDAPINSTANZ_3)
-CARME_LDAPINSTANZ_4=$(get_variable CARME_LDAPINSTANZ_4)
-CARME_LDAPINSTANZ_5=$(get_variable CARME_LDAPINSTANZ_5)
-CARME_LDAP_ADMIN=$(get_variable CARME_LDAP_ADMIN)
-CARME_LDAP_DC1=$(get_variable CARME_LDAP_DC1)
-CARME_LDAP_DC2=$(get_variable CARME_LDAP_DC2)
+CARME_LDAP_BIND_DN=$(get_variable CARME_LDAP_BIND_DN)
 
-[[ -z ${CARME_LDAP_ADMIN} ]] && die "CARME_LDAP_ADMIN not set"
-[[ -z ${CARME_LDAP_DC1} ]] && die "CARME_LDAP_DC1 not set"
-[[ -z ${CARME_LDAP_DC2} ]] && die "CARME_LDAP_DC2 not set"
+[[ -z ${CARME_LDAP_SERVER_IP} ]] && die "CARME_LDAP_SERVER_IP not set"
+[[ -z ${CARME_LDAP_BIND_DN} ]] && die "CARME_LDAP_BIND_DN not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -85,7 +74,7 @@ THIS_NODE_IPS=( "$(hostname -I)" )
 read -rp "Do you want to change a user password? [y/N] " RESP
 echo ""
 
-if [ "$RESP" = "y" ]; then
+if [[ "${RESP}" = "y" ]]; then
 
   read -rp "enter user name(s) [multiple names separated by space]: " LDAPUSER_HELPER
   echo ""
@@ -107,41 +96,25 @@ if [ "$RESP" = "y" ]; then
   for LDAPUSER in ${LDAPUSER_HELPER}; do
 
     # check is username contains uppercase characters ------------------------------------------------------------------------------
-    [[ $LDAPUSER =~ [A-Z] ]] && die "uppercase user-names not allowed"
+    [[ ${LDAPUSER} =~ [A-Z] ]] && die "uppercase user-names not allowed"
     #-------------------------------------------------------------------------------------------------------------------------------
 
 
     # check if username is empty ---------------------------------------------------------------------------------------------------
-    [[ -z "$LDAPUSER" ]] && die "empty user-names not allowed"
+    [[ -z "${LDAPUSER}" ]] && die "empty user-names not allowed"
     #-------------------------------------------------------------------------------------------------------------------------------
 
 
-    # get id of the users main group -----------------------------------------------------------------------------------------------
-    STRING=$(getent passwd | grep "${LDAPUSER}" | awk -F':' '$3>h{h=$3;g=$4;u=$1}END{print g ":" u}')
-    GROUPID=${STRING%%:*}
-
-    case "$GROUPID" in
-      "$CARME_LDAPGROUP_ID_1") LDAPINSTANZ="$CARME_LDAPINSTANZ_1"
-                               LDAPGROUP="$CARME_LDAPGROUP_1"
-      ;;
-      "$CARME_LDAPGROUP_ID_2") LDAPINSTANZ="$CARME_LDAPINSTANZ_2"
-                               LDAPGROUP="$CARME_LDAPGROUP_2"
-      ;;
-      "$CARME_LDAPGROUP_ID_3") LDAPINSTANZ="$CARME_LDAPINSTANZ_3"
-                               LDAPGROUP="$CARME_LDAPGROUP_3"
-      ;;
-      "$CARME_LDAPGROUP_ID_4") LDAPINSTANZ="$CARME_LDAPINSTANZ_4"
-                               LDAPGROUP="$CARME_LDAPGROUP_4"
-      ;;
-      "$CARME_LDAPGROUP_ID_5") LDAPINSTANZ="$CARME_LDAPINSTANZ_5"
-                               LDAPGROUP="$CARME_LDAPGROUP_5"
-      ;;
-    esac
+    # get LDAP user DN -------------------------------------------------------------------------------------------------------------
+    LDAP_USER_DN="$(ldapsearch -v -x -D "${CARME_LDAP_BIND_DN}" "uid=${LDAPUSER}" -w "${LDAP_ADMIN_PASSWORD}" | grep "dn: uid=${LDAPUSER}" | awk -F'dn: ' '{ print $2 }')"
+    [[ -z "${LDAP_USER_DN}" ]] && die "could not determine a valid DN for user '${LDAPUSER}'"
+    USER_FOUND_NUMBER=$(echo "${LDAP_USER_DN}" | wc -l)
+    [[ "${USER_FOUND_NUMBER}" -gt "1" ]] && die "found more than one possible DN's for user '${LDAPUSER}'"
     #-------------------------------------------------------------------------------------------------------------------------------
 
 
     # set new password -------------------------------------------------------------------------------------------------------------
-    ldappasswd -H ldapi:/// -x -D "cn=${CARME_LDAP_ADMIN},dc=${CARME_LDAP_DC1},dc=${CARME_LDAP_DC2}" -w "${LDAP_ADMIN_PASSWORD}" "uid=${LDAPUSER},cn=${LDAPGROUP},ou=${LDAPINSTANZ},dc=${CARME_LDAP_DC1},dc=${CARME_LDAP_DC2}" -s "${LDAP_PASSWD}"
+    ldappasswd -H ldapi:/// -x -D "${CARME_LDAP_BIND_DN}" -w "${LDAP_ADMIN_PASSWORD}" "${LDAP_USER_DN}" -s "${LDAP_PASSWD}"
 
     echo "password for ${LDAPUSER} changed to ${LDAP_PASSWD}"
   done

@@ -1,27 +1,32 @@
 <img src="Images/Carme-Stage--dark--symmetric.jpg" width="740">
 
-
 ## **HPC meets interactive Data Science and Machine Learning**
+
 **Carme (/ˈkɑːrmiː/ KAR-mee; Greek: Κάρμη) is a Jupiter moon, also giving the name for a Cluster of Jupiter moons (the carme group).**
 
 _or in our case..._
 
 an open source framework to manage resources for **multiple users** running **interactive jobs** on a **Cluster** of (GPU) compute nodes.
 
-
 ## **Follow us on Twitter**
+
 &rarr; [#OpenCarme](https://twitter.com/open_carme)
 
-
 ## **Presentations**
-_(selection)_
+
+### Marketing Slides
+[CARME slides (05/2022)](Slides/[2022-05]--carme--pr-slides.pdf)
+
+### Selected Conference Presentations
+
 * [Slides from our talk at ISC18 06/2018](https://www.researchgate.net/publication/325967129_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 * [Slides from our talk at LRZ 10/2018](https://www.researchgate.net/publication/328161743_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 * [Slides from ISC 06/2019](https://www.researchgate.net/publication/334319039_Carme_-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
 
-
 ## **Core Idea**
+
 _We combine established open source ML and DS tools with HPC backends and use therefore_
+
 * [Singularity containers](https://sylabs.io)
 * [Anaconda environments](https://www.anaconda.com/distribution)
 * web based GUI frontends e.g. [Theia-IDE](https://theia-ide.org) and [JupyterLab](https://github.com/jupyterlab/jupyterlab)
@@ -31,13 +36,12 @@ _We combine established open source ML and DS tools with HPC backends and use th
 * HPC data I/O technologies like [Fraunhofer’s BeeGFS](https://www.beegfs.io)
 * HPC maintenance and monitoring tools
 
-
 _Job submission scheme_
 
 <img src="Images/carme-run.png" width="740">
 
-
 ## **Key Features**
+
 * **Open source**
   * we use only opensource components that allow commercial usage
   * *Carme* is open source, allowing commercial usage
@@ -47,6 +51,7 @@ _Job submission scheme_
   * Integrate existing distributed file systems like **BeeGFS**
 * **Access via web-interface**
   * **OS independent** (only web browser needed)
+  * requires **2FA**
   * Full user **information** (running jobs, cluster usage, news /  messages)
   * **Start/Stop jobs** within the web-interface
 * **Interactive jobs**
@@ -67,41 +72,61 @@ _Job submission scheme_
     (easy updates, project / user specific environments)
   * **Built-in matching between GPU driver and ML/DL tools**
 
-
 ## **Roadmap**
-* [x] since 04/2018: _Carme prototype_ is up and running on our Cluster 
-* [x] 03/2019: r0.3.0 (first public release)
-* [x] 07/2019: r0.4.0
-* [x] 11/2019: r0.5.0
-* [x] 12/2019: r0.6.0
-* [x] 07/2020: r0.7.0
-* [x] 11/2020: r0.8.0
-* [x] 08/2021: **r0.9.0** (latest)
-* [ ] 10/2021: _r1.0.0_ _(development)_
-* [ ] 02/2022: _r1.1.0_ _(planned)_
-* [ ] 06/2022: _r1.2.0_ _(planned)_
-* [ ] 12/2022: _r2.0.0_ _(planned)_
 
+* **06/2022: ISC release**
+  * improvements
+    * user dashboard redesign
+  * planed features
+    * CPU only jobs
+    * new job monitoring (for users)
+    * batch job support (beta)
+
+* **12/2022: SC release**
+  * improvements
+    * web-frontend redesign
+  * planed features
+    * full batch job support
+    * FPGA support
+
+## Releases
+
+* 04/2018: _Carme prototype_ at ITWM
+
+* 03/2019: r0.3.0 (first public release)
+
+* 07/2019: r0.4.0
+
+* 11/2019: r0.5.0
+
+* 12/2019: r0.6.0
+
+* 07/2020: r0.7.0
+
+* 11/2020: r0.8.0
+
+* 08/2021: r0.9.0
+
+* 05/2022: **r0.9.5** (latest)
 
 ## **Documentation**
+
 Visit our documentation at [github](https://carmeteam.github.io/Carme-Docu/).
 
-
 ## **Who is behind Carme?**
-_Carme_ is developed at the [machine learning group](http://itwm.fraunhofer.de/ml) of the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
 
+_Carme_ is developed at the [machine learning group](http://itwm.fraunhofer.de/ml) of the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
 
 <img src="Images/logo-itwm.png" width="200">
 
-
 _NOTE:_ We are open for contributions!
 
-
 ## **Contact**
+
 &rarr; dominik.strassel@itwm.fraunhofer.de
 
-
 ## **Sponsors**
+
 **The development of *Carme* is financed by research grants from**
 
 <img src="Images/logo-bmbf.png" width="200" height="100">  

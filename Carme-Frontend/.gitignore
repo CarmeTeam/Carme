@@ -5,6 +5,9 @@
 *.conf
 hosts
 
+# system specific settings.py
+settings.py
+
 # custom python config
 custom.py
 

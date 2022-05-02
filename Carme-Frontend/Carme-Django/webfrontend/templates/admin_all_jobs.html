@@ -20,44 +20,76 @@
 {% block title %}Carme Home{% endblock %}
 
 {% block content %}
-<div class="container my-4">
-	<div class="row">
-		<div class="col-12">
+
+{% if request.user.is_superuser %}
+
+<div class="row mt-2 mb-4">
+	<div class="col-12">
+		<div class="card-deck">
 			<div class="card">
 				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; All jobs</div>
 				<div class="card-body">
-					<div class="table-responsive">
-						<table class="table mb-0 text-center">
-							<thead>
-								<tr>
-									<th scope="col">Slurm id</th>
-									<th scope="col">User</th>
-									<th scope="col">Name</th>
-									<th scope="col">#(Nodes)</th>
-									<th scope="col">Master node</td>
-									<th scope="col">GPU type</th>
-									<th scope="col">GPUs / node</th>
-									<th scope="col">Image</th>
-									<th scope="col">Status</th>
-									<th scope="col">Entry points</th>
-									<th scope="col">Details</th>
-									<th scope="col">Stop</th>
-								</tr>
-							</thead>
-							<tbody id="jobtable">
-								{% include "blocks/admin_job_table.html" %}
-							</tbody>
-						</table>
+					<div class="container my-1">
+						<div class="table-responsive scrollbar">
+							<table class="table table-sm table-striped mb-0 overflow-hidden border-bottom style-text">
+								<thead>
+									<tr>
+										<th scope="col">ID</th>
+										<th scope="col">User</th>
+										<th scope="col">Name</th>
+										<th scope="col">Image</th>
+										<th scope="col">Master node</td>
+										<th scope="col">Nodes</td>
+										<th scope="col"><span class="frac"><sup>CPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+										<th scope="col" style="min-width: 6.0rem;"><span class="frac"><sup>GPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
+										<th scope="col">Status</th>
+										<th scope="col" style="min-width: 8.0rem;">Entry points</th>
+										<th scope="col">Details</th>
+										<th scope="col">Stop</th>
+									</tr>
+								</thead>
+								<tbody id="jobtable">
+									{% include "blocks/admin_job_table.html" %}
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
+{% else %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="error-template">
+                <h1>
+                    Oops!</h1>
+                <h2 class="display-4">
+                    403 Not Authorized</h2>
+                <div class="error-details">
+                    Sorry, you don't have permissions to access this page!
+                </div>
+                <div class="error-actions">
+                    <a href="{% url 'index' %}" class="btn btn-secondary btn-lg"><i class="fa fa-home" aria-hidden="true"></i>
+                        Take Me Home </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
 {% endblock %}
 
 
 {% block javascript %}
+
+{% if request.user.is_superuser %}
+
 <script type="text/javascript">
 	if (!$) console.error('jQuery is required!');
 	else {
@@ -115,4 +147,7 @@
 		});
 	}
 </script>
+
+{% endif %}
+
 {% endblock %}

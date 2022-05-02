@@ -6,9 +6,13 @@ Requires=network-online.target
 [Service]
 Type=forking
 Environment=SINGULARITYENV_APACHE_STARTED_BY_SYSTEMD=1
-Environment=SINGULARITYENV_APACHE_LOG_DIR=/opt/Carme-Apache-Logs 
-ExecStart=/usr/bin/singularity exec -B "/opt/Carme/Carme-Frontend/run:/opt/apache2-run" -B "/opt/Carme-Proxy-Routes/routes:/opt/traefik/routes" -B "/opt/Carme/Carme-Frontend/CarmeConfig.frontend" -B "/var/log/carme/apache:/opt/Carme-Apache-Logs" -B "/opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/apache2.conf" -B "/opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/ports.conf" -B "/opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/002-gpu.conf" -B "/opt/Carme/Carme-Frontend/Carme-Django/webfrontend/SSL" -B "/var/run" -B "/opt/Carme/Carme-Frontend/Carme-Django/webfrontend/scripts/settings.py" "/opt/Carme/Carme-ContainerImages/Carme-Frontend-Container/frontend.simg" /usr/sbin/apache2ctl start
-ExecStop=/usr/bin/singularity exec -B "/opt/Carme/Carme-Frontend/run:/opt/apache2-run" -B "/opt/Carme-Proxy-Routes/routes:/opt/traefik/routes" -B "/opt/Carme/Carme-Frontend/CarmeConfig.frontend" -B "/var/log/carme/apache:/opt/Carme-Apache-Logs" -B "/opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/apache2.conf" -B "/opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/ports.conf" -B "/opt/Carme/Carme-Frontend/Carme-Server-Conf/apache2/002-gpu.conf" -B "/opt/Carme/Carme-Frontend/Carme-Django/webfrontend/SSL" -B "/var/run" -B "/opt/Carme/Carme-Frontend/Carme-Django/webfrontend/scripts/settings.py" "/opt/Carme/Carme-ContainerImages/Carme-Frontend-Container/frontend.simg" /usr/sbin/apache2ctl stop
+Environment=SINGULARITYENV_APACHE_LOG_DIR=/opt/Carme-Apache-Logs
+ExecStart=/usr/bin/singularity exec -B "/etc/carme/CarmeConfig.frontend" -B "/var/lib/carme/proxy/routes:/opt/traefik/routes"
+-B "/var/log/carme/apache:/opt/Carme-Apache-Logs" -B "/var/run/carme/frontend:/opt/apache2-run"
+-B "/var/run" "/opt/Carme/Carme-ContainerImages/Carme-Frontend-Container/frontend.simg" /usr/sbin/apache2ctl start
+ExecStop=/usr/bin/singularity exec -B "/etc/carme/CarmeConfig.frontend" -B "/var/lib/carme/proxy/routes:/opt/traefik/routes"
+-B "/var/log/carme/apache:/opt/Carme-Apache-Logs" -B "/var/run/carme/frontend:/opt/apache2-run"
+-B "/var/run" "/opt/Carme/Carme-ContainerImages/Carme-Frontend-Container/frontend.simg" /usr/sbin/apache2ctl stop
 PIDFile=/opt/Carme/Carme-Frontend/run/apache2.pid
 RestartSec=30
 Restart=always

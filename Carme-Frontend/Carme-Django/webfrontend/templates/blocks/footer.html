@@ -1,0 +1,71 @@
+
+{% load static %}
+
+<footer class="text-center text-lg-start bg-light text-muted" >
+    
+    <!--<footer top>-->
+    <section class="border-top p-1">
+        <div class="container py-0">
+            <div class="row">
+                <div class="text-center col-md-2 col-lg-2 col-xl-2 d-md-none"> 
+                    {% if settings.CARME_FRONTEND_LINK_DISCLAIMER|length > 0 %}
+                    <h6 class="fw-bold mb-0 py-1">
+                        <a href="{{ settings.CARME_FRONTEND_LINK_DISCLAIMER }}" target="_blank" class="text-reset">Disclaimer</a>
+                    </h6>
+                    {% endif %} 
+                </div>  
+                <div class="text-left col-md-2 col-lg-2 col-xl-2 d-none d-md-block">
+                    {% if settings.CARME_FRONTEND_LINK_DISCLAIMER|length > 0 %}
+                    <h6 class="fw-bold mb-0 pl-2 py-1">
+                        <a href="{{ settings.CARME_FRONTEND_LINK_DISCLAIMER }}" target="_blank" class="text-reset">Disclaimer</a>
+                    </h6>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-2 col-lg-2 col-xl-2">
+                    {% if settings.CARME_FRONTEND_LINK_PRIVACY|length > 0 %}
+                    <h6 class="fw-bold mb-0 py-1">
+                        <a href="{{ settings.CARME_FRONTEND_LINK_PRIVACY }}" target="_blank" class="text-reset">Data Privacy</a>
+                    </h6>
+                    {% endif %} 
+                </div>
+    
+                <div class="text-center col-md-2 offset-md-6 col-lg-2 offset-lg-6 col-xl-2 offset-xl-6 mb-md-0 px-0 d-md-none">
+                    <h6 class="fw-bold mb-0 py-1">
+                        <a href="https://twitter.com/open_carme" target="_blank" class="text-reset text-decoration-none">
+                            <i class="fa fa-twitter px-1"></i>
+                        </a>
+                        <a href="/wiki/" class="me-4 text-reset text-decoration-none">
+                            <i class="fa fa-wikipedia-w px-1"></i>
+                        </a>
+                        <a href="https://github.com/CarmeTeam/Carme" target="_blank" class="text-reset text-decoration-none">
+                            <i class="fa fa-github px-1"></i>
+                        </a>
+                    </h6>
+                </div>
+                <div class="text-right col-md-2 offset-md-6 col-lg-2 offset-lg-6 col-xl-2 offset-xl-6 mb-md-0 px-0 d-none d-md-block">
+                    <h6 class="fw-bold mb-0 pr-4 py-1">
+                        <a href="https://twitter.com/open_carme" target="_blank" class="text-reset text-decoration-none">
+                            <i class="fa fa-twitter px-1"></i>
+                        </a>
+                        <a href="/wiki/" class="me-4 text-reset text-decoration-none">
+                            <i class="fa fa-wikipedia-w px-1"></i>
+                        </a>
+                        <a href="https://github.com/CarmeTeam/Carme" target="_blank" class="text-reset text-decoration-none">
+                            <i class="fa fa-github px-1"></i>
+                        </a>
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--</footer top>-->
+
+    <!--<footer bottom>-->
+    <div class="footer-bottom text-center p-2">
+        <div class="container py-0"> © 2018-<script>document.write(new Date().getFullYear())</script>
+            <a class="text-reset fw-bold" href="https://carmeteam.github.io/Carme/" target="_blank">Carme</a>
+        </div>
+    </div>
+    <!--</footer bottom>-->
+</footer>

@@ -22,7 +22,7 @@ function die () {
 
 # source basic bash functions ------------------------------------------------------------------------------------------------------
 PATH_TO_SCRIPTS_FOLDER="/opt/Carme/Carme-Scripts"
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/carme-basic-bash-functions.sh"
 else
   die "carme-basic-bash-functions.sh not found but needed"
@@ -62,7 +62,7 @@ CARME_SLURM_BackupController=$(get_variable CARME_SLURM_BackupController)
 
 
 # functions ------------------------------------------------------------------------------------------------------------------------
-if [ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh" ];then
+if [[ -f "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh" ]];then
   source "${PATH_TO_SCRIPTS_FOLDER}/slurm/mgmt-scripts/carme-slurm-mgmt-functions.sh"
 else
   echo "ERROR: carme-slurm-mgmt-functions.sh not found but needed"
@@ -81,7 +81,7 @@ NO_WEIGHTS=()
 
 
 read -rp "Do you want to shuffle the weights of the compute nodes? [y/N] " RESP
-if [ "$RESP" = "y" ]; then
+if [[ "$RESP" = "y" ]]; then
 
   # backup slurm.conf
   echo "backup slurm.conf in slurm.conf.bak"
@@ -110,7 +110,7 @@ if [ "$RESP" = "y" ]; then
 
 
   # check if there are nodes without weights
-  if [ ${#NO_WEIGHTS[@]} -eq 0 ]; then
+  if [[ ${#NO_WEIGHTS[@]} -eq 0 ]]; then
 
     # copy new slurm config to all compute nodes
     echo "copy new slurm.conf to all nodes"

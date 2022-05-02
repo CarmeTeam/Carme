@@ -17,6 +17,11 @@ fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
+# variables ------------------------------------------------------------------------------------------------------------------------
+CONFIG_FILE="/etc/carme/CarmeConfig.backend"
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+
 LOG_FILE="/var/log/carme/slurmctld/prolog/${SLURM_JOB_ID}.log"
 { # start command grouping for output redirection
 
@@ -74,7 +79,6 @@ function get_variable () {
 
 
 # source needed variables
-CONFIG_FILE="/opt/Carme/CarmeConfig.backend"
 if [[ -f ${CONFIG_FILE} ]];then
 
   CARME_BACKEND_SERVER=$(get_variable CARME_BACKEND_SERVER ${CONFIG_FILE})
