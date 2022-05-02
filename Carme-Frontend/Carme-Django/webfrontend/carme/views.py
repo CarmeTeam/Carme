@@ -603,6 +603,9 @@ def job_info(request):
 ##        return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
 ##    error_message= 'Internal error. Please contact the admin.'
 ##    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
+@force_maintenance_mode_off
+def login(request):
+    return redirect("two_factor:login")
 
 @force_maintenance_mode_off
 def logout(request):
