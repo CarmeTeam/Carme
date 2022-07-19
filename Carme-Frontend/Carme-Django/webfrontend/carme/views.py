@@ -973,8 +973,7 @@ class BaseForecast():
         forecast_single = [np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))] # add time_end (doubled)
         forecast_single = [forecast_single[k][:,[0,1,2,6,7]] for k in range(len(self.gpus))] # free / queue / used / time_end / time_end
         forecast_single = [np.array(sorted(forecast_single[k],key=lambda x: x[3])) for k in range(len(self.gpus)) ] # sort by time_end
-        forecast_single = [forecast_single[k].astype(str) for k in range(len(self.gpus)) ] # convert to string
-        
+        forecast_single = [forecast_single[k].astype(str) for k in range(len(self.gpus)) ] # convert to string        
         
         for k in range(len(self.gpus)): # Express time in ECT datetime
             for count, x in enumerate(forecast_single[k][:,3]): 
@@ -987,15 +986,17 @@ class BaseForecast():
             for i in range(1,len(forecast_single[k])): # Remove duplicate times
                 if forecast_single[k][i,3]==forecast_single[k][i-1,3]:
                     forecast_single[k][i-1,3]=0
-            forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='0', axis=0)
-
+            if (any(forecast_single[k][:,3])=='0'):
+                print(True)
+                forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='0', axis=0)
             if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_single[k][0,3]: # Add now() time with initial state data      
                 forecast_single[k][0,3] = 'Now'
                 forecast_single[k][0,4] = 'Now'
             else:
                 forecast_single[k] = np.r_[[[free_0[k], queue_0[k], used_0[k], 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]], forecast_single[k]] 
-            forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='none', axis=0) 
-        
+            if (any(forecast_single[k][:,3])=='none'):
+                forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='none', axis=0) 
+            
         for k in range(len(self.gpus)):
             if len(forecast_single[k]) < 8:
                 count = len(forecast_single[k])
@@ -1015,7 +1016,8 @@ class BaseForecast():
         ### Compute Total Forecast (chart for all GPUs) 
         forecast_total = np.concatenate([np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))]) # add time_end (doubled)
         forecast_total = np.array(sorted(forecast_total,key=lambda x: x[6])) # sort by time_end
-        forecast_total = np.delete(forecast_total, forecast_total[:,6] == 0, axis=0) # delete empty rows 
+        if (any(forecast_total[:,6])==0):
+            forecast_total = np.delete(forecast_total, forecast_total[:,6] == 0, axis=0) # delete empty rows 
         if forecast_total.size == 0:
             forecast_total = np.array([[sum(free_0), sum(queue_0), sum(used_0), 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]])
         else:
@@ -1035,7 +1037,8 @@ class BaseForecast():
             for i in range(1,len(forecast_total)): # Remove duplicate times
                 if forecast_total[i,3]==forecast_total[i-1,3]:
                     forecast_total[i-1,3]=0
-            forecast_total = np.delete(forecast_total, forecast_total[:,3]=='0', axis=0)
+            if (any(forecast_total[:,3])=='0'):
+                forecast_total = np.delete(forecast_total, forecast_total[:,3]=='0', axis=0)
             if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_total[0,3]: # Add now() time with initial state data        
                 forecast_total[0,3] = '<b>Now</b>'
             else:

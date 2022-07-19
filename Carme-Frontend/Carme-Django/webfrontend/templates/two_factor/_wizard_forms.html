@@ -3,16 +3,14 @@
 
 {% if wizard.steps.current == 'method' %}
   {% for field in wizard.form %}
-    <div class="form-check mb-2">
-    	{{ field | add_classes:'form-check-input' }}
-    	<label class="form-check-label" for="{{ field.label }}"></label>
-    </div>
+    	{{ field | add_classes:'fs-0 fw-400 text-body pb-3 ps-2' }}
   {% endfor %}
+
 {% else %}
   {% for field in wizard.form %}
-    <div class="form-group">
-     {{ field | add_classes:'form-control' }}
-     <label for="{{ field.label }}">{{ field.label }}</label>
+    <div class="form-group mb-3 position-relative w-100">
+     {{ field | add_classes:'form-control form-control-login fs-0 fw-400 d-block pt-4 ps-3' }}
+     <label class="form-label pt-1 ps-3" for="{{ field.label }}">{{ field.label }}</label>
     </div>
   {% endfor %}
 {% endif %}

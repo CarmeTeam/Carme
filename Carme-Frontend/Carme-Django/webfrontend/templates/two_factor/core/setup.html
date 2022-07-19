@@ -3,63 +3,70 @@
 
 {% block subcontent %}
 
-<div class="row flex-center-carme min-vh-90 py-4">
+<div class="row flex-center-carme min-vh-85 py-4">
 		<div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
  			<div id="login-box">
+
    			<!-- <row> -->       
 						<div class="row">
 
-								<!-- <title>  -->
-								{% if wizard.steps.current == 'generator' %}
-        		<table class="table table-borderless" style="width:50%; margin:auto;">
-            <tbody>
-														<tr>
-																<td>
-																		<p class="text-center"> 
-            								<div class="qr-box" style="--c:#4d5969;--w:30%;--b:4px">
-              								<img src="{{ QR_URL }}" alt="QR Code" style="width:150px; height:150px;" />
-              						</div>
-                  </p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        {% else %}
-          <div class="col-12">
-            <div class="text-center mb-4 mt-4">
-              <img class="img-logo" src="/static/img/carme.svg" alt="logo" />
-              <h3 class="font-weight-normal">Carme</h3>
-            </div>
-          </div>
-        {% endif %}
-								<!-- </title> -->
-
-								<!-- <col> -->
+								<div class="col-12">
+										<!-- <qr> -->
+										{% if wizard.steps.current == 'generator' %}
+        				<table class="table table-borderless" style="width:50%; margin:auto;">
+            		<tbody>
+																<tr>
+																		<td>
+																				<p class="text-center"> 
+            										<div class="qrbox">
+              										<img src="{{ QR_URL }}" class="qrcode" />
+              								</div>
+                  		</p>
+                		</td>
+              		</tr>
+            		</tbody>
+          		</table>
+										<!-- </qr> -->
+										
+										<!-- <logo> -->
+        		{% else %}
+          		<div class="text-center my-4">
+          				<img class="mb-4" src="/static/img/logo/carme-dark.svg"/>
+            		<h5 class="fs-6 fw-600 text-title">Carme</h5>
+          		</div>
+        		{% endif %}
+										<!-- </logo> -->
+								</div>
+								
         <div class="col-12">
-
-										<!-- <subtitle> -->
+										<!-- <key> -->
 										{% if wizard.steps.current == 'generator' %}
             <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text pb-0" style="font-size:0.7rem;"><i class="fa fa-key" aria-hidden="true"></i></span>
-              </div> 
-              <input class="form-control text-center" style="font-size:0.7rem;" type="text" value="{{ secret_key }}" id="mySecretKey" readonly >
-              <div class="input-group-append">
-                <span class="input-group-text pb-0">
-                  <button id="qrcopy" class="btn btn-sm btn-link p-0" style="font-size:0.7rem;"  onclick="myQRFunction()" data-toggle="tooltip" data-placement="top" title="Copy">
-                    <i class="fa fa-clone" aria-hidden="true"></i>
-                  </button>
-                </span>
-              </div> 
+              <span class="input-group-text fs--2"><i class="fas fa-key" aria-hidden="true"></i></span>
+              <input class="form-control text-center fs--3 fw-500 text-header" type="text" value="{{ secret_key }}" id="mySecretKey" readonly >
+              <span class="input-group-text">
+                <button id="qrcopy" class="btn btn-sm btn-link p-0 fs--2" onclick="myQRFunction()" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy">
+                  <i class="fas fa-copy" aria-hidden="true"></i>
+                </button>
+              </span>
             </div>
-          {% else %}
-            <h5 class="text-center mb-4">{% block title %}{% trans "Enable Two-Factor Authentication" %}{% endblock %}</h5>
-          {% endif %}
-										<!-- </subtitle> -->
+										<!-- </key> -->
 
-										<!-- <content> -->
+										<!-- <alert> -->	   
+          {% if form.errors %}
+            <div id="error-message" class="alert alert-danger py-2" role="alert"><i class="fa fa-times-circle"></i>&nbsp; Incorrect information. Please Try again.</div>
+          {% endif %}
+										<!-- </alert> -->
+										
+										<!-- <title> -->
+          {% else %}
+            <h5 class="text-center mb-4 fs-2 fw-500 text-title">{% block title %}{% trans "Enable Two-Factor Authentication" %}{% endblock %}</h5>
+          {% endif %}
+										<!-- </title> -->
+
+										<!-- <steps> -->
           {% if wizard.steps.current == 'welcome' %}
-          		<p>
+          		<p class="fs-0 fw-400 text-body text-justify">
 														{% blocktrans trimmed %}
 																You are about to take your account security to the
                 next level. Follow the steps to enable two-factor
@@ -67,120 +74,46 @@
 														{% endblocktrans %}
 												</p>
           {% elif wizard.steps.current == 'method' %}
-            <p>
+            <p class="fs-0 fw-400 text-body">
 														{% blocktrans trimmed %}
 																Please select the method you would like to use.
 														{% endblocktrans %}
 												</p>
           {% elif wizard.steps.current == 'generator' %}
-          		<p>
+          		<p class="fs-0 fw-400 text-body text-justify">
 														{% blocktrans trimmed %}
-              		Use your smartphone to scan the <i class="fa fa-qrcode" aria-hidden="true"></i>
-                or copy the <i class="fa fa-key" aria-hidden="true"></i> in your authentication app. Then, enter the token.
+              		Use your smartphone to scan the <i class="fas fa-qrcode fs--2" aria-hidden="true"></i>
+                or copy the <i class="fa fa-key fs--2" aria-hidden="true"></i>
+																in your authentication app. Then, enter the token.
               {% endblocktrans %}
 												</p>
-          {% elif wizard.steps.current == 'sms' %}
-          		<p>
-														{% blocktrans trimmed %}
-																Please enter the phone number you wish to receive the
-                text messages on. This number will be validated in the next step.
-              {% endblocktrans %}
-												</p>
-          {% elif wizard.steps.current == 'call' %}
-          		<p>
-														{% blocktrans trimmed %}
-																Please enter the phone number you wish to be called on.
-                This number will be validated in the next step. 
-														{% endblocktrans %}
-												</p>
-          {% elif wizard.steps.current == 'validation' %}
-												<!-- <challenge_succeeded> -->
-          		{% if challenge_succeeded %}
-														<!-- <call> -->
-            		{% if device.method == 'call' %}
-              		<p>
-																		{% blocktrans trimmed %}
-																				We are calling your phone right now, please enter the digits you hear.
-																		{% endblocktrans %}
-																</p>
-              {% elif device.method == 'sms' %}
-              		<p>
-																		{% blocktrans trimmed %}
-																				We sent you a text message, please enter the tokens we sent.
-																		{% endblocktrans %}
-																</p>
-              {% endif %}
-														<!-- </call> -->
-            {% else %}
-            		<p class="alert alert-warning" role="alert">
-																{% blocktrans trimmed %}
-																		We've encountered an issue with the selected authentication method. Please
-                  go back and verify that you entered your information correctly, try
-                  again, or use a different authentication method instead. If the issue
-                  persists, contact the site administrator.
-																{% endblocktrans %}
-														</p>
-            {% endif %}
-												<!-- </challenge_succeeded> -->
 										{% elif wizard.steps.current == 'yubikey' %}
-          		<p>
+          		<p class="fs-0 fw-400 text-body text-justify">
 														{% blocktrans trimmed %}
 																To identify and verify your YubiKey, please insert a token in
                 the field below. Your YubiKey will be linked to your account.
 														{% endblocktrans %}
 												</p>
           {% endif %}
-										<!-- </content> -->
+										<!-- </steps> -->
           
 										<!-- <form> -->  
-          <form action="" method="post">{% csrf_token %}
+          <form action="" method="post">
+											{% csrf_token %}
           	{% include "two_factor/_wizard_forms.html" %}
-           {# hidden submit button to enable [enter] key #}
           	<input type="submit" value="" class="d-none" />
-            
            {% include "two_factor/_wizard_actions.html" %}
           </form>
 										<!-- </form> -->
-
         </div>
-								<!-- </col> -->
+								
       </div>
 						<!-- </row> -->
+						
+						<!-- sponsor -->
+      {% include "two_factor/core/sponsor.html" %}
 
-      <div class="row mb-5 mt-3">
-      		<div class="col">
-       			<a href="https://www.itwm.fraunhofer.de/" target="_blank"><img src="/static/img/itwm.svg" alt="logo" style="width: 100%;" /></a>
-        </div>
-       	<div class="col">
-        		<a href="https://www.bmbf.de/" target="_blank"><img src="/static/img/bmbf.svg" alt="logo" style="width: 100%;" /></a>
-        </div>
-        <div class="col">
-        		<a href="https://mbwwk.rlp.de/" target="_blank"><img src="/static/img/rlp.svg" alt="logo" style="width: 100%;" /></a>
-        </div>
-      </div>
-
-      </div>
+    </div>
   </div>
 </div>
-
-<script>
-  // qrcode secret key 
-
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-  });
-
-  $('#qrcopy').click(function() {
-    $(this).attr('data-original-title', 'Copied!').tooltip('show');
-    $(this).attr('data-original-title', 'Copy');
-  });
-
-  function myQRFunction() {
-    var copyText = document.getElementById("mySecretKey");
-    copyText.select();
-    copyText.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(copyText.value);
-  } 
-</script>
-
 {% endblock %}

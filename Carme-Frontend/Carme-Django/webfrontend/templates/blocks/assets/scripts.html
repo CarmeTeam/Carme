@@ -1,0 +1,151 @@
+<!---------------------------------->
+<!--        Footer: date          -->
+<!--       ( footer.html )        -->
+<!---------------------------------->                   
+<script>
+    document.getElementById("current-year").innerHTML = new Date().getFullYear();
+</script>
+  
+<!---------------------------------->
+<!--        Login: alerts         -->
+<!--  ( two_factor:login.html )   -->
+<!----------------------------------> 
+          
+<script type="text/javascript">
+    if ('URLSearchParams' in window) {
+        var messages = ['timeout', 'logout'];
+        var searchParams = new URLSearchParams(window.location.search);
+      
+        for(var key in messages) {
+            var msg = messages[key];
+      
+            if(searchParams.has(msg)) {
+              var elem = document.getElementById(msg + '-message');
+              if (elem) elem.style.display = 'block';
+      
+              searchParams.delete(msg);
+            }
+        }
+      
+        var query = (searchParams.toString().length > 0) ? '?' + searchParams.toString() : '';
+        var path = window.location.pathname + query;
+      
+        history.pushState(null, '', path);
+    }
+</script>
+      
+  
+<!---------------------------------->
+<!--      QR Code: copy key       -->
+<!--  ( two_factor:setup.html )   -->
+<!----------------------------------> 
+<script>
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip()
+    });
+      
+    $('#qrcopy').click(function() {
+        $(this).attr('data-bs-original-title', 'Copied!').tooltip('show');
+        $(this).attr('data-bs-original-title', 'Copy');
+    });
+      
+    function myQRFunction() {
+        var copyText = document.getElementById("mySecretKey");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+    } 
+</script>
+
+
+<!---------------------------------->
+<!--   Dark-mode: sponsor icons   -->
+<!-- ( two_factor:sponsor.html )  -->
+<!----------------------------------> 
+<script>
+    var imgLoginL = document.getElementsByClassName('carme-login-light');
+    var imgLoginD = document.getElementsByClassName('carme-login-dark');
+    const themeController = document.body;
+    themeController.addEventListener("clickControl", ({ detail: { control, value } }) => {
+        
+        if (control === "theme") {
+          
+            if (value=="dark") {
+                if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
+                    for(var i = 0, length = imgLoginL.length; i < length; i++) {
+                        imgLoginL[i].style.display = 'none';            // hides light-mode img
+                        imgLoginD[i].style.display = 'inline-block';    // shows dark-mode  img
+                    }               
+                }
+            }
+
+            if (value=="light") {
+                if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
+                    for(var i = 0, length = imgLoginL.length; i < length; i++) {
+                        imgLoginL[i].style.display = 'inline-block';    // shows dark-mode  img 
+                        imgLoginD[i].style.display = 'none';            // hides light-mode img
+                    } 
+                }
+            }
+
+        }
+    });
+
+    const element = document.querySelector(':root');
+    const carmeMode = getComputedStyle(element);
+    
+    let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
+    let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
+    let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
+
+        if (activeMode==darkMode) {
+            if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
+                for(var i = 0, length = imgLoginL.length; i < length; i++) {   
+                    imgLoginL[i].style.display = 'none'; // hides light-mode img
+                    imgLoginD[i].style.display = 'inline-block';  // shows dark-mode img
+                }
+            }
+        }
+        
+        if (activeMode==lightMode){
+            if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
+                for(var i = 0, length = imgLoginL.length; i < length; i++) {
+                    imgLoginL[i].style.display = 'inline-block';  // shows dark-mode img 
+                    imgLoginD[i].style.display = 'none'; // hides light-mode img
+                }
+            }
+        }
+</script>
+
+
+<!---------------------------------->
+<!--       OverlayScrollbars      -->
+<!--        ( ??????.html )       -->
+<!----------------------------------> 
+  
+      <script>
+          document.addEventListener("DOMContentLoaded", function() {
+              
+              OverlayScrollbars(document.getElementsByClassName('scrollbar-overlay'), {
+                className       : "os-theme-dark custom-scroll",
+                resize          : "none",
+                sizeAutoCapable : true,
+                paddingAbsolute : true,
+                scrollbars : {
+                  clickScrolling : true
+                }
+              });
+          });
+          document.addEventListener("DOMContentLoaded", function() {
+              
+              OverlayScrollbars(document.querySelectorAll('bodyx'), {
+                className       : "os-theme-dark custom-scroll",
+                resize          : "none",
+                sizeAutoCapable : true,
+                paddingAbsolute : true,
+                scrollbars : {
+                  clickScrolling : true
+                }
+              });
+          });
+      </script>
