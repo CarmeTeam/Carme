@@ -153,6 +153,12 @@ body {
   opacity: 0.5; 
 }
 
+/* body-scrollbar not hidden when modal is active*/
+.modal-open {
+  overflow:hidden!important;
+  overflow-y:scroll!important;
+  padding-right:0 !important;
+}
 
 /*---------------------  Table  ----------------------*/
 table tr{
