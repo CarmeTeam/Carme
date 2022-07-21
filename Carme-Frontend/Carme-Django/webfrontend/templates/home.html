@@ -566,7 +566,8 @@
 												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
             $.get('{% url 'line_chart_json_time' %}', function (data) {
                 data["chart"] = {
-                    type: "areaspline"
+                    type: "areaspline",
+																				backgroundColor: getGrays()[''],
                 };
 
                 data["title"] = {                                                                                                                                                                      
@@ -584,6 +585,9 @@
                     align: 'center',
                     verticalAlign: 'top',
                     floating: false,
+																				itemStyle: {
+																						color: getGrays()['1000']
+																				},
                 };
 
                 $("#myTimeChart").highcharts(data);
@@ -595,12 +599,16 @@
             $.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
                 data["chart"] = {
                 type: "areaspline",
+																backgroundColor: getGrays()[''],
                 };
                 data["legend"] = {
                     layout: 'horizontal',
                     align: 'center',
                     verticalAlign: 'top',
                     floating: false,
+																				itemStyle: {
+																						color: getGrays()['black']
+																				},
                 };
                 data["plotOptions"] = {
                     areaspline: {
@@ -615,12 +623,16 @@
             $.get('line_chart_json_forecast0', function (data) {
                 data["chart"] = {
                 type: "areaspline",
+																backgroundColor: getGrays()[''],
                 };
                 data["legend"] = {
                     layout: 'horizontal',
                     align: 'center',
                     verticalAlign: 'top',
                     floating: false,
+																				itemStyle: {
+																						color: getGrays()['1000']
+																				},
                 };
                 data["plotOptions"] = {
                     areaspline: {
@@ -752,6 +764,15 @@
   };
 		
 
+		themeController.addEventListener(
+  		"clickControl",
+    ({ detail: { control, value } }) => {
+
+    		if (control === "theme") {
+      					update_chart();
+         }
+      }
+    );
 		update_chart();
 		update_news();
 

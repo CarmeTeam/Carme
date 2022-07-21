@@ -401,6 +401,7 @@ input[type=number] {
 nav {
   background-color: var(--carme-navbar-bg)!important;
   border-bottom: none;
+		padding-right:0 !important;
 }
 
 /* navbar-link */
