@@ -13,10 +13,10 @@
 			<td class="align-middle">
 				{% if job.status == 'running' %}
 					<i class="fas fa-check text-success"></i>
-					<span class="sr-only job-status">Running</span>
+					<span class="sr-only">Running</span>
 				{% else %}
 					<i class="fas fa-cog fa-spin text-secondary"></i>
-					<span class="sr-only job-status">Queued</span>
+					<span class="sr-only">Queued</span>
 				{% endif %}
 			</td>
 			<td class="align-middle">
@@ -69,29 +69,16 @@
    </td>
 			<td class="align-middle" style="min-width: 8.0rem;">
 				{% if job.status == 'running' %}
-
-					<div class="carme-job-light" style="display:none;">
 					<a href="/ta_{{ job.url_suffix }}/"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/theia-light.svg' %}" alt="Theia"/>
+								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank">
+							<img class="carme-job-dark" src="{% static 'img/logo/theia-dark.svg' %}" alt="Theia"/>
+							<img class="carme-job-light" src="{% static 'img/logo/theia-light.svg' %}" alt="Theia" />
 					</a>
 					<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/jupyter-light.svg' %}" alt="Jupyter"/>
+								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank">
+							<img class="carme-job-dark" src="{% static 'img/logo/jupyter-dark.svg' %}" alt="Jupyter"/>
+							<img class="carme-job-light" src="{% static 'img/logo/jupyter-light.svg' %}" alt="Jupyter" />
 					</a>
-					</div>
-     
-					<div class="carme-job-dark" style="display:none;">
-					<a href="/ta_{{ job.url_suffix }}/"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/theia-dark.svg' %}" alt="Theia"/>
-					</a>
-					<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/jupyter-dark.svg' %}" alt="Jupyter"/>
-					</a>
-					</div>
-     
 					{% comment %}
  				<a href="/tb_{{ job.url_suffix }}/"
 						onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;"
@@ -174,9 +161,7 @@
                          <td class="align-middle">{{ job.image_name }}</td>
                          <td class="align-middle">{{ slurm.nodelist }}</td>
                          <td class="align-middle"><span class="i-node">{{ slurm.nodes_alloc}}</span></td>
-                         {% if slurm.nodes_alloc %}
                          <td class="align-middle"><span class="i-cpu">{{ slurm.cpus_req | intdiv:slurm.nodes_alloc }}</span></td>
-                         {% endif %}
                          <td class="align-middle"><span class="i-gpu">{{job.num_gpus}}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
                        </tr>
                      </tbody>
@@ -205,6 +190,7 @@
 							</button>
 					</form>
 			</td>
+	</tr>
 
 {% if job.status == 'running' %}
 <script>
@@ -276,6 +262,5 @@
   
 </script>
 {% endif %}
-</tr>
 {% endfor %}
 

@@ -94,6 +94,11 @@ except ImportError:
     from django.utils.http import (
         is_safe_url as url_has_allowed_host_and_scheme,
     )
+
+# color dark-mode 
+#from django.http import JsonResponse
+#from rest_framework.decorators import api_view
+
 #-------------------------------#
 #----- classes and methods -----#
 #-------------------------------#
@@ -382,12 +387,14 @@ def job_table(request):
         sort_order=Case(*cases_active, output_field=IntegerField())).order_by('sort_order')
     myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) ) 
     myjobtable_script = zip( list(slurm_list_user), list(jobtable_active) )    
-
+    #colormode = request.session['colormode']
+    #print('colormode:' + colormode)
 
     # render template
     context = {
         'myjobtable_list': myjobtable_list,
         'myjobtable_script': myjobtable_script,
+        #'colormode': colormode,
     }
     
     return render(request, 'blocks/job_table.html', context)
@@ -737,6 +744,17 @@ def proxy_auth(request):
     
     return HttpResponse(status=403) # forbidden
 
+
+def color(request):
+    if(request.POST.get('result_data')):
+        listt= request.POST['result_data']
+        listt= listt.split(",")
+        print('we have' + request.POST.get('result_data'))
+        request.session['colorful'] = listt[0]
+        request.session['chartborder'] = listt[1]
+        request.session['colormode'] = listt[2]
+    return JsonResponse({'success':True})
+
 #####################################
 #####################################
 ######## Starts HighCharts ##########
@@ -811,13 +829,29 @@ class LineChartJSONViewTime(HighchartPlotLineChartView):
         return next_color(color)
     
     def get_x_axis_options(self):
-        return {"categories": self.get_labels(), "title": {"text": "Time (CET)", "margin": 15}, "min": 0.3,"max":self.xAxispoints-1.3,
-        "plotLines": [{
-        "color": "#aeb1b5",
-        "width": "1",
-        "value": "9",
-        "dashStyle": "Dash" 
-        }]
+        return {
+            "categories": self.get_labels(), 
+            "title": {
+                "text": "Time (CET)", 
+                "margin": 15, 
+                "style": {
+                    "color": self.request.session['colorful']
+                }
+            }, 
+            "min": 0.3,
+            "max":self.xAxispoints-1.3,
+            "lineColor": '#748194',
+            "labels": {
+                "style": {
+                    "color": self.request.session['colorful']
+                }
+            },
+            "plotLines": [{
+                "color": "#aeb1b5",
+                "width": "1",
+                "value": "9",
+                "dashStyle": "Dash" 
+            }]
         }
 
     def get_markers(self):
@@ -856,13 +890,29 @@ class BaseForecast():
         return next_color(color)
     
     def get_x_axis_options(self):
-        return {"categories": self.get_labels(), "title": {"text": "Time (CET)", "margin": 15}, "min": 0.3,"max":self.xAxispoints-1.3,
-        "plotLines": [{
-        "color": "#aeb1b5",
-        "width": "1",
-        "value": "0.5",
-        "dashStyle": "Dash" 
-        }]        
+        return {
+            "categories": self.get_labels(), 
+            "title": {
+                "text": "Time (CET)", 
+                "margin": 15,
+                "style": {
+                    "color": self.request.session['colorful']
+                }
+            }, 
+            "min": 0.3,
+            "max":self.xAxispoints-1.3,
+            "lineColor": self.request.session['chartborder'],
+            "labels": {
+                "style": {
+                    "color": self.request.session['colorful']
+                }
+            }, 
+            "plotLines": [{
+                "color": "#aeb1b5",
+                "width": "1",
+                "value": "0.5",
+                "dashStyle": "Dash" 
+            }]        
         }
 
     def get_markers(self):
@@ -986,16 +1036,17 @@ class BaseForecast():
             for i in range(1,len(forecast_single[k])): # Remove duplicate times
                 if forecast_single[k][i,3]==forecast_single[k][i-1,3]:
                     forecast_single[k][i-1,3]=0
-            if (any(forecast_single[k][:,3])=='0'):
-                print(True)
-                forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='0', axis=0)
+            #if (any(forecast_single[k][:,3])=='0'):
+            #    print(True)
+            forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='0', axis=0)
+
             if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_single[k][0,3]: # Add now() time with initial state data      
                 forecast_single[k][0,3] = 'Now'
                 forecast_single[k][0,4] = 'Now'
             else:
                 forecast_single[k] = np.r_[[[free_0[k], queue_0[k], used_0[k], 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]], forecast_single[k]] 
-            if (any(forecast_single[k][:,3])=='none'):
-                forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='none', axis=0) 
+            #if (any(forecast_single[k][:,3])=='none'):
+            forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='none', axis=0) 
             
         for k in range(len(self.gpus)):
             if len(forecast_single[k]) < 8:
@@ -1016,8 +1067,8 @@ class BaseForecast():
         ### Compute Total Forecast (chart for all GPUs) 
         forecast_total = np.concatenate([np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))]) # add time_end (doubled)
         forecast_total = np.array(sorted(forecast_total,key=lambda x: x[6])) # sort by time_end
-        if (any(forecast_total[:,6])==0):
-            forecast_total = np.delete(forecast_total, forecast_total[:,6] == 0, axis=0) # delete empty rows 
+        #if (any(forecast_total[:,6])==0):
+        forecast_total = np.delete(forecast_total, forecast_total[:,6] == 0, axis=0) # delete empty rows 
         if forecast_total.size == 0:
             forecast_total = np.array([[sum(free_0), sum(queue_0), sum(used_0), 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]])
         else:
@@ -1037,8 +1088,8 @@ class BaseForecast():
             for i in range(1,len(forecast_total)): # Remove duplicate times
                 if forecast_total[i,3]==forecast_total[i-1,3]:
                     forecast_total[i-1,3]=0
-            if (any(forecast_total[:,3])=='0'):
-                forecast_total = np.delete(forecast_total, forecast_total[:,3]=='0', axis=0)
+            #if (any(forecast_total[:,3])=='0'):
+            forecast_total = np.delete(forecast_total, forecast_total[:,3]=='0', axis=0)
             if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_total[0,3]: # Add now() time with initial state data        
                 forecast_total[0,3] = '<b>Now</b>'
             else:

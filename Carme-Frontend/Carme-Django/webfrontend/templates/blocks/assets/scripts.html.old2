@@ -63,19 +63,19 @@
 <!-- ( two_factor:sponsor.html )  -->
 <!----------------------------------> 
 <script>
+    // onload 
     $(document).ready(function() {
         if ($("#twofactor").length > 0) {
             const elementMode = document.querySelector(':root');
             const carmeMode = getComputedStyle(elementMode);
-                    
+                
             let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
             let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
             let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
-        
+    
             var imgLoginL = document.getElementsByClassName('carme-login-light');
             var imgLoginD = document.getElementsByClassName('carme-login-dark');
-
-        
+    
             if (activeMode==darkMode) {
                 if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
                     for(var i = 0, length = imgLoginL.length; i < length; i++) {   
@@ -84,7 +84,7 @@
                     }
                 }
             }
-                    
+                
             if (activeMode==lightMode){
                 if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
                     for(var i = 0, length = imgLoginL.length; i < length; i++) {
@@ -93,89 +93,49 @@
                     }
                 }
             }
-        
+    
         }
     })
 </script>
 
 
 <!---------------------------------->
-<!--       GPU and Chart Card     -->
+<!--    GPU-Card and Chart-Card   -->
 <!--         <form-select>        -->
 <!--         ( home.html )        -->
 <!----------------------------------> 
 <script>
 $(document).ready(function() {
     if (!$("#twofactor").length > 0) {
-    // Note: set .option-gpu{display:none;} in style.css
-    var $list_gpu = $( '#list-gpu' );
-    var $option_gpu = $( '.option-gpu' );
+    		// Note: set .option-gpu{display:none;} in style.css
+    		var $list_gpu = $( '#list-gpu' );
+    		var $option_gpu = $( '.option-gpu' );
 
-    $list_gpu.on( 'change', function ( e ) {
-        $option_gpu.hide();
-        $( '#option-gpu-' + this.value ).show();
-    } );
+    		$list_gpu.on( 'change', function ( e ) {
+      		  $option_gpu.hide();
+        		$( '#option-gpu-' + this.value ).show();
+    		} );
 
-    // Note: set .option-chart{display:none;} in style.css
-    var $list_chart = $( '#list-chart' );
-    var $option_chart = $( '.option-chart' );
+
+    		// Note: set .option-chart{display:none;} in style.css
+    		var $list_chart = $( '#list-chart' );
+    		var $option_chart = $( '.option-chart' );
   
-    $list_chart.on( 'change', function ( e ) { 
-        $option_chart.hide();
-        $( '#option-chart-' + this.value ).show();
-    });
-    }
-})
+    		$list_chart.on( 'change', function ( e ) {    
+      		  $option_chart.hide();
+        		$( '#option-chart-' + this.value ).show();
+    		});
+				}
+})		
 </script>
 
 
 <!---------------------------------->
-<!--   Main: dark-mode & update   -->
-<!--         ( home.html )        -->
+<!--  Dark-mode: themeController  -->
+<!--     ( job_table.html )       -->
 <!----------------------------------> 
-<script>
-// onload color
-var onloadJobTableColor = null;
 
-function onloadColor(){ 
-    $(document).ready(function() {
-        
-            const elementMode = document.querySelector(':root');
-            const carmeMode = getComputedStyle(elementMode);
-                
-            let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
-            let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
-            let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
-    
-												var imgJobL = document.getElementsByClassName('carme-job-light');
-            var imgJobD = document.getElementsByClassName('carme-job-dark');
-    
-            if (activeMode==darkMode) {
-                if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD != null) {
-                    for(var i = 0, length = imgJobL.length; i < length; i++) {   
-                        imgJobL[i].style.display = 'none';          // hides light-mode img
-                        imgJobD[i].style.display = 'inline-block';  // shows dark-mode img
-                    }
-																				onloadJobTableColor = 'completed';
-                }
-            }
-                
-            if (activeMode==lightMode){
-																if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD != null) {
-                    for(var i = 0, length = imgJobL.length; i < length; i++) {
-                        imgJobL[i].style.display = 'inline-block';  // shows light-mode img 
-                        imgJobD[i].style.display = 'none';          // hides dark-mode img
-                    }
-																				onloadJobTableColor = 'completed';
-                }
-            }
-    
-        
-    })
-}
-
-
-
+<script type="text/javascript">
 $(document).ready(function() {
     if (!$("#twofactor").length > 0) {
         if (!$) console.error('jQuery is required!');
@@ -360,72 +320,62 @@ $(document).ready(function() {
 
 										//update jobtable success
 										function update_jobtable_success(data) {
-          		var entries = $(data); // data: HTML page
+												console.log('update_jotable_success starts');
+          		var entries = $(data);
+
             entries.each(function( index, e ) {
-														if(typeof(e.cells)!='undefined'){ //valid for HTMLTableRowElement
-            				var jobid = $(this).data('jobid');
-              		var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
+            		var jobid = $(this).data('jobid');
+              var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
     
-              		if(existing.length > 0) {
-																		console.log('text compare ' + $(this).find('.job-status').text());
-                  console.log('existing compare ' + existing.find('.job-status').text());
-              				if($(this).find('.job-status').text() == existing.find('.job-status').text()) {
-                				// content equals, just update csrf
-                  		var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
-                  		existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
-                  				$(this).val(newTokens[index].value);
-                    		console.log('equals newtoken');
-                  		});
-                  		console.log('equals');
-                		} 
-																		else {
-                				// content changed, replace element
-                  		$(this).replaceAll(existing);
-                  		onloadColor();
-                  		console.log('replaceAll(existing)');
-                		}
-              		} 
+              if(existing.length > 0) {
+              		if($(this).text() == existing.text()) {
+                		// content equals, just update csrf
+                  var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
+                  existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
+                  		$(this).val(newTokens[index].value);
+                  });
+                } 
 																else {
-              				// job not existing, remove element
-                		$('#jobtable').append($(this));
-																		onloadColor();
-                		console.log('Append(this)');
-              		}
-														}
+                		// content changed, replace element
+                  $(this).replaceAll(existing);
+                }
+              } 
+														else {
+              		// job not existing, remove element
+                $('#jobtable').append($(this));
+              }
             });
         
             var sel = $(data).map(function() {
-														if(typeof($(this).data('jobid'))!='undefined'){
-            				var jobid = $(this).data('jobid');
-              		return 'tr[data-jobid="' + jobid + '"]';
-														}
+            		var jobid = $(this).data('jobid');
+              return 'tr[data-jobid="' + jobid + '"]';
             }).get().join(',');
+
             $('#jobtable tr.dashboard-jobtable').not(sel).remove();
+												console.log('update_jobtable_success ends');
+
           };
 
 
 										// update jobtable
           function update_jobtable() {
-												console.log('onloadJobTableColor in jobtable: ' + onloadJobTableColor)
-										  if (onloadJobTableColor =='completed') {
-          				$.ajax('/carme/JobTable/',{
-            				type: "GET",
-              		error: {
-              				404: function (response) {
-                				window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
-                		}
-              		}, 
-              		success: function(data){
-            						$.ajax({
-                				url:update_jobtable_success(data),
-                  		success:function(){
-                  				console.log('success update_jobtable')
-                    		verified=true 
-                  		}
-                		})  
-              		}
-            		});
-												}
+          		$.ajax('/carme/JobTable/',{
+            		type: "GET",
+              error: {
+              		404: function (response) {
+                		window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+                }
+              }, 
+              success: function(data){
+            				$.ajax({
+                		url:update_jobtable_success(data),
+                  success:function(){
+                  		console.log('success update_jobtable')
+                    verified=true 
+                  }
+                })  
+              }
+            });
           } 
   
 		
@@ -489,32 +439,54 @@ $(document).ready(function() {
           {% endfor %}
 
 
-										//themeController 
-										const themeController = document.body;
- 									themeController.addEventListener("clickControl",({ detail: { control, value } }) => {
-     							if (control === "theme") {
-														var imgJobL = document.getElementsByClassName('carme-job-light');
-														var imgJobD = document.getElementsByClassName('carme-job-dark');
-        						if (value=="dark"){
-																if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD !=null) {
-                		for(var i = 0, length = imgJobL.length; i < length; i++) {
-																				console.log('switch is: ' + value)
-                  		imgJobL[i].style.display = 'none';		       // hides light-mode img
-																				imgJobD[i].style.display = 'inline-block'; // shows dark-mode img
-                  }               
-               	}
-              }
-              if (value=='light') {
-              		if (typeof(imgJobD) != 'undefined' && imgJobD != null && typeof(imgJobL) != 'undefined' && imgJobL != null) {
-                		for(var i = 0, length = imgJobD.length; i < length; i++) {
-																				console.log('switch is: ' + value) 
-                  		imgJobD[i].style.display = 'none';		       // hides dark-mode img
-																				imgJobL[i].style.display = 'inline-block'; //shows light-mode img
-                  } 
-               	} 
+										//themeController
+ 									const themeController = document.body;
+
+ 									themeController.addEventListener(
+   									"clickControl",
+   									({ detail: { control, value } }) => {
+ 
+     									if (control === "theme") { 
+        								$.ajax({
+            						url:stopJobTimer(),
+            						success:function(){
+                				var imgJobL = document.getElementsByClassName('carme-job-light');
+                				var imgJobD = document.getElementsByClassName('carme-job-dark');
+                				if (typeof(imgJobL) != 'undefined' && imgJobL != null ) {
+                   			for(var i = 0, length = imgJobL.length; i < length; i++) {
+                       	imgJobL[i].style.display = 'none';		// hides light-mode img
+                   			}               
+               					}
+               					if (typeof(imgJobD) != 'undefined' && imgJobD != null) {
+                   			for(var i = 0, length = imgJobD.length; i < length; i++) { 
+                       	imgJobD[i].style.display = 'none';		// hides dark-mode img
+                   			} 
+               					}
+       
+                				$.ajax({
+                    		url:update_color(),
+                    		success:function(){
+                        startJobTimer();
+                    		}
+                 			})  
+            						}
+        								}) 
+
+        								$.ajax({
+            						url:stopChartTimer(),
+            						success:function(){
+                				$.ajax({
+                    		url:update_color(),
+                    		success:function(){ 
+                        startChartTimer();
+                    		}
+                 			})
+            						}
+        								}) 
+
      									}
    									}
- 									});
+ 									);
 
 
 										///////////////////////////////////
@@ -522,18 +494,18 @@ $(document).ready(function() {
         		///////////////////////////////////
 
 
-										//// calling highcharts update
-        		//var myChartTimer=null;  
-        		//function startChartTimer() {
-          //      update_chart();
-          //      myChartTimer = setInterval(function () {
-          //          update_chart();
-          //      }, 1000 * 60 * 5);
-          //  };
-          //  function stopChartTimer() {
-          //      clearInterval(myChartTimer);
-          //      myChartTimer=null;
-          //  };
+										// calling highcharts update
+        		var myChartTimer=null;  
+        		function startChartTimer() {
+                update_chart();
+                myChartTimer = setInterval(function () {
+                    update_chart();
+                }, 1000 * 60 * 5);
+            };
+            function stopChartTimer() {
+                clearInterval(myChartTimer);
+                myChartTimer=null;
+            };
   
 
 										// calling news update
@@ -560,7 +532,7 @@ $(document).ready(function() {
           function stopJobTimer() {
             clearInterval(myJobTimer);
             myJobTimer=null;
-												console.log('stop JobTimer');
+												console.log('stopjob timer');
           };
 
 
@@ -572,19 +544,15 @@ $(document).ready(function() {
 												}, 175);
 										});
 			
-										if (!$("#twofactor").length > 0) {
-                onloadColor();
-                startJobTimer();
-          }
 
-										//$.ajax({
-    						//		url:update_color(),
-    						//		success:function(){
-          //    console.log('the first update_color success (onload)'); 
-        		//				startJobTimer(); 
-        		//				startChartTimer();   
-    						//		}
- 									//})
+										$.ajax({
+    								url:update_color(),
+    								success:function(){
+              console.log('the first update_color success (onload)'); 
+        						startJobTimer(); 
+        						startChartTimer();   
+    								}
+ 									})
 
 								}
 						}

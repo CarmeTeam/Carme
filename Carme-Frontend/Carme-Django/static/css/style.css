@@ -155,9 +155,9 @@ body {
 
 /* body-scrollbar not hidden when modal is active*/
 .modal-open {
-  overflow:hidden!important;
+  overflow:hidden!important; 
   overflow-y:scroll!important;
-  padding-right:0 !important;
+  /* padding-right:0 !important; */
 }
 
 /*---------------------  Table  ----------------------*/

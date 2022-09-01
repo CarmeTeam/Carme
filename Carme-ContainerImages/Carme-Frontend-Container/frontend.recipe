@@ -14,7 +14,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 %files
 				#before: Carme-Frontend /opt/Carme/Carme-Frontend
-    Carme-Frontend /opt/Carme/Carme-Frontend
+    /opt/Carme/Carme-Frontend /opt/Carme/Carme-Frontend
 
 %post
     # update repos -----------------------------------------------------------------------------------------------------------------

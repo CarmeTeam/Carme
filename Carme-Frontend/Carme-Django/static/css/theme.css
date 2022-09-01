@@ -32,6 +32,19 @@
   --carme-gray-1100: #121e2d;
   --carme-gray-1200: #0b1727;
 
+  /* --carme-gray-100: #f5f5ff;  CARME title in dark mode */
+  /* --carme-gray-200: #ff46be;  e.g. login titles */
+  /* --carme-gray-300: #f5f5ff;  e.g. card titles */
+  /* --carme-gray-400: #f5f5ff; e.g. card text content*/
+  /* --carme-gray-500: #9ca0a4;  e.g. drop down */
+  /* --carme-gray-600: #202328;  e.g. over menu*/
+  /* --carme-gray-700: #73797e;
+  --carme-gray-800: #646E88;
+  --carme-gray-900: #000000;
+  --carme-gray-1000: #000000;
+  --carme-gray-1100: #1c1f24;
+  --carme-gray-1200: #000000; CARME title in light mode */
+
   /* extra */
   --carme-purple: #6b5eae;
   --carme-indigo: #727cf5;
@@ -224,6 +237,7 @@
       
   /*-------------------------------  Chart Card ----------------------------------*/
   
+		--carme-chart:												var(--carme-gray-1100);		
   /* nav-tabs */
   --carme-tab-bg:           transparent;
   --carme-tab-border:       var(--carme-border);
@@ -373,6 +387,8 @@
     
   /*-------------------------------  Chart Card ----------------------------------*/
   
+		--carme-chart:												#fff;
+
   /* nav-tabs */
   --carme-tab-bg:           transparent;
   --carme-tab-border:       var(--carme-border);
