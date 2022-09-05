@@ -7,13 +7,7 @@ class HighchartPlotLineChartView(HighChartsView):
     y_axis_title = None
 
     def get_y_axis_options(self):
-        return {"title": {"text": u"%s" % self.y_axis_title, "style": {"color": self.request.session['colorful']}},
-        "gridLineColor": "#aeb1b5",
-        "labels": {
-            "style": {
-                "color": self.request.session['colorful']
-            }
-        }}
+        return {"title": {"text": u"%s" % self.y_axis_title}, }
 
     def get_x_axis_options(self):
         return {"categories": self.get_labels(), }

@@ -181,147 +181,42 @@ $(document).ready(function() {
         if (!$) console.error('jQuery is required!');
         else {
 
-    						// get colors from DOM
-    						var getColor = function getColor(name) {
-     	 					var dom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document.documentElement;
-      						return getComputedStyle(dom).getPropertyValue("--carme-".concat(name)).trim();
-    						};
-
-    						// get list of colors     
-    						var getGrays = function getGrays(dom) {
-      						return {
-        						white: getColor('white', dom),
-        						100: getColor('100', dom),
-        						200: getColor('200', dom),
-        						300: getColor('300', dom),
-        						400: getColor('400', dom),
-        						500: getColor('500', dom),
-        						600: getColor('600', dom),
-        						700: getColor('700', dom),
-        						800: getColor('800', dom),
-        						900: getColor('900', dom),
-        						1000: getColor('1000', dom),
-        						1100: getColor('1100', dom),
-        						1200: getColor('1200', dom),
-        						chart: getColor('chart', dom),
-        						chart_border: getColor('border',dom),
-        						black: getColor('black', dom),
-        						legend:getColor('card-body-text',dom)
-      						};
-    						};
-
-    						// get cookie
-    						function getCookie(name) {
-        				let cookieValue = null;
-        				if (document.cookie && document.cookie !== "") {
-          				const cookies = document.cookie.split(";");
-          				for (let i = 0; i < cookies.length; i++) {
-            				const cookie = cookies[i].trim();
-            				if (cookie.substring(0, name.length + 1) === (name + "=")) {
-              				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              				break;
-            				}
-          				}
-        				}
-        				return cookieValue;
-    						}
-    
-
-    						// update color
-    						function update_color()  { 
-
-        				const elementMode = document.querySelector(':root');
-        				const carmeMode = getComputedStyle(elementMode);
-      
-        				let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
-        				let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
-        				let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
-
-        				// creates variable 'dark' or 'light' based on current mode
-        				if (activeMode==darkMode) {
-            		colormode='dark'
-														console.log('update_color is dark')
-        				}
-        				if (activeMode==lightMode) {
-            		colormode='light'
-														console.log('update_color is light')
-        				}
-
-        				// POST variables to views.py (highcharts and jobtable)
-        				list = [getGrays()['chart'],getGrays()['chart_border'],colormode]
-        
-												$.ajax({
-        						type: "POST",
-          				url: '/carme/color/',
-          				data: {
-          						'result_data': list.join(","),
-            				'csrfmiddlewaretoken': '{{ csrf_token }}'
-          				},
-          				dataType: "json",
-          				success: function (data) {
-          						//this gets called when server returns an OK response
-            				alert("it worked!");
-          				},
-          				error: function (data) {
-          						alert("it didnt work");
-          				}
-        				}) 
-    						};    
-
+										////////////////////////////////////// Update Functions //////////////////////////////////////////////			    
 
 										// update highcharts
 										function update_chart() {
 												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
            
-												// history-chart update  uses getGrays() from Dark mode
+												// history-chart
 												$.get('{% url 'line_chart_json_time' %}', function (data) {
           				data["chart"] = {
             				type: "areaspline",
-																backgroundColor: getGrays()[''],
-            		};
-														data["title"] = {
-																text: "",
-														};   
-            		data["plotOptions"] = {
-            				areaspline: {
-              				fillOpacity: 0.2
-              		}
+																styledMode: true,
             		};
             		data["legend"] = {
             				layout: 'horizontal',
              			align: 'center',
               		verticalAlign: 'top',
               		floating: false,
-																itemStyle: {
-																		color: getGrays()['black']
-																},
             		};
 
             		$("#myTimeChart").highcharts(data);
           		});			
 	
 
-												// forecast-chart update uses getGrays() from Dark mode
+												// forecast-chart 
 												{% if gputype|length > 1 %}
     										{% for gpu in gpu_loop %}
             				$.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
               				data["chart"] = {
                 				type: "areaspline",
-																				backgroundColor: getGrays()[''],
+																				styledMode: true,
                			};
                 		data["legend"] = {
                					layout: 'horizontal',
                  			align: 'center',
                  			verticalAlign: 'top',
                  			floating: false,
-																				itemStyle: {
-																						color: getGrays()['black']
-																				},
-               			};
-               			data["plotOptions"] = {
-               					areaspline: {
-                 					fillOpacity: 0.2
-                 			}    
                			};
 														
 																		$("#myForecastChart{{forloop.counter0}}").highcharts(data);
@@ -332,22 +227,14 @@ $(document).ready(function() {
           						$.get('line_chart_json_forecast0', function (data) {
                			data["chart"] = {
                					type: "areaspline",
-																				backgroundColor: getGrays()[''],
+																				styledMode: true,
                			};
                			data["legend"] = {
                 				layout: 'horizontal',
                   		align: 'center',
                   		verticalAlign: 'top',
                   		floating: false,
-																				itemStyle: {
-																						color: getGrays()['black']
-																				},
                			};
-               			data["plotOptions"] = { 
-                				areaspline: {
-                  				fillOpacity: 0.2
-                				}    
-                		};
 
                 		$("#myForecastChart0").highcharts(data);
             				});
@@ -358,7 +245,7 @@ $(document).ready(function() {
 							 		};
 
 
-										//update jobtable success
+										// update jobtable success
 										function update_jobtable_success(data) {
           		var entries = $(data); // data: HTML page
             entries.each(function( index, e ) {
@@ -374,7 +261,6 @@ $(document).ready(function() {
                   		var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
                   		existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
                   				$(this).val(newTokens[index].value);
-                    		console.log('equals newtoken');
                   		});
                   		console.log('equals');
                 		} 
@@ -426,7 +312,32 @@ $(document).ready(function() {
               		}
             		});
 												}
-          } 
+          }
+	
+										// update admin jobtable
+										function update_jobtable_admin() {                                                               
+  										console.log('onloadJobTableColor in jobtable_admin: ' + onloadJobTableColor)                   
+  										if (onloadJobTableColor =='completed') {                                                 
+    										$.ajax('/carme/AdminJobTable/',{                                                            
+      										type: "GET",                                                                         
+      										error: {                                                                             
+        										404: function (response) {                                                         
+          										window.location = '/login/?next=' + window.location.pathname + '&timeout=1';     
+        										}                                                                                  
+      										},                                                                                   
+      										success: function(data){                                                             
+        										$.ajax({                                                                           
+          										url:update_jobtable_success(data),                                               
+          										success:function(){                                                              
+            										console.log('success update_jobtable_admin')                                         
+            										verified=true                                                                  
+          										}                                                                                
+        										})                                                                                 
+      										}                                                                                    
+    										});                                                                                    
+ 										 }                                                                                        
+										}                                                                                          
+ 
   
 		
 										// update news
@@ -450,7 +361,7 @@ $(document).ready(function() {
 										}
 
 
-										// messages update
+										// update messages
 										function update_messages() {
 												$.ajax('/carme/Messages/',{
 														type: "GET",
@@ -475,6 +386,8 @@ $(document).ready(function() {
 										}
  											
 
+										////////////////////////////////////// Modal Bootstrap ////////////////////////////////////////////// 
+
 										// stop SetInterval() for each running job  when Modal Boostrap is shown
           {% for job, slurm in myjobtable_script %}   
           		{% if job.status == "running" %}
@@ -489,7 +402,9 @@ $(document).ready(function() {
           {% endfor %}
 
 
-										//themeController 
+										//////////////////////////////////////// Dark - Mode /////////////////////////////////////////////// 
+
+										// theme Controller 
 										const themeController = document.body;
  									themeController.addEventListener("clickControl",({ detail: { control, value } }) => {
      							if (control === "theme") {
@@ -517,52 +432,9 @@ $(document).ready(function() {
  									});
 
 
-										///////////////////////////////////
-										//		calling the above functions  //
-        		///////////////////////////////////
 
-
-										//// calling highcharts update
-        		//var myChartTimer=null;  
-        		//function startChartTimer() {
-          //      update_chart();
-          //      myChartTimer = setInterval(function () {
-          //          update_chart();
-          //      }, 1000 * 60 * 5);
-          //  };
-          //  function stopChartTimer() {
-          //      clearInterval(myChartTimer);
-          //      myChartTimer=null;
-          //  };
-  
-
-										// calling news update
-										update_news();
-
-
-										// calling messages update
-										setInterval(function () {
-												update_messages();
-										}, 2000);
-
-
-								  // calling jobtable update
-          var myJobTimer=null;  
-          var verified=true;
-          function startJobTimer() {
-          		myJobTimer = setInterval(function () {
-            		if(verified!=null) {
-              		verified=null;
-                update_jobtable();     
-              }      
-            }, 2000);
-          };
-          function stopJobTimer() {
-            clearInterval(myJobTimer);
-            myJobTimer=null;
-												console.log('stop JobTimer');
-          };
-
+										////////////////////////////////////// Calling Functions ////////////////////////////////////////////// 
+	
 
 										// in job-table, start and stop buttons on-click updates messages and jobtable
 										$( document ).on( "click", "button.start-job,button.stop-job", function() {
@@ -571,24 +443,54 @@ $(document).ready(function() {
 														update_jobtable();
 												}, 175);
 										});
-			
-										if (!$("#twofactor").length > 0) {
-                onloadColor();
-                startJobTimer();
-          }
+																
+										// calling onloadColor
+										onloadColor();
 
-										//$.ajax({
-    						//		url:update_color(),
-    						//		success:function(){
-          //    console.log('the first update_color success (onload)'); 
-        		//				startJobTimer(); 
-        		//				startChartTimer();   
-    						//		}
- 									//})
+										// calling messages  
+										setInterval(function () {   
+  										update_messages();        
+										}, 2000);                   
+
+										if (!$("#admin-jobtable").length > 0) { 
+
+												// calling news
+												update_news();
+
+												// calling chart
+												update_chart();
+												setInterval(function() {
+														update_chart();
+												}, 1000 * 60 * 5);
+
+										}
+
+										// calling job-table                   
+										var myJobTimer=null;                         
+										var verified=true;                           
+										function startJobTimer() {                   
+  										myJobTimer = setInterval(function () {     
+    										if(verified!=null) {                     
+      										verified=null;
+																if($("#admin-jobtable").length > 0){                         
+      												update_jobtable_admin();
+																}
+																else{
+																		update_jobtable();
+																}                     
+    										}                                        
+  										}, 2000);                                  
+										};                                           
+										function stopJobTimer() {                    
+  										clearInterval(myJobTimer);                 
+  										myJobTimer=null;                                         
+										};                                           
+																		
+          startJobTimer();
 
 								}
-						}
-				})
+				}
+})
 </script>
 
 

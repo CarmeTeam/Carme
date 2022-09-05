@@ -36,7 +36,7 @@
       
   
 <!---------------------------------->
-<!--      QR Code: copy key       -->
+<!--        Login: QR Code        -->
 <!--  ( two_factor:setup.html )   -->
 <!----------------------------------> 
 <script>
@@ -59,511 +59,404 @@
 
 
 <!---------------------------------->
-<!--    GPU-Card and Chart-Card   -->
+<!--       Login: dark-mode       -->
+<!-- ( two_factor:sponsor.html )  -->
+<!----------------------------------> 
+<script>
+    $(document).ready(function() {
+        if ($("#twofactor").length > 0) {
+            const elementMode = document.querySelector(':root');
+            const carmeMode = getComputedStyle(elementMode);
+                    
+            let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
+            let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
+            let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
+        
+            var imgLoginL = document.getElementsByClassName('carme-login-light');
+            var imgLoginD = document.getElementsByClassName('carme-login-dark');
+
+        
+            if (activeMode==darkMode) {
+                if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
+                    for(var i = 0, length = imgLoginL.length; i < length; i++) {   
+                        imgLoginL[i].style.display = 'none';          // hides light-mode img
+                        imgLoginD[i].style.display = 'inline-block';  // shows dark-mode img
+                    }
+                }
+            }
+                    
+            if (activeMode==lightMode){
+                if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
+                    for(var i = 0, length = imgLoginL.length; i < length; i++) {
+                        imgLoginL[i].style.display = 'inline-block';  // shows light-mode img 
+                        imgLoginD[i].style.display = 'none';          // hides dark-mode img
+                    }
+                }
+            }
+        
+        }
+    })
+</script>
+
+
+<!---------------------------------->
+<!--       GPU and Chart Card     -->
 <!--         <form-select>        -->
 <!--         ( home.html )        -->
 <!----------------------------------> 
 <script>
 $(document).ready(function() {
     if (!$("#twofactor").length > 0) {
-    		// Note: set .option-gpu{display:none;} in style.css
-    		var $list_gpu = $( '#list-gpu' );
-    		var $option_gpu = $( '.option-gpu' );
+    // Note: set .option-gpu{display:none;} in style.css
+    var $list_gpu = $( '#list-gpu' );
+    var $option_gpu = $( '.option-gpu' );
 
-    		$list_gpu.on( 'change', function ( e ) {
-      		  $option_gpu.hide();
-        		$( '#option-gpu-' + this.value ).show();
-    		} );
+    $list_gpu.on( 'change', function ( e ) {
+        $option_gpu.hide();
+        $( '#option-gpu-' + this.value ).show();
+    } );
 
-
-    		// Note: set .option-chart{display:none;} in style.css
-    		var $list_chart = $( '#list-chart' );
-    		var $option_chart = $( '.option-chart' );
+    // Note: set .option-chart{display:none;} in style.css
+    var $list_chart = $( '#list-chart' );
+    var $option_chart = $( '.option-chart' );
   
-    		$list_chart.on( 'change', function ( e ) {    
-      		  $option_chart.hide();
-        		$( '#option-chart-' + this.value ).show();
-    		});
-				}
-})		
-</script>
-
-
-<!---------------------------------->
-<!--  Dark-mode: themeController  -->
-<!--        ( general )           -->
-<!----------------------------------> 
-
-<script>
-    // static/js/theme.js handles the dark-mode icon as a themeController variable
-    const themeController = document.body;
-</script> 
-
- 
-<!---------------------------------->
-<!--  Dark-mode: sponsor icons    -->
-<!-- ( two_factor:sponsor.html )  -->
-<!----------------------------------> 
-
-<script>
-
-    // Set sponsor icons colors ( on-click transition )
-    var imgLoginL = document.getElementsByClassName('carme-login-light');
-    var imgLoginD = document.getElementsByClassName('carme-login-dark');
-    themeController.addEventListener("clickControl", ({ detail: { control, value } }) => {
-        
-        if (control === "theme") {
-          
-            if (value=="dark") {
-                if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
-                    for(var i = 0, length = imgLoginL.length; i < length; i++) {
-                        imgLoginL[i].style.display = 'none';            // hides light-mode img
-                        imgLoginD[i].style.display = 'inline-block';    // shows dark-mode  img
-                    }               
-                }
-            }
-
-            if (value=="light") {
-                if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
-                    for(var i = 0, length = imgLoginL.length; i < length; i++) {
-                        imgLoginL[i].style.display = 'inline-block';    // shows light-mode  img 
-                        imgLoginD[i].style.display = 'none';            // hides dark-mode img
-                    } 
-                }
-            }
-
-        }
+    $list_chart.on( 'change', function ( e ) { 
+        $option_chart.hide();
+        $( '#option-chart-' + this.value ).show();
     });
-
-
-    // Set sponsor icons colors ( onload )
-    const elementMode = document.querySelector(':root');
-    const carmeMode = getComputedStyle(elementMode);
-        
-    let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
-    let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
-    let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
-
-    if (activeMode==darkMode) {
-        if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
-            for(var i = 0, length = imgLoginL.length; i < length; i++) {   
-                imgLoginL[i].style.display = 'none';          // hides light-mode img
-                imgLoginD[i].style.display = 'inline-block';  // shows dark-mode img
-            }
-        }
     }
-        
-    if (activeMode==lightMode){
-        if (typeof(imgLoginL) != 'undefined' && imgLoginL != null && typeof(imgLoginD) != 'undefined' && imgLoginD != null) {
-            for(var i = 0, length = imgLoginL.length; i < length; i++) {
-                imgLoginL[i].style.display = 'inline-block';  // shows light-mode img 
-                imgLoginD[i].style.display = 'none';          // hides dark-mode img
-            }
-        }
-    }
+})
 </script>
 
 
 <!---------------------------------->
-<!--     Dark-mode: themeColor    -->
-<!--  Jupyter/Theia, Highcharts   -->   
-<!-- ( home.html, jobtable.html ) -->
+<!--   Main: dark-mode & update   -->
+<!--         ( home.html )        -->
 <!----------------------------------> 
+<script>
+// onload color
+var onloadJobTableColor = null;
 
-<script type="text/javascript">
-
-    // get colors from DOM
-    var getColor = function getColor(name) {
-      var dom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document.documentElement;
-      return getComputedStyle(dom).getPropertyValue("--carme-".concat(name)).trim();
-    };
-
-    // list of colors     
-    var getGrays = function getGrays(dom) {
-      return {
-        white: getColor('white', dom),
-        100: getColor('100', dom),
-        200: getColor('200', dom),
-        300: getColor('300', dom),
-        400: getColor('400', dom),
-        500: getColor('500', dom),
-        600: getColor('600', dom),
-        700: getColor('700', dom),
-        800: getColor('800', dom),
-        900: getColor('900', dom),
-        1000: getColor('1000', dom),
-        1100: getColor('1100', dom),
-        1200: getColor('1200', dom),
-        chart: getColor('chart', dom),
-        chart_border: getColor('border',dom),
-        black: getColor('black', dom),
-        legend:getColor('card-body-text',dom)
-      };
-    };
-
-    // get cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-          const cookies = document.cookie.split(";");
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + "=")) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-    }
-    
-
-    // update color
-    function update_color()  { 
-
-        const elementMode = document.querySelector(':root');
-        const carmeMode = getComputedStyle(elementMode);
-      
-        let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
-        let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
-        let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
-
-        // creates variable 'dark' or 'light' based on current mode
-        if (activeMode==darkMode) {
-            colormode='dark'
-        }
-        if (activeMode==lightMode) {
-            colormode='light'
-        }
-
-        // POST variables to views.py (highcharts and jobtable)
-        list = [getGrays()['chart'],getGrays()['chart_border'],colormode]
+function onloadColor(){ 
+    $(document).ready(function() {
         
-								
-								$.ajax({
-        		type: "POST",
-          url: '/color/',
-          data: {
-          		'result_data': list.join(","),
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
-          dataType: "json",
-          success: function (data) {
-          		//this gets called when server returns an OK response
-            alert("it worked!");
-          },
-          error: function (data) {
-          		alert("it didnt work");
-          }
-        }); 
-    };    
+            const elementMode = document.querySelector(':root');
+            const carmeMode = getComputedStyle(elementMode);
+                
+            let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
+            let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
+            let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
     
-
-				// set Jupyter/Theia icons colors (on-click transition --> display:none)   
-    var imgJobL = document.getElementsByClassName('carme-job-light');
-    var imgJobD = document.getElementsByClassName('carme-job-dark');
-    //const themeController = document.body; // defined  in dark-mode: themeController
-    themeController.addEventListener("clickControl", ({ detail: { control, value } }) => {
-
-           if (control === "theme") {             
-               if (value=="dark") {
-                   if (typeof(imgJobL) != 'undefined' && imgJobL != null ) {
-                       for(var i = 0, length = imgJobL.length; i < length; i++) {
-                           imgJobL[i].style.display = 'none';            // hides light-mode img
-                       }               
-                   }
-               }
-
-               if (value=="light") {
-                   if (typeof(imgJobD) != 'undefined' && imgJobD != null) {
-                       for(var i = 0, length = imgJobD.length; i < length; i++) { 
-                           imgJobD[i].style.display = 'none';            // hides dark-mode img
-                       } 
-                   }
-               }
-
-           }
-    });				
-
-
-				
-    update_color();
-						
-
-  
-</script>
+												var imgJobL = document.getElementsByClassName('carme-job-light');
+            var imgJobD = document.getElementsByClassName('carme-job-dark');
+    
+            if (activeMode==darkMode) {
+                if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD != null) {
+                    for(var i = 0, length = imgJobL.length; i < length; i++) {   
+                        imgJobL[i].style.display = 'none';          // hides light-mode img
+                        imgJobD[i].style.display = 'inline-block';  // shows dark-mode img
+                    }
+																				onloadJobTableColor = 'completed';
+                }
+            }
+                
+            if (activeMode==lightMode){
+																if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD != null) {
+                    for(var i = 0, length = imgJobL.length; i < length; i++) {
+                        imgJobL[i].style.display = 'inline-block';  // shows light-mode img 
+                        imgJobD[i].style.display = 'none';          // hides dark-mode img
+                    }
+																				onloadJobTableColor = 'completed';
+                }
+            }
+    
+        
+    })
+}
 
 
-<!---------------------------------->
-<!--     Update setInterval()     -->
-<!--        ( home.html )         -->
-<!----------------------------------> 
-  
-<script type="text/javascript">
 
-		if (!$("#twofactor").length > 0) {
+$(document).ready(function() {
+    if (!$("#twofactor").length > 0) {
+        if (!$) console.error('jQuery is required!');
+        else {
 
-				if (!$) console.error('jQuery is required!');
-				else {
+										////////////////////////////////////// Update Functions //////////////////////////////////////////////			    
 
-								// highcharts update
-								function update_chart() {
-										Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
+										// update highcharts
+										function update_chart() {
+												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
            
-										// history-chart update  uses getGrays() from Dark mode
-										$.get('{% url 'line_chart_json_time' %}', function (data) {
-          		data["chart"] = {
-            		type: "areaspline",
-														backgroundColor: getGrays()[''],
-            };
-												data["title"] = {
-														text: "",
-												};   
-            data["plotOptions"] = {
-            		areaspline: {
-              		fillOpacity: 0.2
-              }
-            };
-            data["legend"] = {
-            		layout: 'horizontal',
-             	align: 'center',
-              verticalAlign: 'top',
-              floating: false,
-														itemStyle: {
-																color: getGrays()['1000']
-														},
-            };
+												// history-chart
+												$.get('{% url 'line_chart_json_time' %}', function (data) {
+          				data["chart"] = {
+            				type: "areaspline",
+																styledMode: true,
+            		};
+            		data["legend"] = {
+            				layout: 'horizontal',
+             			align: 'center',
+              		verticalAlign: 'top',
+              		floating: false,
+            		};
 
-            $("#myTimeChart").highcharts(data);
-          });			
+            		$("#myTimeChart").highcharts(data);
+          		});			
 	
 
-										// forecast-chart update uses getGrays() from Dark mode
-										{% if gputype|length > 1 %}
-    								{% for gpu in gpu_loop %}
-            		$.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
-              		data["chart"] = {
-                		type: "areaspline",
-																		backgroundColor: getGrays()[''],
-               	};
-                data["legend"] = {
-               			layout: 'horizontal',
-                 	align: 'center',
-                 	verticalAlign: 'top',
-                 	floating: false,
-																		itemStyle: {
-																				color: getGrays()['black']
-																		},
-               	};
-               	data["plotOptions"] = {
-               			areaspline: {
-                 			fillOpacity: 0.2
-                 	}    
-               	};
+												// forecast-chart 
+												{% if gputype|length > 1 %}
+    										{% for gpu in gpu_loop %}
+            				$.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
+              				data["chart"] = {
+                				type: "areaspline",
+																				styledMode: true,
+               			};
+                		data["legend"] = {
+               					layout: 'horizontal',
+                 			align: 'center',
+                 			verticalAlign: 'top',
+                 			floating: false,
+               			};
 														
-																$("#myForecastChart{{forloop.counter0}}").highcharts(data);
-           			});
-    								{% endfor %}
-										{% elif  gputype|length == 1 %}
-          				$.get('line_chart_json_forecast0', function (data) {
-               	data["chart"] = {
-               			type: "areaspline",
-																		backgroundColor: getGrays()[''],
-               	};
-               	data["legend"] = {
-                		layout: 'horizontal',
-                  align: 'center',
-                  verticalAlign: 'top',
-                  floating: false,
-																		itemStyle: {
-																				color: getGrays()['1000']
-																		},
-               	};
-               	data["plotOptions"] = { 
-                		areaspline: {
-                  		fillOpacity: 0.2
-                		}    
-                };
+																		$("#myForecastChart{{forloop.counter0}}").highcharts(data);
+           					});
+    										{% endfor %}
 
-                $("#myForecastChart0").highcharts(data);
+												{% elif  gputype|length == 1 %}
+          						$.get('line_chart_json_forecast0', function (data) {
+               			data["chart"] = {
+               					type: "areaspline",
+																				styledMode: true,
+               			};
+               			data["legend"] = {
+                				layout: 'horizontal',
+                  		align: 'center',
+                  		verticalAlign: 'top',
+                  		floating: false,
+               			};
+
+                		$("#myForecastChart0").highcharts(data);
+            				});
+
+												{% else %}
+          						console.log('GPU_TYPE is empty');
+												{% endif %}
+							 		};
+
+
+										// update jobtable success
+										function update_jobtable_success(data) {
+          		var entries = $(data); // data: HTML page
+            entries.each(function( index, e ) {
+														if(typeof(e.cells)!='undefined'){ //valid for HTMLTableRowElement
+            				var jobid = $(this).data('jobid');
+              		var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
+    
+              		if(existing.length > 0) {
+																		console.log('text compare ' + $(this).find('.job-status').text());
+                  console.log('existing compare ' + existing.find('.job-status').text());
+              				if($(this).find('.job-status').text() == existing.find('.job-status').text()) {
+                				// content equals, just update csrf
+                  		var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
+                  		existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
+                  				$(this).val(newTokens[index].value);
+                  		});
+                  		console.log('equals');
+                		} 
+																		else {
+                				// content changed, replace element
+                  		$(this).replaceAll(existing);
+                  		onloadColor();
+                  		console.log('replaceAll(existing)');
+                		}
+              		} 
+																else {
+              				// job not existing, remove element
+                		$('#jobtable').append($(this));
+																		onloadColor();
+                		console.log('Append(this)');
+              		}
+														}
+            });
+        
+            var sel = $(data).map(function() {
+														if(typeof($(this).data('jobid'))!='undefined'){
+            				var jobid = $(this).data('jobid');
+              		return 'tr[data-jobid="' + jobid + '"]';
+														}
+            }).get().join(',');
+            $('#jobtable tr.dashboard-jobtable').not(sel).remove();
+          };
+
+
+										// update jobtable
+          function update_jobtable() {
+												console.log('onloadJobTableColor in jobtable: ' + onloadJobTableColor)
+										  if (onloadJobTableColor =='completed') {
+          				$.ajax('/carme/JobTable/',{
+            				type: "GET",
+              		error: {
+              				404: function (response) {
+                				window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+                		}
+              		}, 
+              		success: function(data){
+            						$.ajax({
+                				url:update_jobtable_success(data),
+                  		success:function(){
+                  				console.log('success update_jobtable')
+                    		verified=true 
+                  		}
+                		})  
+              		}
             		});
-										{% else %}
-          				console.log('GPU_TYPE is empty');
-										{% endif %}
-							 } 
+												}
+          } 
   
 		
-								// news update
-								function update_news() {
-										$.ajax('/wiki/cluster_news/', {
-												type: "GET",
-												statusCode: {
-														401: function (response) {
-														window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
-														}
-												}, 
-												success: function (data) {
-														var content_reg = /<body.*?>([\S\s]*?)(?:<\/body>)/gmi;
-														var match = content_reg.exec(data);
-
-														if(match && match.length > 1) {
-																document.getElementById('news').innerHTML = $(match[1]).find('.wiki-article').first().html();
-														}
-												}
-										});
-								}
-
-
-								// messages update
-								function update_messages() {
-										$.ajax('/carme/Messages/',{
-												type: "GET",
-												statusCode: {
-														401: function (response) {
-														window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
-														}
-												}, 
-												success: function (data) {
-														var entries = $(data);					
-														entries.each(function( index ) {
-																var msgid = $(this).data('msgid');
-																var existing = $('#messages div[data-msgid="' + msgid + '"]');
-
-																if(existing.length == 0) {
-																		// message not existing, prepend element
-																		$('#messages').prepend($(this));
+										// update news
+										function update_news() {
+												$.ajax('/wiki/cluster_news/', {
+														type: "GET",
+														statusCode: {
+																401: function (response) {
+																		window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
 																}
-														});
-												}
-										});
-								}
+														}, 
+														success: function (data) {
+																var content_reg = /<body.*?>([\S\s]*?)(?:<\/body>)/gmi;
+																var match = content_reg.exec(data);
 
-
-								// jobtable update
-								function update_jobtable() {
-										$.ajax('/carme/JobTable/',{
-												type: "GET",
-												statusCode: {
-														401: function (response) {
-																window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+																if(match && match.length > 1) {
+																		document.getElementById('news').innerHTML = $(match[1]).find('.wiki-article').first().html();
+																}
 														}
-												}, 
-												success: function (data) {
-														var entries = $(data);
+												});
+										}
 
-														entries.each(function( index ) {
-																var jobid = $(this).data('jobid');
-																var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
 
-																if(existing.length > 0) {
-																		if($(this).text() == existing.text()) {
-																				// content equals, just update csrf
-																				var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
-																				existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
-																						$(this).val(newTokens[index].value);
-																				});
-																		} else {
-																				// content changed, replace element
-																				$(this).replaceAll(existing);
+										// update messages
+										function update_messages() {
+												$.ajax('/carme/Messages/',{
+														type: "GET",
+														statusCode: {
+																401: function (response) {
+																		window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+																}
+														}, 
+														success: function (data) {
+																var entries = $(data);					
+																entries.each(function( index ) {
+																		var msgid = $(this).data('msgid');
+																		var existing = $('#messages div[data-msgid="' + msgid + '"]');
+
+																		if(existing.length == 0) {
+																				// message not existing, prepend element
+																				$('#messages').prepend($(this));
 																		}
-																} else {
-																		// job not existing, remove element
-																		$('#jobtable').append($(this));
-																}
-														});
+																});
+														}
+												});
+										}
+ 											
 
-														var sel = $(data).map(function() {
-																var jobid = $(this).data('jobid');
-																return 'tr[data-jobid="' + jobid + '"]';
-														}).get().join(',');
+										////////////////////////////////////// Modal Bootstrap ////////////////////////////////////////////// 
 
-														$('#jobtable tr.dashboard-jobtable').not(sel).remove();
-												}
-										});
-								}
-
-
-								// stop SetInterval() in jobtable  when Modal Boostrap is shown        
-  						{% for job, slurm in myjobtable_script %}   
-  								{% if job.status == "running" %}
- 	 									$(document).on('show.bs.modal', '#jobinfoModal{{ job.slurm_id }}', function (e) {
-    										stopTimer();
-														stop();
-  										});
-
-  										$(document).on('hidden.bs.modal', '#jobinfoModal{{ job.slurm_id }}', function (e) {
-   											startTimer();
-  										});
-  								{% endif %}
-  						{% endfor %}
-
-
-								///////////////////////////////////
-								//		calling the above functions  //
-        ///////////////////////////////////
-
-								
-								// calling highcharts update + themeController update (on-click Dark mode transition)
-								themeController.addEventListener(
-        		"clickControl",
-          ({ detail: { control, value } }) => {
-            if (control === "theme") {
-             	
-														$.ajax({
-                        url:update_color(),
-                        success:function(){
-                            update_chart();
-                        }
-                     })
-            }
-          }
-        );
-
-								update_chart();
-
-       	setInterval(function () {
-       			update_chart();
-       	}, 1000 * 60 * 5);
+										// stop SetInterval() for each running job  when Modal Boostrap is shown
+          {% for job, slurm in myjobtable_script %}   
+          		{% if job.status == "running" %}
+            		$(document).on('show.bs.modal', '#jobinfoModal{{ job.slurm_id }}', function (e) {
+                stopJobTimer();
+              });
   
-
-								// calling news update
-								update_news();
-
-
-								// calling messages update
-								setInterval(function () {
-										update_messages();
-								}, 2000);
+              $(document).on('hidden.bs.modal', '#jobinfoModal{{ job.slurm_id }}', function (e) {
+                startJobTimer();
+              });
+            {% endif %}
+          {% endfor %}
 
 
-								// calling jobtable update
-        var myTimer=null;
-    
-       	function startTimer() {
-       			myTimer = setInterval(function () {
-  										update_jobtable();
-         	}, 1000);
-       	};
-								function stopTimer() {
-       			clearInterval(myTimer);
-         	myTimer=null;
-       	};
-  						window.onload = function() {
-    						startTimer();
-  						};	
+										//////////////////////////////////////// Dark - Mode /////////////////////////////////////////////// 
+
+										// theme Controller 
+										const themeController = document.body;
+ 									themeController.addEventListener("clickControl",({ detail: { control, value } }) => {
+     							if (control === "theme") {
+														var imgJobL = document.getElementsByClassName('carme-job-light');
+														var imgJobD = document.getElementsByClassName('carme-job-dark');
+        						if (value=="dark"){
+																if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD !=null) {
+                		for(var i = 0, length = imgJobL.length; i < length; i++) {
+																				console.log('switch is: ' + value)
+                  		imgJobL[i].style.display = 'none';		       // hides light-mode img
+																				imgJobD[i].style.display = 'inline-block'; // shows dark-mode img
+                  }               
+               	}
+              }
+              if (value=='light') {
+              		if (typeof(imgJobD) != 'undefined' && imgJobD != null && typeof(imgJobL) != 'undefined' && imgJobL != null) {
+                		for(var i = 0, length = imgJobD.length; i < length; i++) {
+																				console.log('switch is: ' + value) 
+                  		imgJobD[i].style.display = 'none';		       // hides dark-mode img
+																				imgJobL[i].style.display = 'inline-block'; //shows light-mode img
+                  } 
+               	} 
+     									}
+   									}
+ 									});
 
 
-								// in job-table, start and stop buttons on-click updates messages and jobtable
-								$( document ).on( "click", "button.start-job,button.stop-job", function() {
-										setTimeout(function() {
-										update_messages();
-										update_jobtable();
-										}, 175);
-								});
+
+										////////////////////////////////////// Calling Functions ////////////////////////////////////////////// 
+	
+
+										// in job-table, start and stop buttons on-click updates messages and jobtable
+										$( document ).on( "click", "button.start-job,button.stop-job", function() {
+												setTimeout(function() {
+														update_messages();
+														update_jobtable();
+												}, 175);
+										});
+																
+										// calling onloadColor
+										onloadColor();
+
+										// calling news
+										update_news();
+
+										// calling messages  
+										setInterval(function () {   
+  										update_messages();        
+										}, 2000);                   
+
+										// calling chart
+										update_chart();
+										setInterval(function() {
+												update_chart();
+										}, 1000 * 60 * 5);
+
+										// calling job-table                   
+										var myJobTimer=null;                         
+										var verified=true;                           
+										function startJobTimer() {                   
+  										myJobTimer = setInterval(function () {     
+    										if(verified!=null) {                     
+      										verified=null;                         
+      										update_jobtable();                     
+    										}                                        
+  										}, 2000);                                  
+										};                                           
+										function stopJobTimer() {                    
+  										clearInterval(myJobTimer);                 
+  										myJobTimer=null;                                         
+										};                                           
+																		
+          startJobTimer();
+
+								}
 				}
-		}
-
+})
 </script>
 
 

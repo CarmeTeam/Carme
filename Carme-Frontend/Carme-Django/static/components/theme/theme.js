@@ -1,16 +1,34 @@
 "use strict";
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 /* -------------------------------------------------------------------------- */
+/*                                     Base                                   */
+/* -------------------------------------------------------------------------- */
+function _classCallCheck(instance, Constructor) { 
+		if (!(instance instanceof Constructor)) { 
+				throw new TypeError("Cannot call a class as a function"); 
+		} 
+}
 
+function _defineProperties(target, props) { 
+		for (var i = 0; i < props.length; i++) { 
+				var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; 
+				if ("value" in descriptor) descriptor.writable = true; 
+				Object.defineProperty(target, descriptor.key, descriptor); 
+		} 
+}
+
+function _createClass(Constructor, protoProps, staticProps) { 
+		if (protoProps) _defineProperties(Constructor.prototype, protoProps); 
+		if (staticProps) _defineProperties(Constructor, staticProps); 
+		return Constructor; 
+}
+
+
+/* -------------------------------------------------------------------------- */
 /*                                    Utils                                   */
-
 /* -------------------------------------------------------------------------- */
+
 var docReady = function docReady(fn) {
   // see if DOM is already available
   if (document.readyState === 'loading') {
@@ -36,8 +54,9 @@ var getData = function getData(el, data) {
 };
 
 
-
-/* ---------------------------------- Store --------------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                   Store                                    */
+/* -------------------------------------------------------------------------- */
 var getItemFromStore = function getItemFromStore(key, defaultValue) {
   var store = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : localStorage;
 
@@ -60,11 +79,11 @@ var utils = {
   getData: getData
 };
 
-/*-----------------------------------------------
-|   DomNode
------------------------------------------------*/
 
 
+/* -------------------------------------------------------------------------- */
+/*                                  DomNode                                   */
+/* -------------------------------------------------------------------------- */
 var DomNode = /*#__PURE__*/function () {
   function DomNode(node) {
     _classCallCheck(this, DomNode);
@@ -109,27 +128,16 @@ var DomNode = /*#__PURE__*/function () {
   return DomNode;
 }();
 
-/*colors*/
 
 
 /* -------------------------------------------------------------------------- */
-
-/*                                Theme Control                               */
-
+/*                        Theme Control: Dark-Mode                            */
 /* -------------------------------------------------------------------------- */
-
-
 var initialDomSetup = function initialDomSetup(element) {
   if (!element) return;
-  var dataUrlDom = element.querySelector('[data-theme-control = "navbarPosition"]');
-  var hasDataUrl = dataUrlDom ? getData(dataUrlDom, 'page-url') : null;
   element.querySelectorAll('[data-theme-control]').forEach(function (el) {
     var inputDataAttributeValue = getData(el, 'theme-control');
     var localStorageValue = getItemFromStore(inputDataAttributeValue);
-
-    if (inputDataAttributeValue === 'navbarStyle' && !hasDataUrl && getItemFromStore('navbarPosition') === 'top') {
-      el.setAttribute('disabled', true);
-    }
 
     if (el.type === 'checkbox') {
       if (inputDataAttributeValue === 'theme') {
@@ -159,7 +167,6 @@ var changeTheme = function changeTheme(element) {
 
 var themeControl = function themeControl() {
   var themeController = new DomNode(document.body);
-  var navbarVertical = document.querySelector('.navbar-vertical');
   initialDomSetup(themeController.node);
   themeController.on('click', function (e) {
     var target = new DomNode(e.target);
@@ -189,26 +196,6 @@ var themeControl = function themeControl() {
             break;
           }
 
-        case 'navbarStyle':
-          {
-            navbarVertical.classList.remove('navbar-card');
-            navbarVertical.classList.remove('navbar-inverted');
-            navbarVertical.classList.remove('navbar-vibrant');
-
-            if (value !== 'transparent') {
-              navbarVertical.classList.add("navbar-".concat(value));
-            }
-
-            break;
-          }
-
-        case 'navbarPosition':
-          {
-            var pageUrl = getData(target.node, 'page-url');
-            pageUrl ? window.location.replace(pageUrl) : window.location.reload();
-            break;
-          }
-
         default:
           window.location.reload();
       }
@@ -216,9 +203,24 @@ var themeControl = function themeControl() {
   });
 };
 
-
 docReady(themeControl);
 
+
+/* -------------------------------------------------------------------------- */
+/*                          Container: Fluid-Mode                             */
+/* -------------------------------------------------------------------------- */
+var isFluid = JSON.parse(localStorage.getItem('isFluid'));
+if (isFluid) {
+  var container = document.querySelector('[data-layout]');
+  var container_header = document.querySelector('[data-layout-header]');
+  var container_footer = document.querySelector('[data-layout-footer]');
+  container.classList.remove('container');
+  container.classList.add('container-fluid');
+  container_header.classList.remove('container');
+  container_header.classList.add('container-fluid');
+  container_footer.classList.remove('container');
+  container_footer.classList.add('container-fluid');
+};
 
 
 //# sourceMappingURL=theme.js.map

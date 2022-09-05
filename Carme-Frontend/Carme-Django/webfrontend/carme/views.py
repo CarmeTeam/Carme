@@ -51,8 +51,8 @@ from .forms import LoginForm
 
 # Charts
 from django.utils.translation import gettext_lazy as _
-from .highchart.colors import COLORS, next_color
-from .highchart.lines import HighchartPlotLineChartView
+from .highcharts.colors import COLORS, next_color
+from .highcharts.lines import HighchartPlotLineChartView
 
 # History Card
 from django.db.models import Case, Value, When, IntegerField 
@@ -387,14 +387,11 @@ def job_table(request):
         sort_order=Case(*cases_active, output_field=IntegerField())).order_by('sort_order')
     myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) ) 
     myjobtable_script = zip( list(slurm_list_user), list(jobtable_active) )    
-    #colormode = request.session['colormode']
-    #print('colormode:' + colormode)
 
     # render template
     context = {
         'myjobtable_list': myjobtable_list,
         'myjobtable_script': myjobtable_script,
-        #'colormode': colormode,
     }
     
     return render(request, 'blocks/job_table.html', context)
@@ -612,7 +609,10 @@ def job_info(request):
 ##    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
 @force_maintenance_mode_off
 def login(request):
-    return redirect("two_factor:login")
+    if request.user.is_authenticated:
+        return redirect('/')
+    else:
+        return redirect("two_factor:login")
 
 @force_maintenance_mode_off
 def logout(request):
@@ -745,15 +745,15 @@ def proxy_auth(request):
     return HttpResponse(status=403) # forbidden
 
 
-def color(request):
-    if(request.POST.get('result_data')):
-        listt= request.POST['result_data']
-        listt= listt.split(",")
-        print('we have' + request.POST.get('result_data'))
-        request.session['colorful'] = listt[0]
-        request.session['chartborder'] = listt[1]
-        request.session['colormode'] = listt[2]
-    return JsonResponse({'success':True})
+#def color(request):
+#    if(request.POST.get('result_data')):
+#        listt= request.POST['result_data']
+#        listt= listt.split(",")
+#        print('we have' + request.POST.get('result_data'))
+#        request.session['colorful'] = listt[0]
+#        request.session['chartborder'] = listt[1]
+#        request.session['colormode'] = listt[2]
+#    return JsonResponse({'success':True})
 
 #####################################
 #####################################
@@ -833,29 +833,20 @@ class LineChartJSONViewTime(HighchartPlotLineChartView):
             "categories": self.get_labels(), 
             "title": {
                 "text": "Time (CET)", 
-                "margin": 15, 
-                "style": {
-                    "color": self.request.session['colorful']
-                }
+                "margin": 15,
             }, 
             "min": 0.3,
             "max":self.xAxispoints-1.3,
-            "lineColor": '#748194',
-            "labels": {
-                "style": {
-                    "color": self.request.session['colorful']
-                }
-            },
             "plotLines": [{
-                "color": "#aeb1b5",
                 "width": "1",
-                "value": "9",
-                "dashStyle": "Dash" 
+                "value": "9", 
             }]
         }
 
     def get_markers(self):
-        return [{"symbol": 'circle', "radius":4.5},{"symbol": 'square', "radius":3.9},{"symbol": 'diamond', "radius":5}]
+        return [ {"symbol": 'circle', "radius":4.5},
+                 {"symbol": 'square', "radius":3.9},
+                 {"symbol": 'diamond', "radius":5}  ]
 
     title = _("")
     y_axis_title = _("GPUs")  
@@ -895,28 +886,19 @@ class BaseForecast():
             "title": {
                 "text": "Time (CET)", 
                 "margin": 15,
-                "style": {
-                    "color": self.request.session['colorful']
-                }
             }, 
             "min": 0.3,
-            "max":self.xAxispoints-1.3,
-            "lineColor": self.request.session['chartborder'],
-            "labels": {
-                "style": {
-                    "color": self.request.session['colorful']
-                }
-            }, 
+            "max":self.xAxispoints-1.3, 
             "plotLines": [{
-                "color": "#aeb1b5",
                 "width": "1",
-                "value": "0.5",
-                "dashStyle": "Dash" 
+                "value": "0.5", 
             }]        
         }
 
     def get_markers(self):
-        return [{"symbol": 'circle', "radius":4.5},{"symbol": 'square', "radius":3.9},{"symbol": 'diamond', "radius":5}]
+        return [ {"symbol": 'circle', "radius":4.5},
+                 {"symbol": 'square', "radius":3.9},
+                 {"symbol": 'diamond', "radius":5}  ]
     
     title = _("") # Title shows None if removed
     y_axis_title = _("GPUs")  

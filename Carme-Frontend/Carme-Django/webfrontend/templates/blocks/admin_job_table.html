@@ -18,7 +18,7 @@
 {% load mathfilters %}
 
 {% for slurm, job in slurm_list %}
-<tr data-jobid="{{ job.slurm_id }}">
+<tr data-jobid="{{ job.slurm_id }}" class="dashboard-jobtable">
 	<td class="align-middle">{{ job.slurm_id }}</td>
 	<td class="align-middle">{{ job.user }}</td>
 	<td class="align-middle">{{ job.name }}</td>
