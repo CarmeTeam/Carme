@@ -1,7 +1,7 @@
 "use strict";
 
 var CONFIG = {
-  theme: 'dark',
+  theme: 'light',
   isFluid: false
 };
 
