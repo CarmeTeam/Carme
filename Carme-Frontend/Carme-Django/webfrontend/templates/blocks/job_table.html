@@ -47,7 +47,7 @@
 						{% endcomment %}
 						<div class="d-flex flex-row justify-content-between"> 
         <div><span class="badge fs--3 fw-400 text-body">{{ slurm.time_start | print_timestamp_small }}</span></div>
-        <div><span class="badge fs--3 fw-400 text-body">{{ slurm.timelimit | mul:60 | add:slurm.time_start | print_timestamp_small }}</span></div>
+        <div><span class="badge fs--3 fw-400 text-body job-extension">{{ slurm.timelimit | mul:60 | add:slurm.time_start | print_timestamp_small }}</span></div>
       </div>
      {% else %}
       <div class="progress mt-3 mb-3" style="height:12px;"
@@ -159,7 +159,7 @@
                          <td class="align-middle">
 																											<p class="mb-0">{{ slurm.time_submit | print_timestamp }}</p>
 																											<p class="mb-0">{{ slurm.time_start | print_timestamp }}</p>
-																											<p class="mb-0">{{ slurm.time_end | print_timestamp }}</p>
+																											<p class="mb-0">{{ slurm.timelimit | mul:60 | add:slurm.time_start | print_timestamp }}</p>
 																									</td>
                          <td class="align-middle">
                            {% if job.status == "running" %}

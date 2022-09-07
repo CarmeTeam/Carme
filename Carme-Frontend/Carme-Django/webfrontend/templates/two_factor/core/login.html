@@ -21,18 +21,24 @@
 										</div>
 										<!-- </logo> -->
           
-										<!-- <alert> -->                  
-										<div id="timeout-message" class="alert alert-warning py-2" role="alert" style="display: none;">
-												<i class="fas fa-warning"></i>&nbsp; Your session has expired! Log in again.
-										</div>
-										<div id="logout-message" class="alert alert-success py-2" role="alert" style="display: none;">
-												<i class="fas fa-check"></i>&nbsp; Successfully logged out.
-										</div>
-										{% if form.errors %}
-    						<div id="error-message" class="alert alert-danger py-2" role="alert">
-												<i class="fas fa-times-circle"></i>&nbsp; Incorrect information. Please Try again.
-										</div>
-										{% endif %}
+										<!-- <alert> -->
+										{% if maintenance_mode %}
+            <div id="maintenance-message" class="alert alert-warning py-2" role="alert">
+              <i class="fas fa-warning"></i>&nbsp; Maintenance mode on. User access denied. 
+            </div>
+          {% else %}                    
+										  <div id="timeout-message" class="alert alert-warning py-2" role="alert" style="display: none;">
+												  <i class="fas fa-warning"></i>&nbsp; Your session has expired! Log in again.
+										  </div>
+										  <div id="logout-message" class="alert alert-success py-2" role="alert" style="display: none;">
+												  <i class="fas fa-check"></i>&nbsp; Successfully logged out.
+										  </div>
+										  {% if form.errors %}
+    						  <div id="error-message" class="alert alert-danger py-2" role="alert">
+												  <i class="fas fa-times-circle"></i>&nbsp; Incorrect information. Please Try again.
+										  </div>
+										  {% endif %}
+          {% endif %}
 										<!-- </alert> -->
     				</div>
 

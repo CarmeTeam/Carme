@@ -254,9 +254,8 @@ $(document).ready(function() {
               		var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
     
               		if(existing.length > 0) {
-																		console.log('text compare ' + $(this).find('.job-status').text());
-                  console.log('existing compare ' + existing.find('.job-status').text());
-              				if($(this).find('.job-status').text() == existing.find('.job-status').text()) {
+              				if($(this).find('.job-status').text() == existing.find('.job-status').text() &&
+                     $(this).find('.job-extension').text() == existing.find('.job-extension').text()) {
                 				// content equals, just update csrf
                   		var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
                   		existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {

@@ -196,7 +196,9 @@ def generateChoices(request):
 @login_required(login_url='/account/login') 
 def index(request):
     """ dashboard page -> generates user job-list, messages and other interactive features"""
-    if request.user.is_verified():
+    #if request.user.is_verified():
+    if ((get_maintenance_mode()==False and request.user.is_verified()) or 
+        (get_maintenance_mode()==True  and request.user.is_verified()  and request.user.is_superuser )):
     
         # logout
         request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
@@ -315,9 +317,12 @@ def index(request):
         }
 
         return render(request, 'home.html', context)
+    
+    elif ((get_maintenance_mode()==False and request.user.is_verified()==False)):
+        return redirect("two_factor:setup")
 
     else:
-        return redirect("two_factor:setup")
+        return redirect("logout")
 
 
 @login_required(login_url='/account/login')
@@ -609,10 +614,7 @@ def job_info(request):
 ##    return render(request, 'login.html', {'login_data':login_data,'login_errors':error_message})
 @force_maintenance_mode_off
 def login(request):
-    if request.user.is_authenticated:
-        return redirect('/')
-    else:
-        return redirect("two_factor:login")
+    return redirect("two_factor:login")
 
 @force_maintenance_mode_off
 def logout(request):

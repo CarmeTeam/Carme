@@ -46,7 +46,10 @@
 
    <!-- main -->
 			<main role="main" class="flex-shrink-0">
-				{% include "blocks/maintenance.html" %}
+    {% if request.path != "/account/login/" %}
+					{% include "blocks/maintenance.html" %}
+				{% endif %}
+
     {% block content %}{% endblock %}
 			</main>
          
