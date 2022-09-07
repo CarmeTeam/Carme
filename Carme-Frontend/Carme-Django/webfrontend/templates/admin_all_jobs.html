@@ -17,137 +17,82 @@
 
 {% load static %}
 
-{% block title %}Carme Home{% endblock %}
+{% block title %}Jobs{% endblock %}
 
 {% block content %}
 
 {% if request.user.is_superuser %}
-
-<div class="row mt-2 mb-4">
-	<div class="col-12">
-		<div class="card-deck">
-			<div class="card">
-				<div class="card-header font-weight-bold"><i class="fa fa-tasks fa-fw" aria-hidden="true"></i>&nbsp; All jobs</div>
-				<div class="card-body">
-					<div class="container my-1">
-						<div class="table-responsive scrollbar">
-							<table class="table table-sm table-striped mb-0 overflow-hidden border-bottom style-text">
-								<thead>
-									<tr>
-										<th scope="col">ID</th>
-										<th scope="col">User</th>
-										<th scope="col">Name</th>
-										<th scope="col">Image</th>
-										<th scope="col">Master node</td>
-										<th scope="col">Nodes</td>
-										<th scope="col"><span class="frac"><sup>CPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
-										<th scope="col" style="min-width: 6.0rem;"><span class="frac"><sup>GPUs</sup><span>&frasl;</span><sub>node</sub></span></th>
-										<th scope="col">Status</th>
-										<th scope="col" style="min-width: 8.0rem;">Entry points</th>
-										<th scope="col">Details</th>
-										<th scope="col">Stop</th>
-									</tr>
-								</thead>
-								<tbody id="jobtable">
-									{% include "blocks/admin_job_table.html" %}
-								</tbody>
-							</table>
+<div id="admin-jobtable" class="row mt-2">
+		<div class="col-12 mb-4 pb-2">
+				<div class="card h-100">
+						
+						<div class="card-header d-flex justify-content-between">
+								<h5 class="mb-0 py-2 fs-0 fw-400 text-header">					
+										<i class="fas fa-tasks"></i>
+										All jobs
+								</h5>
 						</div>
-					</div>
+						
+						<div class="card-body">
+								<div class="mt-2 table-responsive">
+										<table class="table mb-0 overflow-hidden text-center fs--1 fw-400 text-body">
+												<thead>
+														<tr class="align-middle">
+																<th>ID</th>
+																<th>User</th>
+																<th>Name</th>
+																<th>Image</th>
+																<th>Nodes</td>
+																<th>
+																		<span class="frac">
+																				<sup>CPUs</sup>
+																				<span>&frasl;</span>
+																				<sub>node</sub>
+																		</span>
+																</th>
+																<th style="min-width: 6.0rem;">
+																		<span class="frac">
+																				<sup>GPUs</sup>
+																				<span>&frasl;</span>
+																				<sub>node</sub>
+																		</span>
+																</th>
+																<th>Status</th>
+																<th>Timing</th>
+																<th>Entry points</th>
+																<th>Details</th>
+																<th>Stop</th>
+														</tr>
+												</thead>
+												<tbody id="jobtable">
+														{% include "blocks/admin_job_table.html" %}
+												</tbody>
+										</table>
+								</div>
+						</div>
+						
+
 				</div>
-			</div>
 		</div>
-	</div>
 </div>
+
 {% else %}
-
 <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="error-template">
-                <h1>
-                    Oops!</h1>
-                <h2 class="display-4">
-                    403 Not Authorized</h2>
-                <div class="error-details">
-                    Sorry, you don't have permissions to access this page!
-                </div>
-                <div class="error-actions">
-                    <a href="{% url 'index' %}" class="btn btn-secondary btn-lg"><i class="fa fa-home" aria-hidden="true"></i>
-                        Take Me Home </a>
-                </div>
-            </div>
+		<div class="row">
+  		<div class="col-md-12">
+    		<div class="error-template">
+      		<h1>Oops!</h1>
+        <h2 class="display-4">403 Not Authorized</h2>
+        <div class="error-details">
+        		Sorry, you don't have permissions to access this page!
         </div>
+      </div>
     </div>
+  </div>
 </div>
-
 {% endif %}
 
 {% endblock %}
 
 
-{% block javascript %}
 
-{% if request.user.is_superuser %}
-
-<script type="text/javascript">
-	if (!$) console.error('jQuery is required!');
-	else {
-		function update_jobtable() {
-			$.ajax('/carme/AdminJobTable/', {
-				type: "GET",
-				statusCode: {
-					401: function (response) {
-						window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
-					}
-				}, success: function (data) {
-					var entries = $(data);
-
-					entries.each(function( index ) {
-						var jobid = $(this).data('jobid');
-						var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
-
-
-
-						if(existing.length > 0) {
-							if($(this).text() == existing.text()) {
-								// content equals, just update csrf
-								var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
-									existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
-									$(this).val(newTokens[index].value);
-								});
-							} else {
-								// content changed, replace element
-								$(this).replaceAll(existing);
-							}
-						} else {
-							// job not existing, add element
-							$('#jobtable').append($(this));
-						}
-					});
-
-					var sel = $(data).map(function() {
-						var jobid = $(this).data('jobid');
-						return 'tr[data-jobid="' + jobid + '"]';
-					}).get().join(',');
-
-					$('#jobtable tr').not(sel).remove();
-				}
-			});
-		}
-
-		setInterval(function () {
-			update_jobtable();
-		}, 2000);
-
-		$( document ).on( "click", "button.stop-job", function() {
-			setTimeout(function() {
-				update_jobtable();
-			}, 250);
-		});
-	}
-</script>
-
-{% endif %}
-
-{% endblock %}

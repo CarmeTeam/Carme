@@ -51,8 +51,8 @@ from .forms import LoginForm
 
 # Charts
 from django.utils.translation import gettext_lazy as _
-from .highchart.colors import COLORS, next_color
-from .highchart.lines import HighchartPlotLineChartView
+from .highcharts.colors import COLORS, next_color
+from .highcharts.lines import HighchartPlotLineChartView
 
 # History Card
 from django.db.models import Case, Value, When, IntegerField 
@@ -94,6 +94,11 @@ except ImportError:
     from django.utils.http import (
         is_safe_url as url_has_allowed_host_and_scheme,
     )
+
+# color dark-mode 
+#from django.http import JsonResponse
+#from rest_framework.decorators import api_view
+
 #-------------------------------#
 #----- classes and methods -----#
 #-------------------------------#
@@ -191,7 +196,9 @@ def generateChoices(request):
 @login_required(login_url='/account/login') 
 def index(request):
     """ dashboard page -> generates user job-list, messages and other interactive features"""
-    if request.user.is_verified():
+    #if request.user.is_verified():
+    if ((get_maintenance_mode()==False and request.user.is_verified()) or 
+        (get_maintenance_mode()==True  and request.user.is_verified()  and request.user.is_superuser )):
     
         # logout
         request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
@@ -310,9 +317,12 @@ def index(request):
         }
 
         return render(request, 'home.html', context)
+    
+    elif ((get_maintenance_mode()==False and request.user.is_verified()==False)):
+        return redirect("two_factor:setup")
 
     else:
-        return redirect("two_factor:setup")
+        return redirect("logout")
 
 
 @login_required(login_url='/account/login')
@@ -382,7 +392,6 @@ def job_table(request):
         sort_order=Case(*cases_active, output_field=IntegerField())).order_by('sort_order')
     myjobtable_list  = zip( list(slurm_list_user), list(jobtable_active) ) 
     myjobtable_script = zip( list(slurm_list_user), list(jobtable_active) )    
-
 
     # render template
     context = {
@@ -737,6 +746,17 @@ def proxy_auth(request):
     
     return HttpResponse(status=403) # forbidden
 
+
+#def color(request):
+#    if(request.POST.get('result_data')):
+#        listt= request.POST['result_data']
+#        listt= listt.split(",")
+#        print('we have' + request.POST.get('result_data'))
+#        request.session['colorful'] = listt[0]
+#        request.session['chartborder'] = listt[1]
+#        request.session['colormode'] = listt[2]
+#    return JsonResponse({'success':True})
+
 #####################################
 #####################################
 ######## Starts HighCharts ##########
@@ -811,17 +831,24 @@ class LineChartJSONViewTime(HighchartPlotLineChartView):
         return next_color(color)
     
     def get_x_axis_options(self):
-        return {"categories": self.get_labels(), "title": {"text": "Time (CET)", "margin": 15}, "min": 0.3,"max":self.xAxispoints-1.3,
-        "plotLines": [{
-        "color": "#aeb1b5",
-        "width": "1",
-        "value": "9",
-        "dashStyle": "Dash" 
-        }]
+        return {
+            "categories": self.get_labels(), 
+            "title": {
+                "text": "Time (CET)", 
+                "margin": 15,
+            }, 
+            "min": 0.3,
+            "max":self.xAxispoints-1.3,
+            "plotLines": [{
+                "width": "1",
+                "value": "9", 
+            }]
         }
 
     def get_markers(self):
-        return [{"symbol": 'circle', "radius":4.5},{"symbol": 'square', "radius":3.9},{"symbol": 'diamond', "radius":5}]
+        return [ {"symbol": 'circle', "radius":4.5},
+                 {"symbol": 'square', "radius":3.9},
+                 {"symbol": 'diamond', "radius":5}  ]
 
     title = _("")
     y_axis_title = _("GPUs")  
@@ -856,17 +883,24 @@ class BaseForecast():
         return next_color(color)
     
     def get_x_axis_options(self):
-        return {"categories": self.get_labels(), "title": {"text": "Time (CET)", "margin": 15}, "min": 0.3,"max":self.xAxispoints-1.3,
-        "plotLines": [{
-        "color": "#aeb1b5",
-        "width": "1",
-        "value": "0.5",
-        "dashStyle": "Dash" 
-        }]        
+        return {
+            "categories": self.get_labels(), 
+            "title": {
+                "text": "Time (CET)", 
+                "margin": 15,
+            }, 
+            "min": 0.3,
+            "max":self.xAxispoints-1.3, 
+            "plotLines": [{
+                "width": "1",
+                "value": "0.5", 
+            }]        
         }
 
     def get_markers(self):
-        return [{"symbol": 'circle', "radius":4.5},{"symbol": 'square', "radius":3.9},{"symbol": 'diamond', "radius":5}]
+        return [ {"symbol": 'circle', "radius":4.5},
+                 {"symbol": 'square', "radius":3.9},
+                 {"symbol": 'diamond', "radius":5}  ]
     
     title = _("") # Title shows None if removed
     y_axis_title = _("GPUs")  
@@ -973,8 +1007,7 @@ class BaseForecast():
         forecast_single = [np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))] # add time_end (doubled)
         forecast_single = [forecast_single[k][:,[0,1,2,6,7]] for k in range(len(self.gpus))] # free / queue / used / time_end / time_end
         forecast_single = [np.array(sorted(forecast_single[k],key=lambda x: x[3])) for k in range(len(self.gpus)) ] # sort by time_end
-        forecast_single = [forecast_single[k].astype(str) for k in range(len(self.gpus)) ] # convert to string
-        
+        forecast_single = [forecast_single[k].astype(str) for k in range(len(self.gpus)) ] # convert to string        
         
         for k in range(len(self.gpus)): # Express time in ECT datetime
             for count, x in enumerate(forecast_single[k][:,3]): 
@@ -987,6 +1020,8 @@ class BaseForecast():
             for i in range(1,len(forecast_single[k])): # Remove duplicate times
                 if forecast_single[k][i,3]==forecast_single[k][i-1,3]:
                     forecast_single[k][i-1,3]=0
+            #if (any(forecast_single[k][:,3])=='0'):
+            #    print(True)
             forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='0', axis=0)
 
             if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_single[k][0,3]: # Add now() time with initial state data      
@@ -994,8 +1029,9 @@ class BaseForecast():
                 forecast_single[k][0,4] = 'Now'
             else:
                 forecast_single[k] = np.r_[[[free_0[k], queue_0[k], used_0[k], 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]], forecast_single[k]] 
+            #if (any(forecast_single[k][:,3])=='none'):
             forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='none', axis=0) 
-        
+            
         for k in range(len(self.gpus)):
             if len(forecast_single[k]) < 8:
                 count = len(forecast_single[k])
@@ -1015,6 +1051,7 @@ class BaseForecast():
         ### Compute Total Forecast (chart for all GPUs) 
         forecast_total = np.concatenate([np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))]) # add time_end (doubled)
         forecast_total = np.array(sorted(forecast_total,key=lambda x: x[6])) # sort by time_end
+        #if (any(forecast_total[:,6])==0):
         forecast_total = np.delete(forecast_total, forecast_total[:,6] == 0, axis=0) # delete empty rows 
         if forecast_total.size == 0:
             forecast_total = np.array([[sum(free_0), sum(queue_0), sum(used_0), 'Now', datetime.now().strftime('%H:%M,%b-%d-%y')]])
@@ -1035,6 +1072,7 @@ class BaseForecast():
             for i in range(1,len(forecast_total)): # Remove duplicate times
                 if forecast_total[i,3]==forecast_total[i-1,3]:
                     forecast_total[i-1,3]=0
+            #if (any(forecast_total[:,3])=='0'):
             forecast_total = np.delete(forecast_total, forecast_total[:,3]=='0', axis=0)
             if datetime.now().strftime('%H:%M<br/>%b-%d') == forecast_total[0,3]: # Add now() time with initial state data        
                 forecast_total[0,3] = '<b>Now</b>'

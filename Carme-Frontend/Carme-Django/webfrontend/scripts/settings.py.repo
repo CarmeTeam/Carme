@@ -367,9 +367,6 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = CARME_FRONTEND_PATH+'/Carme-Django/static/'
 
-#LOGIN_REDIRECT_URL = 'home'
-LOGIN_REDIRECT_URL = '/'
-
 # Wiki settings
 WIKI_ACCOUNT_HANDLING = False
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False
@@ -382,8 +379,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # maintanence mode -----------------------------------------------------------------------------------------------------------------
 #MAINTENANCE_MODE = None
 MAINTENANCE_MODE_IGNORE_SUPERUSER = True
-
-MAINTENANCE_MODE_REDIRECT_URL = '/logout'
+#MAINTENANCE_MODE_REDIRECT_URL = '/logout'
+MAINTENANCE_MODE_IGNORE_URLS = 'account/login/' 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 

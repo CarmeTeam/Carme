@@ -13,7 +13,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
     mkdir -p ${SINGULARITY_ROOTFS}/etc/carme
 
 %files
-    Carme-Frontend /opt/Carme/Carme-Frontend
+    /opt/Carme/Carme-Frontend /opt/Carme/Carme-Frontend
 
 %post
     # update repos -----------------------------------------------------------------------------------------------------------------

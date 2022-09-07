@@ -1,0 +1,414 @@
+@charset "UTF-8";
+
+/* ------------------------------------------------------------------------------ */
+/*                                 Carme Colors                                   */
+/* ------------------------------------------------------------------------------ */
+
+:root {
+
+  /*----------------------------------- Hex --------------------------------------*/
+
+  /* main */
+  --carme-primary: #2c7be5;
+  --carme-secondary: #748194;
+  --carme-success: #00d27a;
+  --carme-info: #27bcfd;
+  --carme-warning: #f5803e;
+  --carme-danger: #e63757;
+  --carme-light: #e9ecef;
+  --carme-dark: #1a2431;
+
+  /* grayscale */
+  --carme-gray-100: #f9fafd;
+  --carme-gray-200: #edf2f9;
+  --carme-gray-300: #d8e2ef;
+  --carme-gray-400: #b6c1d2;
+  --carme-gray-500: #9da9bb;
+  --carme-gray-600: #748194;
+  --carme-gray-700: #5e6e82;
+  --carme-gray-800: #4d5969;
+  --carme-gray-900: #344050;
+  --carme-gray-1000: #232e3c;
+  --carme-gray-1100: #121e2d;
+  --carme-gray-1200: #0b1727;
+
+  /* --carme-gray-100: #f5f5ff;  CARME title in dark mode */
+  /* --carme-gray-200: #ff46be;  e.g. login titles */
+  /* --carme-gray-300: #f5f5ff;  e.g. card titles */
+  /* --carme-gray-400: #f5f5ff; e.g. card text content*/
+  /* --carme-gray-500: #9ca0a4;  e.g. drop down */
+  /* --carme-gray-600: #202328;  e.g. over menu*/
+  /* --carme-gray-700: #73797e;
+  --carme-gray-800: #646E88;
+  --carme-gray-900: #000000;
+  --carme-gray-1000: #000000;
+  --carme-gray-1100: #1c1f24;
+  --carme-gray-1200: #000000; CARME title in light mode */
+
+  /* extra */
+  --carme-purple: #6b5eae;
+  --carme-indigo: #727cf5;
+  --carme-navy: #163e73;
+  --carme-blue: #007bff;
+  --carme-sky: #96bdf2;
+  --carme-cyan: #1fa1d8;
+  --carme-teal: #02a8b5;
+  --carme-green: #00d27a;
+  --carme-orange: #f5803e;
+  --carme-pink: #ff679b;
+  --carme-red: #e63757;
+  --carme-white: #fff;
+  --carme-black: #000;
+
+  /*------------------------------------ RGB -------------------------------------*/
+
+  /* main */
+  --carme-primary-rgb: 44, 123, 229;
+  --carme-secondary-rgb: 116, 129, 148;
+  --carme-success-rgb: 0, 210, 122;
+  --carme-info-rgb: 39, 188, 253;
+  --carme-warning-rgb: 245, 128, 62;
+  --carme-danger-rgb: 230, 55, 87;
+  --carme-light-rgb: 233, 236, 239;
+  --carme-dark-rgb: 26, 36, 49;
+
+  /* grayscale */
+  --carme-gray-100-rgb: 249, 250, 253;
+  --carme-gray-200-rgb: 237, 242, 249;
+  --carme-gray-300-rgb: 216, 226, 239;
+  --carme-gray-400-rgb: 182, 193, 210;
+  --carme-gray-500-rgb: 157, 169, 187 ;
+  --carme-gray-600-rgb: 116, 129, 148;
+  --carme-gray-700-rgb: 94, 110, 130;
+  --carme-gray-800-rgb: 77, 89, 105;
+  --carme-gray-900-rgb: 52, 64, 80;
+  --carme-gray-1000-rgb: 35, 46, 60;
+  --carme-gray-1100-rgb: 18, 30, 45;
+  --carme-gray-1200-rgb: 11, 23, 39;
+
+  /* extra */
+  --carme-purple-rgb: 107, 94, 174;
+  --carme-indigo-rgb: 114, 124, 245;
+  --carme-navy-rgb: 22,62, 115;
+  --carme-blue-rgb: 0, 123, 255;
+  --carme-sky-rgb: 150, 189, 242;
+  --carme-cyan-rgb: 31, 161, 216;
+  --carme-teal-rgb: 2, 168, 181;
+  --carme-green-rgb: 0, 210, 122;
+  --carme-orange-rgb: 245, 128, 62;
+  --carme-pink-rgb: 255, 103, 155;
+  --carme-red-rgb: 230, 55, 87;
+  --carme-white-rgb: 255, 255, 255;
+  --carme-black-rgb: 0, 0, 0;
+
+
+  /*---------------------------- Light / Dark Mode -------------------------------*/
+
+  /* body-bg */
+  --carme-light-mode: rgba(var(--carme-gray-200-rgb),0.6);
+  --carme-dark-mode:  rgba(var(--carme-gray-1200-rgb),1.0);
+}
+
+
+
+:root, :root.light, :root .light {
+
+  
+  /* grayscale */
+  --carme-100:  var(--carme-gray-100);
+  --carme-200:  var(--carme-gray-200);
+  --carme-300:  var(--carme-gray-300);
+  --carme-400:  var(--carme-gray-400);
+  --carme-500:  var(--carme-gray-500);
+  --carme-600:  var(--carme-gray-600);
+  --carme-700:  var(--carme-gray-700);
+  --carme-800:  var(--carme-gray-800);
+  --carme-900:  var(--carme-gray-900);
+  --carme-1000: var(--carme-gray-1000);
+  --carme-1100: var(--carme-gray-1100);
+  --carme-1200: var(--carme-gray-1200);
+
+  /*----------------------------------- General ----------------------------------*/
+  --carme-title-text: var(--carme-gray-1000); 
+  --carme-brand-text: var(--carme-gray-100);
+
+  --carme-body-bg: var(--carme-light-mode);
+  --carme-border:  var(--carme-gray-300);
+
+  /* card and modal */
+  --carme-card-head-text: var(--carme-gray-900);
+  --carme-card-body-text: var(--carme-gray-800); 
+
+  --carme-card-bg:     var(--carme-white);
+  --carme-card-border: none;
+  --carme-card-shadow: 0 5px 15px rgba(var(--carme-gray-900-rgb), 0.1), 
+                       0 2px 5px  rgba(var(--carme-black-rgb), 0.03);
+  
+  --carme-card-header-bg:     var(--carme-gray-100);
+  --carme-card-header-border: none;
+  --carme-card-header-shadow: none;
+  
+  --carme-card-footer-bg:     var(--carme-gray-100);
+  --carme-card-footer-border: rgba(var(--carme-gray-200-rgb),0.5);
+  --carme-card-footer-shadow: none;
+  
+  --carme-modal-btn-close-bg:     url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23344050'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+  --carme-modal-btn-close-border: none;
+  --carme-modal-btn-close-shadow: none;
+
+  /* table */
+  --carme-table-bg:     none;
+  --carme-table-border: var(--carme-gray-300);
+  --carme-table-shadow: none;
+
+  --carme-table-head-bg:     none;
+  --carme-table-head-border: rgba(var(--carme-gray-700-rgb),0.6);
+  --carme-table-head-shadow: none;    
+
+  /* form-select */
+  --carme-form-bg:           var(--carme-white);
+  --carme-form-border:       var(--carme-gray-300);
+  --carme-form-border-hover: var(--carme-sky);
+  --carme-form-shadow:       0 1px 2px rgba(var(--carme-black-rgb),0.075);
+
+
+  /*------------------------------------ Login -----------------------------------*/
+  --carme-input-label-sm-text: var(--carme-gray-500);
+  --carme-input-label-lg-text: var(--carme-gray-600);
+  --carme-input-group-text:    var(--carme-gray-1000);
+  --carme-input-text:          var(--carme-gray-1000);
+
+  --carme-input-bg:           var(--carme-card-bg);
+  --carme-input-border:       var(--carme-gray-300);
+  --carme-input-border-focus: var(--carme-sky);
+  --carme-input-shadow:       0 1px 2px rgba(var(--carme-black-rgb),0.075);
+
+  --carme-input-group-bg:     rgba(var(--carme-gray-200-rgb),0.8);
+  --carme-input-group-border: var(--carme-gray-300);
+  --carme-input-group-shadow: 0 1px 2px rgba(var(--carme-black-rgb),0.075);
+
+  --carme-qrcode-bg:     var(--carme-white);
+  --carme-qrcode-border: var(--carme-gray-800);
+  --carme-qrcode-shadow: none;
+
+  --carme-login-box-bg:     var(--carme-card-bg);
+  --carme-login-box-border: none;
+  --carme-login-box-shadow: 0 10px 25px rgba(var(--carme-gray-900-rgb), 0.1), 
+                            0 5px 15px rgba(var(--carme-black-rgb), 0.07);
+
+
+  /*------------------------------------ Footer ----------------------------------*/
+  --carme-footer-bottom-text-hover: var(--carme-gray-1100);
+  --carme-footer-bottom-text:       var(--carme-gray-900);
+  --carme-footer-top-text-hover:    var(--carme-gray-1000);
+  --carme-footer-top-text:          var(--carme-gray-800);
+
+  --carme-footer-top-bg:     transparent;
+  --carme-footer-top-border: var(--carme-gray-300);
+  --carme-footer-top-shadow: none;
+
+  --carme-footer-bottom-bg:     rgba(var(--carme-gray-1200-rgb),0.05);
+  --carme-footer-bottom-border: none;
+  --carme-footer-bottom-shadow: none;
+
+  
+  /*----------------------------------- Navbar -----------------------------------*/
+  --carme-dropdown-menu-text-hover: var(--carme-gray-1000);
+  --carme-dropdown-menu-text:       var(--carme-gray-800);
+  --carme-navbar-text-hover:        var(--carme-gray-400);
+  --carme-navbar-text:              var(--carme-gray-200);  
+  
+  --carme-navbar-bg:       var(--carme-gray-1000);
+  --carme-navbar-icons-bg: var(--carme-gray-800);
+  
+  --carme-dropdown-menu-bg-hover: var(--carme-light);
+  --carme-dropdown-menu-bg:       var(--carme-white);
+  --carme-dropdown-menu-border:   var(--carme-white);
+  --carme-dropdown-menu-shadow:   0 5px 15px 0 rgba(var(--carme-gray-900-rgb),0.1), 
+                                  0 2px 5px 0 rgba(var(--carme-black-rgb), 0.07); 
+
+  --carme-toggler-border-hover:    var(--carme-gray-800);
+  --carme-dropdown-divider-border: var(--carme-border);
+
+
+  /*------------------------------ GPU Card: Bullet ------------------------------*/
+  --carme-bullet-bg: var(--carme-border);
+
+      
+  /*-------------------------------  Chart Card ----------------------------------*/
+  
+		--carme-chart:												var(--carme-gray-1100);		
+  /* nav-tabs */
+  --carme-tab-bg:           transparent;
+  --carme-tab-border:       var(--carme-border);
+  --carme-tab-border-hover: var(--carme-gray-200);
+  --carme-tab-shadow:       none;
+
+  
+  /*--------------------------------- Job-Card -----------------------------------*/
+  
+  /* custom-button */
+  --carme-btn-text-hover: var(--carme-gray-700);
+
+  --carme-btn-bg:       var(--carme-white);
+  --carme-btn-bg-hover: var(--carme-light);
+  --carme-btn-border:   var(--carme-gray-300);
+  --carme-btn-shadow:   0 1px 2px rgba(var(--carme-black-rgb),0.075);
+  
+  /* progress-bar */
+  --carme-progress-bar-bg:     var(--carme-gray-200);
+  --carme-progress-bar-border: none;
+  --carme-progress-bar-shadow: none;
+}
+
+.dark {
+
+  /* grayscale */
+  --carme-100:  var(--carme-gray-1200);
+  --carme-200:  var(--carme-gray-1100);
+  --carme-300:  var(--carme-gray-1000);
+  --carme-400:  var(--carme-gray-900);
+  --carme-500:  var(--carme-gray-800);
+  --carme-600:  var(--carme-gray-700);
+  --carme-700:  var(--carme-gray-600);
+  --carme-800:  var(--carme-gray-500);
+  --carme-900:  var(--carme-gray-400);
+  --carme-1000: var(--carme-gray-300);
+  --carme-1100: var(--carme-gray-200);
+  --carme-1200: var(--carme-gray-100);
+
+
+  /*---------------------------------- General -----------------------------------*/
+  --carme-title-text: var(--carme-gray-200);
+  --carme-brand-text: var(--carme-gray-100);
+
+  --carme-body-bg: var(--carme-dark-mode);
+  --carme-border:  var(--carme-gray-900);
+  
+  /* card and modal */
+  --carme-card-head-text: var(--carme-gray-300);
+  --carme-card-body-text: var(--carme-gray-400);
+  
+  --carme-card-bg:     var(--carme-gray-1100);
+  --carme-card-border: none;
+  --carme-card-shadow: 0 10px 25px rgba(var(--carme-gray-1200-rgb),0.15), 
+                       0 3px 10px  rgba(var(--carme-black-rgb),0.2);
+
+  --carme-card-header-bg:     rgba(var(--carme-gray-1000-rgb), 0.25);
+  --carme-card-header-border: none;
+  --carme-card-header-shadow: none;
+
+  --carme-card-footer-bg:     rgba(var(--carme-gray-1000-rgb), 0.25);
+  --carme-card-footer-border: rgba(var(--carme-white), 0.125);
+  --carme-card-footer-shadow: none;
+  
+  --carme-modal-btn-close-bg:     url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23d8e2ef'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+  --carme-modal-btn-close-border: none;
+  --carme-modal-btn-close-shadow: none;
+
+  /* table */
+  --carme-table-bg:     none;
+  --carme-table-border: var(--carme-gray-1000);
+  --carme-table-shadow: none;
+
+  --carme-table-head-bg:     none;
+  --carme-table-head-border: rgba(var(--carme-gray-700-rgb),0.6);
+  --carme-table-head-shadow: none;
+
+  /* form-select */
+  --carme-form-bg:           var(--carme-dark);
+  --carme-form-border:       var(--carme-gray-1000);
+  --carme-form-border-hover: var(--carme-navy);
+  --carme-form-shadow:       0 1px 2px rgba(var(--carme-black-rgb),0.075);
+  
+
+  /*------------------------------------ Login -----------------------------------*/
+  --carme-input-label-sm-text: var(--carme-gray-600);
+  --carme-input-label-lg-text: var(--carme-gray-500);
+  --carme-input-group-text:    var(--carme-gray-300);
+  --carme-input-text:          var(--carme-gray-300);
+
+  --carme-input-bg:           var(--carme-gray-1100);
+  --carme-input-border:       var(--carme-gray-900);
+  --carme-input-border-focus: var(--carme-navy);
+  --carme-input-shadow:       0 1px 2px rgba(var(--carme-black-rgb),0.075);
+
+  --carme-input-group-bg:     var(--carme-gray-1000);
+  --carme-input-group-border: var(--carme-gray-1000);
+  --carme-input-group-shadow: 0 1px 2px rgba(var(--carme-black-rgb),0.075);
+
+  --carme-qrcode-bg:     var(--carme-gray-200);
+  --carme-qrcode-border: var(--carme-gray-800);
+  --carme-qrcode-shadow: none;
+
+
+  --carme-login-box-bg:     var(--carme-card-bg);
+  --carme-login-box-border: none;
+  --carme-login-box-shadow: 0 10px 25px rgba(var(--carme-gray-1200-rgb),0.15), 
+                            0 5px  15px rgba(var(--carme-black-rgb), 0.2);
+
+
+  /*------------------------------------ Footer ----------------------------------*/
+  --carme-footer-bottom-text-hover: var(--carme-gray-200);
+  --carme-footer-bottom-text:       var(--carme-gray-400);
+  --carme-footer-top-text-hover:    var(--carme-gray-300);
+  --carme-footer-top-text:          var(--carme-gray-500);
+
+  --carme-footer-top-bg:     transparent;
+  --carme-footer-top-border: var(--carme-gray-900);
+  --carme-footer-top-shadow: none;
+
+  --carme-footer-bottom-bg:     var(--carme-gray-1100);
+  --carme-footer-bottom-border: none;
+  --carme-footer-bottom-shadow: none;
+
+
+  /*----------------------------------- Navbar -----------------------------------*/
+  --carme-navbar-text-hover:        var(--carme-gray-200);
+  --carme-navbar-text:              var(--carme-gray-400);
+  --carme-dropdown-menu-text-hover: var(--carme-gray-300);
+  --carme-dropdown-menu-text:       var(--carme-gray-500);
+
+  --carme-navbar-bg:       var(--carme-dark);
+  --carme-navbar-icons-bg: var(--carme-gray-800);
+
+  --carme-dropdown-menu-bg-hover: var(--carme-gray-900);
+  --carme-dropdown-menu-bg:       var(--carme-gray-1000);
+  --carme-dropdown-menu-border:   var(--carme-gray-900);
+  --carme-dropdown-menu-shadow:   0 5px 15px rgba(var(--carme-gray-1200-rgb),0.15), 
+                                  0 2px 5px rgba(var(--carme-black-rgb), 0.2); 
+
+  --carme-toggler-border-hover:    var(--carme-gray-800);
+  --carme-dropdown-divider-border: var(--carme-gray-900);
+  
+  
+  /*----------------------------- GPU Card: Bullet -------------------------------*/
+  --carme-bullet-bg: var(--carme-border);
+    
+  /*-------------------------------  Chart Card ----------------------------------*/
+  
+		--carme-chart:												#fff;
+
+  /* nav-tabs */
+  --carme-tab-bg:           transparent;
+  --carme-tab-border:       var(--carme-border);
+  --carme-tab-border-hover: var(--carme-gray-1000);
+  --carme-tab-shadow:       none;
+
+  /*--------------------------------- Job-Card -----------------------------------*/
+  
+  /* custom-button */
+  --carme-btn-text-hover: var(--carme-gray-600);
+  
+  --carme-btn-bg:       var(--carme-gray-1000);
+  --carme-btn-bg-hover: var(--carme-dark);
+  --carme-btn-border:   var(--carme-gray-1000);
+  --carme-btn-shadow:   0 1px 2px rgba(var(--carme-black-rgb),0.075);
+  
+  /* progress-bar */  
+  --carme-progress-bar-bg:     var(--carme-gray-1000);
+  --carme-progress-bar-border: none;
+  --carme-progress-bar-shadow: none;
+}
+
+

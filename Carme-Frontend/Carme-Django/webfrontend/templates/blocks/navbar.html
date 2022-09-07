@@ -1,0 +1,208 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top">
+		<div class="container py-0" data-layout-header="container">
+
+ 			<!-- <toggle> -->
+				<button class="navbar-toggler navbar-toggler-frame" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+      						aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+  				<span class="navbar-toggler-icon"></span>
+  		</button>
+				<!-- </toggle> -->
+
+  		<!-- <brand> -->
+  		<a class="navbar-brand me-auto pb-2 px-2 d-md-none text-brand" href="/">Carme</a>
+  		<a class="navbar-brand me-auto pb-2 px-2 d-none d-md-block text-brand" href="/">Carme |</a>
+				<!-- </brand> -->
+
+				<!-- <left> -->
+  		<div class="collapse navbar-collapse order-1" id="navbarMain">
+   			<ul class="navbar-nav me-auto">
+    				<li class="nav-item{% if '/' == request.path %} active{% endif %}">
+     					<a class="nav-link" href="/">Dashboard <span class="sr-only">(current)</span></a>
+    				</li>
+    				<li class="nav-item{% if '/carme/JobHist' in request.path %} active{% endif %}">
+     					<a class="nav-link" href="/carme/JobHist/">History</a>
+    				</li>       
+    				<li class="nav-item dropdown">
+     					<a class="nav-link dropdown-toggle dropdown-left" href="#" id="dropdownHelp" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+												Help
+										</a>
+     					<ul class="dropdown-menu dropdown-menu-start dropdown-menu-links" aria-labelledby="dropdownHelp">
+												<li>
+     									<a class="dropdown-item" href="/wiki">
+																<i class="fab fa-wikipedia-w"></i>&nbsp; Wiki
+														</a>
+												</li>
+												<li>
+      								<a class="dropdown-item" href="https://carmeteam.github.io/Carme-Docu/" target="_blank">
+																<i	class="fas fa-book"></i>&nbsp; Documentation
+														</a>
+     							</li>
+										</ul>
+    				</li>
+   			</ul>
+  		</div>
+  		<!--</left> -->
+
+  		<!--<right> -->
+  		<div class="order-md-1">
+   			<ul class="navbar-nav flex-row align-items-center">
+    				
+								<!-- <settings> -->
+    				<li class="nav-item dropdown me-3 me-md-1 {% if '/carme/AdminAllJobs/' in request.path %} active{% endif %}">
+     					<a class="nav-link dropdown-toggle dropdown-right" href="#" id="dropdownSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      						<i class="fas fa-cog fa-border"></i>
+     					</a>
+     					<div class="dropdown-menu dropdown-menu-start dropdown-menu-settings position-absolute" aria-labelledby="dropdownSettings">
+
+												<!-- <wide-screen> --> 
+												<div>
+            		<a class="dropdown-item">
+              		<i class="fas fa-arrows-alt-h"></i>&nbsp; Wide screen
+                <span class="form-check form-switch d-inline ps-0">
+                  <input class="form-check-input ms-0 float-end" id="mode-fluid" type="checkbox" data-theme-control="isFluid" />
+                </span>
+              </a>
+            </div>
+												<!-- </wide-screen> -->
+
+												<!-- <dark-mode> -->
+            <div>
+            		<a class="dropdown-item">
+              		<i class="fas fa-moon"></i>&nbsp; Dark mode
+                <span class="form-check form-switch d-inline ps-0">
+                  <input class="form-check-input float-end" id="mode-dark" type="checkbox" data-theme-control="theme" />
+                </span>
+              </a>
+            </div>
+												<!-- </dark-mode> -->
+
+												<!-- <admin> -->
+												{% if user.is_superuser %}
+														<div class="dropdown-divider"></div>
+      								<a class="dropdown-item" href="/carme/AdminAllJobs/">
+																<i class="fas fa-tasks"></i>&nbsp; All jobs
+														</a>
+      								{% if maintenance_mode %}
+      								<a class="dropdown-item" href="/carme/maintenance-mode/off/">
+																<i class="fas fa-unlock"></i>&nbsp; Maintenance off
+														</a>
+      								{%else %}
+      								<a class="dropdown-item" href="/carme/maintenance-mode/on/">
+																<i class="fas fa-lock"></i>&nbsp; Maintenance on
+														</a>
+      								{% endif %}
+														<div class="dropdown-divider"></div>
+														<a class="dropdown-item" href="/wiki/cluster_news/">
+																<i	class="fas fa-newspaper"></i>&nbsp; Edit news
+														</a>
+      								<a class="dropdown-item" href="/admin/">
+																<i class="fas fa-wrench"></i>&nbsp; Admin portal
+														</a>
+      								{% if settings.CARME_FRONTEND_LINK_PROXY|length > 0 %}
+      								<a class="dropdown-item" href={{ settings.CARME_FRONTEND_LINK_PROXY }} target="_blank">
+																<i	class="fas fa-map-signs"></i>&nbsp; Proxy
+														</a>
+      								{% endif %}
+      								{% if settings.CARME_FRONTEND_LINK_MONITOR|length > 0 %}
+      								<a class="dropdown-item" href={{ settings.CARME_FRONTEND_LINK_MONITOR }} target="_blank">
+																<i	class="fab fa-watchman-monitoring"></i>&nbsp; Monitoring
+														</a>
+      								{% endif %}
+      								{% if settings.CARME_FRONTEND_LINK_SWITCH|length > 0 %}
+      								<a class="dropdown-item" href={{ settings.CARME_FRONTEND_LINK_SWITCH }} target="_blank">
+																<i	class="fas fa-sitemap"></i>&nbsp; Switch
+														</a>
+      								{% endif %}
+      								{% if settings.CARME_FRONTEND_LINK_LDAP|length > 0 %}
+      								<a class="dropdown-item" href={{ settings.CARME_FRONTEND_LINK_LDAP }} target="_blank">	
+																<i	class="fas fa-users"></i>&nbsp; LDAP
+														</a>
+      								{% endif %}
+												{% endif %}
+												<!-- </admin> -->
+
+      						<!-- <version> -->
+												{% if CARME_VERSION %}
+      								<div class="dropdown-divider"></div>
+      								<p class="mb-0 px-4 py-1"><b>Version</b> {{ CARME_VERSION }}</p>
+      						{% endif %}
+												<!-- </version> -->
+												
+     					</div>
+    				</li>
+								<!-- </settings> -->
+    
+    				<!-- <notifications> -->
+								<li class="nav-item dropdown me-3 me-md-1">
+    						<a class="nav-link dropdown-toggle dropdown-right" href="#" id="dropdownNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      						<i class="fas fa-bell fa-border position-relative"></i>
+												{% comment %}
+												<span class="position-absolute translate-middle badge bg-primary rounded-circle" style="top:0.7rem; right:-1.0rem;">9
+     									<span class="visually-hidden">New alerts</span>
+												</span>
+												{% endcomment %}
+										</a>
+										<ul class="dropdown-menu dropdown-menu-notifications position-absolute" style="width: 220px"  aria-labelledby="dropdownNotifications">
+												<li>
+     									<dl class="row no-gutters mb-0 px-3 py-1">
+                <dt class="col-12 fw-400"><i class="fas fa-circle-exclamation"></i>&nbsp; Last 10 notifications</dt>
+              </dl>
+												</li>
+      						<div class="dropdown-divider"></div>
+												<div class="scrollbar-overlay" style="max-height: 240px;">
+														<li>
+      										{% for message in message_list %}
+       											{% if message.color == "red" %}
+        												<div data-msgid="{{ message.id }}" class="alert alert-danger px-2 mx-2" role="alert">{{ message.message }}</div>
+       											{% elif message.color == "#e8be17" %}
+        												<div data-msgid="{{ message.id }}" class="alert alert-info px-2 mx-2" role="alert">{{ message.message }}</div>
+       											{% else %}
+        												<div data-msgid="{{ message.id }}" class="alert alert-success px-2 mx-2" role="alert">{{ message.message }}</div>
+       											{% endif %}
+      										{% endfor %}
+														</li>
+     							</div>
+										</ul>
+    				</li>
+								<!-- </notifications> -->
+  
+    				<!-- <user> -->
+								<li class="nav-item dropdown me-3 me-md-1">
+     					<a class="nav-link dropdown-toggle dropdown-right" href="#" id="dropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+     							<i class="fas fa-user fa-border"></i>
+     					</a>
+										<ul class="dropdown-menu dropdown-menu-end dropdown-menu-user position-absolute" aria-labelledby="dropdownUser">
+												<li>
+      								<a class="dropdown-item" href="/account/two_factor/">
+																<i class="fas fa-shield-halved"></i>&nbsp; Account security
+														</a>
+												</li>
+      						<div class="dropdown-divider"></div>
+												<li>
+      								<dl class="row no-gutters mb-0 px-3 py-1" style="width: 230px">
+																<dt class="col-12"><i class="fas fa-user"></i>&nbsp; User</dt>
+																<dd class="col-12">&nbsp; &nbsp; &nbsp; {{ user.username }}</dd>
+       									<dt class="col-12"><i class="fas fa-users"></i>&nbsp;Group</dt>
+       									<dd class="col-12">&nbsp; &nbsp; &nbsp; &nbsp;{% for g in user.ldap_user.group_names %}{{g}} {%endfor%}</dd>
+       									<dt class="col-12"><i class="fas fa-clock"></i>&nbsp; Session timeout</dt>
+       									<dd class="col-12">&nbsp; &nbsp; &nbsp; &nbsp;{{request.session.get_expiry_date}}</dd>
+      								</dl>
+												</li>
+      						<div class="dropdown-divider"></div>
+												<li>
+      								<a class="dropdown-item" href="/logout/">
+       									<i class="fas fa-right-from-bracket"></i>&nbsp; Logout
+     	 							</a>
+												</li>
+										</ul>
+    				</li>
+								<!-- </user> -->
+   			
+						</ul>
+  		</div>
+				<!--</right> -->
+    
+ 	</div>  
+</nav>
