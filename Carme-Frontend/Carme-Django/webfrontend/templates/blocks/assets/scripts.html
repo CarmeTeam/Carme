@@ -99,6 +99,38 @@
 </script>
 
 
+
+<!----------------------------------> 
+<!--          Form Submit         -->  
+<!--         ( base.html )        --> 
+<!----------------------------------> 
+<script type="text/javascript">                                                              
+  if (!$) console.error('jQuery is required!');                                              
+  else {                                                                                     
+    $(document).on('submit', 'form.ajax', function (event) {                                 
+      // source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery      
+      event.preventDefault(); //prevent default action                                       
+      var post_url = $(this).attr("action"); //get form action url                           
+      var request_method = $(this).attr("method"); //get form GET/POST method                
+      var form_data = $(this).serialize(); //Encode form elements for submission             
+      $.ajax({                                                                               
+        url: post_url,                                                                       
+        type: request_method,                                                                
+        data: form_data                                                                      
+      }).fail(function () {                                                                  
+        console.error('Request to ' + post_url + ' failed. Please try again.');              
+      }).always(function () {                                                                
+          setTimeout(function () {                                                           
+          //document.location.reload();                                                      
+          }, 1000);                                                                          
+        });                                                                                  
+    });                                                                                      
+  }                                                                                          
+</script>                                                                                    
+                                                                                             
+
+
+
 <!---------------------------------->
 <!--       GPU and Chart Card     -->
 <!--         <form-select>        -->
@@ -261,20 +293,17 @@ $(document).ready(function() {
                   		existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
                   				$(this).val(newTokens[index].value);
                   		});
-                  		console.log('equals');
                 		} 
 																		else {
                 				// content changed, replace element
                   		$(this).replaceAll(existing);
                   		onloadColor();
-                  		console.log('replaceAll(existing)');
                 		}
               		} 
 																else {
               				// job not existing, remove element
                 		$('#jobtable').append($(this));
 																		onloadColor();
-                		console.log('Append(this)');
               		}
 														}
             });
@@ -291,7 +320,6 @@ $(document).ready(function() {
 
 										// update jobtable
           function update_jobtable() {
-												console.log('onloadJobTableColor in jobtable: ' + onloadJobTableColor)
 										  if (onloadJobTableColor =='completed') {
           				$.ajax('/carme/JobTable/',{
             				type: "GET",
@@ -304,7 +332,6 @@ $(document).ready(function() {
             						$.ajax({
                 				url:update_jobtable_success(data),
                   		success:function(){
-                  				console.log('success update_jobtable')
                     		verified=true 
                   		}
                 		})  
@@ -314,8 +341,7 @@ $(document).ready(function() {
           }
 	
 										// update admin jobtable
-										function update_jobtable_admin() {                                                               
-  										console.log('onloadJobTableColor in jobtable_admin: ' + onloadJobTableColor)                   
+										function update_jobtable_admin() {                                                                                  
   										if (onloadJobTableColor =='completed') {                                                 
     										$.ajax('/carme/AdminJobTable/',{                                                            
       										type: "GET",                                                                         
@@ -327,8 +353,7 @@ $(document).ready(function() {
       										success: function(data){                                                             
         										$.ajax({                                                                           
           										url:update_jobtable_success(data),                                               
-          										success:function(){                                                              
-            										console.log('success update_jobtable_admin')                                         
+          										success:function(){                                         
             										verified=true                                                                  
           										}                                                                                
         										})                                                                                 
@@ -412,7 +437,6 @@ $(document).ready(function() {
         						if (value=="dark"){
 																if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD !=null) {
                 		for(var i = 0, length = imgJobL.length; i < length; i++) {
-																				console.log('switch is: ' + value)
                   		imgJobL[i].style.display = 'none';		       // hides light-mode img
 																				imgJobD[i].style.display = 'inline-block'; // shows dark-mode img
                   }               
@@ -420,8 +444,7 @@ $(document).ready(function() {
               }
               if (value=='light') {
               		if (typeof(imgJobD) != 'undefined' && imgJobD != null && typeof(imgJobL) != 'undefined' && imgJobL != null) {
-                		for(var i = 0, length = imgJobD.length; i < length; i++) {
-																				console.log('switch is: ' + value) 
+                		for(var i = 0, length = imgJobD.length; i < length; i++) { 
                   		imgJobD[i].style.display = 'none';		       // hides dark-mode img
 																				imgJobL[i].style.display = 'inline-block'; //shows light-mode img
                   } 
