@@ -14,4 +14,4 @@ Object.keys(CONFIG).forEach(function (key) {
 if (localStorage.getItem('theme') === 'dark') {
   document.documentElement.classList.add('dark');
 }
-//# sourceMappingURL=config.js.map
+//# sourceMappingURL=config.min.js.map

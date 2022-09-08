@@ -156,7 +156,7 @@ body {
 /* body-scrollbar not hidden when modal is active*/
 .modal-open {
   overflow:hidden!important; 
-  overflow-y:scroll!important;
+  overflow-y:auto!important;
   /* padding-right:0 !important; */
 }
 
@@ -523,26 +523,32 @@ nav a.nav-link:hover{
 
 /* dropdown-menu position */
 .dropdown-menu.dropdown-menu-user:after {
-  right: 0.85rem;
+  right: 1.05rem;
 }
 .dropdown-menu.dropdown-menu-settings:after {
-  left: 1.80rem;
+  left: 1.60rem;
 }
 .dropdown-menu.dropdown-menu-notifications:after {
-  right: 3.95rem;
+  right: 4.25rem;
 }
 .dropdown-menu.dropdown-menu-links:after {
   left: 1.2rem;
 }
 .dropdown-menu-notifications {
-  left: 72% !important;
+  left: 69% !important;
   right: auto !important;
-  transform: translate(-72%, 0) !important;
+  transform: translate(-69%, 0) !important;
 }
 .dropdown-menu-settings {
-  left: 13% !important;
+  left: 9% !important;
   right: auto !important;
-  transform: translate(-13%, 0) !important;
+  transform: translate(-9%, 0) !important;
+}
+
+.dropdown-menu-user {
+  left: 98% !important;
+  right: auto !important;
+  transform: translate(-98%, 0) !important;
 }
 
 /*dropdown-item*/
