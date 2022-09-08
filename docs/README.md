@@ -74,20 +74,15 @@ _Job submission scheme_
 
 ## **Roadmap**
 
-* **06/2022: ISC release**
-  * improvements
-    * user dashboard redesign
-  * planed features
-    * CPU only jobs
-    * new job monitoring (for users)
-    * batch job support (beta)
-
-* **12/2022: SC release**
+* **11/2022: SC release**
   * improvements
     * web-frontend redesign
   * planed features
     * full batch job support
     * FPGA support
+    * CPU only jobs
+    * new job monitoring (for users)
+    * batch job support (beta)
 
 ## Releases
 
@@ -107,11 +102,15 @@ _Job submission scheme_
 
 * 08/2021: r0.9.0
 
-* 05/2022: **r0.9.5** (latest)
+* 05/2022: r0.9.5
+
+* 09/2022: **r0.9.6** (latest)
+
 
 ## **Documentation**
 
 Visit our documentation at [github](https://carmeteam.github.io/Carme-Docu/).
+
 
 ## **Who is behind Carme?**
 
