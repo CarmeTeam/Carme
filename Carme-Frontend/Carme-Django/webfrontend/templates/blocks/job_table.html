@@ -71,25 +71,35 @@
 				{% if job.status == 'running' %}
 
 					<div class="carme-job-light" style="display:none;">
-					<a href="/ta_{{ job.url_suffix }}/"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/theia-light.svg' %}" alt="Theia"/>
-					</a>
-					<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/jupyter-light.svg' %}" alt="Jupyter"/>
-					</a>
+       <div id="pre-light-{{job.slurm_id}}" style="display:none;">
+         <i class="fas fa-cog fa-spin text-secondary"></i> 
+       </div>
+							<div id="post-light-{{job.slurm_id}}" style="display:none;">
+									<a href="/ta_{{ job.url_suffix }}/"
+												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
+											<img src="{% static 'img/logo/theia-light.svg' %}" alt="Theia"/>
+									</a>
+									<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
+												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
+											<img src="{% static 'img/logo/jupyter-light.svg' %}" alt="Jupyter"/>
+									</a>
+							</div>
 					</div>
      
 					<div class="carme-job-dark" style="display:none;">
-					<a href="/ta_{{ job.url_suffix }}/"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/theia-dark.svg' %}" alt="Theia"/>
-					</a>
-					<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
-								onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
-							<img src="{% static 'img/logo/jupyter-dark.svg' %}" alt="Jupyter"/>
-					</a>
+							<div id="pre-dark-{{job.slurm_id}}" style="display:none;">
+									<i class="fas fa-cog fa-spin text-secondary"></i> 
+							</div>
+							<div id="post-dark-{{job.slurm_id}}" style="display:none;">
+									<a href="/ta_{{ job.url_suffix }}/"
+												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
+											<img src="{% static 'img/logo/theia-dark.svg' %}" alt="Theia"/>
+									</a>
+									<a href="/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}"
+												onclick="w=window.open(this.href, '_blank'); (w.onload=function(){w.document.title='{{job.name}}';})(); return false;" target="_blank" style="text-decoration:none;">
+											<img src="{% static 'img/logo/jupyter-dark.svg' %}" alt="Jupyter"/>
+									</a>
+							</div>
 					</div>
      
 					{% comment %}
@@ -274,6 +284,56 @@
     }
   }, 1000);
   
+</script>
+<script>
+        var myBadGateway{{job.slurm_id}} = setInterval(function () {
+    
+     
+        var url = '/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}/';  	
+        fetch(url)
+        .then(function(response) {
+          response.text().then(function(text) {
+            storedText = text;
+            //console.log('Checking Bad Gateway in: {{job.slurm_id}}');
+            if(storedText=='Bad Gateway'){
+              document.getElementById('pre-light-{{job.slurm_id}}').style.display ='block';
+														document.getElementById('pre-dark-{{job.slurm_id}}').style.display='block';
+            }    
+            else {
+              document.getElementById('pre-light-{{job.slurm_id}}').style.display ='none';
+														document.getElementById('pre-dark-{{job.slurm_id}}').style.display ='none'; 
+              document.getElementById('post-light-{{job.slurm_id}}').style.display ='block';
+              document.getElementById('post-dark-{{job.slurm_id}}').style.display ='block'; 
+              clearInterval(myBadGateway{{job.slurm_id}});
+              //console.log('You can access now to: {{job.slurm_id}}');
+              myBadGateway = 0;
+              
+            }
+    
+          });
+        });
+        
+        
+      }, 1000);
+
+//$.ajax('/nb_{{ job.url_suffix }}/lab/workspaces/{{ job.slurm_id }}/',{
+//		type: "GET",
+//  error: {
+//  		404: function (response) {
+//    window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+//  		}
+// 	}, 
+//  success: function(data){
+//    console.log('after success');
+//  		var nbentries = $(data);
+//    nbentries.each(function(index,e){
+//    		if(typeof(e.cells)!='undefined'){
+//      		console.log('gate:' $(this).text());
+//					 }
+//    });                         
+//  } 
+//
+//});
 </script>
 {% endif %}
 </tr>
