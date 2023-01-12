@@ -52,8 +52,8 @@ MirrorURL: http://ftp.de.debian.org/debian/
   # install jupyterlab
   bash /opt/install/install_jupyterlab.sh
 
-  # install theia.ide and basic plugins
-  bash /opt/install/install_theia.sh
+  # install codeserver
+  bash /opt/install/install_codeserver.sh
 
   # build and install gpi 
   bash /opt/install/install_gpi.sh
