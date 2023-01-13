@@ -29,7 +29,7 @@ _We combine established open source ML and DS tools with HPC backends and use th
 
 * [Singularity containers](https://sylabs.io)
 * [Anaconda environments](https://www.anaconda.com/distribution)
-* web based GUI frontends e.g. [Theia-IDE](https://theia-ide.org) and [JupyterLab](https://github.com/jupyterlab/jupyterlab)
+* web–based GUI frontends e.g. [Code-Server](https://github.com/coder/code-server) and [JupyterLab](https://github.com/jupyterlab/jupyterlab)
 * completely web frontend based  
   (OS independent, no installation on user side needed)
 * HPC job management and schedulers ([SLURM](https://slurm.schedmd.com))
@@ -74,7 +74,7 @@ _Job submission scheme_
 
 ## **Roadmap**
 
-* **11/2022: SC release**
+* **06/2023: ISC release**
   * improvements
     * web-frontend redesign
   * planed features
