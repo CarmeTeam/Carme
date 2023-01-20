@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 /* ------------------------------------------------------------------------------ */
-/*                                 Carme Colors                                   */
+/*                              Carme Colors: root                                */
 /* ------------------------------------------------------------------------------ */
 
 :root {
@@ -32,20 +32,7 @@
   --carme-gray-1100: #121e2d;
   --carme-gray-1200: #0b1727;
 
-  /* --carme-gray-100: #f5f5ff;  CARME title in dark mode */
-  /* --carme-gray-200: #ff46be;  e.g. login titles */
-  /* --carme-gray-300: #f5f5ff;  e.g. card titles */
-  /* --carme-gray-400: #f5f5ff; e.g. card text content*/
-  /* --carme-gray-500: #9ca0a4;  e.g. drop down */
-  /* --carme-gray-600: #202328;  e.g. over menu*/
-  /* --carme-gray-700: #73797e;
-  --carme-gray-800: #646E88;
-  --carme-gray-900: #000000;
-  --carme-gray-1000: #000000;
-  --carme-gray-1100: #1c1f24;
-  --carme-gray-1200: #000000; CARME title in light mode */
-
-  /* extra */
+  /* colors */
   --carme-purple: #6b5eae;
   --carme-indigo: #727cf5;
   --carme-navy: #163e73;
@@ -86,7 +73,7 @@
   --carme-gray-1100-rgb: 18, 30, 45;
   --carme-gray-1200-rgb: 11, 23, 39;
 
-  /* extra */
+  /* colors */
   --carme-purple-rgb: 107, 94, 174;
   --carme-indigo-rgb: 114, 124, 245;
   --carme-navy-rgb: 22,62, 115;
@@ -110,6 +97,10 @@
 }
 
 
+
+/* ------------------------------------------------------------------------------ */ 
+/*                           Carme Colors: light-mode                             */ 
+/* ------------------------------------------------------------------------------ */ 
 
 :root, :root.light, :root .light {
 
@@ -236,8 +227,8 @@
 
       
   /*-------------------------------  Chart Card ----------------------------------*/
-  
 		--carme-chart:												var(--carme-gray-1100);		
+
   /* nav-tabs */
   --carme-tab-bg:           transparent;
   --carme-tab-border:       var(--carme-border);
@@ -260,6 +251,13 @@
   --carme-progress-bar-border: none;
   --carme-progress-bar-shadow: none;
 }
+
+
+
+/* ------------------------------------------------------------------------------ */ 
+/*                            Carme Colors: dark-mode                             */ 
+/* ------------------------------------------------------------------------------ */ 
+
 
 .dark {
 
@@ -385,8 +383,7 @@
   /*----------------------------- GPU Card: Bullet -------------------------------*/
   --carme-bullet-bg: var(--carme-border);
     
-  /*-------------------------------  Chart Card ----------------------------------*/
-  
+  /*-------------------------------  Chart Card ----------------------------------*/  
 		--carme-chart:												#fff;
 
   /* nav-tabs */

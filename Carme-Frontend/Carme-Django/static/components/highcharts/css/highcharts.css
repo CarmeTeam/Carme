@@ -1,0 +1,66 @@
+@import 'https://code.highcharts.com/css/highcharts.css';
+@value --carme-* from "./../../../css/theme.css";
+
+.highcharts-background {
+    fill: transparent;
+}
+.highcharts-axis-title {
+    fill: var(--carme-900)!important;
+}  
+.highcharts-axis-labels {
+    fill: var(--carme-900)!important;
+    cursor: default;
+    font-size: 0.9em;
+}
+.highcharts-legend-item > text {
+    fill: var(--carme-card-body-text)!important;
+    font-weight: bold;
+    font-size: 1.0em;
+    cursor: pointer;
+    stroke-width: 0;
+}
+.highcharts-legend-item-hidden > text {
+    fill: var(--carme-900)!important;
+				opacity: 0.2;
+    font-weight: bold;
+    font-size: 1.0em;
+    cursor: pointer;
+    stroke-width: 0;
+}
+  
+.highcharts-legend-item-hidden * {
+    fill: var(--carme-900)!important;
+    stroke: var(--carme-900)!important;
+				opacity: 0.2;
+    transition: fill 250ms;
+}
+.highcharts-axis-line {
+    fill: none;
+    stroke: var(--carme-border)!important;
+}
+.highcharts-grid-line {
+    fill: none;
+    stroke: var(--carme-border)!important;
+}
+.highcharts-color-0 {
+    fill: rgb(45, 212, 191);
+    stroke: rgb(45, 212, 191);
+}
+.highcharts-color-1 {
+    fill: rgb(76, 157, 255);
+    stroke: rgb(76, 157, 255);
+}
+.highcharts-color-2 {
+    fill: var(--carme-900)!important;
+    stroke: var(--carme-900)!important;
+}
+.highcharts-area {
+    fill-opacity: 0.1!important;
+    stroke-width: 0;
+}
+.highcharts-plot-line {
+    fill: none;
+    stroke: var(--carme-600)!important;
+    stroke-width: 1px;
+    stroke-dasharray: 5;
+}
