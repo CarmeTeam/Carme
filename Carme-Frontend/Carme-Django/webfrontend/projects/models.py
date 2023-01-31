@@ -40,8 +40,8 @@ class Project(models.Model):
 
         return super(Project, self).save(*args, **kwargs)
 
-    #def get_absolute_url(self):
-    #    return reverse("projects:join", kwargs={"slug": self.slug})
+    def get_absolute_url(self):
+        return reverse("projects:join", kwargs={"slug": self.slug})
       
     class Meta:
         ordering = ["name"]
@@ -73,3 +73,53 @@ class ProjectMember(models.Model):
 
     class Meta:
         unique_together = ("project", "user")
+
+# Project -- (ProjectHasTemplate) -- ResourceTemplate
+class ResourceTemplate(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    maxjobs = models.IntegerField(default=4)
+    maxnodes_per_job = models.CharField(max_length=50, default="1")
+    maxaccels_per_node = models.CharField(max_length=50, default="1")
+    walltime = models.IntegerField(default=3)
+    partition = models.CharField(max_length=255)
+    features = models.TextField(blank=True, default='')
+    template = models.ManyToManyField(Project,through="ProjectHasTemplate")
+
+    def __str__(self):
+        return self.name
+
+
+class ProjectHasTemplate(models.Model):
+    project = models.ForeignKey(Project,on_delete=models.CASCADE,)
+    template = models.ForeignKey(ResourceTemplate,on_delete=models.CASCADE,)
+    
+    def __str__(self):
+        return f"{self.project}-{self.template}"
+
+    class Meta:
+        unique_together = ("project", "template")
+
+
+# ResourceTemplate -- (TemplateHasAccelerator) -- Accelerator
+class Accelerator(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    type = models.CharField(max_length=50, default="NONE")
+    num_total = models.IntegerField(default=0)
+    num_per_node = models.IntegerField(default=0)
+    num_cpus_per_acc = models.IntegerField(default=0)
+    num_ram_per_acc = models.IntegerField(default=0)
+    accelerator = models.ManyToManyField(ResourceTemplate,through="TemplateHasAccelerator")
+
+    def __str__(self):
+        return f"{self.type}-{self.name}"
+
+
+class TemplateHasAccelerator(models.Model):
+    resourcetemplate = models.ForeignKey(ResourceTemplate,on_delete=models.CASCADE,)
+    accelerator = models.ForeignKey(Accelerator,on_delete=models.CASCADE,)
+    
+    def __str__(self):
+        return f"{self.resourcetemplate}-{self.accelerator}"
+
+    class Meta:
+        unique_together = ("resourcetemplate", "accelerator")

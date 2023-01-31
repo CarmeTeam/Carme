@@ -32,7 +32,10 @@
 												<td>{{ job.id_job }}</td>
 												<td class="align-middle">{{ job.job_name }}</td>
 												<td class="align-middle">{{ job.partition }}</td>
-												<td class="align-middle"><p class="mb-0">{{ job.time_submit | print_timestamp }}</p><p class="mb-0">{{ job.time_end | print_timestamp }}</p></td>
+												<td class="align-middle">
+													<p class="mb-0">{{ job.time_submit | print_timestamp }}</p>
+													<p class="mb-0">{{ job.time_end | print_timestamp }}</p>
+												</td>
 												<td class="align-middle">
 														{% if job.exit_code == 0 %}
 																<i class="fa fa-check fa-fw text-success"></i>
@@ -45,9 +48,16 @@
 												<td class="align-middle">{{ job.mem_req }}</td>
 												<td class="align-middle">{{ slurm.image_name }}</td>
 												<td class="align-middle">{{ job.nodelist }}</td>
-												<td class="align-middle"><span class="i-node">{{ job.nodes_alloc}}</span></td>
-												<td class="align-middle"><span class="i-cpu">{% widthratio job.cpus_req slurm.num_nodes 1 %}</span></td>
-												<td class="align-middle"><span class="i-gpu">{{slurm.num_gpus}}</span> <span class="i-gpu-text">{{ slurm.gpu_type | upper }}</span></td>
+												<td class="align-middle">
+													<span class="i-orange py-1 px-2 rounded-circle fs--1 fw-700">{{ job.nodes_alloc}}</span>
+												</td>
+												<td class="align-middle">
+													<span class="i-cyan py-1 px-2 rounded-circle fs--1 fw-700">{% widthratio job.cpus_req slurm.num_nodes 1 %}</span>
+												</td>
+												<td class="align-middle">
+													<span class="i-blue py-1 px-2 rounded-circle fs--1 fw-700">{{slurm.num_gpus}}</span> 
+													<span class="i-blue py-1 px-2 rounded-pill-3 fs--2 fw-400">{{ slurm.gpu_type | upper }}</span>
+												</td>
 										</tr>
 								{% endfor %}
 								</tbody>

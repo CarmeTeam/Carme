@@ -1,0 +1,67 @@
+i{% extends "projects/project_base.html" %}
+{% load wizardtags %}
+
+{% block title %}Update Project{% endblock title %}
+
+{% block project_content %}
+
+<div class="row mt-2 mb-4">
+	<div class="col">
+		<div class="card overflow-hidden h-100">
+
+  	<!-- <card-header> -->
+   <div class="card-header">
+   	<div class="row align-items-center">
+    	<div class="col">
+     	<h5 class="mb-0 py-2 fs-0 fw-400 text-header"><i class="fas fa-tasks"></i> Update Project</h5>
+     </div>
+    </div>
+   </div>
+   <!-- </card-header> -->
+
+   <!-- <card-body> -->
+   <div class="card-body">
+   	<p class="fs--1 text-body"><b>Note:</b> You can only modify the description of the project</p>
+    <form action="" method="POST" enctype="multipart/form-data">
+    	{% csrf_token %}
+    	<div class="input-group mb-3 hidden">
+    		<span class="input-group-text" style="width:120px;" id="{{ form.name.name }}-addon">{{ form.name.label }}</span>
+      <input type="text" name="" value="{{form.name.value|capfirst}}" class="fs-0 fw-400 text-body form-control" required disabled id="">
+     </div> 
+     <div class="input-group mb-3 hidden">
+     	<span class="input-group-text" style="width:120px;" id="{{ form.description.name }}-addon">{{ form.description.label }}</span>
+      <input type="text" name="{{form.description.name}}" value="{{form.description.value|capfirst}}" 
+													class="fs-0 fw-400 text-body form-control" required id="id_{{form.description.name}}">
+     </div>
+     <div class="input-group mb-3 hidden">
+     	<span class="input-group-text" style="width:120px;" id="{{ form.classification.name }}-addon">{{ form.classification.label }}</span>
+      <input type="text" name="{{form.classification.name}}" value="{{form.classification.value|capfirst}}" 
+													class="fs-0 fw-400 text-body form-control" required disabled id="id_{{form.classification.name}}">
+     </div>  
+     <div class="input-group mb-3 hidden">
+     	<span class="input-group-text" style="width:120px;" id="{{ form.date_created.name }}-addon">{{ form.date_created.label }}</span>
+      <input type="text" name="{{form.date_created.name}}" value="{{form.date_created.value|date:'Y-m-d'}}" 
+													class="fs-0 fw-400 text-body form-control" required disabled id="id_{{form.date_created.name}}">
+     </div>
+    	<div class="input-group mb-3 hidden">
+     	<span class="input-group-text" style="width:120px;" id="{{ form.date_updated.name }}-addon">{{ form.date_updated.label }}</span>
+     	<input type="text" name="{{form.date_updated.name}}" value="{{form.date_updated.value|date:"Y-m-d"}}" 
+													class="fs-0 fw-400 text-body form-control" required disabled id="id_{{form.date_updated.name}}">
+     </div> 
+     <div class="input-group mb-3 hidden">
+    		<span class="input-group-text" style="width:120px;" id="{{ form.information.name }}-addon">{{ form.information.label }}</span>
+      <textarea name="" cols="40" rows="5" class="fs-0 fw-400 text-body form-control" required disabled id="">{{form.information.value|capfirst}}</textarea>
+     </div>
+     <a href="{% url 'projects:single' slug=project.slug %}" class="float-end btn btn-secondary mt-2">
+     	Back to Project
+     </a> 
+     <button type='submit' class="btn btn-primary mt-2">Update</button> 
+    </form>                    
+   </div>
+			<!-- </card body> -->
+  
+		</div>
+ </div>
+</div>
+
+{% endblock project_content %}

@@ -1,0 +1,779 @@
+{% extends "projects/project_base.html" %}
+{% load indextags %}
+
+{% block title %}Project{% endblock title %}
+
+{% block project_content %}
+<div class="row mt-2 mb-4">
+
+	<!-- <project> -->
+	<div class="col-lg-8 mb-4">
+		<div class="card mb-3 h-100">
+
+			<!-- <project-header> -->
+			<div class="card-header">	
+				<div class="row align-items-center">
+					<div class="col">
+						<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
+							<i class="fas fa-diagram-project"></i> Project
+						</h5>
+					</div>			
+					<div class="col-auto"> 
+						<div class"form-select form-select-sm">
+
+							{% if user in project.members.all %}
+								{%for x in project.projectmember_set.all%}
+									{% if x.user == request.user %}
+										
+										<!-- <member> -->	
+										{% if x.is_manager %}
+											{% if x.is_approved_by_admin == 1 and x.is_approved_by_manager == 1 and x.status == 'accepted' %}
+												<!-- <is-active-manager> -->
+												<a href="{% url 'projects:project-update' slug=project.slug %}" class="text-decoration-none">
+													<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
+														<span class="p-1 text-header">Update</span>
+													</button>
+												</a>
+												<!-- </is-active-manager> -->
+											{% endif %}
+										{%endif%}
+
+										{% if x.user != project.owner %}
+											{% if x.is_approved_by_admin == 1 and x.is_approved_by_manager == 1 and x.status == 'accepted' %}
+												<!-- <is-active-user> -->
+												<a href="{% url 'projects:leave' slug=project.slug %}" class="text-decoration-none">
+													<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
+														<span class="p-1 text-header">Leave</span>
+													</button>
+												</a>
+												<!-- </is-active-user> -->
+											{% endif %}
+										{% endif %}
+
+										{% if x.user == project.owner %}
+											{% if x.is_approved_by_admin == 1 and x.is_approved_by_manager == 1 and x.status == 'accepted' %}
+												<!-- <is-active-creator> -->
+												<a href="{% url 'projects:project-delete' slug=project.slug %}" class="text-decoration-none">
+													<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
+														<span class="p-1 text-header">Delete</span>
+													</button>
+												</a>
+												<!-- <is-active-creator> -->
+											{% endif %}
+										{% endif %}
+										<!-- </member> -->
+
+									{% endif %}
+								{%endfor%}
+							{% else %}
+
+								<!-- <not-member> -->	
+								{% if project.is_approved  %}
+									<a href="{% url 'projects:join' slug=project.slug %}" class="text-decoration-none">
+										<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
+											<span class="p-1 text-header">Join</span>
+										</button>
+									</a>
+								{% else %}
+									<span data-bs-toggle="tooltip" data-bs-placement="left" title="Project must be approved">
+										<button type="button" class="btn btn-sm btn-outline-secondary custom-btn" disabled>
+											<span class="p-1 text-header">Join</span>
+										</button>
+									</span>
+								{% endif %}
+								<!-- </not-member> -->
+
+							{% endif %}
+						</div>
+					</div>		  
+				</div>		
+			</div>
+			<!-- </project-header> -->
+
+			<!-- <project-body> -->
+			<div class="card-body">
+				{% if messages %}
+					{% for message in messages %}
+						<div {% if message.tags %} id="{{ message.tags }}-message" class="alert alert-{{ message.tags }}" {% endif %} style="padding: 3px 8px; font-size:14px;" role="alert">
+							<small {% if message.tags == 'success' %} class="fas fa-check-circle" {% endif %}></small>&nbsp; {{ message }}
+						</div>
+					{% endfor %}
+				{% endif %}
+
+				<!-- <status> -->
+				<div class="mb-3">
+					{% if project.is_approved  %}
+						<div class="py-1 mb-3">
+							<span class="i-blue-text">
+								<small class="fa fa-check-circle text-primary"></small>&nbsp; Active
+							</span>
+						</div>
+					{% else %}
+						<div class="py-1 mb-3">
+							<span class="i-gray-text">
+								<small class="fa fa-minus-circle text-secondary"></small>&nbsp; Waiting for approval
+							</span>
+						</div>	
+					{% endif %}
+				</div>
+				<!-- </status> -->
+
+				<!-- <form> -->
+				<div class="input-group mb-3">
+					<span class="input-group-text text-body" style="width:120px;">Name</span>
+					<input type="text" name="name" id="id_name" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{project.name|capfirst}}" 
+						   autocomplete="do-not-autofill" disabled>
+				</div>
+				<div class="input-group mb-3">
+					<span class="input-group-text" style="width:120px;">Description</span>
+					<input type="text" name="description" id="id_description" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{project.description|capfirst}}" 
+					       autocomplete="do-not-autofill" disabled>
+				</div>
+
+				{% if user in project.members.all %}
+
+					<!-- <member> -->
+					<div class="input-group mb-3">
+						<span class="input-group-text" style="width:120px;">Classification</span>
+						<input type="text" name="classification" id="id_classification" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{project.classification|capfirst}}" 
+							autocomplete="do-not-autofill" disabled>
+					</div>
+
+					{% if project.is_approved  %}
+						<div class="input-group mb-3">
+							<span class="input-group-text" style="width:120px;">Members</span>
+							<input type="text" name="membercount" id="id_membercount" maxlength="255" class="form-control fs-0 fw-400 text-body" 
+								   value="{% for member in member_list %} {{member.active_members}} {% endfor %}" 
+								autocomplete="do-not-autofill" disabled>
+						</div>
+
+						{%for x in project.projectmember_set.all%}
+							{% if x.user == request.user %}
+
+								{% if x.status == 'sent' and x.is_approved_by_manager == 0 %}
+									<!-- <membership-requested> -->
+									<!-- </membership-requested> -->
+								{% else %}
+
+									<!-- <resources> -->
+									<div class="card-header p-1 ps-2 mb-3 " style="margin-top:50px;">
+										<span class="fs--1 fw-400 text-body">Resources</span>
+									</div>
+									{% if template_list.count == 0 %}
+										<p class="text-body mt-2">No resources have been allocated to this project. Please contact the administrator.</p>
+									{% endif %}
+									<!-- </resources> -->
+
+									{% if template_list.count > 0 %}
+										<div class="input-group mb-3">
+											<span class="input-group-text" style="width:195px;">Template</span>
+											<select class="form-select form-select-sm text-header" id="list-template">
+												<option value="template0" selected>
+													{% for resource in template_list|slice:"0:1" %}
+														{{ resource.template__name }}
+													{% endfor %}
+												</option>
+												{% for resource in template_list|slice:"1:" %}
+												<option value="template{{forloop.counter}}">
+													{{ resource.template__name }}
+												</option>
+												{% endfor %}
+											</select>
+										</div>
+									{% endif %}
+									
+									{%for resource in template_list %}
+										
+										{% if forloop.first %}
+										<div id="option-template-template{{forloop.counter0}}" class="option-template" style="display: block;">
+										{% else %}
+										<div id="option-template-template{{forloop.counter0}}" class="option-template">
+										{% endif %}
+
+											<!-- <form-resources> -->
+											<div class="input-group mb-3">
+												<span class="input-group-text" style="width:195px;">Accelerators</span>
+												<select id="" class="form-select form-select-sm px-2 bg-transparent text-body" >
+													<option>Available</option>
+													{% for accelerator in accelerator_list %}
+													{% if accelerator.resourcetemplate__name == resource.template__name%}
+													<option value="">{{accelerator.accelerator__type}}: {{accelerator.accelerator__name}}</option>
+													{% endif %}
+													{% endfor %}
+												</select>
+											</div>
+											<div class="input-group mb-3">
+												<span class="input-group-text" style="width:195px;">Max Accelerators/Node</span>
+												<input type="text" name="maxaccelsnode" id="id_maxaccelsnode" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{resource.template__maxaccels_per_node}}" 
+													autocomplete="do-not-autofill" disabled>
+											</div>
+											<div class="input-group mb-3">
+												<span class="input-group-text" style="width:195px;">Max Nodes/Job</span>
+												<input type="text" name="maxnodesjob" id="id_maxnodesjob" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{resource.template__maxnodes_per_job}}" 
+													autocomplete="do-not-autofill" disabled>
+											</div>
+											<div class="input-group mb-3">
+												<span class="input-group-text" style="width:195px;">Max Jobs</span>
+												<input type="text" name="maxjobs" id="id_maxjobs" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{resource.template__maxjobs}}" 
+													autocomplete="do-not-autofill" disabled>
+											</div>
+											<div class="input-group mb-3">
+												<span class="input-group-text" style="width:195px;">Walltime</span>
+												<input type="text" name="walltime" id="id_walltime" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{resource.template__walltime}}" 
+													autocomplete="do-not-autofill" disabled>
+											</div>
+											<div class="input-group mb-3">
+												<span class="input-group-text" style="width:195px;">Features</span>
+												<textarea cols="40" rows="3" name="features" id="id_features" maxlength="255" class="form-control fs-0 w-400 text-body" 
+														autocomplete="do-not-autofill" disabled>{{resource.template__features}}</textarea>
+											</div>
+											<!-- </form-resources> -->
+										</div>
+									{% endfor %}	
+								{% endif %}
+							
+							{% endif %}
+						{% endfor %}
+					{% else %}
+
+						<div class="input-group">
+							<span class="input-group-text" style="width:120px;">Information</span>
+							<textarea cols="40" rows="5" name="information" id="id_information" maxlength="255" class="form-control fs-0 w-400 text-body" 
+									autocomplete="do-not-autofill" disabled>{{project.information|capfirst}}</textarea>
+						</div>
+
+					{% endif %}
+					<!-- </member> -->
+				
+				{% endif %}
+				<!-- </form> -->
+
+			</div>
+			<!-- </project-body> -->
+					
+		</div>
+	</div>
+	<!-- </project> -->
+
+	
+	<!-- <membership> -->
+	<div class="col-lg-4 mb-4">
+		<div class="card mb-3 h-100">
+
+			<!-- <membership-header> -->
+			<div class="card-header">
+				<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
+					<i class="fas fa-users me-2"></i> Membership
+				</h5>
+			</div>
+			<!-- </membership-header> -->
+
+			<!-- <membership-body> -->
+			<div class="card-body">
+				
+				{% if user in project.members.all %}
+					{%for x in project.projectmember_set.all%}
+						{% if x.user == request.user %}	
+							
+							{% if x.is_manager %}
+								{% if x.is_approved_by_admin == 1 and x.is_approved_by_manager == 1 and x.status == 'accepted' %}
+
+									<!-- <invite> -->
+									<div id="invite" class="mb-4">
+
+										<div class="card-header p-1 ps-2 mb-3">
+											<span class="fs--1 fw-400 text-body">Invite</span>
+										</div>
+										
+										<script>
+											$(function () {
+												var availableTags = [
+													{% for obj in object_list %}
+														{% if obj not in project.members.all %}
+															"{{ obj }}",
+														{% endif %}
+													{% endfor %}
+												];
+												$("#user_pk").autocomplete({
+													source: availableTags
+												});
+											});
+										</script>
+
+										<!-- <form-add> -->
+										<form action="{% url 'projects:send-invite' %}" method="POST">
+											{% csrf_token %} 
+											<div class="input-group mb-3">
+												<input type="hidden" id="project_pk" name="project_pk" value={{project.pk}}>
+												{% if project.is_approved == False %}
+												<input type="text" id="user_pk" name="user_pk" class="form-control"  placeholder="...Waiting for approval" disabled>
+												<button class="btn btn-sm btn-outline-secondary custom-btn text-body" type="submit" id="more-details" disabled>Add to Project</button>
+												{% else %}
+												<input type="text" id="user_pk" name="user_pk" class="form-control"  placeholder="Type username" autocomplete="do-not-autofill" autocomplete="off">
+												<button class="btn btn-sm btn-outline-secondary custom-btn text-body" type="submit" id="more-details">Add to Project</button>
+												{% endif %}
+											</div>
+										</form>
+										<!-- </form-add> -->
+
+										<!-- <copy> -->
+										<div class="input-group mb-3">
+											{% if project.is_approved == False %}
+											<input type="text" id="value_to_copy" name="value_to_copy" class="form-control"  placeholder="...Waiting for approval" disabled>
+											<button id="copy_value" class="btn btn-sm btn-outline-secondary custom-btn text-body" disabled>Copy Project ID 
+												<span class="far fa-copy ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
+											</button>
+											{% else %}
+											<input type="text" id="value_to_copy" name="value_to_copy" class="form-control" style="color:#6c757d;" value="{{project.slug}}" readonly>
+											<button id="copy_value" class="btn btn-sm btn-outline-secondary custom-btn text-body" onclick="myCopyFunction()" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy">Copy Project ID 
+												<span class="far fa-copy ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
+											</button> 
+											{% endif %}
+										</div>
+										<!-- </copy> -->
+
+									</div>
+									<!-- </invite> -->
+
+								{% endif %}
+							{% endif %}
+
+						{% endif %}
+					{% endfor %}
+				{% endif %}		
+				
+				{% for x in project.projectmember_set.all %}
+					{% if x.user == project.owner %}
+
+						<!-- <creator> -->
+						<div id="creator">	
+							<div class="card-header p-1 ps-2 mb-3">
+								<span class="fs--1 fw-400 text-body">Creator</span>
+							</div>
+							
+							<table class="table table-borderless m-0">
+								<tbody>
+								  <tr>
+									<td>
+										<div class="d-flex text-body p-2">
+											<div>
+												<img class="rounded-circle" style="width:50px;" src="/static/img/users/blank-user.png" />
+											</div>
+											<div class="flex-1 ms-2">
+												<h6 class="mb-2">
+													<a href="">
+													{% if x.user != request.user %}
+														{{ x.user }}
+													{% else %}
+														You
+													{% endif%}
+													</a>
+												</h6>
+												<span class="i-gray-text">ADMIN</span>
+											</div>
+										</div>
+									</td>
+									{% if x.user != request.user %}
+									<td>
+										<div class="float-end">
+											<select class="form-select form-select-sm px-2 bg-transparent text-body mt-4" style="width: 100px;">
+												<option>Action</option>
+												<option>View</option>
+											</select>
+										</div>
+									</td>
+									{% endif %}	
+								  </tr>
+								</tbody>
+							</table>
+						</div>
+						<!-- </creator> -->
+
+					{% endif %}
+				{% endfor %}
+
+				
+				{% if user in project.members.all %}
+					{%for x in project.projectmember_set.all%}
+						{% if x.user == request.user %}
+						
+							<!-- <members> -->
+							<div id="members">
+								{% if project.is_approved == True %}
+								
+									{% if x.is_approved_by_admin == 1 and x.is_approved_by_manager == 1 and x.status == 'accepted' %}
+
+										<!-- <user-is-active-member> -->
+										{% for member in member_list %}
+										
+											{% if member.active_members == 1 and member.inactive_members == 0 %}
+												
+												<!-- <single-member> -->
+												<div class="card-header p-1 ps-2 mb-3 mt-2">
+													<span class="fs--1 fw-400 text-body">Members</span>
+												</div>
+
+												<div class="row flex-center text-center" style="padding: 50 0 50 0;">
+													<div class="text-300 fw-900" style="font-size:22px;">Single Member Project</div>
+													<p class="lead mt-4 fs--1 text-body fw-semi-bold mx-auto">To add members, share the project ID or submit an invitation</p>
+												</div>
+												<!-- </single-member> -->
+
+											{% elif member.active_members > 0 and member.inactive_members >= 0 %}
+													
+												{% if member.active_members != 1 %}
+
+													<!-- <active-member> -->
+													<div class="card-header p-1 ps-2 mb-3 mt-2">
+														<span class="fs--1 fw-400 text-body">Members</span>
+													</div>
+
+													<table class="table table-borderless m-0">
+														<tbody>
+															
+															{% for y in project.projectmember_set.all %}
+																{% if y.is_approved_by_admin == 1 and y.is_approved_by_manager == 1 and y.status == 'accepted' and y.user != project.owner %}
+																
+																	<tr class="border-dashed-bottom my-3">
+																		<td>
+																			<div class="d-flex text-body p-2">
+																				<div>
+																					<img class="rounded-circle" style="width:50px;" src="/static/img/users/blank-user.png" />
+																				</div>
+																				<div class="flex-1 ms-2">
+																					<h6 class="mb-2">
+																						<a href="">
+																						{% if y.user == request.user %} 
+																							You 
+																						{% else %}
+																							{{ y.user }}
+																						{% endif %}
+																						</a>
+																					</h6>
+							
+																					<span class="i-gray-text">
+																						{% if y.is_manager %}
+																							ADMIN
+																						{% else %}
+																							USER
+																						{% endif %}
+																					</span>																					
+																			
+																				</div>
+																			</div>
+																		</td>
+	
+																		{% if y.user != request.user %}
+																		<td>
+																			<div class="float-end">
+																				<form id="form-manager{{ forloop.counter }}" action="" method="POST">
+																					{% csrf_token %} 
+																					<input type="hidden" name="project_pk" value={{project.pk}}>
+																					<input type="hidden" name="user_pk" value={{y.user}}>
+																					<select id="manager{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body mt-4" 
+                             style="width: 100px;" onChange=selectChange(this)>
+																						<option>Action</option>
+																						<option>View</option>
+																						{% if x.is_manager %}
+																							<option value="remove">Remove</option>
+																							{% if y.is_manager %}
+																							<option value="not-manager">Set as User</option>
+																							{% else %}
+																							<option value="manager">Set as Admin</option>
+																							{% endif %}
+																						{% endif %}
+																					</select>
+																				</form>
+																			</div>
+																		</td>
+																		{% endif %}
+																	</tr>
+																{% endif %}
+															{% endfor %}
+														</tbody>
+													</table>
+													<!-- </active-member> -->
+
+												{% endif %}
+												
+												<!-- <inactive-member> -->
+												{% if member.inactive_members > 0 %}
+												<div class="card-header p-1 ps-2 mb-3 mt-2">
+													<span class="fs--1 fw-400 text-body">In process</span>
+												</div>
+												{% endif %}
+												
+												<table class="table table-borderless m-0">
+													<tbody>
+														{% for y in project.projectmember_set.all %}
+															{% if y.is_approved_by_admin == 0 or y.is_approved_by_manager == 0 or y.status == 'sent' %}
+
+																<tr class="border-dashed-bottom my-3">
+																	<td>
+																		<div class="d-flex text-body p-2">
+																			<div>
+																				<img class="rounded-circle" style="width:50px;" src="/static/img/users/blank-user.png" />
+																			</div>
+																			<div class="flex-1 ms-2">
+																				<h6 class="mb-2">
+																					<a href="">{{ y.user }}</a>
+																				</h6>
+											
+																				{% if y.is_approved_by_admin == 0 and y.is_approved_by_manager == 1 and y.status == "accepted" %}
+																					<button class="btn btn-sm btn-outline-secondary custom-btn text-body" style="width:150px;" disabled>
+																						Waiting for approval
+																					</button>
+																				{% elif y.is_approved_by_manager == 1 and y.status == "sent" %}
+																					<button class="btn btn-sm btn-outline-secondary custom-btn text-body" style="width:150px;" disabled>
+																						Invitation submitted
+																					</button>
+																				{% elif y.is_approved_by_manager == 0 and y.status == "sent" %}
+																					<button class="btn btn-sm btn-outline-secondary custom-btn text-body" style="width:150px;" disabled>
+																						Invitation received
+																					</button>
+																				{% endif %}
+																		
+																			</div>
+																		</div>
+																	</td>
+
+																	<td class="align-bottom">
+																		<div class="float-end">
+																			<form id="form-request-received{{ forloop.counter }}" action="" method="POST">
+																				{% csrf_token %} 
+																				<input type="hidden" name="project_pk" value={{project.pk}}>
+																				<input type="hidden" name="user_pk" value={{y.user}}>
+																				<select id="request-received{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" 
+                            style="width:100px; margin-bottom:-0.4rem;" onChange=selectChange(this)>
+																					<option>Action</option>
+																					<option>View</option>
+																					{% if x.is_manager == 1 %}
+																						{% if y.is_approved_by_admin == 0 and y.is_approved_by_manager == 1 and y.status == "accepted" %}
+																						<option value="cancel">Cancel</option>
+																						{% elif y.is_approved_by_manager == 1 and y.status == "sent" %}
+																						<option value="cancel">Cancel</option>
+																						{% elif y.is_approved_by_manager == 0 and y.status == "sent" %}
+																						<option value="accept">Accept</option>
+																						<option value="reject">Reject</option>
+																						{% endif %}
+																					{% endif %}
+																				</select>
+																			</form>
+																		</div>
+																	</td>
+
+																</tr>
+															{% endif %}
+														{% endfor %}
+													</tbody>
+												</table>
+												<!-- </inactive-member> -->											
+											{% endif %}
+
+										{% endfor %}
+										<!-- </user-is-active-member> -->
+										
+									{% else %}
+										
+										<div class="card-header p-1 ps-2 mb-3 mt-2">
+											<span class="fs--1 fw-400 text-body">In process</span>
+										</div>
+
+										<!-- <user-is-inactive-member> -->
+										<table class="table table-borderless m-0">
+											<tbody>
+												{% for y in project.projectmember_set.all %}
+													{% if y.user == x.user %}
+															
+														{% if y.status == 'sent' and y.is_approved_by_manager == 1 %}
+															<!-- received -->
+															<div id="warning-message" class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
+																<small class="fas fa-circle-exclamation"></small>&nbsp; You have been invited to join this project
+															</div>
+														{% elif y.status == 'sent' and y.is_approved_by_manager == 0 %}
+															<!-- requested -->
+															<div id="warning-message" class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
+																<small class="fas fa-circle-exclamation"></small>&nbsp; You have sent a request to join this project
+															</div>
+														{% elif y.status == 'accepted' and y.is_approved_by_manager == 1 %}
+															<!-- waiting -->
+															<div id="warning-message" class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
+																<small class="fas fa-circle-exclamation"></small>&nbsp; Your membership is waiting for approval
+															</div>
+														{% endif %}
+														
+														<tr class="border-dashed-bottom my-3">
+															<td>
+																<div class="d-flex text-body p-2">
+																	<div>
+																		<img class="rounded-circle" style="width:50px;" src="/static/img/users/blank-user.png" />
+																	</div>
+																	<div class="flex-1 ms-2">
+																		<h6 class="mb-2">
+																			<a href="">You</a>
+																		</h6>
+									
+																		{% if y.status == 'sent' and y.is_approved_by_manager == 1 %}
+																			<!-- received -->
+																			<button class="btn btn-sm btn-outline-secondary custom-btn text-body" style="width:150px;" disabled>
+																				Invitation received
+																			</button>
+																		{% elif y.status == 'sent' and y.is_approved_by_manager == 0 %}
+																			<!-- requested -->
+																			<button class="btn btn-sm btn-outline-secondary custom-btn text-body" style="width:150px;" disabled>
+																				Invitation requested
+																			</button>
+																		{% elif y.status == 'accepted' and y.is_approved_by_manager == 1 %}
+																			<!-- waiting -->
+																			<button class="btn btn-sm btn-outline-secondary custom-btn text-body" style="width:150px;" disabled>
+																				Waiting for approval
+																			</button>
+																		{% endif %}
+																	</div>
+																</div>
+															</td>
+															<td class="align-bottom">
+																<div class="float-end">
+																	{% if y.status == 'sent' and y.is_approved_by_manager == 1 %}
+																		<!-- received -->
+
+																		<form id="form-received{{ forloop.counter }}" action="" method="POST">
+																			{% csrf_token %} 
+																			<input type="hidden" name="project_pk" value={{project.pk}}>
+																			<select id="received{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body mt-4" 
+                           style="width:100px; margin-bottom:-0.4rem;" onChange=selectChange(this)>
+																				<option>Action</option>
+																				<option value="accept">Accept</option>
+																				<option value="reject">Reject</option>
+																			</select>
+																		</form>
+																	
+																	{% elif y.status == 'sent' and y.is_approved_by_manager == 0 %}
+																		<!-- requested -->
+
+																		<form id="form-requested{{ forloop.counter }}" action="" method="POST">
+																			{% csrf_token %} 
+																			<input type="hidden" name="project_pk" value={{project.pk}}>
+																			<select id="requested{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body mt-4" 
+                           style="width:100px; margin-bottom:-0.4rem;" onChange=selectChange(this)>
+																				<option>Action</option>
+																				<option value="cancel">Cancel</option>
+																			</select>
+																		</form>
+
+																	{% elif y.status == 'accepted' and y.is_approved_by_manager == 1 %}
+																		<!-- waiting -->
+
+																		<form id="form-waiting{{ forloop.counter }}" action="" method="POST">
+																			{% csrf_token %} 
+																			<input type="hidden" name="project_pk" value={{project.pk}}>
+																			<select id="waiting{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body mt-4" 
+                           style="width:100px; margin-bottom:-0.4rem;" onChange=selectChange(this)>
+																				<option>Action</option>
+																				<option value="cancel">Cancel</option>
+																			</select>
+																		</form>
+																	{% endif %}
+
+																</div>
+															</td>
+
+														</tr>
+													{% endif %}
+												{% endfor %}
+											</tbody>
+										</table>
+										<!-- <user-is-inactive-member> -->
+
+									{% endif %}
+								{% endif %}
+							</div>
+							<!-- </members> -->
+
+						{% endif %}
+					{% endfor %}
+				{% endif %}				
+									
+			</div>
+			<!--</membership-body>-->
+	
+		</div>
+	</div>
+	<!-- </membership> -->
+
+</div>
+
+<script>
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip()
+    });
+      
+    $('#copy_value').click(function() {
+        $(this).attr('data-bs-original-title', 'Copied!').tooltip('show');
+        $(this).attr('data-bs-original-title', 'Copy');
+    });
+      
+    function myCopyFunction() {
+        var copyText = document.getElementById("value_to_copy");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+    } 
+</script>
+
+<script>
+	// actions: accept, reject, cancel, remove, update, delete
+	function selectChange(select) {
+		var selectID = select.id;
+		var value = select.value;
+		
+		if ($('#'+selectID).data('slug')) {
+			var my_slug = $('#'+selectID).data('slug');
+			var my_url_update = "{% url 'projects:project-update' slug=12345 %}".replace(/12345/, my_slug.toString());
+			var my_url_leave = "{% url 'projects:leave' slug=12345 %}".replace(/12345/, my_slug.toString());
+			var my_url_delete = "{% url 'projects:project-delete' slug=12345 %}".replace(/12345/, my_slug.toString());
+		}
+		
+		if(value == 'accept'){
+			$("#form-"+selectID).attr("action", "{% url 'projects:accept-invite' %}");
+			$("#form-"+selectID).submit();
+		}
+		else if (value == 'reject' || value == 'cancel' || value == 'remove'){
+			$("#form-"+selectID).attr("action", "{% url 'projects:reject-invite' %}");
+			$("#form-"+selectID).submit();
+		}
+		else if (value == 'update'){
+			$("#form-"+selectID).attr("action", my_url_update);
+			$("#form-"+selectID).submit();
+		}
+		else if (value == 'leave'){
+			$("#form-"+selectID).attr("action", my_url_leave);
+			$("#form-"+selectID).submit();
+		}
+		else if (value == 'delete'){
+			$("#form-"+selectID).attr("action", my_url_delete);
+			$("#form-"+selectID).submit();
+		} 
+		else if (value == 'manager' || value == 'not-manager'){
+			$("#form-"+selectID).attr("action", "{% url 'projects:set-manager' %}");
+			$("#form-"+selectID).submit();
+		} 
+	}
+</script>
+
+<script>
+	$(document).ready(function() {
+		if (!$("#twofactor").length > 0) {
+			// Note: set .option-template{display:none;} in style.css
+			var $list_template = $( '#list-template' );
+			var $option_template = $( '.option-template' );
+		
+			$list_template.on( 'change', function ( e ) {
+				$option_template.hide();
+				$( '#option-template-' + this.value ).show();
+			} );
+		}
+	})
+	</script>
+
+{% endblock project_content %}
