@@ -120,8 +120,9 @@
   --carme-1200: var(--carme-gray-1200);
 
   /*----------------------------------- General ----------------------------------*/
-  --carme-title-text: var(--carme-gray-1000); 
-  --carme-brand-text: var(--carme-gray-100);
+  --carme-title-text: 				var(--carme-gray-1000); 
+  --carme-brand-text: 				var(--carme-gray-100);
+		--carme-watermark-text: var(--carme-gray-300);
 
   --carme-body-bg: var(--carme-light-mode);
   --carme-border:  var(--carme-gray-300);
@@ -250,8 +251,12 @@
   --carme-progress-bar-bg:     var(--carme-gray-200);
   --carme-progress-bar-border: none;
   --carme-progress-bar-shadow: none;
-}
 
+		/*---------------------------- Avatar (Project list) -----------------------------*/
+		--carme-avatar-bg: 				var(--carme-gray-900);
+		--carme-avatar-border: none;
+		--carme-avatar-shadow: none;
+}
 
 
 /* ------------------------------------------------------------------------------ */ 
@@ -277,8 +282,9 @@
 
 
   /*---------------------------------- General -----------------------------------*/
-  --carme-title-text: var(--carme-gray-200);
-  --carme-brand-text: var(--carme-gray-100);
+  --carme-title-text: 				var(--carme-gray-200);
+  --carme-brand-text: 				var(--carme-gray-100);
+		--carme-watermark-text: var(--carme-gray-1000);
 
   --carme-body-bg: var(--carme-dark-mode);
   --carme-border:  var(--carme-gray-900);
@@ -406,6 +412,11 @@
   --carme-progress-bar-bg:     var(--carme-gray-1000);
   --carme-progress-bar-border: none;
   --carme-progress-bar-shadow: none;
+
+		/*---------------------------- Avatar (Project list) -----------------------------*/
+		--carme-avatar-bg: var(--carme-gray-800);
+		--carme-avatar-border: none;
+		--carme-avatar-shadow: none;
 }
 
 

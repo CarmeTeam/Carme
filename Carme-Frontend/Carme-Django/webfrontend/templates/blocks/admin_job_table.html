@@ -23,9 +23,16 @@
 	<td class="align-middle">{{ job.user }}</td>
 	<td class="align-middle">{{ job.name }}</td>
 	<td class="align-middle">{{ job.image_name }}</td>
-	<td class="align-middle"><span class="i-node">{{ job.num_nodes}}</span></td>
- <td class="align-middle"><span class="i-cpu">{{ slurm.cpus_req | intdiv:job.num_nodes }}</span></td>
-	<td class="align-middle" style="min-width: 6.0rem;"><span class="i-gpu">{{ job.num_gpus }}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td>
+	<td class="align-middle">
+		<span class="i-orange py-1 px-2 rounded-circle fs--1 fw-700">{{ job.num_nodes}}</span>
+	</td>
+ <td class="align-middle">
+		<span class="i-cyan py-1 px-2 rounded-circle fs--1 fw-700">{{ slurm.cpus_req | intdiv:job.num_nodes }}</span>
+	</td>
+	<td class="align-middle" style="min-width: 6.0rem;">
+		<span class="i-blue py-1 px-2 rounded-circle fs--1 fw-700">{{ job.num_gpus }}</span>
+		<span class="i-blue py-1 px-2 rounded-pill-3 fs--2 fw-700">{{ job.gpu_type | upper }}</span>
+	</td>
 	<td class="align-middle">
 		{% if job.status == 'running' %}
 			<i class="fas fa-check text-success"></i>
@@ -168,11 +175,18 @@
     																		<td class="align-middle">{{ slurm.mem_req }}</td>                                                                                    
     																		<td class="align-middle">{{ job.image_name }}</td>                                                                                   
     																		<td class="align-middle">{{ slurm.nodelist }}</td>                                                                                   
-    																		<td class="align-middle"><span class="i-node">{{ slurm.nodes_alloc}}</span></td>                                                     
-    																		{% if slurm.nodes_alloc %}                                                                                                           
-    																		<td class="align-middle"><span class="i-cpu">{{ slurm.cpus_req | intdiv:slurm.nodes_alloc }}</span></td>                             
-    																		{% endif %}                                                                                                                          
-    																		<td class="align-middle"><span class="i-gpu">{{job.num_gpus}}</span> <span class="i-gpu-text">{{ job.gpu_type | upper }}</span></td> 
+    																		<td class="align-middle">
+																							<span class="i-orange py-1 px-2 rounded-circle fs--1 fw-700">{{ slurm.nodes_alloc}}</span>
+																						</td>
+																						{% if slurm.nodes_alloc %}
+																						<td class="align-middle">
+																							<span class="i-cyan py-1 px-2 rounded-circle fs--1 fw-700">{{ slurm.cpus_req | intdiv:slurm.nodes_alloc }}</span>
+																						</td>                             
+    																		{% endif %}
+																						<td class="align-middle">
+																							<span class="i-blue py-1 px-2 rounded-circle fs--1 fw-700">{{job.num_gpus}}</span>
+																							<span class="i-blue py-1 px-2 rounded-pill-3 fs--2 fw-700">{{ job.gpu_type | upper }}</span>
+																						</td> 
 																				</tr>
 																		</tbody>
 																</table>

@@ -4,6 +4,32 @@
 /*            Font Size - Font Weight               */
 /*--------------------------------------------------*/
 
+/*text-color*/
+.text-primary{
+  color:var(--carme-primary)!important;
+}
+.text-secondary{
+  color:var(--carme-secondary)!important;
+}
+.text-success{
+  color:var(--carme-success)!important;
+}
+.text-info{
+  color:var(--carme-info)!important;
+}
+.text-warning{
+  color:var(--carme-warning)!important;
+}
+.text-danger{
+  color:var(--carme-danger)!important;
+}
+.text-light{
+  color:var(--carme-light)!important;
+}
+.text-dark{
+  color:var(--carme-dark)!important;
+}
+
 /* font-size */
 .fs--5{
   font-size: .475rem!important;
@@ -56,6 +82,18 @@
 .fs-10{
   font-size: 1.925rem!important;
 }
+.fs-20{
+  font-size: 2.925rem!important;
+}
+.fs-30{
+  font-size: 3.925rem!important;
+}
+.fs-40{
+  font-size: 4.925rem!important;
+}
+.fs-50{
+  font-size: 5.925rem!important;
+}
 
 /* font-weight */
 .fw-100 {
@@ -89,12 +127,38 @@
   font-weight:1000!important;
 }
 
+/* i-circles */
+.i-blue {
+  background: rgba(var(--carme-blue-rgb),0.08);
+  color: var(--carme-blue);
+}
+.i-gray {
+  background: rgba(var(--carme-gray-rgb),0.08);
+  color: var(--carme-gray);
+} 
+.i-green {
+  background: rgba(var(--carme-green-rgb),0.08);
+  color: var(--carme-green);
+}
+.i-cyan {
+  background: rgba(var(--carme-cyan-rgb),0.08);
+  color: var(--carme-cyan);
+}
+.i-orange {
+  background: rgba(var(--carme-orange-rgb),0.08);
+  color: var(--carme-orange);
+}
+.i-red {
+  background: rgba(var(--carme-red-rgb),0.08);
+  color: var(--carme-red);
+}
+
 /*--------------------------------------------------*/
 /*                     General                      */
 /*--------------------------------------------------*/
 
-body {
-  background-color: var(--carme-body-bg)!important;
+.text-justify {
+  text-align: justify;
 }
 .text-title {
   color: var(--carme-title-text)!important;
@@ -108,8 +172,12 @@ body {
 .text-body {
   color: var(--carme-card-body-text)!important;
 }
-.text-justify {
-  text-align: justify;
+.text-watermark {
+  color: var(--carme-watermark-text)!important;
+}
+
+body {
+  background-color: var(--carme-body-bg)!important;
 }
 
 
@@ -200,6 +268,12 @@ thead{
   border-color: var(--carme-form-border-hover);
   outline: 0;
 } 
+.form-select.bg-transparent {
+  background-color: transparent!important;
+}
+.form-select option.bg-transparent {
+  background-color: var(--carme-form-bg)!important;
+}
 
 /*--------------------------------------------------*/
 /*                     Login                        */
@@ -632,53 +706,6 @@ nav a.nav-link:hover{
 /*               Jobs Card - Dashboard              */
 /*--------------------------------------------------*/
 
-/*--- circles ---*/
-.i-gpu {
-  background: rgba(var(--carme-blue-rgb),0.08);
-  color: var(--carme-blue);
-  padding: 3px 8px;
-  border-radius: 50%;
-  font-size: 15px;
-  font-weight: bold;
-}
-.i-gpu-text {
-  background: rgba(var(--carme-blue-rgb),0.08);
-  color: var(--carme-blue);
-  padding: 3px 8px;
-  border-radius: 10%;
-  font-size: 12px;
-}
-.i-cpu {
-  background: rgba(var(--carme-cyan-rgb),0.08);
-  color: var(--carme-cyan);
-  padding: 3px 8px;
-  border-radius: 50%;
-  font-size: 15px;
-  font-weight: bold;
-}
-.i-cpu-text {
-  background: rgba(var(--carme-cyan-rgb),0.08);
-  color: var(--carme-cyan);
-  padding: 3px 8px;
-  border-radius: 10%;
-  font-size: 12px;
-}
-.i-node {
-  background: rgba(var(--carme-orange-rgb),0.08);
-  color: var(--carme-orange);
-  padding: 3px 8px;
-  border-radius: 50%;
-  font-size: 15px;
-  font-weight: bold;
-}
-.i-node-text {
-  background: rgba(var(--carme-orange-rgb),0.08);
-  color: var(--carme-orange);
-  padding: 3px 8px;
-  border-radius: 10%;
-  font-size: 12px;
-}
-
 /*--- fraction ---*/
 span.frac {
   display: inline-block;
@@ -854,5 +881,13 @@ span.frac > sub {
   appearance: none;
 }
 
-
-
+/*--------------------------------------------------*/
+/*              Avatar (Project list)               */
+/*--------------------------------------------------*/
+.avatar-icon {
+  height: 2.5rem;
+  width:  2.5rem;
+}
+.avatar-icon .avatar-name {
+  background-color: var(--carme-avatar-bg);
+}

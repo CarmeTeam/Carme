@@ -23,7 +23,10 @@
     				</li>
     				<li class="nav-item{% if '/carme/JobHist' in request.path %} active{% endif %}">
      					<a class="nav-link" href="/carme/JobHist/">History</a>
-    				</li>       
+    				</li>
+								<li class="nav-item">
+          <a class="nav-link" href="{% url 'projects:all' %}">Projects</a>
+        </li>        
     				<li class="nav-item dropdown">
      					<a class="nav-link dropdown-toggle dropdown-left" href="#" id="dropdownHelp" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 												Help

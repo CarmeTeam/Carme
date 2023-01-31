@@ -1,0 +1,23 @@
+{% extends "projects/project_base.html" %}
+
+{% block title %}Delete Project{% endblock title %}
+
+
+{% block project_content %}
+<h1 class="">{{project.name}}</h1>
+
+<h2> Member Count: {{project.members.count}}</h2>
+  <div class="content">
+
+				{% if user in project.members.all %}
+                    <h3>Delete post?</h3>
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <p>Are you sure you want to delete the post?</p>
+                        <button type='submit'>Submit</button>
+                    </form>
+				{% endif %}
+
+  </div>
+{% endblock project_content %}
+
