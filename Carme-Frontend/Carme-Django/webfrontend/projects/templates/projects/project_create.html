@@ -9,12 +9,12 @@
 			<div class="card">
 
 				<!-- <card-header> -->
-		    	<div class="card-header">
-          			<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-            			<i class="fas fa-pen-to-square me-2"></i>
-            			Create Project
-          			</h5>
-        		</div>
+		  <div class="card-header">
+    	<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
+     	<i class="fas fa-pen-to-square me-2"></i>
+      Create Project
+     </h5>
+    </div>
 				<!-- </card-header> -->
 
 				<!-- <card-body> -->
@@ -31,12 +31,12 @@
 						
 						<div class="input-group mb-3 hidden">
 							<span class="input-group-text" style="width:120px;">Name</span>
-							<input type="text" name="name" id="id_name" maxlength="255" class="fs-0 fw-400 text-body form-control" placeholder="Project name" 
+							<input type="text" name="name" id="id_name" maxlength="50" class="fs-0 fw-400 text-body form-control" placeholder="Project name" 
 									autocomplete="do-not-autofill" required>
 						  </div>
 						<div class="input-group mb-3">
 							<span class="input-group-text" style="width:120px;">Description</span>
-							<input type="text" name="description" id="id_description" maxlength="255" class="fs-0 fw-400 text-body form-control" placeholder="A brief description of your project" 
+							<input type="text" name="description" id="id_description" maxlength="70" class="fs-0 fw-400 text-body form-control" placeholder="A brief description of your project" 
 									autocomplete="do-not-autofill" required>
 						</div>
 						<div class="input-group mb-3">
@@ -50,7 +50,7 @@
 						</div>
 						<div class="input-group mb-3">
 							<span class="input-group-text" style="width:120px;">Information</span>
-							<textarea cols="40" rows="5" name="information" id="id_information" maxlength="255" class="fs-0 fw-400 text-body form-control" placeholder="Write down the resources that you need" 
+							<textarea cols="40" rows="3" name="information" id="id_information" maxlength="350" class="fs-0 fw-400 text-body form-control" placeholder="Write down the resources that you need" 
 										autocomplete="do-not-autofill" required></textarea>
 						</div>
 						<a href="{% url 'projects:all' %}" class="float-end btn btn-secondary mt-2">
@@ -59,10 +59,10 @@
 						<button type="submit" class="btn btn-primary mt-2">Create</button>
 					</form>
 				</div>
-       			<!-- </card-body> -->
+   	<!-- </card-body> -->
 				   
-      		</div>
-    	</div>
-  	</div>
+   </div>
+  </div>
+ </div>
 </div>	  
 {% endblock project_content %}

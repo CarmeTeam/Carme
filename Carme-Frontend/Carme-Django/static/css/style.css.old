@@ -218,26 +218,6 @@ a{
   color: var(--carme-primary);
 }
 
-/*--------------------- Borders --------------------*/
-.border-bottom-double{
-  border-bottom: 2px solid var(--carme-border-head);
-}
-.border-bottom-solid{
-  border-bottom: 1px solid var(--carme-border-body);
-}
-.border-bottom-dashed{
-  border-bottom: 1px dashed var(--carme-border-body);
-}
-.border-top-double{
-  border-top: 2px solid var(--carme-border-head);
-}
-.border-top-solid{
-  border-top: 1px solid var(--carme-border-body);
-}
-.border-top-dashed{
-  border-top: 1px dashed var(--carme-border-body);
-}
-
 
 /*-----------------  Card & Modal  -----------------*/
 
@@ -285,6 +265,24 @@ a{
   overflow-y:auto!important;
   /* padding-right:0 !important; */
 }
+
+/*---------------------  Table  ----------------------*/
+table tr{
+  background:   var(--carme-table-bg); 
+  /*border: 0px solid var(--carme-table-border)!important;*/
+  box-shadow: var(--carme-table-shadow); 
+  -webkit-box-shadow: var(--carme-table-shadow);
+}
+thead{
+  background: var(--carme-table-head-bg); 
+  border-bottom: 2px solid var(--carme-table-head-border);
+  box-shadow: var(--carme-table-head-shadow); 
+  -webkit-box-shadow: var(--carme-table-head-shadow);
+}
+.table>:not(:first-child) {
+  border-top: none; 
+}
+
 
 /*-------------------  Form-Select  ------------------*/
 .form-select, 

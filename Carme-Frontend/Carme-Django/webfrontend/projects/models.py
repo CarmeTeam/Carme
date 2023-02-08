@@ -31,11 +31,17 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            self.slug = slugify(self.name + " " + str(Project.get_random_code()))
+            if len(self.name) > 20:
+                short_name = self.name[:20]
+            else:
+                short_name = self.name
+            self.slug = slugify(str(self.owner) + " " + short_name + " " + str(Project.get_random_code()))
             self.description_html = misaka.html(self.description)
         else:
             orig = Project.objects.get(pk=self.pk)
+            self.description_html = misaka.html(self.description)
             if orig.name != self.name:
+                # This should never happen! If it does, there is an error
                 self.slug = slugify(self.name + " " + str(Project.get_random_code()))
 
         return super(Project, self).save(*args, **kwargs)

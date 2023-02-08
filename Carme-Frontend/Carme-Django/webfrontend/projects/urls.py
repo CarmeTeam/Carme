@@ -10,11 +10,11 @@ urlpatterns = [
     path("join/<slug>/",views.JoinProject.as_view(), name="join"),
     path("leave/<slug>/",views.LeaveProject.as_view(), name="leave"),
     path("detail/<slug>/",views.SingleProject.as_view(),name="single"),
-    path("delete/<slug>/",views.DeleteProject.as_view(), name="project-delete"),
-    path("update/<slug>/",views.UpdateProject.as_view(), name="project-update"),
+    path("delete/<slug>/",views.DeleteProject.as_view(), name="delete"),
+    path("update/<slug>/",views.UpdateProject.as_view(), name="update"),
     # membership methods:
     path('set/manager/', views.set_as_manager, name='set-manager'),
-    path('send-invite/', views.send_invitation, name='send-invite'),
-    path('invitation/accept/', views.accept_invitation, name='accept-invite'),
-    path('invitation/reject/', views.reject_invitation, name='reject-invite'),
+    path('invitation/submit/', views.submit_invitation, name='submit-invitation'),
+    path('invitation/accept/', views.accept_invitation, name='accept-invitation'),
+    path('invitation/reject/', views.reject_invitation, name='reject-invitation'),
 ]

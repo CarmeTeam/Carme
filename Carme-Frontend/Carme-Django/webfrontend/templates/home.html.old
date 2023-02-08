@@ -94,7 +94,7 @@
                    					</div>
 
                    					<ul class="list-unstyled mt-3">
-                   							<li class="border-top-solid pt-3 pb-1">
+                   							<li class="border-top pt-3 pb-1">
                    									<div class=" border-3 border-primary mt-1">
                      									<h5 class="mb-2 fs-0 fw-600 text-body">
 																																{{ gputype | index:forloop.counter0 | upper }}
@@ -339,7 +339,7 @@
 																								
 																								<!-- <job-form> -->
 																								<thead>
-																										<tr class="border-bottom-solid">
+																										<tr>
                    									<form class="form ajax" action="{% url 'start_job' %}" method="post">
                     										{% csrf_token %}
                     										<div class="form-row">
@@ -414,7 +414,7 @@
                     										</div>
                    									</form>
                   								</tr>
-																										<tr class="align-middle border-bottom-double">
+																										<tr class="align-middle">
                    									<th>ID</th>
                    									<th>Name</th>
                    									<th>Image</th>
@@ -444,22 +444,7 @@
 
 																								<!-- <job-table> -->
 																								<tbody id="jobtable">
-																									{% if not myjobtable_list %}
-																										<tr class="border-bottom-solid">
-  																									<td class="align-middle" colspan="11">
-    																								<div class="row flex-center text-center" style="padding: 50px 0 50px 0;">
-      																						<div class="fs-40 fw-900 text-watermark">No Jobs</div>
-      																							{% if myprojects.count > 0%}
-        																						<p class="mt-4 mx-auto fs-2 fw-200 text-body">Choose an image to start a job</p>
-      																							{% else %}
-        																						<p class="mt-4 mx-auto fs-2 fw-200 text-body">Choose an image to start a job</p>
-      																							{% endif %}
-    																								</div>
-  																									</td>
-																										</tr>
-																									{% else %}
 																										{% include "blocks/job_table.html" %}
-																									{% endif %}
 																								</tbody>
 																								<!-- </job-table> -->
 																						</table>
