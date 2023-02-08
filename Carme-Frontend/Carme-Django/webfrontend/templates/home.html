@@ -302,17 +302,17 @@
                 								<button type="button" class="btn btn-sm btn-outline-secondary custom-btn" data-bs-toggle="modal" data-bs-target="#jobsModal">
                  									<span class="p-1 text-header">History</span>
                  							</button>
-                								<div class="modal fade" id="jobsModal" tabindex="-1" aria-labelledby="jobsModalLabel" aria-hidden="true">
+                								<div class="modal fade" id="jobsModal" tabindex="-1">
                  	
-																										<div class="modal-dialog modal-xl modal-dialog-scrollable">
+																										<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                   										
 																												<div class="modal-content">
                    											<div class="modal-header">
-                    												<h5 class="mb-0 py-0 fs-0 fw-400 text-header" id="jobsModalLabel">
+                    												<h5 class="mb-0 py-0 fs-0 fw-400 text-header">
 																																		<i class="fas fa-history"></i> 
 																																		History
 																																</h5>
-                     											<button type="button" class="btn-close fs--1" data-bs-dismiss="modal" aria-label="Close"></button>
+                     											<button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
                     										</div>
 																														
 																														<div class="scrollbar-overlay os-host-flexbox">
@@ -334,7 +334,7 @@
 																		</div>
 
 																		<div class="card-body">
-																				<div class="mt-2 table-responsive">
+																				<div id="scrollbarModal" class="table-responsive scrollbar-overlay">
 																						<table class="table mb-0 overflow-hidden text-center fs--1 fw-400 text-body">
 																								
 																								<!-- <job-form> -->
@@ -471,6 +471,22 @@
 														</div>
 												</div>
 												<!--</bottom>-->
+
+
 {% endblock %}
 
-{% block javascript %}{% endblock %}
+{% block javascript %}
+<script>
+var osInstance = $('#scrollbarModal').overlayScrollbars({ }).overlayScrollbars();
+
+$('#scrollbarModal').on('show.bs.modal', function() { 
+  requestAnimationFrame(function() {
+    var osContentElm = $(osInstance.getElements().content);
+    var backdropElms = $('body > .modal-backdrop');
+    backdropElms.each(function(index, elm) {
+      osContentElm.append(elm);
+    });
+  });
+});
+</script>
+{% endblock %}

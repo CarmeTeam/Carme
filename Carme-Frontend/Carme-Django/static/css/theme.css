@@ -132,6 +132,9 @@
 		/* border */
   --carme-border-head: rgba(var(--carme-gray-700-rgb),0.6);
   --carme-border-body: rgba(var(--carme-gray-300-rgb),1.0);
+  
+		/* scrollbar */
+		--carme-scrollbar-bg: var(--carme-gray-300);		
 
   /* card and modal */
   --carme-card-head-text: var(--carme-gray-900);
@@ -299,6 +302,9 @@
   --carme-border-head: rgba(var(--carme-gray-700-rgb),0.6);
   --carme-border-body: rgba(var(--carme-gray-900-rgb),1.0);
   
+		/* scrollbar */
+		--carme-scrollbar-bg: var(--carme-gray-800);
+
   /* card and modal */
   --carme-card-head-text: var(--carme-gray-300);
   --carme-card-body-text: var(--carme-gray-400);
