@@ -532,7 +532,7 @@ $(document).ready(function() {
 
 <!---------------------------------->
 <!--       OverlayScrollbars      -->
-<!--        ( ??????.html )       -->
+<!--         ( all pages )        -->
 <!----------------------------------> 
   
 <script>
@@ -543,19 +543,9 @@ $(document).ready(function() {
             sizeAutoCapable : true,
             paddingAbsolute : true,
             scrollbars : {
-                clickScrolling : true
-            }
-        });
-    });
-
-    document.addEventListener("DOMContentLoaded", function() {
-        OverlayScrollbars(document.querySelectorAll('bodyx'), {
-            className       : "os-theme-dark custom-scroll",
-            resize          : "none",
-            sizeAutoCapable : true,
-            paddingAbsolute : true,
-            scrollbars : {
-                clickScrolling : true
+                clickScrolling : true,
+																autoHide: 'leave',
+																autoHidedelay: 50,
             }
         });
     });

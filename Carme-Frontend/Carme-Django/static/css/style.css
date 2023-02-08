@@ -867,14 +867,25 @@ span.frac > sub {
   scrollbar-width: thin;
 }
 
+/* uses overlay scrollbar */
+.scrollbar-overlay {
+  overflow: hidden;
+}
 .os-theme-dark > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle {
   border-radius:0;
-  background-color: rgba(var(--carme-dark-rgb),0.12)!important;
+  background-color: var(--carme-scrollbar-bg);
 }
 .os-theme-dark > .os-scrollbar:hover > .os-scrollbar-track > .os-scrollbar-handle, .os-theme-dark > .os-scrollbar:focus > .os-scrollbar-track > .os-scrollbar-handle {
-  background: rgba(182, 193, 210, 0.55);
+  background: var(--carme-scrollbar-bg);
 }
-
+/* hides native scrollbar */
+.os-theme-dark {
+  -ms-overflow-style: none; 
+  scrollbar-width: none;     
+}
+.os-theme-dark::-webkit-scrollbar { 
+  display: none; 
+}
 
 /*--------------------------------------*/
 /*                Extras                */
