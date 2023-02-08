@@ -13,7 +13,10 @@ i{% extends "projects/project_base.html" %}
    <div class="card-header">
    	<div class="row align-items-center">
     	<div class="col">
-     	<h5 class="mb-0 py-2 fs-0 fw-400 text-header"><i class="fas fa-tasks"></i> Update Project</h5>
+     	<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
+							<i class="fas fa-rotate"></i> 
+							Update Project
+						</h5>
      </div>
     </div>
    </div>
@@ -26,12 +29,12 @@ i{% extends "projects/project_base.html" %}
     	{% csrf_token %}
     	<div class="input-group mb-3 hidden">
     		<span class="input-group-text" style="width:120px;" id="{{ form.name.name }}-addon">{{ form.name.label }}</span>
-      <input type="text" name="" value="{{form.name.value|capfirst}}" class="fs-0 fw-400 text-body form-control" required disabled id="">
+      <input type="text" name="" value="{{form.name.value|capfirst}}" class="fs-0 fw-400 text-body form-control" maxlength="50" required disabled id="">
      </div> 
      <div class="input-group mb-3 hidden">
      	<span class="input-group-text" style="width:120px;" id="{{ form.description.name }}-addon">{{ form.description.label }}</span>
       <input type="text" name="{{form.description.name}}" value="{{form.description.value|capfirst}}" 
-													class="fs-0 fw-400 text-body form-control" required id="id_{{form.description.name}}">
+													class="fs-0 fw-400 text-body form-control" maxlength="70" required id="id_{{form.description.name}}">
      </div>
      <div class="input-group mb-3 hidden">
      	<span class="input-group-text" style="width:120px;" id="{{ form.classification.name }}-addon">{{ form.classification.label }}</span>
@@ -50,11 +53,17 @@ i{% extends "projects/project_base.html" %}
      </div> 
      <div class="input-group mb-3 hidden">
     		<span class="input-group-text" style="width:120px;" id="{{ form.information.name }}-addon">{{ form.information.label }}</span>
-      <textarea name="" cols="40" rows="5" class="fs-0 fw-400 text-body form-control" required disabled id="">{{form.information.value|capfirst}}</textarea>
+      <textarea name="" cols="40" rows="3" class="fs-0 fw-400 text-body form-control" maxlength="350" required disabled id="">{{form.information.value|capfirst}}</textarea>
      </div>
-     <a href="{% url 'projects:single' slug=project.slug %}" class="float-end btn btn-secondary mt-2">
-     	Back to Project
-     </a> 
+     {% if request.get_full_path == request.path %}
+     	<a href="{% url 'projects:single' slug=project.slug %}" class="float-end btn btn-secondary mt-2">
+     		Back to Project
+     	</a>
+     {% else %}
+     	<a href="{% url 'projects:all' %}" class="float-end btn btn-secondary mt-2">
+      	Back to Projects
+      </a>
+     {% endif %} 
      <button type='submit' class="btn btn-primary mt-2">Update</button> 
     </form>                    
    </div>

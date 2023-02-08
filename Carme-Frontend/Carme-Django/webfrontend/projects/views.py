@@ -40,7 +40,7 @@ class CreateProject(LoginRequiredMixin, CreateView):
             return super().form_invalid(form)
         
 
-class SingleProject(DetailView):
+class SingleProject(LoginRequiredMixin,DetailView):
     """ single project information """
     model = Project
 
@@ -54,9 +54,9 @@ class SingleProject(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # User list to add to project
+        # User list
         User = get_user_model()
-        context['object_list'] = User.objects.all()
+        context['user_list'] = User.objects.all()
 
         # Template list
         templateQuerySet = ProjectHasTemplate.objects.values('template__name',
@@ -74,7 +74,7 @@ class SingleProject(DetailView):
                                                                     'resourcetemplate__name')
         context['accelerator_list'] = acceleratorQuerySet
 
-        # Members list
+        # Member list
         slug = self.kwargs.get('slug')
         project_id = Project.objects.get(slug=slug).id
         memberQuerySet = ProjectMember.objects.filter(project_id=project_id)
@@ -89,10 +89,15 @@ class SingleProject(DetailView):
         )
         context['member_list'] = countQuerySet
 
+        # request.user is member
+        is_memberQuerySet = ProjectMember.objects.filter(project_id=project_id,
+                                                         user=self.request.user)
+        context['is_member'] = is_memberQuerySet
+
         return context
     
 
-class ListProjects(ListView):
+class ListProjects(LoginRequiredMixin,ListView):
     """ list of projects """
     model = Project
 
@@ -224,12 +229,18 @@ class DeleteProject(LoginRequiredMixin, DeleteView):
         obj = Project.objects.get(slug=slug)
         return obj
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != self.request.user:
+            return redirect('projects:all')
+        return super(DeleteProject, self).dispatch(request, *args, **kwargs)
+
 
 class UpdateProject(LoginRequiredMixin, UpdateView):
     """ update a project """
-    form_class = ProjectModelForm
     model = Project
     template_name = 'projects/project_update.html'
+    form_class = ProjectModelForm
     
     def get_success_url(self, *args, **kwargs):
         return reverse_lazy('projects:single', args=[self.kwargs['slug']])
@@ -267,7 +278,7 @@ class JoinProject(LoginRequiredMixin, RedirectView):
                 pass
         else:
             try:
-                ProjectMember.objects.create(user=self.request.user,project=project,status="send")
+                ProjectMember.objects.create(user=self.request.user,project=project,status="sent")
 
             except IntegrityError:
                 messages.warning(self.request,("Warning, already a member of {}".format(project.name)))
@@ -311,16 +322,19 @@ class LeaveProject(LoginRequiredMixin, RedirectView):
 #################################################
 
 @login_required
-def send_invitation(request):
+def submit_invitation(request):
     """ submit invitation/request to join a project """
 
     if request.method=='POST':
         project_pk = request.POST.get('project_pk') # project ID
         user_pk = request.POST.get('user_pk')       # username
         User = get_user_model()
-        receiver = User.objects.get(username=user_pk) 
         sender = Project.objects.get(pk=project_pk) # (maybe use slug instead?)
-        rel = ProjectMember.objects.create(project=sender, user=receiver, status='sent', is_approved_by_manager=True)
+        try:
+            receiver = User.objects.get(username=user_pk)
+            ProjectMember.objects.create(project=sender, user=receiver, status='sent', is_approved_by_manager=True)
+        except User.DoesNotExist:
+            receiver = None
 
         return redirect(request.META.get('HTTP_REFERER'))
     return redirect('projects:all')

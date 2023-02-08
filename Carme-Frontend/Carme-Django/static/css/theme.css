@@ -45,6 +45,7 @@
   --carme-pink: #ff679b;
   --carme-red: #e63757;
   --carme-white: #fff;
+  --carme-gray: #748194;
   --carme-black: #000;
 
   /*------------------------------------ RGB -------------------------------------*/
@@ -86,6 +87,7 @@
   --carme-pink-rgb: 255, 103, 155;
   --carme-red-rgb: 230, 55, 87;
   --carme-white-rgb: 255, 255, 255;
+  --carme-gray-rgb: 116, 129, 148;
   --carme-black-rgb: 0, 0, 0;
 
 
@@ -126,6 +128,10 @@
 
   --carme-body-bg: var(--carme-light-mode);
   --carme-border:  var(--carme-gray-300);
+
+		/* border */
+  --carme-border-head: rgba(var(--carme-gray-700-rgb),0.6);
+  --carme-border-body: rgba(var(--carme-gray-300-rgb),1.0);
 
   /* card and modal */
   --carme-card-head-text: var(--carme-gray-900);
@@ -196,7 +202,7 @@
   --carme-footer-top-text:          var(--carme-gray-800);
 
   --carme-footer-top-bg:     transparent;
-  --carme-footer-top-border: var(--carme-gray-300);
+  --carme-footer-top-border: 1px solid var(--carme-gray-300);
   --carme-footer-top-shadow: none;
 
   --carme-footer-bottom-bg:     rgba(var(--carme-gray-1200-rgb),0.05);
@@ -289,6 +295,10 @@
   --carme-body-bg: var(--carme-dark-mode);
   --carme-border:  var(--carme-gray-900);
   
+  /* border */
+  --carme-border-head: rgba(var(--carme-gray-700-rgb),0.6);
+  --carme-border-body: rgba(var(--carme-gray-900-rgb),1.0);
+  
   /* card and modal */
   --carme-card-head-text: var(--carme-gray-300);
   --carme-card-body-text: var(--carme-gray-400);
@@ -359,7 +369,7 @@
   --carme-footer-top-text:          var(--carme-gray-500);
 
   --carme-footer-top-bg:     transparent;
-  --carme-footer-top-border: var(--carme-gray-900);
+  --carme-footer-top-border: 1px solid rgba(var(--carme-gray-900-rgb),0.6);
   --carme-footer-top-shadow: none;
 
   --carme-footer-bottom-bg:     var(--carme-gray-1100);

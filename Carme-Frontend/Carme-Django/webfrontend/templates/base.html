@@ -27,17 +27,19 @@
 	<!-- title -->
 	<title>Carme - {% block title %}{% endblock %}</title>
 
-	<!-- assets -->
+	<!-- <assets> -->	
 	{% include "blocks/assets/assets_header.html" %}
+	<!-- </assets> -->
+
 </head>
 
 <body class="d-flex flex-column h-100 w-100 m-0 p-0">
 	<div class="d-flex justify-content-between flex-column min-vh-100">
-  <div class="container" data-layout="container">
+		<div class="container" data-layout="container">
 
-  	<!-- navbar -->
   	{% if request.path != "/account/two_factor/setup/complete/" %}
 				{% if user.is_authenticated and user.is_verified %}
+					<!-- navbar -->
 					<div style="padding-top:90px;">
 						{% include "blocks/navbar.html" %}
 					</div>
@@ -46,14 +48,16 @@
 
    <!-- main -->
 			<main role="main" class="flex-shrink-0">
-    {% if request.path != "/account/login/" %}
+   
+				{% if request.path != "/account/login/" %}
+					<!-- maintenance -->
 					{% include "blocks/maintenance.html" %}
 				{% endif %}
 
     {% block content %}{% endblock %}
 			</main>
          
-  </div>		
+  </div>
 
 		<!-- footer -->
 		{% include "blocks/footer.html" %}
