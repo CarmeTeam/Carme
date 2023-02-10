@@ -65,7 +65,7 @@
 														<div class="scrollbar-overlay os-host-flexbox">
 															<div class="modal-body fs-0 fw-400 text-body">
 																<div class="alert alert-warning py-1 px-2 fs--1" role="alert">
-																	<small class="fas fa-circle-exclamation"></small>&nbsp; This project will be removed for all members.
+																	<small class="fas fa-circle-exclamation pe-1"></small> This project will be removed for all members.
 																</div>
 																<p class="ps-2"> Are you sure that you want to delete this project?</p>
 																<div class="form-check ps-4 ms-2">
@@ -120,13 +120,17 @@
 			<div class="card-body">
 				
 				{% if messages %}
-					<!-- <alert> -->
 					{% for message in messages %}
-						<div {% if message.tags %} id="{{ message.tags }}-message" class="alert alert-{{ message.tags }} py-1 px-2 fs--1" {% endif %} role="alert">
-							<small {% if message.tags == 'success' %} class="fas fa-check-circle" {% endif %}></small>&nbsp; {{ message }}
+						{% if message.tags == 'success' %}
+						<div  class="alert alert-success py-1 px-2 fs--1" role="alert">
+							<small class="fas fa-check-circle pe-1"></small>
+						{% elif message.tags == 'error' %}
+						<div  class="alert alert-danger py-1 px-2 fs--1" role="alert">
+							<small class="fas fa-times-circle pe-1"></small>
+						{% endif %}
+						{{ message }}
 						</div>
 					{% endfor %}
-					<!-- </alert> -->
 				{% endif %}
 
 				<!-- <status> -->
@@ -397,7 +401,7 @@
 											{% endif%}
 												<div class="avatar-icon position-relative d-inline-block my-2">
 														<span class="position-absolute top-50 start-50 translate-middle">
-															<img class="rounded-circle" style="width:50px;" src="/static/img/blank-user.png" />
+															<img class="rounded-circle" style="width:50px;" src="/static/img/users/blank-user.png" />
 														</span>
 												</div>
 											</a>
@@ -635,23 +639,20 @@
 											<tbody>
 												{% for y in project.projectmember_set.all %}
 													{% if y.user == x.user %}
-															
-														{% if y.status == 'sent' and y.is_approved_by_manager == 1 %}
+
+														<div class="alert alert-warning py-1 px-2 fs--1" role="alert">
+														 <small class="fas fa-circle-exclamation pe-1"></small>
+														 {% if y.status == 'sent' and y.is_approved_by_manager == 1 %}
 															<!-- received -->
-															<div id="warning-message" class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
-																<small class="fas fa-circle-exclamation"></small>&nbsp; You have been invited to join this project
-															</div>
-														{% elif y.status == 'sent' and y.is_approved_by_manager == 0 %}
+															You have been invited to join this project
+															{% elif y.status == 'sent' and y.is_approved_by_manager == 0 %}
 															<!-- requested -->
-															<div id="warning-message" class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
-																<small class="fas fa-circle-exclamation"></small>&nbsp; You have sent a request to join this project
-															</div>
-														{% elif y.status == 'accepted' and y.is_approved_by_manager == 1 %}
+															You have sent a request to join this project	
+															{% elif y.status == 'accepted' and y.is_approved_by_manager == 1 %}
 															<!-- waiting -->
-															<div id="warning-message" class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
-																<small class="fas fa-circle-exclamation"></small>&nbsp; Your membership is waiting for approval
-															</div>
-														{% endif %}
+															Your membership is waiting for approval
+															{% endif %}
+														</div>		
 														
 														<tr class="border-bottom-dashed my-3">
 															<td class="align-middle text-left">

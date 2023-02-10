@@ -287,9 +287,10 @@
 												<div class="row mt-2">
 														<div class="col-12 mb-4 pb-2">
 													
-																<div class="card h-100">
-																		<div class="card-header">
-																				<div class="row align-items-center">
+																   <div class="card h-100">
+
+																		  <div class="card-header">
+																				 <div class="row align-items-center">
 																						<div class="col">
 																								<h5 class="mb-0 fs-0 fw-400 text-header">
 																										<i class="fas fa-tasks"></i> 
@@ -298,145 +299,136 @@
 																						</div>
 
 																						<!-- <modal> -->
-																						<div class="col-auto text-center pe-card" class"form-select form-select-sm">
-                								<button type="button" class="btn btn-sm btn-outline-secondary custom-btn" data-bs-toggle="modal" data-bs-target="#jobsModal">
+																						<div class="col-auto pe-card text-center" class"form-select form-select-sm">
+                								<button type="button" class="btn btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#jobsModal">
                  									<span class="p-1 text-header">History</span>
                  							</button>
-                								<div class="modal fade" id="jobsModal" tabindex="-1">
-                 	
-																										<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                  										
-																												<div class="modal-content">
-                   											<div class="modal-header">
-                    												<h5 class="mb-0 py-0 fs-0 fw-400 text-header">
-																																		<i class="fas fa-history"></i> 
-																																		History
-																																</h5>
-                     											<button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
-                    										</div>
+																						</div>
+                						<div class="modal fade pe-0" id="jobsModal" tabindex="-1">
+																							<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+																								<div class="modal-content">
+
+                   						<div class="modal-header">
+                    						<h5 class="mb-0 py-0 fs-0 fw-400 text-header">
+																											<i class="fas fa-history"></i> 
+																											History
+																										</h5>
+                     					<button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
+                    					</div>
 																														
-																														<div class="scrollbar-overlay os-host-flexbox">
-                    												<div class="modal-body">
-                    														{% include "blocks/jobhistory.html" %} 
-                    												</div>
-																														</div>
+																									<div class="scrollbar-overlay os-host-flexbox">
+                    						<div class="modal-body">
+                    							{% include "blocks/jobhistory.html" %} 
+                    						</div>
+																									</div>
 
-                    										<div class="modal-footer" style="padding:0.6rem;">
-                    												<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                    										</div>
-                   									</div>
+                    					<div class="modal-footer">
+                    						<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    					</div>
 
-                  								</div>
-                 							</div>
-                						</div>
+                   					</div>
+                  					</div>
+                 					</div>
 																						<!-- </modal> -->
-																				</div>
-																		</div>
+
+																				 </div>
+																		  </div>
 
 																		<div class="card-body">
 																				<div id="scrollbarModal" class="table-responsive scrollbar-overlay">
-																						<table class="table mb-0 overflow-hidden text-center fs--1 fw-400 text-body">
+																						<table class="table mb-0 overflow-hidden align-middle fs--1 fw-400 text-center text-body">
 																								
-																								<!-- <job-form> -->
 																								<thead>
 																										<tr class="border-bottom-solid">
+
+                            <!-- <job-form> -->
                    									<form class="form ajax" action="{% url 'start_job' %}" method="post">
-                    										{% csrf_token %}
-                    										<div class="form-row">
-                    												<th scope="col" class="align-middle" colspan="2" style="min-width: 9.6rem;">
-                     													<div class="input-group my-1 align-middle">
-                      														<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
-                       															{{ start_job_form.nodes.label }} 
-                       													</div>
-                       													<select name="{{ start_job_form.nodes.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
-                       															{% for choice in start_job_form.nodes.field.choices %}
-                        																<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                        														{% endfor %} 
-                       													</select>
-                      												</div>
-                     											</th>
-
-                     											<th scope="col" class="align-middle" colspan="2" style="min-width: 12.2rem;">
-                      												<div class="input-group my-1">
-                       													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
-                        														{{ start_job_form.gpu_type.label }}
-                       													</div>
-                       													<select name="{{ start_job_form.gpu_type.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
-                        														{% for choice in start_job_form.gpu_type.field.choices %}
-                        	 														<option value="{{ choice.0 }}">{{ choice.1 | upper }}</option>
-                        														{% endfor %}
-                       													</select> 
-                      												</div>
-                     											</th>
-
-                     											<th scope="col" class="align-middle" colspan="2" style="min-width: 11.1rem;">
-                      												<div class="input-group my-1">
-                       													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
-                        														{{ start_job_form.gpus.label }}
-                       													</div>
-                       													<select name="{{ start_job_form.gpus.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
-                        														{% for choice in start_job_form.gpus.field.choices %}
-                         															<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                        														{% endfor %}
-                       													</select>
-                      												</div>
-                     											</th>
-
-                     											<th scope="col" class="align-middle" colspan="2">
-                      												<div class="input-group my-1">
-                       													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
-                        														{{ start_job_form.image.label }}
-                       													</div>
-                       													<select name="{{ start_job_form.image.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
-                        														{% for choice in start_job_form.image.field.choices %}
-                         															<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                        														{% endfor %}
-                       													</select>
-                      												</div>
-                     											</th>
-
-                     											<th scope="col" class="align-middle" colspan="2">
-                     													<div class="input-group my-1">
-                       													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
-                        														{{ start_job_form.name.label }}
-                       													</div>
-                       													<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control fs--1 fw-400 text-body" 
-																																											value="{{ start_job_form.name.field.initial }}">
-                      												</div>
-                     											</th>
-                                  
-                     											<th scope="col" class="align-middle">
-                      												<button class="btn btn-primary start-job" type="submit">
-																																				<i class="fa fa-play fa-fw" aria-hidden="true"></i>
-																																		</button>
-                     											</th>
-
-                    										</div>
+                    									 {% csrf_token %}                    										
+                    										<th colspan="2">
+                     										<div class="input-group my-1">
+                      										<div class="input-group-text fs--1 fw-400 text-body">
+                       										{{ start_job_form.nodes.label }} 
+                       									</div>
+                       									<select name="{{ start_job_form.nodes.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
+                       										{% for choice in start_job_form.nodes.field.choices %}
+                        										<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        									{% endfor %} 
+                       									</select>
+                      									</div>
+                     									</th>
+                     									<th colspan="2">
+                      									<div class="input-group my-1" style="width:12.2rem; max-wdith:12.2rem;">
+                       									<div class="input-group-text fs--1 fw-400 text-body">
+                     												{{ start_job_form.gpu_type.label }}
+                   													</div>
+                   													<select name="{{ start_job_form.gpu_type.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
+                   														{% for choice in start_job_form.gpu_type.field.choices %}
+                   	 													<option value="{{ choice.0 }}">{{ choice.1 | upper }}</option>
+                        									{% endfor %}
+                       									</select> 
+                      									</div>
+                     									</th>
+                     									<th colspan="2">
+                      									<div class="input-group my-1" style="width:11.1rem; max-width:11.1rem;">
+                       									<div class="input-group-text fs--1 fw-400 text-body">
+                      											{{ start_job_form.gpus.label }}
+                   													</div>
+                       									<select name="{{ start_job_form.gpus.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
+                        									{% for choice in start_job_form.gpus.field.choices %}
+                     													<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                   														{% endfor %}
+                   													</select>
+                   												</div>
+                   											</th>
+                   											<th colspan="2">
+                      									<div class="input-group my-1">
+                       									<div class="input-group-text fs--1 fw-400 text-body">
+                      											{{ start_job_form.image.label }}
+                   													</div>
+                   													<select name="{{ start_job_form.image.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
+                   														{% for choice in start_job_form.image.field.choices %}
+                   															<option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        									{% endfor %}
+                       									</select>
+                      									</div>
+                     									</th>
+                     									<th colspan="2">
+                     										<div class="input-group my-1">
+                       									<div class="input-group-text fs--1 fw-400 text-body">
+                   														{{ start_job_form.name.label }}
+                       									</div>
+                       									<input type="text" name="{{ start_job_form.name.html_name }}" class="form-control fs--1 fw-400 text-body" 
+																																							value="{{ start_job_form.name.field.initial }}">
+                      									</div>
+                     									</th>
+                     									<th colspan="1">
+                      									<button class="btn btn-primary start-job" type="submit">
+																																<i class="fa fa-play fa-fw"></i>
+																															</button>
+                     									</th>
                    									</form>
+                            <!-- </job-form> -->
+
                   								</tr>
-																										<tr class="align-middle border-bottom-double">
-                   									<th>ID</th>
-                   									<th>Name</th>
-                   									<th>Image</th>
-                   									<th>Nodes</th>
-                   									<th>
-																														<span class="frac">
-																																<sup>CPUs</sup>
-																																<span>&frasl;</span>
-																																<sub>node</sub>
-																														</span>
-																												</th>
-					              									<th style="min-width: 6.0rem;">
-																														<span class="frac">
-																																<sup>GPUs</sup>
-																																<span>&frasl;</span>
-																																<sub>node</sub>
-																														</span>
-																												</th>
-                   									<th>Status</th>
-                   									<th>Timing</th>
-                   									<th>Entry points</th>
-                   									<th>Details</th>
+																										<tr class="border-bottom-double">
+                   									<th style="width: 5.0rem; max-width:5.0rem;">ID</th>
+                   									<th style="width: 7.0rem; max-width:7.0rem;">Name</th>
+                   									<th style="width: 7.0rem; max-width:7.0rem;">Image</th>
+                   									<th style="width: 5.0rem; max-width:5.0rem;">Nodes</th>
+                   									<th style="width: 5.0rem; max-width:5.0rem;"><span class="frac">
+																																																																										<sup>CPUs</sup>
+																																																																										<span>&frasl;</span>
+																																																																										<sub>node</sub>
+																																																																									</span></th>
+					              									<th style="width: 6.0rem; max-width:6.0rem;"><span class="frac">
+																																																																										<sup>GPUs</sup>
+																																																																										<span>&frasl;</span>
+																																																																										<sub>node</sub>
+																																																																									</span></th>
+                   									<th style="width: 5.0rem; max-width:5.0rem;">Status</th>
+                   									<th style="width: 12rem; max-width:12rem;">Timing</th>
+                   									<th style="width: 10rem; max-width:10rem;">Entry points</th>
+                   									<th style="width: 5.0rem; max-width:5.0rem;">Details</th>
                    									<th>Stop</th>
                   								</tr>
 																								</thead>
@@ -444,9 +436,9 @@
 
 																								<!-- <job-table> -->
 																								<tbody id="jobtable">
-																									{% if not myjobtable_list %}
+																									{% if myjobtable_list.count == 0 %}
 																										<tr class="border-bottom-solid">
-  																									<td class="align-middle" colspan="11">
+  																									<td colspan="11">
     																								<div class="row flex-center text-center" style="padding: 50px 0 50px 0;">
       																						<div class="fs-40 fw-900 text-watermark">No Jobs</div>
       																							{% if myprojects.count > 0%}

@@ -232,7 +232,8 @@ class DeleteProject(LoginRequiredMixin, DeleteView):
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.owner != self.request.user:
-            return redirect('projects:all')
+            messages.error(self.request,'You need to be the owner of the project to delete it.')
+            return redirect('projects:single', slug=obj.slug)
         return super(DeleteProject, self).dispatch(request, *args, **kwargs)
 
 
@@ -244,6 +245,18 @@ class UpdateProject(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self, *args, **kwargs):
         return reverse_lazy('projects:single', args=[self.kwargs['slug']])
+
+    def get_object(self, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        obj = Project.objects.get(slug=slug)
+        return obj
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != self.request.user:
+            messages.error(self.request,'You need to be the owner of the project to update it.')
+            return redirect('projects:single', slug=obj.slug)
+        return super(UpdateProject, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         if form.instance.owner == self.request.user:

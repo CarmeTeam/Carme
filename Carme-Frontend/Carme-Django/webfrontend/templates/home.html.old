@@ -94,7 +94,7 @@
                    					</div>
 
                    					<ul class="list-unstyled mt-3">
-                   							<li class="border-top pt-3 pb-1">
+                   							<li class="border-top-solid pt-3 pb-1">
                    									<div class=" border-3 border-primary mt-1">
                      									<h5 class="mb-2 fs-0 fw-600 text-body">
 																																{{ gputype | index:forloop.counter0 | upper }}
@@ -287,9 +287,10 @@
 												<div class="row mt-2">
 														<div class="col-12 mb-4 pb-2">
 													
-																<div class="card h-100">
-																		<div class="card-header">
-																				<div class="row align-items-center">
+																   <div class="card h-100">
+
+																		  <div class="card-header">
+																				 <div class="row align-items-center">
 																						<div class="col">
 																								<h5 class="mb-0 fs-0 fw-400 text-header">
 																										<i class="fas fa-tasks"></i> 
@@ -298,52 +299,52 @@
 																						</div>
 
 																						<!-- <modal> -->
-																						<div class="col-auto text-center pe-card" class"form-select form-select-sm">
-                								<button type="button" class="btn btn-sm btn-outline-secondary custom-btn" data-bs-toggle="modal" data-bs-target="#jobsModal">
+																						<div class="col-auto pe-card text-center" class"form-select form-select-sm">
+                								<button type="button" class="btn btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#jobsModal">
                  									<span class="p-1 text-header">History</span>
                  							</button>
-                								<div class="modal fade" id="jobsModal" tabindex="-1" aria-labelledby="jobsModalLabel" aria-hidden="true">
-                 	
-																										<div class="modal-dialog modal-xl modal-dialog-scrollable">
-                  										
-																												<div class="modal-content">
-                   											<div class="modal-header">
-                    												<h5 class="mb-0 py-0 fs-0 fw-400 text-header" id="jobsModalLabel">
-																																		<i class="fas fa-history"></i> 
-																																		History
-																																</h5>
-                     											<button type="button" class="btn-close fs--1" data-bs-dismiss="modal" aria-label="Close"></button>
-                    										</div>
+																						</div>
+                						<div class="modal fade pe-0" id="jobsModal" tabindex="-1">
+																							<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+																								<div class="modal-content">
+
+                   						<div class="modal-header">
+                    						<h5 class="mb-0 py-0 fs-0 fw-400 text-header">
+																											<i class="fas fa-history"></i> 
+																											History
+																										</h5>
+                     					<button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
+                    					</div>
 																														
-																														<div class="scrollbar-overlay os-host-flexbox">
-                    												<div class="modal-body">
-                    														{% include "blocks/jobhistory.html" %} 
-                    												</div>
-																														</div>
+																									<div class="scrollbar-overlay os-host-flexbox">
+                    						<div class="modal-body">
+                    							{% include "blocks/jobhistory.html" %} 
+                    						</div>
+																									</div>
 
-                    										<div class="modal-footer" style="padding:0.6rem;">
-                    												<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                    										</div>
-                   									</div>
+                    					<div class="modal-footer">
+                    						<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    					</div>
 
-                  								</div>
-                 							</div>
-                						</div>
+                   					</div>
+                  					</div>
+                 					</div>
 																						<!-- </modal> -->
-																				</div>
-																		</div>
+
+																				 </div>
+																		  </div>
 
 																		<div class="card-body">
-																				<div class="mt-2 table-responsive">
-																						<table class="table mb-0 overflow-hidden text-center fs--1 fw-400 text-body">
+																				<div id="scrollbarModal" class="table-responsive scrollbar-overlay">
+																						<table class="table mb-0 overflow-hidden align-middle fs--1 fw-400 text-center text-body">
 																								
 																								<!-- <job-form> -->
 																								<thead>
-																										<tr>
+																										<tr class="border-bottom-solid">
                    									<form class="form ajax" action="{% url 'start_job' %}" method="post">
                     										{% csrf_token %}
                     										<div class="form-row">
-                    												<th scope="col" class="align-middle" colspan="2" style="min-width: 9.6rem;">
+                    												<th colspan="2" style="min-width: 9.6rem;">
                      													<div class="input-group my-1 align-middle">
                       														<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
                        															{{ start_job_form.nodes.label }} 
@@ -356,7 +357,7 @@
                       												</div>
                      											</th>
 
-                     											<th scope="col" class="align-middle" colspan="2" style="min-width: 12.2rem;">
+                     											<th colspan="2" style="min-width: 12.2rem;">
                       												<div class="input-group my-1">
                        													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
                         														{{ start_job_form.gpu_type.label }}
@@ -369,7 +370,7 @@
                       												</div>
                      											</th>
 
-                     											<th scope="col" class="align-middle" colspan="2" style="min-width: 11.1rem;">
+                     											<th colspan="2" style="min-width: 11.1rem;">
                       												<div class="input-group my-1">
                        													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
                         														{{ start_job_form.gpus.label }}
@@ -382,7 +383,7 @@
                       												</div>
                      											</th>
 
-                     											<th scope="col" class="align-middle" colspan="2">
+                     											<th colspan="2">
                       												<div class="input-group my-1">
                        													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
                         														{{ start_job_form.image.label }}
@@ -395,7 +396,7 @@
                       												</div>
                      											</th>
 
-                     											<th scope="col" class="align-middle" colspan="2">
+                     											<th colspan="2">
                      													<div class="input-group my-1">
                        													<div class="input-group-text fs--1 fw-400 text-body" id="inputGroup-sizing-default">
                         														{{ start_job_form.name.label }}
@@ -405,7 +406,7 @@
                       												</div>
                      											</th>
                                   
-                     											<th scope="col" class="align-middle">
+                     											<th colspan="1">
                       												<button class="btn btn-primary start-job" type="submit">
 																																				<i class="fa fa-play fa-fw" aria-hidden="true"></i>
 																																		</button>
@@ -414,7 +415,7 @@
                     										</div>
                    									</form>
                   								</tr>
-																										<tr class="align-middle">
+																										<tr class="align-middle border-bottom-double">
                    									<th>ID</th>
                    									<th>Name</th>
                    									<th>Image</th>
@@ -444,7 +445,22 @@
 
 																								<!-- <job-table> -->
 																								<tbody id="jobtable">
+																									{% if not myjobtable_list %}
+																										<tr class="border-bottom-solid">
+  																									<td class="align-middle" colspan="11">
+    																								<div class="row flex-center text-center" style="padding: 50px 0 50px 0;">
+      																						<div class="fs-40 fw-900 text-watermark">No Jobs</div>
+      																							{% if myprojects.count > 0%}
+        																						<p class="mt-4 mx-auto fs-2 fw-200 text-body">Choose an image to start a job</p>
+      																							{% else %}
+        																						<p class="mt-4 mx-auto fs-2 fw-200 text-body">Choose an image to start a job</p>
+      																							{% endif %}
+    																								</div>
+  																									</td>
+																										</tr>
+																									{% else %}
 																										{% include "blocks/job_table.html" %}
+																									{% endif %}
 																								</tbody>
 																								<!-- </job-table> -->
 																						</table>
@@ -456,6 +472,22 @@
 														</div>
 												</div>
 												<!--</bottom>-->
+
+
 {% endblock %}
 
-{% block javascript %}{% endblock %}
+{% block javascript %}
+<script>
+var osInstance = $('#scrollbarModal').overlayScrollbars({ }).overlayScrollbars();
+
+$('#scrollbarModal').on('show.bs.modal', function() { 
+  requestAnimationFrame(function() {
+    var osContentElm = $(osInstance.getElements().content);
+    var backdropElms = $('body > .modal-backdrop');
+    backdropElms.each(function(index, elm) {
+      osContentElm.append(elm);
+    });
+  });
+});
+</script>
+{% endblock %}
