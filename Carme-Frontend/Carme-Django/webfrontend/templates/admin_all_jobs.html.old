@@ -34,29 +34,33 @@
 						</div>
 						
 						<div class="card-body">
-								<div id="scrollbarModal" class="table-responsive scrollbar-overlay">
-										<table class="table mb-0 overflow-hidden align-middle fs--1 fw-400 text-center text-body">
+								<div class="table-responsive">
+										<table class="table mb-0 overflow-hidden text-center fs--1 fw-400 text-body">
 												<thead>
-														<tr class="border-bottom-double">
-																<th style="min-width: 5.0rem;">ID</th>
-																<th style="min-width: 5.0rem;">User</th>
-																<th style="min-width: 7.0rem;">Name</th>
-																<th style="min-width: 7.0rem;">Image</th>
-																<th style="min-width: 5.0rem;">Nodes</td>
-																<th style="min-width: 5.0rem;"><span class="frac">
-																																																<sup>CPUs</sup>
-																																																<span>&frasl;</span>
-																																																<sub>node</sub>
-																																															</span></th>
-																<th style="min-width: 6.0rem;"><span class="frac">
-																																																<sup>GPUs</sup>
-																																																<span>&frasl;</span>
-																																																<sub>node</sub>
-																																															</span></th>
-																<th style="min-width: 5.0rem;">Status</th>
-																<th style="min-width: 12.0rem;">Timing</th>
-																<th style="min-width: 10.0rem;">Entry points</th>
-																<th style="min-width: 5.0rem;">Details</th>
+														<tr class="align-middle">
+																<th>ID</th>
+																<th>User</th>
+																<th>Name</th>
+																<th>Image</th>
+																<th>Nodes</td>
+																<th>
+																		<span class="frac">
+																				<sup>CPUs</sup>
+																				<span>&frasl;</span>
+																				<sub>node</sub>
+																		</span>
+																</th>
+																<th style="min-width: 6.0rem;">
+																		<span class="frac">
+																				<sup>GPUs</sup>
+																				<span>&frasl;</span>
+																				<sub>node</sub>
+																		</span>
+																</th>
+																<th>Status</th>
+																<th>Timing</th>
+																<th>Entry points</th>
+																<th>Details</th>
 																<th>Stop</th>
 														</tr>
 												</thead>
@@ -88,22 +92,6 @@
 </div>
 {% endif %}
 
-{% endblock %}
-
-{% block javascript %}
-<script>
-var osInstance = $('#scrollbarModal').overlayScrollbars({ }).overlayScrollbars();
-
-$('#scrollbarModal').on('show.bs.modal', function() { 
-  requestAnimationFrame(function() {
-    var osContentElm = $(osInstance.getElements().content);
-    var backdropElms = $('body > .modal-backdrop');
-    backdropElms.each(function(index, elm) {
-      osContentElm.append(elm);
-    });
-  });
-});
-</script>
 {% endblock %}
 
 

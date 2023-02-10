@@ -264,20 +264,6 @@ a{
   -webkit-box-shadow: var(--carme-card-footer-shadow)!important;
 }
 
-/* modal-close-button */
-.btn-close {
-  background: var(--carme-modal-btn-close-bg);
-  border: 1px solid var(--carme-modal-btn-close-border);
-  box-shadow: var(--carme-modal-btn-close-shadow)!important; 
-  -webkit-box-shadow: var(--carme-modal-btn-close-shadow)!important;
-  opacity: 1;
-}
-.btn-close:active,
-.btn-close:focus {
-  box-shadow: var(--carme-modal-btn-close-shadow)!important; 
-  -webkit-box-shadow: var(--carme-modal-btn-close-shadow)!important;
-  opacity: 0.5; 
-}
 
 /* body-scrollbar not hidden when modal is active*/
 .modal-open {
@@ -764,7 +750,55 @@ span.frac > sub {
   bottom: 0px
 }
 
-/*--- button ---*/
+
+/*----------------------*/
+/*       Buttons        */
+/*----------------------*/
+
+/* custom-button */
+.btn-custom {
+	background-color: var(--carme-btn-bg);
+  border-color: var(--carme-btn-border);
+  box-shadow: var(--carme-btn-shadow);
+}
+.btn-custom:active, 
+.btn-outline-secondary.custom-btn.active {
+	box-shadow: none!important;
+}
+.btn-custom:focus, 
+.btn-custom.focus {
+  background-color:var(--carme-btn-bg);
+  border-color: var(--carme-btn-border);
+  box-shadow: var(--carme-btn-shadow);
+}
+.btn-custom:not(:disabled):not(.disabled):active:focus{
+  background-color:var(--carme-btn-bg-hover);
+  color:var(--carme-btn-text-hover);
+  border-color:var(--carme-btn-bg);
+}
+.btn-custom:not(:disabled):not(.disabled).active.focus{
+  background-color:var(--carme-btn-bg-hover);
+  color:var(--carme-btn-text-hover);
+  border-color:var(--carme-btn-bg);}
+
+/* modal-[x]-button */
+.btn-close {
+  background: var(--carme-modal-btn-close-bg);
+  border: 1px solid var(--carme-modal-btn-close-border);
+  box-shadow: var(--carme-modal-btn-close-shadow)!important; 
+  -webkit-box-shadow: var(--carme-modal-btn-close-shadow)!important;
+  opacity: 1;
+}
+.btn-close:active,
+.btn-close:focus {
+  box-shadow: var(--carme-modal-btn-close-shadow)!important; 
+  -webkit-box-shadow: var(--carme-modal-btn-close-shadow)!important;
+  opacity: 0.5; 
+}
+
+
+
+
 .btn-outline-secondary.custom-btn {
 	background-color: var(--carme-btn-bg);
   border-color: var(--carme-btn-border);
@@ -810,62 +844,6 @@ span.frac > sub {
 /*--------------------------------------------------*/
 /*                 Overlayscrollbar                 */
 /*--------------------------------------------------*/
-
-.scrollbar-overlay {
-  overflow: hidden!important;
-  visibility: hidden!important;
-}
-.scrollbar {
-  visibility: hidden!important;
-}
-.scrollbar:hover,.scrollbar-overlay:hover {
-  visibility: visible!important;
-}
-.scrollbar::-webkit-scrollbar {
-  visibility: hidden!important;
-  -webkit-appearance: none;
-  width: 6px;
-  height: 6px;
-  background-color: transparent;
-}
-.scrollbar::-webkit-scrollbar-thumb {
-  visibility: hidden!important;
-  border-radius: 3px;
-  background-color: rgba(255, 255, 255, 0.4);
-}
-.scrollbar:hover::-webkit-scrollbar, .scrollbar:hover::-webkit-scrollbar-thumb, .scrollbar:focus::-webkit-scrollbar, .scrollbar:focus::-webkit-scrollbar-thumb {
-  visibility: visible!important;
-}
-
-.navbar-vibrant .scrollbar {
-  overflow: auto;
-}
-.navbar-vibrant .scrollbar::-webkit-scrollbar {
-  visibility: hidden;
-  -webkit-appearance: none;
-  width: 6px;
-  height: 6px;
-  background-color: transparent;
-}
-.navbar-vibrant .scrollbar::-webkit-scrollbar-thumb {
-  visibility: hidden;
-  border-radius: 3px;
-  background-color: rgba(255, 255, 255, 0.4);
-}
-.navbar-vibrant .scrollbar:hover::-webkit-scrollbar, .navbar-vibrant .scrollbar:hover::-webkit-scrollbar-thumb, .navbar-vibrant .scrollbar:focus::-webkit-scrollbar, .navbar-vibrant .scrollbar:focus::-webkit-scrollbar-thumb {
-  visibility: visible;
-}
-
-.firefox .scrollbar {
-  overflow: auto !important;
-  scrollbar-color: rgba(255, 255, 255, 0.4) transparent; /*var(--carme-scrollbar-bg)*/
-  scrollbar-width: thin;
-}
-.firefox .navbar-vibrant .scrollbar {
-  overflow: auto !important;
-  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
-  scrollbar-width: thin;
-}
 
 /* uses overlay scrollbar */
 .scrollbar-overlay {
