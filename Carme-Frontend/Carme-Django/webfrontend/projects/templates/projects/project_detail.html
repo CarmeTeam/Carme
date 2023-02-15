@@ -27,32 +27,28 @@
 
 									{% if x.is_approved_by_admin == True and x.is_approved_by_manager == True and x.status == 'accepted'  %}
 										{% if x.is_manager %}
-											<!-- <is-active-manager> -->
+											<!-- is-active-manager -->
 											<a href="{% url 'projects:update' slug=project.slug %}" class="text-decoration-none">
-												<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
+												<button type="button" class="btn btn-sm bt-custom">
 													<span class="p-1 text-header">Update</span>
 												</button>
 											</a>
-											<!-- </is-active-manager> -->
 										{% endif %}
 
 										{% if x.user != project.owner %}
-											<!-- <is-active-user> -->
-											<a href="{% url 'projects:leave' slug=project.slug %}" class="text-decoration-none">
-												<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
-													<span class="p-1 text-header">Leave</span>
-												</button>
-											</a>
-											<!-- </is-active-user> -->
+											<!-- is-active-user -->
+											<button type="button" class="btn btn-sm btn-custom">
+												<span class="p-1 text-header">Leave</span>
+											</button>
+											{% include "projects/blocks/leave_modal_active.html" %}
 										{% endif %}
 
 										{% if x.user == project.owner %}
-											<!-- <is-active-creator> -->
-											<button type="button" class="btn btn-sm btn-outline-secondary custom-btn" data-bs-toggle="modal" data-bs-target="#deleteModal">
+											<!-- is-active-creator -->
+											<button type="button" class="btn btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#deleteModal">
 												<span class="p-1 text-header">Delete</span>
 											</button>
 											{% include "projects/blocks/delete_modal.html" %}			
-											<!-- </is-active-creator> -->
 										{% endif %}
 									{% endif %}
 									<!-- </is-member> -->
@@ -797,9 +793,13 @@
 
 <script>
 		$(document).ready(function(){
-		$('[id^=deleteModal]').on("hidden.bs.modal", function () {
-			$('[id^=deleteCheckbox]').prop('checked', false);
-			$('[id^=deleteButton]').prop('disabled', true);
+			$('[id^=deleteModal]').on("hidden.bs.modal", function () {
+				$('[id^=deleteCheckbox]').prop('checked', false);
+				$('[id^=deleteButton]').prop('disabled', true);
+		 });
+			$('[id^=leaveModal]').on("hidden.bs.modal", function () {
+				$('[id^=leaveCheckbox]').prop('checked', false);
+				$('[id^=leaveButton]').prop('disabled', true);
 		 });
 		});
 </script>

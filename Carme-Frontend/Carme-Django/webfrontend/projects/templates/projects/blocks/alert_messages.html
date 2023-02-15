@@ -1,0 +1,20 @@
+{% load static %}
+
+{% if messages %}
+<!-- <alert-messages> -->
+	{% for message in messages %}
+		{% if message.tags == 'success' %}
+			<div  class="alert alert-success py-1 px-2 fs--1" role="alert">
+				<small class="fas fa-check-circle pe-1"></small>
+		{% elif message.tags == 'error' %}
+			<div  class="alert alert-danger py-1 px-2 fs--1" role="alert">
+				<small class="fas fa-times-circle pe-1"></small>
+		{% elif message.tags == 'warning' %}
+			<div  class="alert alert-warning py-1 px-2 fs--1" role="alert">
+				<small class="fas fa-circle-info pe-1"></small>
+		{% endif %}
+				{{ message }}
+			</div>
+	{% endfor %}
+<!-- </alert-messages> -->
+{% endif %}
