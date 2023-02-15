@@ -164,41 +164,40 @@
 											<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">{{ project.inactive_members }}</span>
 										</span>
 									</td>
-									{% if project.project__owner__username == request.user.username %}
-									<!-- action: creator -->
+									<!-- action -->
 									<td class="pe-0">
 										<form id="form-active{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
 											{% csrf_token %} 
 											<select id="active{{ forloop.counter }}" data-slug="{{project.project__slug}}" 
                    class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
 												<option value="action" class="bg-transparent">Action</option>
-												<option value="update" class="bg-transparent">Update</option>
-												<option value="delete" class="bg-transparent">Delete</option>
+												{% if project.project__owner__username == request.user.username %}
+													<!-- creator -->
+													<option value="update" class="bg-transparent">Update</option>
+													<option value="delete" class="bg-transparent">Delete</option>
+												{% else %}
+													{% for manager in project_list_manager %}
+														{% if manager.project == project.project__pk %}
+															{% if manager.is_manager %}
+																<!-- manager -->
+																<option value="update" class="bg-transparent">Update</option>
+															{% else %}
+																<!-- user -->
+																<option value="leave" class="bg-transparent">Leave</option>
+															{% endif %}
+														{% endif %}
+													{% endfor %}
+												{% endif %}
 											</select>
 										</form>
-										{% include "projects/blocks/delete_modal.html" %}
+
+										{% if project.project__owner__username == request.user.username %}
+										 {% include "projects/blocks/delete_modal.html" %}
+										{% else %}
+										 {% include "projects/blocks/leave_modal_active.html" %}
+										{% endif %}
+
 									</td>
-									{% else %}
-										{% for manager in project_list_manager %}
-											{% if manager.project == project.project__pk %}
-												<!-- action: manager and user -->
-												<td class="pe-0">
-													<form id="form-active{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
-														{% csrf_token %} 
-														<select id="active{{ forloop.counter }}" data-slug="{{project.project__slug}}" 
-                	     class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
-															<option value="action" class="bg-transparent">Action</option>
-															{% if manager.is_manager %}
-															<option value="update" class="bg-transparent">Update</option>
-															{% else %}
-															<option value="leave" class="bg-transparent">Leave</option>
-															{% endif %}
-														</select>
-													</form>
-												</td>
-											{% endif %}
-										{% endfor %}
-									{% endif %}
 								</tr>
 								<!-- </membership-active> -->	
 							{% endfor %}
@@ -368,9 +367,10 @@
 											<input type="hidden" name="project_pk" value={{project.project__pk}}>
 											<select id="requested{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
 												<option class="bg-transparent">Action</option>
-												<option value="cancel" class="bg-transparent">Cancel</option>
+												<option value="leave" class="bg-transparent">Leave</option>
 											</select>
 										</form>
+										{% include "projects/blocks/leave_modal_requested.html" %}
 									</td>
 								</tr>	
 								<!-- </membership-requested> -->
@@ -453,9 +453,10 @@
 											<input type="hidden" name="project_pk" value={{project.project__pk}}>
 											<select id="waiting{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
 												<option class="bg-transparent">Action</option>
-												<option value="cancel" class="bg-transparent">Cancel</option>
+												<option value="leave" class="bg-transparent">Leave</option>
 											</select>
 										</form>
+										{% include "projects/blocks/leave_modal_waiting.html" %}
 									</td>
 								</tr>
 								<!-- </membership-waiting> -->	
@@ -486,7 +487,7 @@
 		if ($('#'+selectID).data('slug')) {
 			var my_slug = $('#'+selectID).data('slug');
 			var my_url_update = "{% url 'projects:update' slug=12345 %}?path=list".replace(/12345/, my_slug.toString());
-			var my_url_leave = "{% url 'projects:leave' slug=12345 %}".replace(/12345/, my_slug.toString());
+			var my_url_leave = "{% url 'projects:leave' slug=12345 %}?path=list".replace(/12345/, my_slug.toString());
 			var my_url_delete = "{% url 'projects:delete' slug=12345 %}".replace(/12345/, my_slug.toString());
 		}
 		
@@ -503,13 +504,17 @@
 			$("#form-"+selectID).submit();
 		}
 		else if (value == 'leave'){
-			$("#form-"+selectID).attr("action", my_url_leave);
-			$("#form-"+selectID).submit();
+			$('#leaveModal-'+selectID).modal("show");
+			$('#leaveModal-'+selectID).on("hidden.bs.modal", function () {
+				//reset action value on hidden modal
+				$(document).find('#'+selectID).val('action');
+				$('#'+selectID).val('action');
+			});
 		}
 		else if (value == 'delete'){
 			$('#deleteModal-'+selectID).modal("show");
 			$('#deleteModal-'+selectID).on("hidden.bs.modal", function () {
-				//reset value on hidden modal
+				//reset action value on hidden modal
 				$(document).find('#'+selectID).val('action')
 				$('#'+selectID).val('action');
 			 });
@@ -530,11 +535,19 @@
 	}
 </script>
 <script>
+	// reset checkbox and button on hidden modal 
 	$(document).ready(function(){
-	$('[id^=deleteModal]').on("hidden.bs.modal", function () {
-		$('[id^=deleteCheckbox]').prop('checked', false);
-		$('[id^=deleteButton]').prop('disabled', true);
+
+		$('[id^=deleteModal]').on("hidden.bs.modal", function () {
+			$('[id^=deleteCheckbox]').prop('checked', false);
+			$('[id^=deleteButton]').prop('disabled', true);
 	 });
+
+		$('[id^=leaveModal]').on("hidden.bs.modal", function () {
+			$('[id^=leaveCheckbox]').prop('checked', false);
+			$('[id^=leaveButton]').prop('disabled', true);
+	 });
+
 	});
 </script>
 {% endblock project_footer %}

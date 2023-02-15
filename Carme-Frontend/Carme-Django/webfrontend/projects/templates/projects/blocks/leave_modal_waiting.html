@@ -1,0 +1,40 @@
+{% load static %}
+
+<div class="modal fade pe-0" id="leaveModal-waiting{{ forloop.counter }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">		
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="mb-0 py-0 fs-0 fw-400 text-header">
+                    <i class="fas fa-arrow-right-from-bracket"></i> 
+                    Leave Project
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body fs-0 fw-400 text-body">
+                <div class="alert alert-warning py-1 px-2 fs--1" role="alert">
+                    <small class="fas fa-circle-exclamation pe-1"></small> You will lose access to the resources of the project.
+                </div>
+                <p class="ps-2"> Are you sure that you want to leave this project?</p>
+                <div class="form-check ps-4 ms-2">
+                    <input class="form-check-input" id="leaveCheckbox-waiting{{ forloop.counter }}" type="checkbox" onchange="document.getElementById('leaveButton-waiting{{ forloop.counter }}').disabled = !this.checked;">
+                    <label class="form-check-label" for="leaveCheckbox-waiting{{ forloop.counter }}">
+                        Yes, I'm sure.
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                {% if request.path == '/projects/' %}
+                <form method="POST" action="{% url 'projects:leave' slug=project.project__slug %}">
+                {% else %}
+                <form method="POST" action="{% url 'projects:leave' slug=project.slug %}">
+                {% endif %}
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger" id="leaveButton-waiting{{ forloop.counter }}" value="leave" disabled>Leave</button>
+                </form>
+                    <button type="button" class="btn btn-sm btn-secondary ms-auto" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+                
+    </div>
+</div>
