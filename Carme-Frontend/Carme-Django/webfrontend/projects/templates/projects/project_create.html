@@ -19,48 +19,53 @@
 
 				<!-- <card-body> -->
 				<div class="card-body">
-					{% if messages %}
-						{% for message in messages %}
-							<div {% if message.tags %}  id="{{ message.tags }}-message" {% endif %} class="alert alert-danger py-2" role="alert">
-								<i class="fas fa-times-circle"></i>&nbsp; {{ message }}
-							</div>
-						{% endfor %}
-					{% endif %}
-					<form method="POST" action="{% url 'projects:create' %}" id="projectForm" >
+
+					{% include "projects/blocks/delete_modal.html" %}
+
+					<form id="projectForm" method="POST" action="{% url 'projects:create' %}">
 						{% csrf_token %}
-						
-						<div class="input-group mb-3 hidden">
-							<span class="input-group-text" style="width:120px;">Name</span>
-							<input type="text" name="name" id="id_name" maxlength="50" class="fs-0 fw-400 text-body form-control" placeholder="Project name" 
-									autocomplete="do-not-autofill" required>
-						  </div>
-						<div class="input-group mb-3">
-							<span class="input-group-text" style="width:120px;">Description</span>
-							<input type="text" name="description" id="id_description" maxlength="70" class="fs-0 fw-400 text-body form-control" placeholder="A brief description of your project" 
-									autocomplete="do-not-autofill" required>
-						</div>
-						<div class="input-group mb-3">
-							<span class="input-group-text" style="width:120px;">Classification</span>
-							<select name="classification" id="id_classification" class="form-select bg-transparent text-body">
-								<option class="bg-transparent" value="public">Public</option>
-								<option class="bg-transparent" value="internal" selected>Internal</option>
-								<option class="bg-transparent" value="confidential">Confidential</option>
-								<option class="bg-transparent" value="highly-confidential" disabled>Highly confidential</option>
-							</select>
-						</div>
-						<div class="input-group mb-3">
-							<span class="input-group-text" style="width:120px;">Information</span>
-							<textarea cols="40" rows="3" name="information" id="id_information" maxlength="350" class="fs-0 fw-400 text-body form-control" placeholder="Write down the resources that you need" 
-										autocomplete="do-not-autofill" required></textarea>
-						</div>
+
+						{% for field in form %}
+							{% if field.name != 'checked' %}
+								<div class="input-group mb-3 hidden">
+									<span class="input-group-text" style="width:7.5rem;">{{field.label}}</span>
+									{% if field.name == 'department' %}
+										<select name="department" id="id_department" class="form-select bg-transparent fs-0 fw-400 text-body">
+											{% for value, text in form.department.field.widget.choices %}
+												<option class="bg-transparent" value="{{value}}">
+													{{text}}
+												</option>
+											{% endfor %}
+										</select>
+									{% elif  field.name == 'classification' %}
+										<select name="classification" id="id_classification" class="form-select bg-transparent fs-0 fw-400 text-body">
+											{% for value, text in form.classification.field.widget.choices %}
+											<option class="bg-transparent" value="{{value}}" {% if value == 'Internal' %} selected {% elif value == 'Highly Confidential' %} disabled {% endif %}>
+												{{text}}
+											</option>
+											{% endfor %}
+										</select>
+									{% else%}
+										{{field }}
+									{% endif %}
+								</div>
+							{% else %}
+								<div class="form-check ps-4 py-2 ms-2">
+									<input name="checked" id="id_checked"  class="form-check-input" type="checkbox">
+									<label class="form-check-label fs-0 fw-400 text-body" for="id_checked">
+										I have read and accept the <a href="">terms and conditions</a>.
+									</label>
+								</div>
+							{% endif %}
+						{% endfor %}
 						<a href="{% url 'projects:all' %}" class="float-end btn btn-secondary mt-2">
 							Back to Projects
 						</a> 
-						<button type="submit" class="btn btn-primary mt-2">Create</button>
+						<button type="submit" id="createButton" class="btn btn-primary mt-2">Create</button>
 					</form>
 				</div>
-   	<!-- </card-body> -->
-				   
+				<!-- </card-body> -->				
+ 
    </div>
   </div>
  </div>

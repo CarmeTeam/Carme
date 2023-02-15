@@ -15,7 +15,7 @@ from django.urls import reverse, reverse_lazy
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Case, When, Q
 
-from .forms import ProjectModelForm, CreateProjectForm
+from .forms import UpdateProjectForm, CreateProjectForm
 
 
 #################################################
@@ -30,13 +30,18 @@ class CreateProject(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         """ validate form """
-        form.instance.owner = self.request.user
-        try:
-            response = super(CreateProject, self).form_valid(form)
-            messages.success(self.request, 'Project succesfully created.')
-            return response
-        except IntegrityError:
-            messages.error(self.request,'Project name already exists. Choose a different one.')
+        
+        if form.instance.checked:
+            form.instance.owner = self.request.user
+            try:
+                response = super(CreateProject, self).form_valid(form)
+                messages.success(self.request, 'Project succesfully created.')
+                return response
+            except IntegrityError:
+                messages.error(self.request,'Project name already exists. Choose a different one.')
+                return super().form_invalid(form)
+        else:
+            messages.error(self.request,'You have to accept the terms and conditions.')
             return super().form_invalid(form)
         
 
@@ -226,14 +231,14 @@ class DeleteProject(LoginRequiredMixin, DeleteView):
 
     def get_object(self, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        obj = Project.objects.get(slug=slug)
-        return obj
+        project = Project.objects.get(slug=slug)
+        return project
 
     def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.owner != self.request.user:
-            messages.error(self.request,'You need to be the owner of the project to delete it.')
-            return redirect('projects:single', slug=obj.slug)
+        project = self.get_object()
+        if project.owner != self.request.user:
+            messages.error(self.request,'You need to be the project owner to delete it.')
+            return redirect('projects:single', slug=project.slug)
         return super(DeleteProject, self).dispatch(request, *args, **kwargs)
 
 
@@ -241,32 +246,33 @@ class UpdateProject(LoginRequiredMixin, UpdateView):
     """ update a project """
     model = Project
     template_name = 'projects/project_update.html'
-    form_class = ProjectModelForm
+    form_class = UpdateProjectForm
     
     def get_success_url(self, *args, **kwargs):
         return reverse_lazy('projects:single', args=[self.kwargs['slug']])
 
     def get_object(self, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        obj = Project.objects.get(slug=slug)
-        return obj
+        project = Project.objects.get(slug=slug)
+        return project
 
     def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.owner != self.request.user:
-            messages.error(self.request,'You need to be the owner of the project to update it.')
-            return redirect('projects:single', slug=obj.slug)
-        return super(UpdateProject, self).dispatch(request, *args, **kwargs)
+        project = self.get_object()
+        members = ProjectMember.objects.filter(project=project,user=self.request.user)
+
+        for member in members:
+            if member.is_manager:
+                return super(UpdateProject, self).dispatch(request, *args, **kwargs) 
+
+        messages.error(self.request,'You need to be the project admin to update it.')
+        return redirect('projects:single', slug=project.slug)
 
     def form_valid(self, form):
         if form.instance.owner == self.request.user:
-            field_value = Project.objects.get(pk=form.instance.pk).date_created
-            form.instance.date_created = field_value
             form.instance.date_updated = timezone.now()
             messages.success(self.request, 'Project succesfully updated.')
             return super().form_valid(form)
         else:
-            form.add_error(None, 'You need to be the owner of the project to update it.')
             return super().form_invalid(form)
 
 
