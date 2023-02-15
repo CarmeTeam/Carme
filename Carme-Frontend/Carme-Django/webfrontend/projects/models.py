@@ -9,17 +9,26 @@ from django.contrib.auth.models import User
 from django.db.models import UniqueConstraint
 
 class Project(models.Model):
+    # input
+    checked = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
+    num = models.CharField(max_length=255, unique=False)  
     name = models.CharField(max_length=255, unique=False)
     slug = models.SlugField(allow_unicode=True, unique=True)
-    is_approved = models.BooleanField(default=False) 
-    description = models.TextField(blank=True, default='')
+    department = models.CharField(max_length=255, unique=False)
+    classification = models.CharField(max_length=255, unique=False)
+    # textarea
+    information = models.TextField(default='', blank=True)  
+    description = models.TextField(default='', blank=True)
     description_html = models.TextField(editable=False, default='', blank=True)
-    classification = models.TextField(default='Internal')
-    information = models.TextField(blank=True, default='')
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_owner')
-    date_updated = models.DateTimeField(default=timezone.now)
+    # dates
+    date_updated = models.DateTimeField(null=True, blank=True)
+    date_expired = models.DateTimeField(null=True, blank=True) 
+    date_approved = models.DateTimeField(null=True, blank=True)
     date_created = models.DateTimeField(default=timezone.now)
+    # foreign keys
     members = models.ManyToManyField(User,through="ProjectMember")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_owner') 
 
     def __str__(self):
         name = slugify(self.name)

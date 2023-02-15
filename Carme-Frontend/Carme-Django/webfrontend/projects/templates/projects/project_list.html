@@ -42,493 +42,430 @@
 							<span class="p-1 fs--1 fw-400 text-body">Join Project</span>
 						</button>
 					</div>
-				</form>
-				
-				{% if messages %}
-					{% for message in messages %}
-						{% if message.tags == 'success' %}
-						<div  class="alert alert-success py-1 px-2 fs--1" role="alert">
-							<small class="fas fa-check-circle pe-1"></small>
-						{% elif message.tags == 'error' %}
-						<div  class="alert alert-danger py-1 px-2 fs--1" role="alert">
-							<small class="fas fa-times-circle pe-1"></small>
-						{% endif %}
-						{{ message }}
-						</div>
-					{% endfor %}
-				{% endif %}
+				</form>				
+				{% include "projects/blocks/alert_messages.html" %}
 				<!-- </join-project> -->
 
-				<!-- <project-list> -->
-				<div class="table-responsive mt-2">    
-					<table class="table mb-0 overflow-hidden fs--1 fw-400 text-body text-center">
-						<thead>
-							<tr class="border-bottom-double">
-								<th class="align-middle text-left border-0" style="padding-left:65px;">Project</th>
-								<th class="align-middle d-none d-md-block border-0" style="min-width:90px;">Created by</th>
-								<th class="align-middle border-0">Status</th>
-								<th class="align-middle border-0">Membership</th>
-								<th class="align-middle d-none d-lg-block border-0" style="min-width:90px;">Members</th>
-								<th class="align-middle border-0"></th>
-							</tr>						
-						</thead>
-						<tbody>
+				{% if project_list_active.count == 0 and project_list_received.count == 0 and project_list_requested.count == 0 and project_list_waiting.count == 0 %}
+					<!-- <project-none> -->
+					<div class="table-responsive mt-2">    
+						<table class="table mb-0 overflow-hidden fs--1 fw-400 text-body text-center">
+							<tbody>
+								<tr class="border-bottom-solid">
+									<!-- large screen -->
+									<td class="align-middle d-none d-lg-table-cell" colspan="5">
+										<div class="row flex-center text-center p-4">
+											<div class="fs-40 fw-900 text-watermark">No Projects</div>
+											<p class="mt-4 mx-auto fs-2 fw-200 text-body">Create a new project or join one</p>
+										</div>
+									</td>
+									<!-- middle screen -->
+									<td class="align-middle d-none d-md-table-cell d-lg-none" colspan="4">
+										<div class="row flex-center text-center p-4">
+											<div class="fs-30 fw-900 text-watermark">No Projects</div>
+											<p class="mt-4 mx-auto fs-0 fw-200 text-body">Create a new project or join one</p>
+										</div>
+									</td>
+									<!-- small screen -->
+									<td class="align-middle d-md-none" colspan="3">
+										<div class="row flex-center text-center p-4">
+											<div class="fs-20 fw-900 text-watermark">No Projects</div>
+											<p class="mt-4 mx-auto fs-1 fw-200 text-body">Create a new project or join one</p>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<!-- </project-none> -->
+				{% else %}
+					<!-- <project-list> -->
+					<div class="table-responsive mt-2">    
+						<table class="table mb-0 overflow-hidden align-middle fs--1 fw-400 text-center text-body">
+							<thead>
+								<tr class="border-bottom-double">
+									<th class="border-0 text-left" style="padding-left:65px;">Project</th>
+									<th class="border-0 d-none d-md-block" style="min-width:90px;">Created by</th>
+									<th class="border-0">Status</th>
+									<th class="border-0">Membership</th>
+									<th class="border-0 d-none d-lg-block" style="min-width:90px;">Members</th>
+									<th class="border-0"></th>
+								</tr>						
+							</thead>
+							<tbody>
 			
-						{% for project in project_list_active %}
-							<!-- <membership-active> -->
-							<tr class="border-bottom-solid">
-								<td class="align-middle text-left">
-									<div class="d-flex align-items-center">
-										<a href="{% url 'projects:single' slug=project.project__slug %}">
-											<div class="avatar-icon position-relative d-inline-block my-2">
-												<div class="avatar-name position-absolute h-100 w-100 d-block text-center text-uppercase text-white fs--2 fw-700 rounded-circle">
-													<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
-												</div>
-											</div>
-										</a>
-										<!-- large screen -->
-										<div class="flex-1 align-self-center ps-3 pt-3 d-none d-lg-block">
-											<h6 class="fs-0 mb-1">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-											<span class="d-none d-lg-block">
-												{% comment %} {{project.project__description}} {% endcomment %}
-												{% with description=project.project__description_html|capfirst %}
-													{{description|safe}}
-												{% endwith %}
-											</span>
-										</div>
-										<!-- small screen -->
-										<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
-											<h6 class="fs-0">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-										</div>
-									</div>
-								</td>
-								<td class="align-middle d-none d-md-table-cell">
-									{% if project.project__owner__username == request.user.username %}
-									{% comment %}<a href="{% url 'profiles:my-profile-view' %}" class="text-body"> {% endcomment %}
-         <a href="" class="text-body text-underline-hover">
-										{{ project.project__owner__username }}
-									{% else %}
-									{% comment %}<a href="{% url 'profiles:profile-detail-view' slug=project.project__owner__username %}" class="text-body">{% endcomment %}
-									<a href="" class="text-body text-underline-hover">	
-										{{ project.project__owner__username }}
-									{% endif %}
-									</a>
-								</td>
-								<td class="align-middle">
-									{% if project.project__is_approved == True %}
-										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
-											<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
-										</span> 
-									{% else %}
-										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
-											<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
-										</span> 
-									{% endif %}
-								</td>
-								<td class="align-middle">
-									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active member">
-										<small class="fa fa-check-circle text-success" data-fa-transform="shrink-4 down-2"></small>
-									</span> 
-								</td>
-								<td class="align-middle d-none d-lg-table-cell">
-									<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
-										<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
-									</span>
-									<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
-										<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">{{ project.inactive_members }}</span>
-									</span>
-								</td>
-								{% if project.project__owner__username == request.user.username %}
-								<td class="align-middle pe-0">
-									<form id="form-active{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
-										{% csrf_token %} 
-										<select id="active{{ forloop.counter }}" data-slug="{{project.project__slug}}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
-											<option value="action" class="bg-transparent">Action</option>
-											<option value="update" class="bg-transparent">Update</option>
-											<option value="delete" class="bg-transparent">Delete</option>
-										</select>
-									</form>
-
-									<div class="modal fade" id="deleteModal-active{{ forloop.counter }}" tabindex="-1">
-										<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">					  
-										  <div class="modal-content">
-											<div class="modal-header">
-											  <h5 class="mb-0 py-0 fs-0 fw-400 text-header">
-												<i class="fas fa-trash"></i> 
-												Delete Project
-											  </h5>
-											  <button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
-											</div>
-											<div class="scrollbar-overlay os-host-flexbox">
-											<div class="modal-body fs-0 fw-400 text-body">
-												<div class="alert alert-warning py-1 px-2 fs--1" role="alert">
-													<small class="fas fa-circle-exclamation pe-1"></small> This project will be removed for all members.
-												</div>
-												  <p class="ps-2"> Are you sure that you want to delete this project?</p>
-												  <div class="form-check ps-4 ms-2">
-													<input class="form-check-input" type="checkbox" value="" id="flexCheckDisabled" checked disabled>
-													<label class="form-check-label" style="padding-top:0.2rem;" for="flexCheckDisabled">
-														  Yes, I'm sure.
-													</label>
-												  </div>
-											</div>
-											</div>
-											<div class="modal-footer" style="padding:0.6rem;">
-												<form method="POST" action="{% url 'projects:delete' slug=project.project__slug %}">
-													{% csrf_token %}
-													<button type="submit" value="delete" class="btn btn-sm btn-danger">Delete</button>
-												</form>
-												  <button type="button" class="btn btn-sm btn-secondary ms-auto" data-bs-dismiss="modal">Cancel</button>
-											</div>
-										  </div>  
-										</div>
-									</div>													  
-								
-								</td>
-								{% else %}
-									{% for manager in project_list_manager %}
-										{% if manager.project == project.project__pk %}
-											{% if manager.is_manager %}
-												<td class="align-middle pe-0">
-													<form id="form-active{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
-														{% csrf_token %} 
-														<select id="active{{ forloop.counter }}" data-slug="{{project.project__slug}}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
-															<option value="action" class="bg-transparent">Action</option>
-															<option value="update" class="bg-transparent">Update</option>
-															<option value="delete" class="bg-transparent">Delete</option>
-														</select>
-													</form>
-
-													<div class="modal fade" id="deleteModal-active{{ forloop.counter }}" tabindex="-1">
-														<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">					  
-														  <div class="modal-content">
-															<div class="modal-header">
-															  <h5 class="mb-0 py-0 fs-0 fw-400 text-header" id="deleteModalLabel-{{ forloop.counter }}">
-																<i class="fas fa-trash"></i> 
-																Delete Project
-															  </h5>
-															  <button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
-															</div>
-															<div class="scrollbar-overlay os-host-flexbox">
-															<div class="modal-body fs-0 fw-400 text-body">
-																<div class="alert alert-warning py-1 px-2 fs--1" role="alert">
-																	<small class="fas fa-circle-exclamation pe-1"></small> This project will be removed for all members.
-																</div>
-																  <p class="ps-2"> Are you sure that you want to delete the project: "{{ project.project__name | capfirst}}"?</p>
-																  <div class="form-check ps-4 ms-2">
-																	<input class="form-check-input" type="checkbox" value="" id="flexCheckDisabled" checked disabled>
-																	<label class="form-check-label" style="padding-top:0.2rem;" for="flexCheckDisabled">
-																		  Yes, I'm sure.
-																	</label>
-																  </div>
-															</div>
-															</div>
-															<div class="modal-footer" style="padding:0.6rem;">
-																<form method="POST" action="{% url 'projects:delete' slug=project.project__slug %}">
-																	{% csrf_token %}
-																	<button type="submit" value="delete" class="btn btn-sm btn-danger">Delete</button>
-																</form>
-																  <button type="button" class="btn btn-sm btn-secondary ms-auto" data-bs-dismiss="modal">Cancel</button>
-															</div>
-														  </div>  
-														</div>
+							{% for project in project_list_active %}
+								<!-- <membership-active> -->
+								<tr class="border-bottom-solid">
+									<!-- project -->
+									<td class="text-left">
+										<div class="d-flex align-items-center">
+											<a href="{% url 'projects:single' slug=project.project__slug %}">
+												<div class="avatar-icon position-relative d-inline-block my-2">
+													<div class="avatar-name position-absolute h-100 w-100 d-block rounded-circle fs--2 fw-700 text-center text-uppercase text-white">
+														<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
 													</div>
-
-												</td>
-											{% else %}
-												<td class="align-middle pe-0">
+												</div>
+											</a>
+											<!-- large screen -->
+											<div class="flex-1 align-self-center ps-3 pt-3 d-none d-lg-block">
+												<h6 class="fs-0 mb-1">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+												<span class="d-none d-lg-block">
+													{% with description=project.project__description_html|capfirst %}
+														{{description|safe}}
+													{% endwith %}
+												</span>
+											</div>
+											<!-- small screen -->
+											<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
+												<h6 class="fs-0">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+											</div>
+										</div>
+									</td>
+									<!-- created by -->
+									<td class="d-none d-md-table-cell">
+										{% if project.project__owner__username == request.user.username %}
+         	<a href="" class="text-body text-underline-hover">
+										{{ project.project__owner__username }}
+										{% else %}
+										<a href="" class="text-body text-underline-hover">	
+										{{ project.project__owner__username }}
+										{% endif %}
+										</a>
+									</td>
+									<!-- project status -->
+									<td>
+										{% if project.project__is_approved == True %}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
+												<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% else %}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
+												<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% endif %}
+									</td>
+									<!-- member status: active -->
+									<td>
+										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active member">
+											<small class="fa fa-check-circle text-success" data-fa-transform="shrink-4 down-2"></small>
+										</span> 
+									</td>
+									<!-- member count -->
+									<td class="d-none d-lg-table-cell">
+										<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
+											<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
+										</span>
+										<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
+											<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">{{ project.inactive_members }}</span>
+										</span>
+									</td>
+									{% if project.project__owner__username == request.user.username %}
+									<!-- action: creator -->
+									<td class="pe-0">
+										<form id="form-active{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
+											{% csrf_token %} 
+											<select id="active{{ forloop.counter }}" data-slug="{{project.project__slug}}" 
+                   class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
+												<option value="action" class="bg-transparent">Action</option>
+												<option value="update" class="bg-transparent">Update</option>
+												<option value="delete" class="bg-transparent">Delete</option>
+											</select>
+										</form>
+										{% include "projects/blocks/delete_modal.html" %}
+									</td>
+									{% else %}
+										{% for manager in project_list_manager %}
+											{% if manager.project == project.project__pk %}
+												<!-- action: manager and user -->
+												<td class="pe-0">
 													<form id="form-active{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
 														{% csrf_token %} 
-														<select id="active{{ forloop.counter }}" data-slug="{{project.project__slug}}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
-															<option class="bg-transparent">Action</option>
+														<select id="active{{ forloop.counter }}" data-slug="{{project.project__slug}}" 
+                	     class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
+															<option value="action" class="bg-transparent">Action</option>
+															{% if manager.is_manager %}
+															<option value="update" class="bg-transparent">Update</option>
+															{% else %}
 															<option value="leave" class="bg-transparent">Leave</option>
+															{% endif %}
 														</select>
 													</form>
 												</td>
 											{% endif %}
+										{% endfor %}
+									{% endif %}
+								</tr>
+								<!-- </membership-active> -->	
+							{% endfor %}
+						
+						
+							{% for project in project_list_received %}
+								<!-- <membership-received> -->
+								<tr class="border-bottom-solid">
+									<!-- project -->
+									<td class="text-left">
+										<div class="d-flex align-items-center">
+											<a href="{% url 'projects:single' slug=project.project__slug %}">
+												<div class="avatar-icon position-relative d-inline-block my-2">
+													<div class="avatar-name position-absolute h-100 w-100 d-block rounded-circle fs--2 fw-700 text-center text-uppercase text-white">
+														<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
+													</div>
+												</div>
+											</a>
+											<!-- large screen -->
+											<div class="flex-1 align-self-center ps-3 pt-1 d-none d-lg-block">
+												<h6 class="fs-0 mb-1">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+												<span class="d-none d-lg-block">
+													{% with description=project.project__description_html|capfirst %}
+														{{description|safe}}
+													{% endwith %}
+												</span>
+											</div>
+											<!-- small screen -->
+											<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
+												<h6 class="fs-0">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+											</div>
+										</div>
+									</td>
+									<!-- created by -->
+									<td class="d-none d-md-table-cell">
+										{% if project.project__owner__username == request.user.username %}
+										<a href="" class="text-body text-underline-hover">
+											{{ project.project__owner__username }}
+										{% else %}
+										<a href="" class="text-body text-underline-hover">
+											{{ project.project__owner__username }}
 										{% endif %}
-									{% endfor %}
-								{% endif %}
-							</tr>	
-							{% empty %}
-							{% if project_list_received.count == 0 and project_list_requested.count == 0 and project_list_waiting.count == 0%}
-							<tr class="border-bottom-solid">
-								<!-- large screen -->
-								<td class="align-middle d-none d-lg-table-cell" colspan="5">
-									<div class="row flex-center text-center" style="padding: 50 0;">
-										<div class="fs-40 fw-900 text-watermark">No Projects</div>
-										<p class="mt-4 mx-auto fs-2 fw-200 text-body">Create a new project or join one</p>
-									</div>
-								</td>
-								<!-- middle screen -->
-								<td class="align-middle d-none d-md-table-cell d-lg-none" colspan="4">
-									<div class="row flex-center text-center" style="padding: 50 0;">
-										<div class="fs-30 fw-900 text-watermark">No Projects</div>
-										<p class="mt-4 mx-auto fs-0 fw-200 text-body">Create a new project or join one</p>
-									</div>
-								</td>
-								<!-- small screen -->
-								<td class="align-middle d-md-none" colspan="3">
-									<div class="row flex-center text-center" style="padding: 50 0;">
-										<div class="fs-20 fw-900 text-watermark">No Projects</div>
-										<p class="mt-4 mx-auto fs-1 fw-200 text-body">Create a new project or join one</p>
-									</div>
-								</td>
-							</tr>
-							{% endif %}
-							<!-- </membership-active> -->
-						{% endfor %}
-						
-						
-						{% for project in project_list_received %}
-							<!-- <membership-received> -->
-							<tr class="border-bottom-solid">
-								<td class="align-middle text-left">
-
-									<div class="d-flex align-items-center">
-										<a href="{% url 'projects:single' slug=project.project__slug %}">
-											<div class="avatar-icon position-relative d-inline-block my-2">
-												<div class="avatar-name position-absolute h-100 w-100 d-block text-center text-uppercase text-white fs--2 fw-700 rounded-circle">
-													<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
-												</div>
-											</div>
 										</a>
-										<!-- large screen -->
-										<div class="flex-1 align-self-center ps-3 pt-1 d-none d-lg-block">
-											<h6 class="fs-0 mb-1">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-											<span class="d-none d-lg-block">
-												{% with description=project.project__description_html|capfirst %}
-													{{description|safe}}
-												{% endwith %}
-											</span>
-										</div>
-										<!-- small screen -->
-										<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
-											<h6 class="fs-0">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-										</div>
-									</div>
-								</td>
-								<td class="align-middle d-none d-md-table-cell">
-									{% if project.project__owner__username == request.user.username %}
-									<a href="" class="text-body text-underline-hover">
-										{{ project.project__owner__username }}
-									{% else %}
-									<a href="" class="text-body text-underline-hover">
-										{{ project.project__owner__username }}
-									{% endif %}
-									</a>
-								</td>
-								<td class="align-middle">
-									{% if project.project__is_approved == True%}
-										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
-											<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
+									</td>
+									<!-- project status -->
+									<td>
+										{% if project.project__is_approved == True%}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
+												<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% else %}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
+												<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% endif %}
+									</td>
+									<!-- member status: received -->
+									<td>
+										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Invitation received">
+											<small class="fas fa-envelope text-secondary" data-fa-transform="shrink-4 down-2"></small>
 										</span> 
-									{% else %}
+									</td>
+									<!-- member count -->
+									<td class="d-none d-lg-table-cell">
+										<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
+											<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
+										</span>
+										<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
+											<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">{{ project.inactive_members }}</span>
+										</span>
+									</td>
+									<!-- action: received -->
+									<td class="align-middle pe-0">
+										<form id="form-received{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
+											{% csrf_token %} 
+											<input type="hidden" name="project_pk" value={{project.project__pk}}>
+											<select id="received{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
+												<option class="bg-transparent">Action</option>
+												<option value="accept" class="bg-transparent">Accept</option>
+												<option value="reject" class="bg-transparent">Reject</option>
+											</select>
+										</form>
+									</td>
+								</tr>	
+								<!-- </membership-received> -->
+							{% endfor %}
+						
+
+							{% for project in project_list_requested %}
+								<!-- <membership-requested> -->
+								<tr class="border-bottom-solid">
+									<!-- project -->
+									<td class="text-left">
+										<div class="d-flex align-items-center">
+											<a href="{% url 'projects:single' slug=project.project__slug %}">
+												<div class="avatar-icon position-relative d-inline-block my-2">
+													<div class="avatar-name position-absolute h-100 w-100 d-block rounded-circle fs--2 fw-700 text-center text-uppercase text-white">
+														<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
+													</div>
+												</div>
+											</a>
+											<!-- large screen -->
+											<div class="flex-1 align-self-center ps-3 pt-1 d-none d-lg-block">
+												<h6 class="fs-0 mb-1">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+												<span class="d-none d-lg-block">
+													{% with description=project.project__description_html|capfirst %}
+														{{description|safe}}
+													{% endwith %}
+												</span>
+											</div>
+											<!-- small screen -->
+											<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
+												<h6 class="fs-0">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+											</div>
+										</div>
+									</td>
+									<!-- created by -->
+									<td class="d-none d-md-table-cell">
+										{% if project.project__owner__username == request.user.username %}
+										<a href="" class="text-body text-underline-hover">
+											{{ project.project__owner__username }}
+										{% else %}
+										<a href="" class="text-body text-underline-hover">
+											{{ project.project__owner__username }}
+										{% endif %}
+										</a>
+									</td>
+									<!-- project-status -->
+									<td>
+										{% if project.project__is_approved == True%}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
+												<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% else %}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
+												<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% endif %}
+									</td>
+									<!-- member status: requested -->
+									<td>
+										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Invitation requested">
+											<small class="fas fa-envelope text-secondary" data-fa-transform="shrink-4 down-2"></small>
+										</span> 
+									</td>
+									<!-- member count -->
+									<td class="d-none d-lg-table-cell">
+										<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
+											<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
+										</span>
+										<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
+											<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">{{ project.inactive_members }}</span>
+										</span>
+									</td>
+									<!-- action: requested -->
+									<td class="pe-0">
+										<form id="form-requested{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
+											{% csrf_token %} 
+											<input type="hidden" name="project_pk" value={{project.project__pk}}>
+											<select id="requested{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
+												<option class="bg-transparent">Action</option>
+												<option value="cancel" class="bg-transparent">Cancel</option>
+											</select>
+										</form>
+									</td>
+								</tr>	
+								<!-- </membership-requested> -->
+							{% endfor %}
+						
+
+							{% for project in project_list_waiting %}
+								<!-- <membership-waiting> -->
+								<tr class="border-bottom-solid">
+									<!-- project -->
+									<td class="text-left">
+										<div class="d-flex align-items-center">
+											<a href="{% url 'projects:single' slug=project.project__slug %}">
+												<div class="avatar-icon position-relative d-inline-block my-2">
+													<div class="avatar-name position-absolute h-100 w-100 d-block rounded-circle fs--2 fw-700 text-center text-uppercase text-white">
+														<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
+													</div>
+												</div>
+											</a>
+											<!-- large screen -->
+											<div class="flex-1 align-self-center ps-3 pt-1 d-none d-lg-block">
+												<h6 class="fs-0 mb-1">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+												<span class="d-none d-lg-block">
+													{% with description=project.project__description_html|capfirst %}
+														{{description|safe}}
+													{% endwith %}
+												</span>
+											</div>
+											<!-- small screen -->
+											<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
+												<h6 class="fs-0">
+													<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
+												</h6>
+											</div>
+										</div>
+									</td>
+									<!-- created by -->
+									<td class="d-none d-md-table-cell">
+										{% if project.project__owner__username == request.user.username %}
+										<a href="" class="text-body text-underline-hover">
+											{{ project.project__owner__username }}
+										{% else %}
+										<a href="" class="text-body text-underline-hover">
+											{{ project.project__owner__username }}
+										{% endif %}
+										</a>
+									</td>
+									<!-- project status -->
+									<td>
+										{% if project.project__is_approved == True%}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
+												<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% else %}
+											<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
+												<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
+											</span> 
+										{% endif %}
+									</td>
+									<!-- member status: waiting -->
+									<td>
 										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
 											<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
 										</span> 
-									{% endif %}
-								</td>
-								<td class="align-middle">
-									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Invitation received">
-										<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
-									</span> 
-								</td>
-								<td class="align-middle d-none d-lg-table-cell">
-									<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
-										<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
-									</span>
-									<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
-										<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">-</span>
-									</span>
-								</td>
-								<td class="align-middle pe-0">
-									<form id="form-received{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
-										{% csrf_token %} 
-										<input type="hidden" name="project_pk" value={{project.project__pk}}>
-										<select id="received{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
-											<option class="bg-transparent">Action</option>
-											<option value="accept" class="bg-transparent">Accept</option>
-											<option value="reject" class="bg-transparent">Reject</option>
-										</select>
-									</form>
-								</td>
-							</tr>	
-							<!-- </membership-received> -->
-						{% endfor %}
-						
-
-						{% for project in project_list_requested %}
-							<!-- <membership-requested> -->
-							<tr class="border-bottom-solid">
-								<td class="align-middle text-left">
-									<div class="d-flex align-items-center">
-										<a href="{% url 'projects:single' slug=project.project__slug %}">
-											<div class="avatar-icon position-relative d-inline-block my-2">
-												<div class="avatar-name position-absolute h-100 w-100 d-block text-center text-uppercase text-white fs--2 fw-700 rounded-circle">
-													<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
-												</div>
-											</div>
-										</a>
-										<!-- large screen -->
-										<div class="flex-1 align-self-center ps-3 pt-1 d-none d-lg-block">
-											<h6 class="fs-0 mb-1">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-											<span class="d-none d-lg-block">
-												{% with description=project.project__description_html|capfirst %}
-													{{description|safe}}
-												{% endwith %}
-											</span>
-										</div>
-										<!-- small screen -->
-										<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
-											<h6 class="fs-0">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-										</div>
-									</div>
-								</td>
-								<td class="align-middle d-none d-md-table-cell">
-									{% if project.project__owner__username == request.user.username %}
-									<a href="" class="text-body text-underline-hover">
-										{{ project.project__owner__username }}
-									{% else %}
-									<a href="" class="text-body text-underline-hover">
-										{{ project.project__owner__username }}
-									{% endif %}
-									</a>
-								</td>
-								<td class="align-middle">
-									{% if project.project__is_approved == True%}
-										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
-											<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
-										</span> 
-									{% else %}
-										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
-											<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
-										</span> 
-									{% endif %}
-								</td>
-								<td class="align-middle">
-									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Invitation requested">
-										<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
-									</span> 
-								</td>
-								<td class="align-middle d-none d-lg-table-cell">
-									<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
-										<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
-									</span>
-									<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
-										<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">-</span>
-									</span>
-								</td>
-								<td class="align-middle pe-0">
-									<form id="form-requested{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
-										{% csrf_token %} 
-										<input type="hidden" name="project_pk" value={{project.project__pk}}>
-										<select id="requested{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
-											<option class="bg-transparent">Action</option>
-											<option value="cancel" class="bg-transparent">Cancel</option>
-										</select>
-									</form>
-								</td>
-							</tr>	
-							<!-- </membership-requested> -->
-						{% endfor %}
-						
-
-						{% for project in project_list_waiting %}
-							<!-- <membership-waiting> -->
-							<tr class="border-bottom-solid">
-								<td class="align-middle text-left">
-									<div class="d-flex align-items-center">
-										<a href="{% url 'projects:single' slug=project.project__slug %}">
-											<div class="avatar-icon position-relative d-inline-block my-2">
-												<div class="avatar-name position-absolute h-100 w-100 d-block text-center text-uppercase text-white fs--2 fw-700 rounded-circle">
-													<span class="position-absolute top-50 start-50 translate-middle">{{ project.project__name.0 }}</span>
-												</div>
-											</div>
-										</a>
-										<!-- large screen -->
-										<div class="flex-1 align-self-center ps-3 pt-1 d-none d-lg-block">
-											<h6 class="fs-0 mb-1">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-											<span class="d-none d-lg-block">
-												{% with description=project.project__description_html|capfirst %}
-													{{description|safe}}
-												{% endwith %}
-											</span>
-										</div>
-										<!-- small screen -->
-										<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
-											<h6 class="fs-0">
-												<a href="{% url 'projects:single' slug=project.project__slug %}" class="text-decoration-none">{{ project.project__name | capfirst}}</a>
-											</h6>
-										</div>
-									</div>
-								</td>
-								<td class="align-middle d-none d-md-table-cell">
-									{% if project.project__owner__username == request.user.username %}
-									<a href="" class="text-body text-underline-hover">
-										{{ project.project__owner__username }}
-									{% else %}
-									<a href="" class="text-body text-underline-hover">
-										{{ project.project__owner__username }}
-									{% endif %}
-									</a>
-								</td>
-								<td class="align-middle">
-									{% if project.project__is_approved == True%}
-										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
-											<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
-										</span> 
-									{% else %}
-										<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
-											<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
-										</span> 
-									{% endif %}
-								</td>
-								<td class="align-middle">
-									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
-										<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
-									</span> 
-								</td>
-								<td class="align-middle d-none d-lg-table-cell">
-									<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
-										<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
-									</span>
-									<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
-										<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">-</span>
-									</span>
-								</td>
-								<td class="align-middle pe-0">
-									<form id="form-waiting{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
-										{% csrf_token %} 
-										<input type="hidden" name="project_pk" value={{project.project__pk}}>
-										<select id="waiting{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
-											<option class="bg-transparent">Action</option>
-											<option value="cancel" class="bg-transparent">Cancel</option>
-										</select>
-									</form>
-								</td>
-							</tr>
-							<!-- </membership-waiting> -->	
-						{% endfor %}
+									</td>
+									<!-- member count -->
+									<td class="d-none d-lg-table-cell">
+										<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
+											<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ project.active_members }}</span>
+										</span>
+										<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
+											<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">{{ project.inactive_members }}</span>
+										</span>
+									</td>
+									<td class="pe-0">
+										<form id="form-waiting{{ forloop.counter }}" class="my-1 float-end" action="" method="POST">
+											{% csrf_token %} 
+											<input type="hidden" name="project_pk" value={{project.project__pk}}>
+											<select id="waiting{{ forloop.counter }}" class="form-select form-select-sm px-2 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
+												<option class="bg-transparent">Action</option>
+												<option value="cancel" class="bg-transparent">Cancel</option>
+											</select>
+										</form>
+									</td>
+								</tr>
+								<!-- </membership-waiting> -->	
+							{% endfor %}
 												
-						</tbody>
-					</table>
-				</div>
-				<!-- </project-list> -->		
+							</tbody>
+						</table>
+					</div>
+					<!-- </project-list> -->		
+				{% endif %}
 
 			</div>
 			<!-- </card-body> -->
@@ -591,5 +528,13 @@
 		
 		return false;
 	}
+</script>
+<script>
+	$(document).ready(function(){
+	$('[id^=deleteModal]').on("hidden.bs.modal", function () {
+		$('[id^=deleteCheckbox]').prop('checked', false);
+		$('[id^=deleteButton]').prop('disabled', true);
+	 });
+	});
 </script>
 {% endblock project_footer %}

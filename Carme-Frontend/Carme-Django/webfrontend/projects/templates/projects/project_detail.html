@@ -15,7 +15,8 @@
 				<div class="row align-items-center">
 					<div class="col">
 						<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-							<i class="fas fa-diagram-project"></i> Project
+							<span class="fas fa-diagram-project"></span>
+							<span class="px-2">Project:</span> {{ project.num}}
 						</h5>
 					</div>			
 					<div class="col-auto"> 
@@ -50,43 +51,7 @@
 											<button type="button" class="btn btn-sm btn-outline-secondary custom-btn" data-bs-toggle="modal" data-bs-target="#deleteModal">
 												<span class="p-1 text-header">Delete</span>
 											</button>
-														
-											<div class="modal fade" id="deleteModal" tabindex="-1">
-												<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-															
-													<div class="modal-content">
-														<div class="modal-header">
-															<h5 class="mb-0 py-0 fs-0 fw-400 text-header">
-																<i class="fas fa-trash"></i> 
-																Delete Project
-															</h5>
-															<button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
-														</div>
-														<div class="scrollbar-overlay os-host-flexbox">
-															<div class="modal-body fs-0 fw-400 text-body">
-																<div class="alert alert-warning py-1 px-2 fs--1" role="alert">
-																	<small class="fas fa-circle-exclamation pe-1"></small> This project will be removed for all members.
-																</div>
-																<p class="ps-2"> Are you sure that you want to delete this project?</p>
-																<div class="form-check ps-4 ms-2">
-																	<input class="form-check-input" type="checkbox" value="" id="deleteCheckbox" onchange="document.getElementById('deleteButton').disabled = !this.checked;">
-																	<label class="form-check-label" for="deleteCheckbox">
-																		Yes, I'm sure.
-																	</label>
-																</div>
-															</div>
-														</div>
-														<div class="modal-footer p-2">
-															<form method="POST" action="{% url 'projects:delete' slug=project.slug %}">
-																{% csrf_token %}
-																<button id="deleteButton" type="submit" value="delete" class="btn btn-sm btn-danger" disabled>Delete</button>
-															</form>
-																<button type="button" class="btn btn-sm btn-secondary ms-auto" data-bs-dismiss="modal">Cancel</button>
-														</div>
-													</div>
-															
-												</div>
-											</div>
+											{% include "projects/blocks/delete_modal.html" %}			
 											<!-- </is-active-creator> -->
 										{% endif %}
 									{% endif %}
@@ -119,19 +84,7 @@
 			<!-- <project-body> -->
 			<div class="card-body">
 				
-				{% if messages %}
-					{% for message in messages %}
-						{% if message.tags == 'success' %}
-						<div  class="alert alert-success py-1 px-2 fs--1" role="alert">
-							<small class="fas fa-check-circle pe-1"></small>
-						{% elif message.tags == 'error' %}
-						<div  class="alert alert-danger py-1 px-2 fs--1" role="alert">
-							<small class="fas fa-times-circle pe-1"></small>
-						{% endif %}
-						{{ message }}
-						</div>
-					{% endfor %}
-				{% endif %}
+				{% include "projects/blocks/alert_messages.html" %}
 
 				<!-- <status> -->
 				<div class="mb-3">
@@ -145,6 +98,9 @@
 								<small class="fa fa-minus-circle text-secondary"></small>&nbsp; Waiting for approval
 							</span>
 						{% endif %}
+							<a href="{% url 'projects:all' %}" class="py-1 px-2 fs--1 fw-400 text-decoration-none float-end">
+								<small class="fas fa-chevron-left text-secondary pe-1"></small> Back to projects
+							</a>
 					</div>
 				</div>
 				<!-- </status> -->
@@ -164,6 +120,11 @@
 				{% if is_member %}
 
 					<!-- <is-member> -->
+					<div class="input-group mb-3">
+						<span class="input-group-text" style="width:120px;">Department</span>
+						<input type="text" name="department" id="id_department" class="form-control fs-0 fw-400 text-body" value="{{project.department}}" 
+							      autocomplete="do-not-autofill" disabled>
+					</div>
 					<div class="input-group mb-3">
 						<span class="input-group-text" style="width:120px;">Classification</span>
 						<input type="text" name="classification" id="id_classification" class="form-control fs-0 fw-400 text-body" value="{{project.classification|capfirst}}" 
@@ -836,10 +797,10 @@
 
 <script>
 		$(document).ready(function(){
-		$('#deleteModal').on("hidden.bs.modal", function () {
-			$('#deleteCheckbox').prop('checked', false);
-			$('#deleteButton').prop('disabled', true);
+		$('[id^=deleteModal]').on("hidden.bs.modal", function () {
+			$('[id^=deleteCheckbox]').prop('checked', false);
+			$('[id^=deleteButton]').prop('disabled', true);
 		 });
 		});
-	</script>
+</script>
 {% endblock project_content %}
