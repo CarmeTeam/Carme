@@ -18,58 +18,56 @@
 <!doctype html>
 <html lang="en">
 
-<head>
+	<head>
 	
-	<!-- meta tags -->
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<!-- meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<!-- title -->
-	<title>Carme - {% block title %}{% endblock %}</title>
+		<!-- title -->
+		<title>Carme - {% block title %}{% endblock %}</title>
 
-	<!-- <assets> -->	
-	{% include "blocks/assets/assets_header.html" %}
-	<!-- </assets> -->
+		<!-- <assets> -->	
+		{% include "blocks/assets/assets_header.html" %}
+		<!-- </assets> -->
 
-</head>
+	</head>
 
-<body class="d-flex flex-column h-100 w-100 m-0 p-0">
-	<div class="d-flex justify-content-between flex-column min-vh-100">
-		<div class="container" data-layout="container">
+	<body class="d-flex flex-column h-100 w-100 m-0 p-0">
+		<div class="d-flex justify-content-between flex-column min-vh-100">
+			<div class="container" data-layout="container">
 
-  	{% if request.path != "/account/two_factor/setup/complete/" %}
-				{% if user.is_authenticated and user.is_verified %}
-					<!-- navbar -->
-					<div style="padding-top:90px;">
-						{% include "blocks/navbar.html" %}
-					</div>
-    {% endif %}
-			{% endif %}
-
-   <!-- main -->
-			<main role="main" class="flex-shrink-0">
-   
-				{% if request.path != "/account/login/" %}
-					<!-- maintenance -->
-					{% include "blocks/maintenance.html" %}
+  				{% if request.path != "/account/two_factor/setup/complete/" %}
+					{% if user.is_authenticated and user.is_verified %}
+						<!-- navbar -->
+						<div style="padding-top:90px;">
+							{% include "blocks/navbar.html" %}
+						</div>
+    				{% endif %}
 				{% endif %}
 
-    {% block content %}{% endblock %}
-			</main>
+   				<!-- main -->
+				<main role="main" class="flex-shrink-0">
+					{% if request.path != "/account/login/" %}
+						<!-- maintenance -->
+						{% include "blocks/maintenance.html" %}
+					{% endif %}
+
+    				{% block content %}{% endblock %}
+				</main>
          
-  </div>
+  			</div>
 
-		<!-- footer -->
-		{% include "blocks/footer.html" %}
+			<!-- footer -->
+			{% include "blocks/footer.html" %}
 
-		<!-- scripts  -->
-		{% include "blocks/assets/assets_footer.html" %}
-		{% include "blocks/assets/scripts.html" %}		
+			<!-- scripts  -->
+			{% include "blocks/assets/assets_footer.html" %}
+			{% include "blocks/assets/scripts.html" %}		
 
-		
-		{% block javascript %}{% endblock %}
+			{% block javascript %}{% endblock %}
 
-	</div>
-</body>
-
+		</div>
+	</body>
+	
 </html>
