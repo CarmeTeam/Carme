@@ -14,14 +14,17 @@
 .text-success{
   color:var(--carme-success)!important;
 }
-.text-info{
-  color:var(--carme-info)!important;
+.text-disabled{
+  color:var(--carme-disabled)!important;
 }
 .text-warning{
   color:var(--carme-warning)!important;
 }
 .text-danger{
   color:var(--carme-danger)!important;
+}
+.text-info{
+  color:var(--carme-info)!important;
 }
 .text-light{
   color:var(--carme-light)!important;
