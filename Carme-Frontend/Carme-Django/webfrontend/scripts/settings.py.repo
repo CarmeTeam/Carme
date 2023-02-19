@@ -63,10 +63,15 @@ INSTALLED_APPS = [
     'wiki.plugins.macros.apps.MacrosConfig',
 				'django_otp', 
     'django_otp.plugins.otp_static', 
-    'django_otp.plugins.otp_totp',   
+    'django_otp.plugins.otp_totp',
+    'two_factor.plugins.phonenumber',   
     'two_factor',		
 				#'otp_yubikey',
-				'mathfilters', 
+				'mathfilters',
+				'misaka',
+				'dal',
+				'dal_select2',
+				'projects', 
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -183,7 +188,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # logging --------------------------------------------------------------------------------------------------------------------------
-# https://docs.python.org/3/library/logging.html
+# https://docs.python.org/en/4.0/topics/logging/
 
 LOGGING = {
     'version': 1,

@@ -301,10 +301,10 @@
 											<input type="hidden" id="project_pk" name="project_pk" value={{project.pk}}>
 											{% if project.is_approved == False %}
 											<input type="text" id="user_pk" name="user_pk" class="form-control"  placeholder="...Waiting for approval" disabled>
-											<button class="btn btn-sm btn-outline-secondary custom-btn text-body" type="submit" disabled>
+											<button class="btn btn-sm btn-custom text-body" type="submit" disabled>
 											{% else %}
 											<input type="text" id="user_pk" name="user_pk" class="form-control fs-0 fw-400 text-body"  placeholder="Type username" autocomplete="do-not-autofill" autocomplete="off">
-											<button class="btn btn-sm btn-outline-secondary custom-btn text-body" type="submit">
+											<button class="btn btn-sm btn-custom text-body" type="submit">
 											{% endif %}
 												<span class="pe-2">Add to Project</span>
 												<span class="fas fa-plus ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
