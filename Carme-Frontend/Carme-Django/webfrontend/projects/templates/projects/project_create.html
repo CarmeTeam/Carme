@@ -1,7 +1,6 @@
 {% extends "projects/project_base.html" %}
 
 {% block title %}Create Project{% endblock title %}
-
 	
 	<!-- <card-header> -->
 	{% block project_header_icon %}fas fa-pen-to-square{% endblock project_header_icon %}
@@ -31,9 +30,13 @@
 					{% elif  field.name == 'classification' %}
 						<select name="classification" id="id_classification" class="form-select bg-transparent fs-0 fw-400 text-body">
 							{% for value, text in form.classification.field.widget.choices %}
-							<option class="bg-transparent" value="{{value}}" {% if value == 'Internal' %} selected {% elif value == 'Highly Confidential'%} disabled {% endif %}>
-								{{text}}
-							</option>
+								{% if value == 'Internal' %}
+								<option class="bg-transparent" value="{{value}}" selected>
+								{% elif value == 'Highly Confidential'%}
+								<option class="bg-transparent" value="{{value}}" disabled>
+								{% endif %}								
+									{{text}}
+								</option>
 							{% endfor %}
 						</select>
 					{% else %}

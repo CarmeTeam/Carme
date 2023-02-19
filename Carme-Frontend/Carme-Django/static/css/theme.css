@@ -11,11 +11,12 @@
   /* main */
   --carme-primary: #2c7be5;
   --carme-secondary: #748194;
+  --carme-disabled: #6c757d;
   --carme-success: #00d27a;
-  --carme-info: #27bcfd;
   --carme-warning: #f5803e;
   --carme-danger: #e63757;
-  --carme-light: #e9ecef;
+  --carme-info: #27bcfd;
+  --carme-light:#e9ecef;
   --carme-dark: #1a2431;
 
   /* grayscale */
@@ -53,10 +54,11 @@
   /* main */
   --carme-primary-rgb: 44, 123, 229;
   --carme-secondary-rgb: 116, 129, 148;
+  --carme-disabled-rgb: 108, 117, 125;
   --carme-success-rgb: 0, 210, 122;
-  --carme-info-rgb: 39, 188, 253;
   --carme-warning-rgb: 245, 128, 62;
   --carme-danger-rgb: 230, 55, 87;
+  --carme-info-rgb: 39, 188, 253;
   --carme-light-rgb: 233, 236, 239;
   --carme-dark-rgb: 26, 36, 49;
 
