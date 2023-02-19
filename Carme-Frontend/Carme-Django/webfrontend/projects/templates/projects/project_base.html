@@ -2,17 +2,16 @@
 
 {% block content %}
 <div class="row mt-2 mb-4">
-
     <div class="col-12 {% block project_main_col %}{% endblock project_main_col %}">
-        <div class="card h-100">  
+        <div class="card h-100">
             <div class="card-header">
-				<div class="row align-items-center">
-					<div class="col">
-						<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-						    <span class="{% block project_header_icon %}{% endblock project_header_icon %}"></span> 
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0 py-2 fs-0 fw-400 text-header">
+                            <span class="{% block project_header_icon %}{% endblock project_header_icon %}"></span>
                             {% block project_header_title %}{% endblock project_header_title %}
-						</h5>
-					</div>
+                        </h5>
+                    </div>
                     <div class="col-auto"> 
                         {% block project_header_button %}{% endblock project_header_button %}
                     </div>
@@ -25,6 +24,5 @@
     </div>
     {% block project_sidebar %}{% endblock project_sidebar %}
     {% block project_script %}{% endblock project_script %}
-        
 </div>
 {% endblock content %}
