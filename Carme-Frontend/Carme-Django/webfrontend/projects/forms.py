@@ -60,28 +60,34 @@ class UpdateProjectForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ('name', 'description','department','classification','information','date_created')
+        fields = ('num', 'name', 'description','department','classification','information','date_created','date_updated')
 
-        labels = {  'name':'Name',
+        labels = {  'num':'ID',
+                    'name':'Name',
                     'department':'Department',
                     'description':'Description',
                     'information':'Information',
                     'classification':'Classification',
                     'date_created': 'Created on',
+                    'date_updated': 'Updated on',
                  }
 
-        widgets = { 'name': forms.TextInput(attrs={'class':'fs-0 fw-400 text-body form-control', 'maxlength':50}),
-                    'description': forms.TextInput(attrs={'class':'fs-0 fw-400 text-body form-control', 'maxlength':70}),
-                    'department': forms.TextInput(attrs={'class':'fs-0 fw-400 text-body form-control'}),
-                    'classification': forms.TextInput(attrs={'class':'fs-0 fw-400 text-body form-control'}),
-                    'information': forms.Textarea(attrs={'class':'fs-0 fw-400 text-body form-control','cols': 40, 'rows': 3}),
-                    'date_created': forms.DateInput(attrs={'class':'fs-0 fw-400 text-body form-control','format': 'd-m-Y','type':'date'}),
+        widgets = { 'num': forms.TextInput(attrs={'id':'id_num','class': 'fs-0 fw-400 text-body form-control','maxlength':50 }),
+                    'name': forms.TextInput(attrs={'id':'id_name','class':'fs-0 fw-400 text-body form-control', 'maxlength':50}),
+                    'description': forms.TextInput(attrs={'id':'id_description','class':'fs-0 fw-400 text-body form-control', 'maxlength':70}),
+                    'department': forms.TextInput(attrs={'id':'id_department','class':'fs-0 fw-400 text-body form-control'}),
+                    'classification': forms.TextInput(attrs={'id':'id_classification','class':'fs-0 fw-400 text-body form-control'}),
+                    'information': forms.Textarea(attrs={'id':'id_information','class':'fs-0 fw-400 text-body form-control','cols': 40, 'rows': 3}),
+                    'date_created': forms.DateInput(attrs={'id':'id_date_created','class':'fs-0 fw-400 text-body form-control','format': 'd-m-Y','type':'date'}),
+                    'date_updated': forms.DateInput(attrs={'id':'id_date_updated','class':'fs-0 fw-400 text-body form-control','format': 'd-m-Y','type':'date'}),
                   }
 
     def __init__(self, *args, **kwargs):
         super(UpdateProjectForm, self).__init__(*args, **kwargs)
+        self.fields['num'].disabled = True
         self.fields['name'].disabled = True
         self.fields['department'].disabled = True
-        self.fields['classification'].disabled = True
         self.fields['information'].disabled = True
         self.fields['date_created'].disabled = True
+        self.fields['date_updated'].disabled = True
+        self.fields['classification'].disabled = True

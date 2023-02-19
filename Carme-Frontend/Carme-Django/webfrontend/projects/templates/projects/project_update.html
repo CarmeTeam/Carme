@@ -1,59 +1,38 @@
-i{% extends "projects/project_base.html" %}
-{% load wizardtags %}
+{% extends "projects/project_base.html" %}
 
 {% block title %}Update Project{% endblock title %}
 
-{% block project_content %}
+  <!-- <card-header> -->
+  {% block project_header_icon %}fas fa-rotate{% endblock project_header_icon %}
+  {% block project_header_title %}Update Project{% endblock project_header_title %}
+  <!-- </card-header> -->
 
-<div class="row mt-2 mb-4">
-	<div class="col">
-		<div class="card overflow-hidden h-100">
-
-  	<!-- <card-header> -->
-   <div class="card-header">
-   	<div class="row align-items-center">
-    	<div class="col">
-     	<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-							<span class="fas fa-rotate"></span>
-       <span class="px-2">Update Project:</span> {{ project.num }}
-						</h5>
-     </div>
-    </div>
-   </div>
-   <!-- </card-header> -->
-
-   <!-- <card-body> -->
-   <div class="card-body">
-   	<p class="fs--1 text-body"><b>Note:</b> You can only modify the description of the project</p>
+  <!-- <card-body> -->
+  {% block project_body %}
+    <p class="fs--1 fw-400 text-body"><b>Note:</b> You can only modify the description of the project.</p>
     <form action="" method="POST">
-    	{% csrf_token %}
-					{% for field in form %}
-     <div class="input-group mb-3 hidden">
-     	<span class="input-group-text" style="width:7.5rem;">{{ field.label }}</span>
-      {{field}}
-     </div>
-     {% endfor %}
-     <div class="input-group mb-3 hidden">
-     	<span class="input-group-text" style="width:7.5rem;">Updated on</span>
-      <input type="type" name="" value="{{project.date_updated|date:"d/m/Y"}}" class="fs-0 fw-400 text-body form-control" required disabled>
-     </div>      
-
-					{% if request.get_full_path == request.path %}
-     	<a href="{% url 'projects:single' slug=project.slug %}" class="float-end btn btn-secondary mt-2">
-     		Back to Project
-     	</a>
-     {% else %}
-     	<a href="{% url 'projects:all' %}" class="float-end btn btn-secondary mt-2">
-      	Back to Projects
-      </a>
-     {% endif %} 
-     <button type='submit' class="btn btn-primary mt-2">Update</button> 
-    </form>                    
-   </div>
-			<!-- </card body> -->
-  
-		</div>
- </div>
-</div>
-
-{% endblock project_content %}
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="input-group mb-3">
+          <span class="input-group-text" style="width:7.5rem;">{{ field.label }}</span>
+          {% if field.name == 'date_updated' and field.value == None %}
+            <input type="text" name="date_updated" value="None" id="id_date_updated" class="fs-0 fw-400 text-body form-control" required disabled>                      
+          {% else %}
+            {{field}}
+          {% endif %}
+        </div>
+      {% endfor %}
+                        
+      {% if request.GET.path == 'main' %}
+        <a href="{% url 'projects:all' %}" class="float-end btn btn-secondary mt-2">
+          Back to Projects
+        </a>    
+      {% else %}
+        <a href="{% url 'projects:single' slug=project.slug %}" class="float-end btn btn-secondary mt-2">
+          Back to Project
+        </a>
+      {% endif %} 
+      <button type='submit' class="btn btn-primary mt-2">Update</button> 
+    </form>        
+  {% endblock project_body %}
+  <!-- </card-body> -->
