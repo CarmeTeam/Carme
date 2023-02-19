@@ -15,7 +15,8 @@
 				<div class="row align-items-center">
 					<div class="col">
 						<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-							<i class="fas fa-diagram-project"></i> Project {{project.num}}
+							<span class="fas fa-diagram-project"></span>
+							<span class="px-2">Project:</span> {{ project.num}}
 						</h5>
 					</div>			
 					<div class="col-auto"> 
@@ -26,68 +27,28 @@
 
 									{% if x.is_approved_by_admin == True and x.is_approved_by_manager == True and x.status == 'accepted'  %}
 										{% if x.is_manager %}
-											<!-- <is-active-manager> -->
+											<!-- is-active-manager -->
 											<a href="{% url 'projects:update' slug=project.slug %}" class="text-decoration-none">
-												<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
+												<button type="button" class="btn btn-sm bt-custom">
 													<span class="p-1 text-header">Update</span>
 												</button>
 											</a>
-											<!-- </is-active-manager> -->
 										{% endif %}
 
 										{% if x.user != project.owner %}
-											<!-- <is-active-user> -->
-											<a href="{% url 'projects:leave' slug=project.slug %}" class="text-decoration-none">
-												<button type="button" class="btn btn-sm btn-outline-secondary custom-btn">
-													<span class="p-1 text-header">Leave</span>
-												</button>
-											</a>
-											<!-- </is-active-user> -->
+											<!-- is-active-user -->
+											<button type="button" class="btn btn-sm btn-custom">
+												<span class="p-1 text-header">Leave</span>
+											</button>
+											{% include "projects/blocks/leave_modal_active.html" %}
 										{% endif %}
 
 										{% if x.user == project.owner %}
-											<!-- <is-active-creator> -->
-											<button type="button" class="btn btn-sm btn-outline-secondary custom-btn" data-bs-toggle="modal" data-bs-target="#deleteModal">
+											<!-- is-active-creator -->
+											<button type="button" class="btn btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#deleteModal">
 												<span class="p-1 text-header">Delete</span>
 											</button>
-														
-											<div class="modal fade" id="deleteModal" tabindex="-1">
-												<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-															
-													<div class="modal-content">
-														<div class="modal-header">
-															<h5 class="mb-0 py-0 fs-0 fw-400 text-header">
-																<i class="fas fa-trash"></i> 
-																Delete Project
-															</h5>
-															<button type="button" class="btn-close fs--1" data-bs-dismiss="modal"></button>
-														</div>
-														<div class="scrollbar-overlay os-host-flexbox">
-															<div class="modal-body fs-0 fw-400 text-body">
-																<div class="alert alert-warning py-1 px-2 fs--1" role="alert">
-																	<small class="fas fa-circle-exclamation pe-1"></small> This project will be removed for all members.
-																</div>
-																<p class="ps-2"> Are you sure that you want to delete this project?</p>
-																<div class="form-check ps-4 ms-2">
-																	<input class="form-check-input" type="checkbox" value="" id="deleteCheckbox" onchange="document.getElementById('deleteButton').disabled = !this.checked;">
-																	<label class="form-check-label" for="deleteCheckbox">
-																		Yes, I'm sure.
-																	</label>
-																</div>
-															</div>
-														</div>
-														<div class="modal-footer p-2">
-															<form method="POST" action="{% url 'projects:delete' slug=project.slug %}">
-																{% csrf_token %}
-																<button id="deleteButton" type="submit" value="delete" class="btn btn-sm btn-danger" disabled>Delete</button>
-															</form>
-																<button type="button" class="btn btn-sm btn-secondary ms-auto" data-bs-dismiss="modal">Cancel</button>
-														</div>
-													</div>
-															
-												</div>
-											</div>
-											<!-- </is-active-creator> -->
+											{% include "projects/blocks/delete_modal.html" %}			
 										{% endif %}
 									{% endif %}
 									<!-- </is-member> -->
@@ -119,19 +80,7 @@
 			<!-- <project-body> -->
 			<div class="card-body">
 				
-				{% if messages %}
-					{% for message in messages %}
-						{% if message.tags == 'success' %}
-						<div  class="alert alert-success py-1 px-2 fs--1" role="alert">
-							<small class="fas fa-check-circle pe-1"></small>
-						{% elif message.tags == 'error' %}
-						<div  class="alert alert-danger py-1 px-2 fs--1" role="alert">
-							<small class="fas fa-times-circle pe-1"></small>
-						{% endif %}
-						{{ message }}
-						</div>
-					{% endfor %}
-				{% endif %}
+				{% include "projects/blocks/alert_messages.html" %}
 
 				<!-- <status> -->
 				<div class="mb-3">
@@ -145,6 +94,9 @@
 								<small class="fa fa-minus-circle text-secondary"></small>&nbsp; Waiting for approval
 							</span>
 						{% endif %}
+							<a href="{% url 'projects:all' %}" class="py-1 px-2 fs--1 fw-400 text-decoration-none float-end">
+								<small class="fas fa-chevron-left text-secondary pe-1"></small> Back to projects
+							</a>
 					</div>
 				</div>
 				<!-- </status> -->
@@ -841,10 +793,14 @@
 
 <script>
 		$(document).ready(function(){
-		$('#deleteModal').on("hidden.bs.modal", function () {
-			$('#deleteCheckbox').prop('checked', false);
-			$('#deleteButton').prop('disabled', true);
+			$('[id^=deleteModal]').on("hidden.bs.modal", function () {
+				$('[id^=deleteCheckbox]').prop('checked', false);
+				$('[id^=deleteButton]').prop('disabled', true);
+		 });
+			$('[id^=leaveModal]').on("hidden.bs.modal", function () {
+				$('[id^=leaveCheckbox]').prop('checked', false);
+				$('[id^=leaveButton]').prop('disabled', true);
 		 });
 		});
-	</script>
+</script>
 {% endblock project_content %}

@@ -2,25 +2,13 @@
 
 {% block title %}Delete Project{% endblock title %}
 
-{% block project_content %}
-<div class="row mt-2 mb-4">
-	<div class="col">
- 	<div class="card">
+		<!-- <card-header> -->
+		{% block project_header_icon %}fas fa-trash{% endblock project_header_icon %} 
+		{% block project_header_title %}Delete Projec{% endblock project_header_title %}
+        <!-- </card-header> -->
 
-   <!-- <card-header> -->
-			<div class="card-header">
-				<div class="row align-items-center">
-					<div class="col">
-						<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-							<i class="fas fa-trash"></i> Delete Project
-						</h5>
-					</div>
-				</div>
-			</div>
-   <!-- </card-header> -->
-
-   <!-- <card-body> -->
-   <div class="card-body">
+            <!-- <card-body> -->
+			{% block project_body %}
 				{% if request.user == project.owner %}
 				<div class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
 					<small class="fas fa-circle-exclamation"></small>&nbsp; This project will be removed from all member accounts.
@@ -54,29 +42,21 @@
 					</div>
 				</div>
 				{% endif %}
-			</div>
+
+				<div class="card-footer pb-0" style="padding-top:0.6rem;">
+					<div class="float-start">
+						{% if request.user == project.owner %}
+							<form action="" method="POST" >
+								{% csrf_token %}
+								<button type="submit" class="btn btn-sm btn-danger mb-0">Delete</button>
+							</form>
+						{% endif %}
+					</div>
+					<div class="float-end">
+						<a href="{% url 'projects:all' %}" class="text-decoration-none float-end">
+							  <button type="button" class="btn btn-sm btn-secondary mb-3">Back to Projects</button>
+						</a>
+					</div>
+				</div>
+			{% endblock project_body %}
 			<!-- </card-body> -->
-			
-			<!-- <card-footer> -->
-			<div class="card-footer pb-0" style="padding-top:0.6rem;">
-				<div class="float-start">
-				{% if request.user == project.owner %}
-				<form action="" method="POST" >
-					{% csrf_token %}
-					<button type="submit" class="btn btn-sm btn-danger mb-0">Delete</button>
-				</form>
-				{% endif %}
-				</div>
-				<div class="float-end">
-					<a href="{% url 'projects:all' %}" class="text-decoration-none float-end">
-				  <button type="button" class="btn btn-sm btn-secondary mb-3">Back to Projects</button>
-					</a>
-				</div>
-			</div>
-			<!-- </card-footer> -->
-
-		</div>
- </div>
-</div>
-{% endblock project_content %}
-

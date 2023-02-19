@@ -8,12 +8,12 @@ from django.contrib.auth.decorators import login_required
 from projects.models import Project, ProjectMember, ProjectHasTemplate, TemplateHasAccelerator
 from django.views.generic import CreateView, DetailView, UpdateView, RedirectView, DeleteView, ListView
 
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse, reverse_lazy
 
 from django.db import IntegrityError
-from django.db.models import Sum, Count, Case, When, Q
+from django.db.models import Sum, Count, Case, When, Q, Value, CharField
 
 from .forms import UpdateProjectForm, CreateProjectForm
 
@@ -46,7 +46,6 @@ class CreateProject(LoginRequiredMixin, CreateView):
         
 
 class SingleProject(LoginRequiredMixin,DetailView):
-    """ single project information """
     model = Project
 
     def get(self, request, *args, **kwargs):
@@ -58,12 +57,10 @@ class SingleProject(LoginRequiredMixin,DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        slug = self.kwargs.get('slug')
 
-        # User list
-        User = get_user_model()
-        context['user_list'] = User.objects.all()
-
-        # Template list
+        ### Resources Forms ###
+        # template list
         templateQuerySet = ProjectHasTemplate.objects.values('template__name',
                                                              'template__maxjobs',
                                                              'template__maxnodes_per_job',
@@ -71,157 +68,130 @@ class SingleProject(LoginRequiredMixin,DetailView):
                                                              'template__walltime',
                                                              'template__partition',
                                                              'template__features')
-        context['template_list'] = templateQuerySet.filter(project__name=self.object.name)
+        templateQuerySet = templateQuerySet.filter(project__name=self.object.name)
+        context['template_list'] = templateQuerySet
 
-        # Accelerator list
+
+        # accelerator list
         acceleratorQuerySet = TemplateHasAccelerator.objects.values('accelerator__name',
                                                                     'accelerator__type',
                                                                     'resourcetemplate__name')
+        #.filter(resourcetemplate__name=resource_name)
         context['accelerator_list'] = acceleratorQuerySet
+        
 
-        # Member list
-        slug = self.kwargs.get('slug')
-        project_id = Project.objects.get(slug=slug).id
-        memberQuerySet = ProjectMember.objects.filter(project_id=project_id)
-        countQuerySet = memberQuerySet.values('project__name').annotate(
-            active_members=Count(
-                Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True), then=1))
-            )
-        ).annotate(
-            inactive_members=Count(
-                Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False), then=1))
-            )
-        )
-        context['member_list'] = countQuerySet
+        ### Members ###
 
-        # request.user is member
-        is_memberQuerySet = ProjectMember.objects.filter(project_id=project_id,
-                                                         user=self.request.user)
-        context['is_member'] = is_memberQuerySet
+        # Step 1: user list to send an invitation
+        User = get_user_model()
+        context['user_list'] = User.objects.all()
 
-        return context
-    
+        # Step 2:
+        membersQuery = ProjectMember.objects.filter(project__slug=slug
+                                                     ).annotate(member_status=
+                                                        Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=Value('actives')),
+                                                        default=Value('inactives'))
+                                                     )
+
+        # Step 3: Set if request.user is active or inactive member
+        is_memberQuery = ProjectMember.objects.filter(project__slug=slug,user=self.request.user
+                                                     ).annotate(member_status=
+                                                        Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=Value('active')),
+                                                        default=Value('inactive'))
+                                                     )
+
+        # Step 4: Count active/inactive members in project
+        countQuery = ProjectMember.objects.filter(project__slug=slug).values('project__name'
+                                                 ).annotate(active_members=Count(
+                                                    Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
+                                                )).annotate(inactive_members=Count(
+                                                    Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
+                                                ))
+
+        context['member_list'] = membersQuery
+        context['is_member'] = is_memberQuery
+        context['count_list'] = countQuery
+
+        return context 
 
 class ListProjects(LoginRequiredMixin,ListView):
-    """ list of projects """
     model = Project
 
     def get_context_data(self, **kwargs):
-
-        # call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
+        myself = self.request.user
         
-        # filter my projects 
-        my_project_list_active= []
-        my_project_list_waiting= []
-        my_project_list_received= []
-        my_project_list_requested= []
+        # Step 1: List my projects for each group 
+        projectQueryActive = ProjectMember.objects.filter(user=myself, status='accepted', is_approved_by_manager=True, is_approved_by_admin=True)
+        my_project_list_active=list(set(projectQueryActive.values_list('project', flat=True)))
         
-        # Membership: active
-        projectQuerySetActive = ProjectMember.objects.filter(user=self.request.user, 
-                                                              is_approved_by_admin=True, 
-                                                              is_approved_by_manager=True,
-                                                              status='accepted')
-        
-        # Membership: waiting for approval
-        projectQuerySetWaiting = ProjectMember.objects.filter(user=self.request.user, 
-                                                              is_approved_by_admin=False, 
-                                                              is_approved_by_manager=True,
-                                                              status='accepted')
+        projectQueryWaiting = ProjectMember.objects.filter(user=myself, status='accepted', is_approved_by_manager=True, is_approved_by_admin=False)
+        my_project_list_waiting=list(set(projectQueryWaiting.values_list('project', flat=True)))
 
-        # Membership: invitation received
-        projectQuerySetReceived = ProjectMember.objects.filter(user=self.request.user, 
-                                                              is_approved_by_manager=True,
-                                                              status='sent')
-        
-        # Membership: invitation requested
-        projectQuerySetRequested = ProjectMember.objects.filter(user=self.request.user, 
-                                                              is_approved_by_manager=False,
-                                                              status='sent')
+        projectQueryReceived = ProjectMember.objects.filter(user=myself, status='sent', is_approved_by_manager=True)
+        my_project_list_received=list(set(projectQueryReceived.values_list('project', flat=True)))
 
-        for item in projectQuerySetActive:
-            my_project_list_active.append(item.project)
-        for item in projectQuerySetWaiting:
-            my_project_list_waiting.append(item.project)
-        for item in projectQuerySetReceived:
-            my_project_list_received.append(item.project)
-        for item in projectQuerySetRequested:
-            my_project_list_requested.append(item.project)    
+        projectQueryRequested = ProjectMember.objects.filter(user=myself, status='sent', is_approved_by_manager=False)
+        my_project_list_requested=list(set(projectQueryRequested.values_list('project', flat=True)))
+ 
+        # Step 2: Filter all members in my projects for each group
+        memberQueryActive = ProjectMember.objects.filter(project__in=my_project_list_active)
+        memberQueryWaiting = ProjectMember.objects.filter(project__in=my_project_list_waiting)
+        memberQueryReceived = ProjectMember.objects.filter(project__in=my_project_list_received)
+        memberQueryRequested = ProjectMember.objects.filter(project__in=my_project_list_requested)
         
-        # filter members in my projects with membership: active
-        memberQuerySetActive = ProjectMember.objects.filter(project__in=my_project_list_active)
-        # filter members in my projects with membership: waiting
-        memberQuerySetWaiting = ProjectMember.objects.filter(project__in=my_project_list_waiting)
-        # filter members in my projects with membership:  received
-        memberQuerySetReceived = ProjectMember.objects.filter(project__in=my_project_list_received)
-        # filter members in my projects with membership: requested
-        memberQuerySetRequested = ProjectMember.objects.filter(project__in=my_project_list_requested)
-        
-        # list project and count members in my projects with membership: active
-        countQuerySetActive = memberQuerySetActive.values('project__pk','project__name','project__slug','project__description_html',
+        # Step 3: Count the number of active/inactive members in each project for each group and set a `member_status` field
+        countQueryActive = memberQueryActive.values('project__pk','project__name','project__slug','project__description_html',
+                                                    'project__owner__username','project__is_approved'
+                                                   ).annotate(active_members=Count(
+                                                        Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
+                                                  )).annotate(inactive_members=Count(
+                                                        Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
+                                                  )).annotate(member_status=Value(
+                                                        'active', output_field=CharField()
+                                                  ))
+
+        countQueryWaiting = memberQueryWaiting.values('project__pk','project__name','project__slug','project__description_html',
+                                                      'project__owner__username','project__is_approved'
+                                                     ).annotate(active_members=Count(
+                                                          Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
+                                                    )).annotate(inactive_members=Count(
+                                                          Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
+                                                    )).annotate(member_status=Value(
+                                                          'waiting', output_field=CharField()
+                                                    ))
+
+        countQueryReceived = memberQueryReceived.values('project__pk','project__name','project__slug','project__description_html',
+                                                        'project__owner__username','project__is_approved'
+                                                       ).annotate(active_members=Count(
+                                                            Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
+                                                      )).annotate(inactive_members=Count(
+                                                            Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
+                                                      )).annotate(member_status=Value(
+                                                            'received', output_field=CharField()
+                                                      ))
+
+        countQueryRequested = memberQueryRequested.values('project__pk','project__name','project__slug','project__description_html',
                                                           'project__owner__username','project__is_approved'
-        ).annotate(
-            active_members=Count(
-                Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
-            )
-        ).annotate(
-            inactive_members=Count(
-                Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
-            )
-        )
+                                                         ).annotate(active_members=Count(
+                                                              Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
+                                                        )).annotate(inactive_members=Count(
+                                                              Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
+                                                        )).annotate(member_status=Value(
+                                                              'requested', output_field=CharField()
+                                                        ))
 
-        isManagerQuerySetActive = projectQuerySetActive.values('project','is_manager')
-
-
-        # list project and count members in my projects with membership: waiting
-        countQuerySetWaiting = memberQuerySetWaiting.values('project__pk','project__name','project__slug','project__description_html',
-                                                            'project__owner__username','project__is_approved'
-        ).annotate(
-            active_members=Count(
-                Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
-            )
-        ).annotate(
-            inactive_members=Count(
-                Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
-            )
-        )
-
-        # list project and count members in my projects with membership: received
-        countQuerySetReceived = memberQuerySetReceived.values('project__pk','project__name','project__slug','project__description_html',
-                                                              'project__owner__username','project__is_approved'
-        ).annotate(
-            active_members=Count(
-                Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
-            )
-        ).annotate(
-            inactive_members=Count(
-                Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
-            )
-        )
-
-        # list project and count members in my projects with membership: requested
-        countQuerySetRequested = memberQuerySetRequested.values('project__pk','project__name','project__slug','project__description_html',
-                                                                'project__owner__username','project__is_approved'
-        ).annotate(
-            active_members=Count(
-                Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=1))
-            )
-        ).annotate(
-            inactive_members=Count(
-                Case(When(Q(is_approved_by_admin=False) | Q(is_approved_by_manager=False) | Q(status='sent'), then=1))
-            )
-        )
+        # Step 4: Join the 4 groups in one Query list
+        countQuery = countQueryActive.union(countQueryWaiting,countQueryReceived,countQueryRequested)
         
+        managerQueryActive = projectQueryActive.values('project','is_manager')
+
         context = {
-            'project_list_active' : countQuerySetActive,
-            'project_list_waiting' : countQuerySetWaiting,
-            'project_list_received' : countQuerySetReceived,
-            'project_list_requested' : countQuerySetRequested,
-            'project_list_manager' : isManagerQuerySetActive
+            'project_manager' : managerQueryActive,
+            'project_list': countQuery,
         }
         
         return context
-
 
 class DeleteProject(LoginRequiredMixin, DeleteView):
     """ delete a project """
@@ -239,14 +209,16 @@ class DeleteProject(LoginRequiredMixin, DeleteView):
         if project.owner != self.request.user:
             messages.error(self.request,'You need to be the project owner to delete it.')
             return redirect('projects:single', slug=project.slug)
-        return super(DeleteProject, self).dispatch(request, *args, **kwargs)
+        else:
+            messages.success(self.request,'The project was succesfully removed.')
+            return super(DeleteProject, self).dispatch(request, *args, **kwargs)
 
 
 class UpdateProject(LoginRequiredMixin, UpdateView):
     """ update a project """
-    model = Project
     template_name = 'projects/project_update.html'
     form_class = UpdateProjectForm
+    model = Project
     
     def get_success_url(self, *args, **kwargs):
         return reverse_lazy('projects:single', args=[self.kwargs['slug']])
@@ -259,6 +231,9 @@ class UpdateProject(LoginRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         project = self.get_object()
         members = ProjectMember.objects.filter(project=project,user=self.request.user)
+
+        if self.request.GET.get('path','') == 'list':
+            return HttpResponseRedirect(request.path+"?path=main")
 
         for member in members:
             if member.is_manager:
@@ -283,7 +258,13 @@ class JoinProject(LoginRequiredMixin, RedirectView):
         return reverse("projects:single",kwargs={"slug": self.kwargs.get("slug")})
 
     def get(self, request, *args, **kwargs):
-        project = get_object_or_404(Project,slug=self.kwargs.get("slug"))
+
+        try:
+            project = get_object_or_404(Project,slug=self.kwargs.get("slug"))
+        except Http404:
+            messages.error(self.request,'Project ID doest not exist.')
+            return redirect('projects:all')
+
 
         if self.request.user == project.owner :
             try:
@@ -291,28 +272,37 @@ class JoinProject(LoginRequiredMixin, RedirectView):
                                              is_approved_by_admin=True,is_approved_by_manager=True,status="accepted")
 
             except IntegrityError:
-                messages.warning(self.request,("Warning, already a member of {}".format(project.name)))
+                messages.warning(self.request,"You are already the owner of the project")
+                return redirect('projects:all')
 
             else:
                 pass
+
         else:
-            try:
-                ProjectMember.objects.create(user=self.request.user,project=project,status="sent")
-
-            except IntegrityError:
-                messages.warning(self.request,("Warning, already a member of {}".format(project.name)))
-
+            member = ProjectMember.objects.filter(user=self.request.user,project=project)
+            if member:
+                messages.warning(self.request,"You are already a member of the project")
+                return redirect('projects:all') 
             else:
-                pass
-
+                if request.GET.get('path','') == 'join':
+                    messages.warning(self.request,"To join the project, first verify the information and then click on join.")
+                    return redirect("projects:single",slug=project.slug) 
+                else:
+                    ProjectMember.objects.create(user=self.request.user,project=project,status="sent")
+                    messages.success(self.request,'You have submitted a request to join the project.')
+                
         return super().get(request, *args, **kwargs)
+
 
 
 class LeaveProject(LoginRequiredMixin, RedirectView):
     """ leave an existing project """
 
     def get_redirect_url(self, *args, **kwargs):
-        return reverse("projects:single",kwargs={"slug": self.kwargs.get("slug")})
+        if self.request.get_full_path == self.request.path:
+            return reverse("projects:single",kwargs={"slug": self.kwargs.get("slug")})
+        else:
+            return reverse("projects:all")
 
     def get(self, request, *args, **kwargs):
 
@@ -331,7 +321,7 @@ class LeaveProject(LoginRequiredMixin, RedirectView):
             membership.delete()
             messages.success(
                 self.request,
-                "You have successfully left this group."
+                "You have successfully left the project."
             )
         return super().get(request, *args, **kwargs)
 
@@ -351,8 +341,14 @@ def submit_invitation(request):
         sender = Project.objects.get(pk=project_pk) # (maybe use slug instead?)
         try:
             receiver = User.objects.get(username=user_pk)
-            ProjectMember.objects.create(project=sender, user=receiver, status='sent', is_approved_by_manager=True)
+            member = ProjectMember.objects.filter(project=sender,user=receiver)
+            if member:
+                messages.warning(request,"User '{}' is already a member of the project.".format(user_pk))
+            else:
+                messages.success(request,"User '{}' was invited to join the project.".format(user_pk))
+                ProjectMember.objects.create(project=sender, user=receiver, status='sent', is_approved_by_manager=True)
         except User.DoesNotExist:
+            messages.error(request,"User '{}' does not exist. Choose a different one.".format(user_pk))
             receiver = None
 
         return redirect(request.META.get('HTTP_REFERER'))
@@ -379,6 +375,7 @@ def accept_invitation(request):
                 rel.is_approved_by_manager = 1
             rel.status = 'accepted'
             rel.save()
+            messages.warning(request, 'Invitation was accepted. Membership is now waiting for approval.')
         return redirect(request.META.get('HTTP_REFERER'))
 
     return redirect('projects:all')
@@ -399,9 +396,49 @@ def reject_invitation(request):
         sender = Project.objects.get(pk=project_pk) 
         rel = get_object_or_404(ProjectMember, project=sender, user=receiver)
         rel.delete()
+        messages.success(request, 'Invitation was rejected.')
         return redirect(request.META.get('HTTP_REFERER'))
 
     return redirect('projects:all')
+
+@login_required
+def remove_invitation(request):
+    if request.method=="POST":
+        project_pk = request.POST.get('project_pk') # project ID
+        if 'user_pk' in request.POST:
+            user_pk  = request.POST.get('user_pk')  # username
+            User = get_user_model()
+            receiver = User.objects.get(username=user_pk) 
+        else:
+            receiver = request.user
+
+        sender = Project.objects.get(pk=project_pk) 
+        rel = get_object_or_404(ProjectMember, project=sender, user=receiver)
+        rel.delete()
+        messages.success(request, "User '{}' was removed.".format(user_pk))
+        return redirect(request.META.get('HTTP_REFERER'))
+
+    return redirect('projects:all')
+
+@login_required
+def cancel_invitation(request):
+    if request.method=="POST":
+        project_pk = request.POST.get('project_pk') # project ID
+        if 'user_pk' in request.POST:
+            user_pk  = request.POST.get('user_pk')  # username
+            User = get_user_model()
+            receiver = User.objects.get(username=user_pk) 
+        else:
+            receiver = request.user
+
+        sender = Project.objects.get(pk=project_pk) 
+        rel = get_object_or_404(ProjectMember, project=sender, user=receiver)
+        rel.delete()
+        messages.success(request, 'Invitation was cancelled.')
+        return redirect(request.META.get('HTTP_REFERER'))
+
+    return redirect('projects:all')
+
 
 @login_required
 def set_as_manager(request):
@@ -418,8 +455,10 @@ def set_as_manager(request):
 
         if rel.is_manager == 0:
             rel.is_manager = 1
+            messages.success(request, "User '{}' is now admin of the project.".format(user_pk))
         else:
             rel.is_manager = 0
+            messages.success(request, "User '{}' is no longer admin of the project.".format(user_pk))
 
         rel.save()
         return redirect(request.META.get('HTTP_REFERER'))
