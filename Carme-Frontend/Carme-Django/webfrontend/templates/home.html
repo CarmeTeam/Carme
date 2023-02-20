@@ -54,12 +54,12 @@
                     		</svg>  
                     		GPU
                    		</h5>
-                  	</div>
-                	<div>
-                		<select class="form-select form-select-sm text-header" id="list-gpu">
-                   			<option value="gpu0" selected>{{ gputype | index:0 | upper }}</option>
-                    		{% for gpu in gputype|slice:"1:" %}
-                    		<option value="gpu{{forloop.counter}}">{{ gputype | index:forloop.counter | upper }}</option>
+					</div>
+					<div>
+						<select class="form-select form-select-sm text-header" id="list-gpu">
+							<option value="gpu0" selected>{{ gputype | index:0 | upper }}</option>
+							{% for gpu in gputype|slice:"1:" %}
+							<option value="gpu{{forloop.counter}}">{{ gputype | index:forloop.counter | upper }}</option>
                     		{% endfor %}
                 		</select>
             		</div>
