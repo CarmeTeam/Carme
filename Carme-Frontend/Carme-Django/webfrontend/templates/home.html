@@ -77,8 +77,8 @@
                    			<div><span class="badge fs--3 fw-400 text-body">Total GPUs: {{ gpusum }}</span></div>
                    		</div>
                 		<div class="progress mt-0 mb-1" style="height: 20px;">
-               				<div class="progress-bar bg-used " id="gpus" role="progressbar" style="width: {{ gpu | mul:100 |div:gpusum }}%" 
-							     aria-valuenow="{{ gpu }}" aria-valuemin="0" aria-valuemax="{{gpusum}}" >
+               				<div class="progress-bar bg-used " id="gpus" role="progressbar" style="width: {{ gpu | mul:100 |div:gpusum }}%"
+							   	 aria-valuenow="{{ gpu }}" aria-valuemin="0" aria-valuemax="{{gpusum}}" >
 								<span>{{ gpu }}</span>
 							</div>
         				</div>
