@@ -109,21 +109,22 @@ except ImportError:
 
 # 2FA
 class QRSetup(SetupView):
-    def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form, **kwargs)
-        if self.steps.current == 'generator':
-            key = self.get_key('generator')
-            rawkey = unhexlify(key.encode('ascii'))
-            b32key = b32encode(rawkey).decode('utf-8')
-            self.request.session[self.session_key_name] = b32key
-            context.update({
-                'QR_URL': reverse(self.qrcode_url),
-                'secret_key': b32key,
-            })
-        elif self.steps.current == 'validation':
-            context['device'] = self.get_device()
-        context['cancel_url'] = resolve_url(settings.LOGIN_REDIRECT_URL)
-        return context
+    pass
+#    def get_context_data(self, form, **kwargs):
+#        context = super().get_context_data(form, **kwargs)
+#        if self.steps.current == 'generator':
+#            key = self.get_key('generator')
+#            rawkey = unhexlify(key.encode('ascii'))
+#            b32key = b32encode(rawkey).decode('utf-8')
+#            self.request.session[self.session_key_name] = b32key
+#            context.update({
+#                'QR_URL': reverse(self.qrcode_url),
+#                'secret_key': b32key,
+#            })
+#        elif self.steps.current == 'validation':
+#            context['device'] = self.get_device()
+#        context['cancel_url'] = resolve_url(settings.LOGIN_REDIRECT_URL)
+#        return context
 
 QRSetup = QRSetup.as_view()
 
