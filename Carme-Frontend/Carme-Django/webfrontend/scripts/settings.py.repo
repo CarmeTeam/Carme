@@ -67,12 +67,12 @@ INSTALLED_APPS = [
     'two_factor',
     'two_factor.plugins.phonenumber',   
     'two_factor.plugins.yubikey',
-    'otp_yubikey',		
-	'mathfilters',
-	'misaka',
-	'dal',
-	'dal_select2',
-	'projects', 
+    'otp_yubikey',
+    'mathfilters'
+    'misaka',
+    'dal',
+    'dal_select2',
+    'projects', 
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
 
