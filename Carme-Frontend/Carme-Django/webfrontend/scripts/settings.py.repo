@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'wiki.plugins.notifications.apps.NotificationsConfig',
     'wiki.plugins.images.apps.ImagesConfig',
     'wiki.plugins.macros.apps.MacrosConfig',
-	'django_otp', 
+    'django_otp', 
     'django_otp.plugins.otp_static', 
     'django_otp.plugins.otp_totp',
     'two_factor',
