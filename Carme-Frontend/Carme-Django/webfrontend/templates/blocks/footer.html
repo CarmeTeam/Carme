@@ -1,59 +1,58 @@
 {% load static %}
 
-<!-- <footer> -->
-    <footer>
+<footer>
 
-        <!-- <footer-top> -->
-        <section class="footer-top p-1">
-            <div class="container py-0" data-layout-footer="container">
-                <div class="row pt-2">
-                    <!-- <left> -->
-                    <div class="col-md-2 text-center text-md-start ps-md-4"> 
-                        {% if settings.CARME_FRONTEND_LINK_DISCLAIMER|length > 0 %}
-                            <h6>
-                             <a href="{{ settings.CARME_FRONTEND_LINK_DISCLAIMER }}" target="_blank" class="fs-0 fw-400">Disclaimer</a> 
-                            </h6>
-                        {% endif %} 
-                    </div>  
-                    <div class="col-md-2 text-center">
-                        {% if settings.CARME_FRONTEND_LINK_PRIVACY|length > 0 %}
-                            <h6 class="">
-                             <a href="{{ settings.CARME_FRONTEND_LINK_PRIVACY }}" target="_blank" class="fs-0 fw-400">Data Privacy</a> 
-                            </h6>
-                        {% endif %} 
-                    </div>
-                    <!-- </left> -->
+  	<!-- <footer-top> -->
+	<section class="footer-top border-top-solid p-1">
+		<div class="container py-0" data-layout-footer="container">
+    		<div class="row pt-2">
+     	
+				<!-- <left> -->
+      			<div class="col-md-2 ps-md-4 text-center text-md-start"> 
+      			{% if settings.CARME_FRONTEND_LINK_DISCLAIMER|length > 0 %}
+					<h6>
+						<a href="{{ settings.CARME_FRONTEND_LINK_DISCLAIMER }}" target="_blank" class="fs-0 fw-400 text-underline-hover">Disclaimer</a>
+					</h6>
+       			{% endif %}
+				</div>  
+      			<div class="col-md-2 text-center">
+				{% if settings.CARME_FRONTEND_LINK_PRIVACY|length > 0 %}
+					<h6>
+						<a href="{{ settings.CARME_FRONTEND_LINK_PRIVACY }}" target="_blank" class="fs-0 fw-400 text-underline-hover">Data Privacy</a>
+					</h6>
+				{% endif %}
+				</div>
+				<!-- </left> -->
     
-                    <!-- <right> -->
-                    <div class="text-center text-md-end col-md-2 offset-md-6 px-0">
-                        <h6 class="mb-0 pe-md-4 pe-sm-0 py-1">
-                            <a href="https://twitter.com/open_carme" target="_blank" class="text-decoration-none"> 
-                                <i class="fab fa-twitter px-1"></i>
-                            </a>
-                            <a href="/wiki/" class="text-decoration-none">
-                                <i class="fab fa-wikipedia-w px-1"></i>
-                            </a>
-                            <a href="https://github.com/CarmeTeam/Carme" target="_blank" class="text-decoration-none">
-                                <i class="fab fa-github px-1"></i>
-                            </a>
-                        </h6>
-                    </div>
-                    <!-- </right> -->
+      			<!-- <right> -->
+      			<div class="col-md-2 offset-md-6 px-0 text-center text-md-end">
+     				<h6 class="mb-0 pe-md-4 pe-sm-0 py-1">
+						<a href="https://twitter.com/open_carme" target="_blank" class="text-decoration-none"> 
+							<i class="fab fa-twitter px-1"></i>
+						</a>
+						<a href="/wiki/" class="text-decoration-none">
+							<i class="fab fa-wikipedia-w px-1"></i>
+						</a>
+						<a href="https://github.com/CarmeTeam/Carme" target="_blank" class="text-decoration-none">
+							<i class="fab fa-github px-1"></i>
+						</a>
+       				</h6>
+      			</div>
+      			<!-- </right> -->
 
-                </div>
-            </div>
-        </section>
-        <!-- </footer top> -->
+     		</div>
+    	</div>
+   </section>
+   <!-- </footer top> -->
 
-        <!-- <footer bottom> -->
-        <div class="footer-bottom text-center py-2">
-										<span class="fs-0 fw-400"> 
-          		© 2018-<span id="current-year"></span>
-            &#183;
-										</span>
-          <a href="https://carmeteam.github.io/Carme/" target="_blank" class="fs-0 fw-400">Carme</a> 
-        </div>
-        <!-- </footer bottom> -->
-
-    </footer>
-<!-- </footer> -->
+   <!-- <footer bottom> -->
+   <div class="footer-bottom py-2 text-center">
+		<span class="fs-0 fw-400">
+			© 2018-<span id="current-year"></span>
+			&#183;
+			<a href="https://carmeteam.github.io/Carme/" target="_blank" class="text-decoration-none">Carme</a> 
+		</span>
+   </div>
+   <!-- </footer bottom> -->
+			
+</footer>

@@ -99,6 +99,18 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
+  # start code-server --------------------------------------------------------------------------------------------------------------
+  if [[ ! -d "${THEIA_BASE_DIR}" ]]; then
+    if command_exists code-server;then
+      log "start Code-Server at ${CARME_MASTER_IP}:${TA_PORT}"
+      code-server --auth none --disable-telemetry --bind-addr ${CARME_MASTER_IP}:${TA_PORT} --app-name CARME-IDE --user-data-dir "${HOME}/.local/share/code-server" --extensions-dir "${HOME}/.local/share/code-server/extensions" &
+    else
+      die "cannot start Code-Server (no executable found)"
+    fi
+  fi
+  #---------------------------------------------------------------------------------------------------------------------------------
+
+
   # start JupyterLab ---------------------------------------------------------------------------------------------------------------
   if command_exists jupyter; then
     log "start JupyterLab at ${CARME_MASTER_IP}:${NB_PORT}"

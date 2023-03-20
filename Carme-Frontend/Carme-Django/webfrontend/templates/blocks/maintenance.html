@@ -2,7 +2,7 @@
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
-#                                                                                                                                                                                                            
+#
 # see Carme development guide for documentation: 
 # * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
 #
@@ -13,21 +13,21 @@
 {% endcomment %}
 
 {% if maintenance_mode %}
-		{% if user.is_superuser %}
-				<div class="container">
-					<div class="row my-4 text-center">
-						<div class="col-md-8 offset-md-2 col-12">
-							<div class="alert alert-warning mb-0" style="display: inline-block;" role="alert">
-									<i class="fa fa-exclamation-triangle fa-fw" aria-hidden="true"></i>
-									&nbsp; Maintenance mode on - user access denied.
-							</div>
-						</div>
+	{% if user.is_superuser %}
+		<div class="container">
+			<div class="row text-center">
+				<div class="col-12 col-md-8 offset-md-2">
+					<div class="alert alert-warning d-inline-block py-2" role="alert">
+						<i class="fa fa-exclamation-triangle fa-fw pe-1"></i>
+						Maintenance mode on - user access denied.
 					</div>
 				</div>
-		{% else %}
-  		<script>
-    		window.location.replace("/logout/");
-    </script>
-  {% endif %}
+			</div>
+		</div>
+	{% else %}
+ 	<script>
+ 		window.location.replace("/logout/");
+ 	</script>
+ 	{% endif %}
 {% endif %} 
 

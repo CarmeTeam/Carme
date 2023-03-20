@@ -1,0 +1,39 @@
+{% extends "projects/project_base.html" %}
+
+{% block title %}Update Project{% endblock title %}
+
+  <!-- <card-header> -->
+  {% block project_header_icon %}fas fa-rotate{% endblock project_header_icon %}
+  {% block project_header_title %}Update Project{% endblock project_header_title %}
+  <!-- </card-header> -->
+
+  <!-- <card-body> -->
+  {% block project_body %}
+    <p class="fs--1 fw-400 text-body"><b>Note:</b> You can only modify the description of the project.</p>
+    <form action="" method="POST">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="input-group mb-3">
+          <span class="input-group-text" style="width:7.5rem;">{{ field.label }}</span>
+          {% if field.name == 'date_updated' and field.value == None %}
+            <input type="text" name="date_updated" value="None" id="id_date_updated" 
+                   class="fs-0 fw-400 text-body form-control" required disabled>                      
+          {% else %}
+            {{field}}
+          {% endif %}
+        </div>
+      {% endfor %}
+                        
+      {% if request.GET.path == 'main' %}
+        <a href="{% url 'projects:all' %}" class="float-end btn btn-secondary mt-2">
+          Back to Projects
+        </a>    
+      {% else %}
+        <a href="{% url 'projects:single' slug=project.slug %}" class="float-end btn btn-secondary mt-2">
+          Back to Project
+        </a>
+      {% endif %} 
+      <button type='submit' class="btn btn-primary mt-2">Update</button> 
+    </form>        
+  {% endblock project_body %}
+  <!-- </card-body> -->

@@ -132,3 +132,16 @@ class CarmeJobTable(models.Model):
         managed = False
         db_table = str(CARME_SLURM_ClusterName) + '_job_table'
         unique_together = (('id_job', 'id_assoc', 'time_submit'),)
+
+
+#class Accelerator(models.Model):
+#    name = models.CharField(max_length=255, unique=True)
+#    type = models.CharField(max_length=50, default="NONE")
+#    num_total = models.IntegerField(default=0)
+#    num_per_node = models.IntegerField(default=0)
+#    num_cpus_per_acc = models.IntegerField(default=0)
+#    num_ram_per_acc = models.IntegerField(default=0)
+#    accelerator = models.ManyToManyField(ResourceTemplate,through="TemplateHasAccelerator")
+#
+#    def __str__(self):
+#        return f"{self.type}-{self.name}"

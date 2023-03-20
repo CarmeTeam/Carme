@@ -1,0 +1,63 @@
+{% extends "projects/project_base.html" %}
+
+{% block title %}Create Project{% endblock title %}
+	
+	<!-- <card-header> -->
+	{% block project_header_icon %}fas fa-pen-to-square{% endblock project_header_icon %}
+	{% block project_header_title %}Create Project{% endblock project_header_title %}
+	<!-- </card-header> -->
+
+	<!-- <card-body> -->
+	{% block project_body %}
+
+	{% include "projects/blocks/alert_messages.html" %}
+
+	<form id="projectForm" method="POST" action="{% url 'projects:create' %}">
+		{% csrf_token %}
+
+		{% for field in form %}
+			{% if field.name != 'checked' %}
+				<div class="input-group mb-3 hidden">
+					<span class="input-group-text" style="width:7.5rem;">{{field.label}}</span>
+					{% if field.name == 'department' %}
+						<select name="department" id="id_department" class="form-select bg-transparent fs-0 fw-400 text-body">
+							{% for value, text in form.department.field.widget.choices %}
+								<option class="bg-transparent" value="{{value}}">
+									{{text}}
+								</option>
+							{% endfor %}
+						</select>
+					{% elif  field.name == 'classification' %}
+						<select name="classification" id="id_classification" class="form-select bg-transparent fs-0 fw-400 text-body">
+							{% for value, text in form.classification.field.widget.choices %}
+								{% if value == 'Internal' %}
+								<option class="bg-transparent" value="{{value}}" selected>
+								{% elif value == 'Highly Confidential'%}
+								<option class="bg-transparent" value="{{value}}" disabled>
+								{% endif %}								
+									{{text}}
+								</option>
+							{% endfor %}
+						</select>
+					{% else %}
+						{{ field }}
+					{% endif %}
+				</div>
+			{% else %}
+				<div class="form-check ps-4 py-2 ms-2">
+					<input name="checked" id="id_checked"  class="form-check-input" type="checkbox">
+					<label class="form-check-label fs-0 fw-400 text-body" for="id_checked">
+						I have read and accept the <a href="">terms and conditions</a>.
+					</label>
+				</div>
+			{% endif %}
+		{% endfor %}
+		<a href="{% url 'projects:all' %}" class="float-end btn btn-secondary mt-2">
+			Back to Projects
+		</a> 
+		<button type="submit" id="createButton" class="btn btn-primary mt-2">Create</button>
+	</form>	
+
+	{% endblock project_body %}
+	<!-- </card-body> -->
+					

@@ -1,0 +1,290 @@
+{% extends "projects/project_base.html" %}
+
+{% block title %}Project{% endblock title %}
+
+	<!-- <card-header> -->
+	{% block project_header_icon %}fas fa-diagram-project{% endblock project_header_icon %}
+	{% block project_header_title %}My Projects{% endblock project_header_title %}
+
+	{% block project_header_button %}			
+		<a href="{% url 'projects:create' %}" class="text-decoration-none">
+			<button type="button" class="btn btn-sm btn-custom" style="width:105px;">
+				<span class="py-1 fs--1 fw-400 text-header">New Project</span>
+			</button>
+		</a>	
+	{% endblock project_header_button %}	
+	<!-- </card-header> -->
+
+    <!-- <card-body> -->
+	{% block project_body %}
+					
+		<!-- <join-project> -->
+		<form onSubmit="return JoinProjectURL();">
+			{% csrf_token %} 
+			<div class="input-group mb-3">
+				<input type="text" name="project-slug" id="project-slug" class="form-control py-1 fs--1 fw-400 text-body" placeholder="Type the project ID to join">
+				<button type="submit" class="btn btn-sm btn-custom" style="width:105px;">
+					<span class="py-1 fs--1 fw-400 text-body">Join Project</span>
+				</button>
+			</div>
+		</form>
+		<!-- </join-project> -->
+
+		{% include "projects/blocks/alert_messages.html" %}
+
+		{% if project_list.count == 0 %}
+
+			{% include "projects/blocks/project_none.html" %}
+
+		{% else %}
+
+			<!-- <project-list> -->
+			<div class="table-responsive mt-2">    
+				<table class="table mb-0 overflow-hidden align-middle fs--1 fw-400 text-center text-body">
+					<thead>
+						<tr class="border-bottom-double">
+							<th class="border-0 text-left" style="padding-left:65px;">Project</th>
+							<th class="border-0 text-center">Status</th>
+							<th class="border-0 text-center">Membership</th>
+							<th class="border-0 text-center d-none d-md-table-cell" style="min-width:90px;">Created by</th>
+							<th class="border-0 text-center d-none d-lg-table-cell" style="min-width:90px;">Members</th>
+							<th class="border-0 text-center"></th>
+						</tr>						
+					</thead>
+					<tbody>
+					{% for obj in project_list %}
+
+						<tr class="border-bottom-solid">
+
+							<!-- project name and description -->
+							<td class="text-left">
+								<div class="d-flex align-items-center">
+									<a href="{% url 'projects:single' slug=obj.project__slug %}">
+										<div class="avatar-icon position-relative d-inline-block my-2">
+											<div class="avatar-name position-absolute h-100 w-100 d-block text-center text-uppercase text-white fs--2 fw-700 rounded-circle">
+												<span class="position-absolute top-50 start-50 translate-middle">{{ obj.project__name.0 }}</span>
+											</div>
+										</div>
+									</a>
+									<!-- large screen -->
+									<div class="flex-1 align-self-center ps-3 pt-3 d-none d-lg-block">
+										<h6 class="fs-0 mb-1">
+											<a href="{% url 'projects:single' slug=obj.project__slug %}" class="text-decoration-none">{{ obj.project__name | capfirst}}</a>
+										</h6>
+										<span class="d-none d-lg-block">
+											{% with description=obj.project__description_html|capfirst %}
+												{{description|safe}}
+											{% endwith %}
+										</span>
+									</div>
+									<!-- small screen -->
+									<div class="flex-1 align-self-center ps-3 pt-2 d-lg-none">
+										<h6 class="fs-0">
+											<a href="{% url 'projects:single' slug=obj.project__slug %}" class="text-decoration-none">{{ obj.project__name | capfirst}}</a>
+										</h6>
+									</div>
+								</div>
+							</td>
+
+							<!-- project status -->
+							<td>
+								{% if obj.project__is_approved == True %}
+									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active project">
+										<small class="fa fa-check-circle text-primary" data-fa-transform="shrink-4 down-2"></small>
+									</span> 
+								{% else %}
+									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
+										<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
+									</span> 
+								{% endif %}
+							</td>
+
+							<!-- member status -->
+							<td>
+								{% if obj.member_status == 'active' %}
+									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Active member">
+										<small class="fa fa-check-circle text-success" data-fa-transform="shrink-4 down-2"></small>
+									</span>
+								{% elif obj.member_status == 'received' %} 
+									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Invitation received">
+										<small class="fas fa-envelope text-secondary" data-fa-transform="shrink-4 down-2"></small>
+									</span>
+								{% elif obj.member_status == 'requested' %}
+									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Invitation requested">
+										<small class="fas fa-envelope text-secondary" data-fa-transform="shrink-4 down-2"></small>
+									</span>
+								{% elif obj.member_status == 'waiting' %} 
+									<span data-bs-toggle="tooltip" data-bs-placement="top" title="Waiting for approval">
+										<small class="fa fa-minus-circle text-secondary" data-fa-transform="shrink-4 down-2"></small>
+									</span> 
+								{% endif %}	
+							</td>
+
+							<!-- owner -->
+							<td class="d-none d-md-table-cell">
+								{% if obj.project__owner__username == request.user.username %}
+								<a href="" class="text-underline-hover text-body ">
+									{{ obj.project__owner__username }}
+								{% else %}
+								<a href="" class="text-underline-hover text-body ">
+									{{ obj.project__owner__username }}
+								{% endif %}
+								</a>
+							</td>
+
+							<!-- member count -->
+							<td class="d-none d-lg-table-cell">
+								<span class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Active members">
+									<span class="i-green py-1 px-2 rounded-circle fs--1 fw-700">{{ obj.active_members }}</span>
+								</span>
+								<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="In process">
+									<span class="i-red py-1 px-2 rounded-circle fs--1 fw-700">{{ obj.inactive_members }}</span>
+								</span>
+							</td>
+									
+							<!-- action -->
+							<td class="pe-0">
+								<div class="float-end mt-2">
+									<form action="" method="POST">
+										{% csrf_token %} 
+										<select id="action-{{obj.member_status}}{{ forloop.counter }}" data-slug="{{ obj.project__slug }}" 
+												class="form-select form-select-sm px-2 py-1 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
+											<option value="action" class="bg-transparent">Action</option>
+											{% if obj.member_status == 'active'%}
+												{% if obj.project__owner__username == request.user.username %}
+													<!-- active creator -->
+													<option value="update" class="bg-transparent">Update</option>
+													<option value="delete" class="bg-transparent">Delete</option>
+												{% else %}
+													{% for x in project_manager %}
+														{% if x.project == obj.project__pk %}
+															{% if x.is_manager %}
+																<!-- active manager -->
+																<option value="update" class="bg-transparent">Update</option>
+																<option value="leave" class="bg-transparent">Leave</option>
+															{% else %}
+																<!-- active user -->
+																<option value="leave" class="bg-transparent">Leave</option>
+															{% endif %}
+														{% endif %}
+													{% endfor %}
+												{% endif %}
+											{% elif obj.member_status == 'received' %}
+												<!-- received -->
+												<option value="accept" class="bg-transparent">Accept</option>
+												<option value="reject" class="bg-transparent">Reject</option>
+											{% elif obj.member_status == 'requested' %}
+												<!-- requested -->
+												<option value="cancel" class="bg-transparent">Cancel</option>
+											{% elif obj.member_status == 'waiting' %}
+												<!-- waiting -->
+												<option value="cancel" class="bg-transparent">Cancel</option>
+											{% endif %}
+										</select>
+									</form>
+								</div>
+								{% include "projects/blocks/action_modal.html" %}
+							</td>
+
+						</tr>	
+					
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<!-- </project-list> -->
+
+		{% endif %}	
+
+	{% endblock project_body %}
+	<!-- </card-body> -->
+
+
+	{% block project_script %}
+	<script>
+		function JoinProjectURL(){
+			// join project
+			if(document.getElementById("project-slug").value){
+				var myURL = "{% url 'projects:join' slug=' '%}";
+				myURL = myURL.slice(0, -4) + document.getElementById("project-slug").value + '?path=join';
+				location.href = myURL;
+			}	
+			return false;
+		}
+	</script>
+	<script>
+		// actions: accept, reject, cancel, update, leave, delete
+		function selectChange(select) {
+			var selectID = select.id;
+			var value = select.value;
+			
+			if ($('#'+selectID).data('slug')) {
+				var my_slug = $('#'+selectID).data('slug');
+				var my_url = {	accept: "{% url 'projects:accept-invitation' %}", 
+								reject: "{% url 'projects:reject-invitation' %}",
+								cancel: "{% url 'projects:cancel-invitation' %}",
+								update: "{% url 'projects:update' slug=12345 %}?path=list".replace(/12345/, my_slug.toString()),
+								leave: "{% url 'projects:leave' slug=12345 %}".replace(/12345/, my_slug.toString()),
+								delete: "{% url 'projects:delete' slug=12345 %}".replace(/12345/, my_slug.toString())
+							 };
+				var my_html = {	
+								cancel: { buttonModal: "Confirm",
+										  alertText: "The request to join the project will be lost.",
+										  bodyText: "Are you sure that you want to cancel this invitation?",
+										  headerText: "<i class='fas fa-ban pe-1'></i> Cancel Invitation"
+										},
+								reject: { buttonModal: "Reject",
+										  alertText: "The request to join the project will be lost.",
+										  bodyText: "Are you sure that you want to reject this invitation?",
+										  headerText: "<i class='fas fa-ban pe-1'></i> Reject Invitation"
+										},
+								leave : { buttonModal: "Leave",
+										  alertText: "You will no longer have access to the project.",
+										  bodyText: "Are you sure that you want to leave?",
+										  headerText: "<i class='fas fa-arrow-right-from-bracket pe-1'></i> Leave Project"
+										},
+								delete: { buttonModal: "Delete",
+										  alertText: "This project will be removed for all members.",
+										  bodyText: "Are you sure that you want to delete this project?",
+										  headerText: "<i class='fas fa-trash pe-1'></i> Delete Project"
+										},
+					 			};
+			}
+
+			if (value == 'update' || value=='accept'){
+				$("#formModal-"+selectID).attr("action", my_url[value]);
+				$("#formModal-"+selectID).submit();
+			}
+			else if (value=='cancel' || value=='reject' || value=='leave' || value=='delete' ){
+				for (let i = 0; i < Object.keys(my_html[value]).length; i++) {
+					$('#'+Object.keys(my_html[value])[i]+'-'+selectID).html(my_html[value][Object.keys(my_html[value])[i]]);
+				}  
+				  
+				$("#formModal-"+selectID).attr("action", my_url[value]);
+				$('#modal-'+selectID).modal("show");
+				$('#modal-'+selectID).on("hidden.bs.modal", function () {
+					$(document).find('#'+selectID).val('action');
+					$('#'+selectID).val('action');
+				});
+			} 
+		}
+
+		$(document).ready(function(){
+			// reset modal buttons
+			$('[id^=modal-action]').on("hidden.bs.modal", function () {
+				$('[id^=checkboxModal-action]').prop('checked', false);
+				$('[id^=buttonModal-action]').prop('disabled', true);
+			});	
+		});
+	</script>
+	<script>
+		(function () {
+			//reload page on back button 
+			window.onpageshow = function(event) {
+				if (event.persisted) {
+					window.location.reload();
+				}
+			};
+		})();
+	</script>
+    {% endblock project_script %}

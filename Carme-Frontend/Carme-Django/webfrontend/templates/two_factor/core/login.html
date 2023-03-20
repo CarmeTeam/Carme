@@ -24,18 +24,18 @@
 										<!-- <alert> -->
 										{% if maintenance_mode %}
             <div id="maintenance-message" class="alert alert-warning py-2" role="alert">
-              <i class="fas fa-warning"></i>&nbsp; Maintenance mode on. User access denied. 
+              <i class="fas fa-warning pe-1"></i> Maintenance mode on. User access denied. 
             </div>
           {% else %}                    
 										  <div id="timeout-message" class="alert alert-warning py-2" role="alert" style="display: none;">
-												  <i class="fas fa-warning"></i>&nbsp; Your session has expired! Log in again.
+												  <i class="fas fa-warning pe-1"></i> Your session has expired! Log in again.
 										  </div>
 										  <div id="logout-message" class="alert alert-success py-2" role="alert" style="display: none;">
-												  <i class="fas fa-check"></i>&nbsp; Successfully logged out.
+												  <i class="fas fa-check pe-1"></i> Successfully logged out.
 										  </div>
 										  {% if form.errors %}
     						  <div id="error-message" class="alert alert-danger py-2" role="alert">
-												  <i class="fas fa-times-circle"></i>&nbsp; Incorrect information. Please Try again.
+												  <i class="fas fa-times-circle pe-1"></i> Incorrect information. Please Try again.
 										  </div>
 										  {% endif %}
           {% endif %}
@@ -50,10 +50,10 @@
     						<input type="submit" value="" class="d-none" />
 
      					{% if wizard.steps.current == 'auth' %}
-     					{% comment %} <p>{% blocktrans %}Enter your credentials.{% endblocktrans %}</p> {% endcomment %}
-
+										<!-- login page -->
      					{% elif wizard.steps.current == 'backup' %}
-     					<p class="ms-1 fs-0 fw-400 text-body text-justify">
+										<!-- backup token page-->
+     					<p class="ms-1 fs-0 fw-400 text-justify text-body">
 												{% blocktrans trimmed %}
        						Please enter one of the backup tokens to login to your account. 
 													Notice that these tokens are used only once.
@@ -62,12 +62,7 @@
      					{% endif %}
 
      					{% if backup_tokens %}
-     					<p class="fs-0 fw-400 text-body">{% trans "As a last resort, you can use a backup token:" %}</p>
-      				<p>
-      						<button name="wizard_goto_step" type="submit" value="backup" class="btn btn-secondary btn-block w-100">
-												{% trans "Use Backup Token" %}
-												</button>
-      				</p>
+     					<p class="fs-0 fw-400 text-body">{% trans "As a last resort, you can use a backup token." %}</p>
      					{% endif %}
               
      					{% include "two_factor/_wizard_actions.html" %}

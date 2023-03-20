@@ -1,5 +1,5 @@
 @import 'https://code.highcharts.com/css/highcharts.css';
-@value --carme-* from "./theme.css";
+@value --carme-* from "./../../../css/theme.css";
 
 .highcharts-background {
     fill: transparent;

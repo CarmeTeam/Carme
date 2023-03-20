@@ -19,7 +19,11 @@
 import numpy as np
 from django.http import HttpResponse
 from django.template import loader
+
+# Database
 from .models import CarmeMessage, SlurmJob, Image, CarmeJobTable, ClusterStat, GroupResource
+from projects.models import ProjectMember, ProjectHasTemplate, TemplateHasAccelerator
+
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from .forms import MessageForm, DeleteMessageForm, StartJobForm, StopJobForm, ChangePasswd, JobInfoForm
@@ -105,21 +109,22 @@ except ImportError:
 
 # 2FA
 class QRSetup(SetupView):
-    def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form, **kwargs)
-        if self.steps.current == 'generator':
-            key = self.get_key('generator')
-            rawkey = unhexlify(key.encode('ascii'))
-            b32key = b32encode(rawkey).decode('utf-8')
-            self.request.session[self.session_key_name] = b32key
-            context.update({
-                'QR_URL': reverse(self.qrcode_url),
-                'secret_key': b32key,
-            })
-        elif self.steps.current == 'validation':
-            context['device'] = self.get_device()
-        context['cancel_url'] = resolve_url(settings.LOGIN_REDIRECT_URL)
-        return context
+    pass
+#    def get_context_data(self, form, **kwargs):
+#        context = super().get_context_data(form, **kwargs)
+#        if self.steps.current == 'generator':
+#            key = self.get_key('generator')
+#            rawkey = unhexlify(key.encode('ascii'))
+#            b32key = b32encode(rawkey).decode('utf-8')
+#            self.request.session[self.session_key_name] = b32key
+#            context.update({
+#                'QR_URL': reverse(self.qrcode_url),
+#                'secret_key': b32key,
+#            })
+#        elif self.steps.current == 'validation':
+#            context['device'] = self.get_device()
+#        context['cancel_url'] = resolve_url(settings.LOGIN_REDIRECT_URL)
+#        return context
 
 QRSetup = QRSetup.as_view()
 
@@ -246,6 +251,33 @@ def index(request):
         # notifications
         message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
     
+        # Projects list
+        projectQuerySetActive = ProjectMember.objects.filter(user=request.user, 
+                                                              is_approved_by_admin=True, 
+                                                              is_approved_by_manager=True,
+                                                              status='accepted',
+                                                              project__is_approved=True)
+        myprojects = projectQuerySetActive.values('project__name')
+
+
+        myprojectlist =[]
+        
+        # Template list
+        for item in myprojects:
+            myprojectlist.append(item['project__name'])
+        mytemplates = ProjectHasTemplate.objects.values('project__name','template__name',
+                                                        'template__maxjobs',
+                                                        'template__maxnodes_per_job',
+                                                        'template__maxaccels_per_node'
+        ).filter(project__name__in=myprojectlist)
+
+        
+        # Accelerator list
+        myaccelerators = TemplateHasAccelerator.objects.values('accelerator__name',
+                                                               'accelerator__type',
+                                                               'resourcetemplate__name'
+        )
+            
         # setting variables gpu card
         gputype=[]
         cpupergpu=[]
@@ -314,6 +346,9 @@ def index(request):
             'gpupernode':gpupernode, #gpucard
             'gputotal':gputotal, #gpucard
             'gpusum': gpusum, #gpucard
+            'myprojects': myprojects, #projects
+            'mytemplates': mytemplates, #projects
+            'myaccelerators': myaccelerators, #projects
         }
 
         return render(request, 'home.html', context)
