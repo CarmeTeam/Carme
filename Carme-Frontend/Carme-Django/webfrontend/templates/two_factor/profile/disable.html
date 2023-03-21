@@ -5,36 +5,38 @@
 
 {% block subcontent %}
 <div class="row mt-2 mb-4">
-	<div class="col-12">
-	  <div class="card-deck">
-		  <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-            <i class="fas fa-shield-halved me-2"></i>
-            {% block title %}{% trans "Disable Two-factor Authentication" %}{% endblock %}
-          </h5>
-        </div>
-		    <div class="card-body fs-0 fw-400 text-body">
-          <p>
-            {% blocktrans trimmed %}You are about to disable two-factor authentication (2FA). Once done,
-            You will be requested to set a new 2FA method. Are you sure?{% endblocktrans %}
-          </p>
-          <form method="post">
-            {% csrf_token %}
-            <div class="form-check">
-              {% for field in form %}
-                {{ field | add_classes:'form-check-input pe-2 me-2' }}
-                <label class="form-check-label" for="{{ field.label }}"><strong>{{ field.label }}</strong></label>
-              {% endfor %}  
-            </div>
-            <div class="form-check pt-3">
-            		<button class="btn btn-danger" type="submit">{% trans "Disable" %}</button>
-            </div>
-          </form>
+ <div class="col-12">
+	 <div class="card-deck">
+			<div class="card">
 
-        </div>
-      </div>
+   	<div class="card-header">
+    	<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
+     	<i class="fas fa-shield-halved me-2"></i>
+      {% block title %}{% trans "Disable Two-factor Authentication" %}{% endblock %}
+     </h5>
     </div>
+
+		  <div class="card-body fs-0 fw-400 text-body">
+    	<p>
+						{% blocktrans trimmed %}You are about to disable two-factor authentication (2FA). Once done,
+      You will be requested to set a new 2FA method. Are you sure?{% endblocktrans %}
+     </p>
+     <form method="post">
+     	{% csrf_token %}
+      <div class="form-check">
+      	{% for field in form %}
+       	{{ field | add_classes:'form-check-input pe-2 me-2' }}
+        <label class="form-check-label" for="{{ field.label }}"><strong>{{ field.label }}</strong></label>
+       {% endfor %}  
+      </div>
+      <div class="form-check pt-3">
+      	<button class="btn btn-danger" type="submit">{% trans "Disable" %}</button>
+      </div>
+     </form>
+
+    </div>
+   </div>
   </div>
+ </div>
 </div>	
 {% endblock %}

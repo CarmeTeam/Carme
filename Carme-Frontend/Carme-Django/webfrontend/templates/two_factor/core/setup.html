@@ -39,63 +39,63 @@
 								</div>
 								
         <div class="col-12">
-										<!-- <key> -->
-										{% if wizard.steps.current == 'generator' %}
-            <div class="input-group mb-3">
-              <span class="input-group-text fs--2"><i class="fas fa-key" aria-hidden="true"></i></span>
-              <input class="form-control text-center fs--3 fw-500 text-header" type="text" value="{{ secret_key }}" id="mySecretKey" readonly >
-              <span class="input-group-text">
-                <button id="qrcopy" class="btn btn-sm btn-link p-0 fs--2" onclick="myQRFunction()" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy">
-                  <i class="fas fa-copy" aria-hidden="true"></i>
-                </button>
-              </span>
-            </div>
+									{% if wizard.steps.current == 'generator' %}
+										<!-- <key> --> 
+          <div class="input-group mb-3">
+          	<span class="input-group-text fs--2">
+												<i class="fas fa-key"></i>
+											</span>
+           <input class="form-control text-center fs--3 fw-500 text-header" type="text" value="{{ secret_key }}" id="mySecretKey" readonly>
+           <span class="input-group-text">
+           	<button id="qrcopy" class="btn btn-sm p-0 fs--2" onclick="myQRFunction()" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy">
+            	<i class="fas fa-copy"></i>
+            </button>
+           </span>
+          </div>
 										<!-- </key> -->
-
-										<!-- <alert> -->	   
-          {% if form.errors %}
-            <div id="error-message" class="alert alert-danger py-2" role="alert"><i class="fa fa-times-circle"></i>&nbsp; Incorrect information. Please Try again.</div>
-          {% endif %}
-										<!-- </alert> -->
-										
+         {% else %}
 										<!-- <title> -->
-          {% else %}
-            <h5 class="text-center mb-4 fs-2 fw-500 text-title">{% block title %}{% trans "Enable Two-Factor Authentication" %}{% endblock %}</h5>
-          {% endif %}
+         	<h5 class="text-center mb-4 fs-2 fw-500 text-title">{% block title %}{% trans "Enable Two-Factor Authentication" %}{% endblock %}</h5>
 										<!-- </title> -->
+         {% endif %}
 
-										<!-- <steps> -->
-          {% if wizard.steps.current == 'welcome' %}
-          		<p class="fs-0 fw-400 text-body text-justify">
-														{% blocktrans trimmed %}
-																You are about to take your account security to the
-                next level. Follow the steps to enable two-factor
-                authentication.
-														{% endblocktrans %}
-												</p>
-          {% elif wizard.steps.current == 'method' %}
-            <p class="fs-0 fw-400 text-body">
-														{% blocktrans trimmed %}
-																Please select the method you would like to use.
-														{% endblocktrans %}
-												</p>
-          {% elif wizard.steps.current == 'generator' %}
-          		<p class="fs-0 fw-400 text-body text-justify">
-														{% blocktrans trimmed %}
-              		Use your smartphone to scan the <i class="fas fa-qrcode fs--2" aria-hidden="true"></i>
-                or copy the <i class="fa fa-key fs--2" aria-hidden="true"></i>
-																in your authentication app. Then, enter the token.
-              {% endblocktrans %}
-												</p>
-										{% elif wizard.steps.current == 'yubikey' %}
-          		<p class="fs-0 fw-400 text-body text-justify">
-														{% blocktrans trimmed %}
-																To identify and verify your YubiKey, please insert a token in
-                the field below. Your YubiKey will be linked to your account.
-														{% endblocktrans %}
-												</p>
-          {% endif %}
-										<!-- </steps> -->
+									{% if form.errors %}
+         	<div id="error-message" class="alert alert-danger py-2" role="alert">
+											<i class="fa fa-times-circle"></i>&nbsp; Incorrect information. Please Try again.
+										</div>
+         {% endif %}
+
+									<!-- <steps> -->
+         {% if wizard.steps.current == 'welcome' %}
+         	<p class="fs-0 fw-400 text-body text-justify">
+											{% blocktrans trimmed %}
+												You are about to take your account security to the
+            next level. Follow the steps to enable two-factor
+            authentication.
+											{% endblocktrans %}
+										</p>
+         {% elif wizard.steps.current == 'method' %}
+         	<p class="fs-0 fw-400 text-body">
+											{% blocktrans trimmed %}
+												Please select the method you would like to use.
+											{% endblocktrans %}
+										</p>
+         {% elif wizard.steps.current == 'generator' %}
+         	<p class="fs-0 fw-400 text-body text-justify">
+											{% blocktrans trimmed %}
+           	Use your smartphone to scan the <i class="fas fa-qrcode fs--2"></i>
+            or copy the <i class="fa fa-key fs--2"></i>
+												in your authentication app. Then, enter the token.
+           {% endblocktrans %}
+										</p>
+									{% elif wizard.steps.current == 'yubikey' %}
+         	<p class="fs-0 fw-400 text-body text-justify">
+											{% blocktrans trimmed %}
+												To add the token, click the field below and touch the Yubikey button.
+											{% endblocktrans %}
+										</p>
+         {% endif %}
+									<!-- </steps> -->
           
 										<!-- <form> -->  
           <form action="" method="post">
