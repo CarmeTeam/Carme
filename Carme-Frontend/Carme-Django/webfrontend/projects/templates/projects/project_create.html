@@ -5,6 +5,13 @@
 	<!-- <card-header> -->
 	{% block project_header_icon %}fas fa-pen-to-square{% endblock project_header_icon %}
 	{% block project_header_title %}Create Project{% endblock project_header_title %}
+ {% block project_header_button %}
+		<a href="https://gitlab.itwm.fraunhofer.de/styx/user-documentation" target="_blank" class="text-decoration-none">
+			<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="left" title="How to create a project?">
+				<span class="fas fa-circle-question text-secondary me-1"></span>
+			</span>			
+		</a>	
+	{% endblock project_header_button %}
 	<!-- </card-header> -->
 
 	<!-- <card-body> -->
@@ -47,7 +54,7 @@
 				<div class="form-check ps-4 py-2 ms-2">
 					<input name="checked" id="id_checked"  class="form-check-input" type="checkbox">
 					<label class="form-check-label fs-0 fw-400 text-body" for="id_checked">
-						I have read and accept the <a href="">terms and conditions</a>.
+						I have read and accept the <a href="https://gitlab.itwm.fraunhofer.de/styx/user-documentation/-/blob/main/user-agreement.md" target="_blank">terms and conditions</a>.
 					</label>
 				</div>
 			{% endif %}
