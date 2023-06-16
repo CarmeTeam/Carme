@@ -2,15 +2,15 @@
 {{ wizard.management_form }}
 
 {% if wizard.steps.current == 'method' %}
-  {% for field in wizard.form %}
-    	{{ field | add_classes:'fs-0 fw-400 text-body pb-3 ps-2' }}
-  {% endfor %}
+	{% for field in wizard.form %}
+ 	{{ field | add_classes:'fs-0 fw-400 text-body pb-3 ps-2' }}
+ {% endfor %}
 
 {% else %}
-  {% for field in wizard.form %}
-    <div class="form-group mb-3 position-relative w-100">
-     {{ field | add_classes:'form-control form-control-login fs-0 fw-400 d-block pt-4 ps-3' }}
-     <label class="form-label pt-1 ps-3" for="{{ field.label }}">{{ field.label }}</label>
-    </div>
-  {% endfor %}
+	{% for field in wizard.form %}
+ 	<div class="form-group mb-3 position-relative w-100">
+  	{{ field | add_classes:'form-control form-control-login fs-0 fw-400 d-block pt-4 ps-3' }}
+   <label class="form-label pt-1 ps-3" id="{{field.label}}" for="{{ field.label }}">{{ field.label }}</label>
+  </div>
+ {% endfor %}
 {% endif %}

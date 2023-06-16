@@ -35,19 +35,22 @@
 <!--   ( _wizard_actions.html )   -->
 <!---------------------------------->  
 <script>
-//  var token = $("#id_token-otp_token");
-//  var backup = $("#id_backup-otp_token");
-//  var validated = 1;
+  var token = $("#id_token-otp_token");
+  var backup = $("#id_backup-otp_token");
+	 var yubikey = $("#YubiKey").length;
+  var validated = 1;
 
-  token.bind("change keyup paste input", function(){
-    if( $(this).val().length < 6 || $(this).val().length > 6){
-      validated = 0; 
-    }
-    if( $(this).val().length == 6 && validated == 0 ) {
-      $('.btn.btn-lg').click();
-      validated = 1; 
-    }
-  });
+		if( yubikey == 0){
+  	token.bind("change keyup paste input", function(){
+   	if( $(this).val().length < 6 || $(this).val().length > 6){
+   		validated = 0; 
+   	}
+   	if( $(this).val().length == 6 && validated == 0 ) {
+   		$('.btn.btn-lg').click();
+    	validated = 1; 
+   	}
+  	});
+	 }
 
   backup.bind("change keyup paste input", function(){
     if( $(this).val().length < 8 || $(this).val().length > 8){

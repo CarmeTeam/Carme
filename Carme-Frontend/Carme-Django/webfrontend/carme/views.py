@@ -158,6 +158,8 @@ class AdminSiteOTPRequiredMixinRedirSetup(AdminSiteOTPRequired):
         return redirect_to_login(redirect_to)
 
 def ldap_username(request):
+    print('ldpan_username')
+    print(request.user.ldap_user.attrs['uid'][0])#e.g., 'demo-admin'
     return request.user.ldap_user.attrs['uid'][0]
 
 def ldap_home(request):
@@ -170,6 +172,10 @@ def generateChoices(request):
     group = list(request.user.ldap_user.group_names)[0]
     group_resources = GroupResource.objects.filter(name__exact=group)[0]
 
+    print('THIS IS GROUP:')
+    print(group)
+    print('THI IS GROUP_RESOURCES')
+    print(group_resources)
     # generate image choices
     image_list = Image.objects.filter(group__exact=group, status__exact="active")
     image_choices = set()
@@ -211,7 +217,12 @@ def index(request):
         # ldap
         group = list(request.user.ldap_user.group_names)[0]
         uID = request.user.ldap_user.attrs['uidNumber'][0]
-    
+        print('THIS IS GROUP IN INDEX:')
+        print(group)
+        print('THIS IS uID IN INDEX')
+        print(uID)
+        print('IN INDEX:')
+        print(ldap_home(request))
         # jobs history (uses ldap uID)
         myjobhist = CarmeJobTable.objects.filter(
             state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
@@ -439,22 +450,25 @@ def job_table(request):
 @login_required(login_url='/account/login')
 def start_job(request):
     """starts a new job (handing request to backend)"""
-
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
-    group = list(request.user.ldap_user.group_names)[0]
+    group = list(request.user.ldap_user.group_names)[0] # e.g., 'itwm-admin'
     partition = GroupResource.objects.filter(name__exact=group)[0].partition
+    print('PARTITION IS:')
+    print(partition)
 
     nodeC, gpuC, imageC, gpuT = generateChoices(request)
 
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
+        print('STARTJOB POST')
         # create a form instance and populate it with data from the request:
         form = StartJobForm(
             request.POST, image_choices=imageC, node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
         
         # check whether it's valid:
         if form.is_valid():
+            print('STARTJOB FORMVALID')
             # get image path and mounts from choices
             image_db = Image.objects.filter(group__exact=group,
                                                    name__exact=form.cleaned_data['image'])[0]
@@ -475,7 +489,11 @@ def start_job(request):
             conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
                                     certfile=settings.BASE_DIR+"/SSL/frontend.crt")
             job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(flags), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
-            
+            print('LDAP_USERNAME IS')
+            print(ldap_username(request))
+            print('LDAP HOME IS')
+            print(ldap_home(request))
+     
             if int(job_id) > 0:
                 SlurmJob.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
                                          user=request.user.username, slurm_id=int(job_id), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
