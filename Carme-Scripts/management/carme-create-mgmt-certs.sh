@@ -119,7 +119,8 @@ function create_backend_certs () {
 
   openssl genrsa -out "/tmp/backend.key" "${BIT_RATE}"
 
-  openssl req -new -x509 -days "${CERT_DAYS}" -key "/tmp/backend.key" -out "/tmp/backend.crt"
+  openssl req -new -x509 -days "${CERT_DAYS}" -key "/tmp/backend.key" -out "/tmp/backend.crt" -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=carme/emailAddress=backend${CARME_SSL_EMAIL_BASE}"
+
 
   chmod 600 "/tmp/backend.key"
   chmod 600 "/tmp/backend.crt"
@@ -144,7 +145,7 @@ function create_frontend_certs () {
 
   openssl genrsa -out "/tmp/frontend.key" "${BIT_RATE}"
 
-  openssl req -new -key "/tmp/frontend.key" -out "/tmp/frontend.csr" -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=carme/emailAddress=frontend@${CARME_SSL_EMAIL_BASE}" -passin pass:""
+  openssl req -new -key "/tmp/frontend.key" -out "/tmp/frontend.csr" -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=carme/emailAddress=frontend${CARME_SSL_EMAIL_BASE}" -passin pass:""
 
   openssl x509 -req -days "${CERT_DAYS}" -in "/tmp/frontend.csr" -CA "${BACKEND_CERT}" -CAkey "${BACKEND_KEY}" -set_serial 01 -out "/tmp/frontend.crt"
 
@@ -170,7 +171,7 @@ function create_slurmctld_certs () {
 
   openssl genrsa -out "/tmp/slurmctld.key" "${BIT_RATE}"
 
-  openssl req -new -key "/tmp/slurmctld.key" -out "/tmp/slurmctld.csr" -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=carme/emailAddress=slurmctld@${CARME_SSL_EMAIL_BASE}" -passin pass:""
+  openssl req -new -key "/tmp/slurmctld.key" -out "/tmp/slurmctld.csr" -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=carme/emailAddress=slurmctld${CARME_SSL_EMAIL_BASE}" -passin pass:""
 
   openssl x509 -req -days "${CERT_DAYS}" -in "/tmp/slurmctld.csr" -CA "${BACKEND_CERT}" -CAkey "${BACKEND_KEY}" -set_serial 01 -out "/tmp/slurmctld.crt"
 
