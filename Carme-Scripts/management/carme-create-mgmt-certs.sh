@@ -17,19 +17,6 @@ set -o pipefail
 # variables ------------------------------------------------------------------------------------------------------------------------
 CARME_PATH="/opt/Carme"                                                                  # path to carme installation
 PATH_TO_SCRIPTS_FOLDER="${CARME_PATH}/Carme-Scripts"                                     # path to the carme scripts folder
-CARME_FRONTEND_SSL_PATH="${CARME_FRONTEND_PATH}/Carme-Django/webfrontend/SSL"            # path to store the frontend certs
-
-BACKEND_CERT="${CARME_BACKEND_PATH}/SSL/backend.crt"                                     # full backend cert name
-BACKEND_KEY="${CARME_BACKEND_PATH}/SSL/backend.key"                                      # full backend key name
-
-FRONTEND_CERT="${CARME_FRONTEND_SSL_PATH}/frontend.crt"                                  # full frontend cert name
-FRONTEND_KEY="${CARME_FRONTEND_SSL_PATH}/frontend.key"                                   # full frontend key name
-
-SLURMCTLD_CERT="${PATH_TO_SCRIPTS_FOLDER}/backend/slurmctld.crt"                         # full slurmctld cert name
-SLURMCTLD_KEY="${PATH_TO_SCRIPTS_FOLDER}/backend/slurmctld.key"                          # full slurmctld key name
-
-BIT_RATE="4096"                                                                          # bits to use for key
-CERT_DAYS="3650"                                                                         # key validation in days
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -87,6 +74,21 @@ CARME_SSL_EMAIL_BASE=$(get_variable CARME_SSL_EMAIL_BASE)
 [[ -z ${CARME_SSL_EMAIL_BASE} ]] && die "CARME_SSL_EMAIL_BASE not set"
 #-----------------------------------------------------------------------------------------------------------------------------------
 
+# script variables -----------------------------------------------------------------------------------------------------------------
+CARME_FRONTEND_SSL_PATH="${CARME_FRONTEND_PATH}/Carme-Django/webfrontend/SSL"            # path to store the frontend certs         
+                                                                                                                                    
+BACKEND_CERT="${CARME_BACKEND_PATH}/SSL/backend.crt"                                     # full backend cert name                   
+BACKEND_KEY="${CARME_BACKEND_PATH}/SSL/backend.key"                                      # full backend key name                    
+                                                                                                                                    
+FRONTEND_CERT="${CARME_FRONTEND_SSL_PATH}/frontend.crt"                                  # full frontend cert name                  
+FRONTEND_KEY="${CARME_FRONTEND_SSL_PATH}/frontend.key"                                   # full frontend key name                   
+                                                                                                                                    
+SLURMCTLD_CERT="${PATH_TO_SCRIPTS_FOLDER}/backend/slurmctld.crt"                         # full slurmctld cert name                 
+SLURMCTLD_KEY="${PATH_TO_SCRIPTS_FOLDER}/backend/slurmctld.key"                          # full slurmctld key name                  
+                                                                                                                                    
+BIT_RATE="4096"                                                                          # bits to use for key                      
+CERT_DAYS="3650"                                                                         # key validation in days                   
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 # check if node is headnode --------------------------------------------------------------------------------------------------------
 [[ "$(hostname -s)" != "${CARME_HEADNODE_NAME}" ]] && die "This is not the headnode (${CARME_HEADNODE_NAME}) defined in your CARME config."
@@ -142,7 +144,7 @@ function create_frontend_certs () {
 
   openssl genrsa -out "/tmp/frontend.key" "${BIT_RATE}"
 
-  openssl req -new -key "/tmp/frontend.key" -out frontend.csr -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=carme/emailAddress=frontend@${CARME_SSL_EMAIL_BASE}" -passin pass:""
+  openssl req -new -key "/tmp/frontend.key" -out "/tmp/frontend.csr" -subj "/C=${CARME_SSL_C}/ST=${CARME_SSL_ST}/L=${CARME_SSL_L}/O=${CARME_SSL_O}/OU=${CARME_SSL_OU}/CN=carme/emailAddress=frontend@${CARME_SSL_EMAIL_BASE}" -passin pass:""
 
   openssl x509 -req -days "${CERT_DAYS}" -in "/tmp/frontend.csr" -CA "${BACKEND_CERT}" -CAkey "${BACKEND_KEY}" -set_serial 01 -out "/tmp/frontend.crt"
 
@@ -180,6 +182,8 @@ function create_slurmctld_certs () {
   chmod 600 "/tmp/slurmctld.key"
   chmod 600 "/tmp/slurmctld.crt"
 
+  [[ -f "${SLURMCTLD_KEY}" ]] && mv "${SLURMCTLD_KEY}" "${SLURMCTLD_KEY}.bak"
+  [[ -f "${SLURMCTLD_CERT}" ]] && mv "${SLURMCTLD_CERT}" "${SLURMCTLD_CERT}.bak"
   mv "/tmp/slurmctld.key" "${SLURMCTLD_KEY}" || die "cannot move '/tmp/slurmctld.key' to '${SLURMCTLD_KEY}'"
   mv "/tmp/slurmctld.crt" "${SLURMCTLD_CERT}" || die "cannot move '/tmp/slurmctld.crt' to '${SLURMCTLD_CERT}'"
 }
