@@ -35,6 +35,8 @@ SECRET_KEY = CARME_FRONTEND_KEY
 DEBUG = CARME_FRONTEND_DEBUG
 
 ALLOWED_HOSTS = [CARME_URL, CARME_LOGINNODE_IP]
+
+CSRF_FAILURE_VIEW = 'carme.views.csrf_failure' 
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
