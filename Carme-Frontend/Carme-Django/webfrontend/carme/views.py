@@ -1,8 +1,8 @@
 # ---------------------------------------------- 
 # Carme
 # ----------------------------------------------
-# views.py                                                                                                                                                                     
-#                                                                                                                                                                                                            
+# views.py
+#
 # see Carme development guide for documentation: 
 # * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
 #
@@ -202,6 +202,10 @@ def generateChoices(request):
     gpu_type = [(str(i), i) for i in gputype]
 
     return node_choices, gpu_choices, sorted(list(image_choices)), gpu_type
+
+
+def csrf_failure(request, reason=""):
+    return redirect("/")             
 
 
 @login_required(login_url='/account/login') 
