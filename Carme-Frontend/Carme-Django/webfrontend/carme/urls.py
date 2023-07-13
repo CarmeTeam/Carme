@@ -31,6 +31,7 @@ gpus = gputype
 urlpatterns = [
     path('', views.index, name='index'),
     path('account/two_factor/setup/', views.QRSetup, name='setup'),
+    path('account/login/', views.myLogin, name='mylogin'),
     re_path(r'^password/$', views.change_password, name='change_password'),
     re_path(r'^StartJob/$', views.start_job, name='start_job'),
     re_path(r'^StopJob/$', views.stop_job, name='stop_job'),
