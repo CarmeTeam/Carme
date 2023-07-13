@@ -92,6 +92,8 @@ from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import resolve_url
 from two_factor.utils import monkeypatch_method
 
+from two_factor.views.core import LoginView
+
 try:
     from django.utils.http import url_has_allowed_host_and_scheme
 except ImportError:
@@ -106,6 +108,18 @@ except ImportError:
 #-------------------------------#
 #----- classes and methods -----#
 #-------------------------------#
+
+# Login
+class myLogin(LoginView):
+    #redirect to the next page
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect('/')
+        else:
+            return super(LoginView, self).dispatch(request, *args, **kwargs)
+    
+myLogin = myLogin.as_view()
+
 
 # 2FA
 class QRSetup(SetupView):
