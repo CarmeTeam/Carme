@@ -1,23 +1,22 @@
 <VirtualHost *:80> 
  ServerName server-name.de
- DocumentRoot /opt/Carme/Carme-Frontend/Carme-Webfrontend/webfrontend/ 
- WSGIScriptAlias / /opt/Carme/Carme-Frontend/Carme-Webfrontend/webfrontend/scripts/wsgi.py  
+ DocumentRoot /opt/Carme/Carme-Frontend/Carme-Django/webfrontend/ 
+ WSGIScriptAlias / /opt/Carme/Carme-Frontend/Carme-Django/webfrontend/scripts/wsgi.py  
  
  # adjust the following line to match your Python path 
  WSGIDaemonProcess server-name.de processes=2 threads=15 display-name=%{GROUP}  
  WSGIProcessGroup server-name.de
  WSGIApplicationGroup %{GLOBAL}
  
- <directory /opt/Carme/Carme-Frontend/Carme-Webfrontend/webfrontend/>
+ <directory /opt/Carme/Carme-Frontend/Carme-Django/webfrontend/>
    AllowOverride all 
    Require all granted 
    Options FollowSymlinks 
  </directory> 
  
- Alias /static/ /opt/Carme/Carme-Frontend/Carme-Webfrontend/static/
+ Alias /static/ /opt/Carme/Carme-Frontend/Carme-Django/static/
  
- <Directory /opt/Carme/Carme-Frontend/Carme-Webfrontend/static/>
+ <Directory /opt/Carme/Carme-Frontend/Carme-Django/static/>
   Require all granted 
  </Directory> 
 </VirtualHost> 
-
