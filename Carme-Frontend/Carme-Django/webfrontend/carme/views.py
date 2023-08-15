@@ -53,12 +53,15 @@ import re
 from .forms import LoginForm
 #from django.contrib.auth import authenticate, login, logout
 
-# Charts
+# News Card in Dashboard
+import misaka
+
+# Chart Card in Dashboard
 from django.utils.translation import gettext_lazy as _
 from .highcharts.colors import COLORS, next_color
 from .highcharts.lines import HighchartPlotLineChartView
 
-# History Card
+# History Card in Dashboard
 from django.db.models import Case, Value, When, IntegerField 
 
 # Maintenance
@@ -186,10 +189,6 @@ def generateChoices(request):
     group = list(request.user.ldap_user.group_names)[0]
     group_resources = GroupResource.objects.filter(name__exact=group)[0]
 
-    print('THIS IS GROUP:')
-    print(group)
-    print('THI IS GROUP_RESOURCES')
-    print(group_resources)
     # generate image choices
     image_list = Image.objects.filter(group__exact=group, status__exact="active")
     image_choices = set()
@@ -235,12 +234,21 @@ def index(request):
         # ldap
         group = list(request.user.ldap_user.group_names)[0]
         uID = request.user.ldap_user.attrs['uidNumber'][0]
-        print('THIS IS GROUP IN INDEX:')
-        print(group)
-        print('THIS IS uID IN INDEX')
-        print(uID)
-        print('IN INDEX:')
-        print(ldap_home(request))
+        
+
+        # news card    
+        carme_message=os.popen("curl https://www.open-carme.org/message.md").read() 
+    
+        news_message = NewsMessage.objects.filter()
+        if news_message.exists():
+            news_message.update(carme_message=carme_message)
+            if news_message.values_list('show_custom_message', flat=True)[0] == 1:
+                news=misaka.html(news_message.values_list('custom_message', flat=True)[0])
+            else:
+                news=misaka.html(news_message.values_list('carme_message', flat=True)[0])
+        else:
+            NewsMessage.objects.create(carme_message=carme_message)
+
         # jobs history (uses ldap uID)
         myjobhist = CarmeJobTable.objects.filter(
             state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
@@ -369,6 +377,7 @@ def index(request):
             'mylist_long': mylist_long,
             'job_time' : job_time,
             'gpu_loop' : gpu_loop,
+            'news': news #news-card
             'gputype': gputype, #gpucard
             'cpupergpu': cpupergpu, #gpucard
             'rampergpu': rampergpu, #gpucard

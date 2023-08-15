@@ -20,28 +20,28 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SourceFileLoader('CarmeConfigFrontend', '/etc/carme/CarmeConfig.frontend').load_module()
 from CarmeConfigFrontend import CARME_SLURM_ClusterName
 
-""" User Messages
+class NewsMessage(models.Model):
+    """ news message """
+    show_custom_message = models.BooleanField(default=False)
+    custom_message = models.TextField(default='Type your message', blank=True)
+    carme_message = models.TextField(default='', blank=True)
 
-"""
 class CarmeMessage(models.Model):
+    """ user notifications """
     user = models.CharField(max_length=64)
     message = models.CharField(max_length=512, default='message')
     color = models.CharField(max_length=16, default='gray')
 
-""" cluster usage statistics
-
-"""
 class ClusterStat(models.Model):
+    """ cluster usage statistics """
     date = models.DateTimeField(default=datetime.now, blank=True)
     free = models.IntegerField(default=0)
     used = models.IntegerField(default=0)
     reserved = models.IntegerField(default=0)
     queued = models.IntegerField(default=0)
 
-""" list of running and queued jobs
-
-"""
 class SlurmJob(models.Model):
+    """ list of running and queued jobs """
     user = models.CharField(max_length=64)
     num_nodes = models.IntegerField(default=1)
     num_gpus = models.IntegerField(default=1)
@@ -58,10 +58,8 @@ class SlurmJob(models.Model):
     frontend = models.CharField(max_length=64, default='main')
     gpu_type = models.CharField(max_length=64, default='none')
 
-""" avalable images
-
-"""
 class Image(models.Model):
+    """ available software images """
     name = models.CharField(max_length=128)
     path = models.CharField(max_length=512)
     group = models.CharField(max_length=64)
@@ -72,6 +70,7 @@ class Image(models.Model):
     owner = models.CharField(max_length=64, default="admin")
 
 class GroupResource(models.Model):
+    """ resources allocated to each group """
     name = models.CharField(max_length=128)
     partition = models.CharField(max_length=128)
     default = models.BooleanField() 
