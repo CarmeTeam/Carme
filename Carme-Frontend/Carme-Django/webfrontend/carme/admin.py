@@ -13,6 +13,7 @@
 from django.contrib import admin
 from .models import SlurmJob
 from .models import Image
+from .models import NewsMessage
 from .models import CarmeMessage
 from .models import ClusterStat
 from .models import GroupResource
@@ -26,10 +27,13 @@ admin.site.site_header = 'EXAMPLETHISISNOTREAL'
 #admin.site.site_title = settings.CARME_ADMIN_SITE_NAME
 #admin.site.index_title = settings.CARME_ADMIN_SITE_INDEX
 
-""" admin view for image db
+class NewsMessageAdmin(admin.ModelAdmin):
+    """ admin view for NewsMessage fields """
+    list_display = ('show_custom_message','custom_message','carme_message')
+    readonly_fields = ['carme_message']
 
-"""
 class ImageAdmin(admin.ModelAdmin):
+    """ admin view for ImageAdmin fields """
     list_display = ('name', 'path', 'group',
                     'flags', 'comment', 'status', 'owner')
     list_display_links = ('name', 'owner')
@@ -74,6 +78,7 @@ class RuningJobAdmin(admin.ModelAdmin):
 class StatAdmin(admin.ModelAdmin):
     list_display = ('date', 'free', 'used', 'reserved', 'queued')
 
+admin.site.register(NewsMessage, NewsMessageAdmin)
 admin.site.register(Image, ImageAdmin)
 admin.site.register(SlurmJob, SlurmJobAdmin)
 admin.site.register(CarmeMessage, CarmeMessageAdmin)

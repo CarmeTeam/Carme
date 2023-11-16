@@ -21,7 +21,7 @@ from django.http import HttpResponse
 from django.template import loader
 
 # Database
-from .models import CarmeMessage, SlurmJob, Image, CarmeJobTable, ClusterStat, GroupResource
+from .models import NewsMessage, CarmeMessage, SlurmJob, Image, CarmeJobTable, ClusterStat, GroupResource
 from projects.models import ProjectMember, ProjectHasTemplate, TemplateHasAccelerator
 
 from django.shortcuts import render
@@ -235,10 +235,10 @@ def index(request):
         group = list(request.user.ldap_user.group_names)[0]
         uID = request.user.ldap_user.attrs['uidNumber'][0]
         
-
         # news card    
         carme_message=os.popen("curl https://www.open-carme.org/message.md").read() 
-    
+        print("NEWS IN PROBLEM")
+        print(carme_message)
         news_message = NewsMessage.objects.filter()
         if news_message.exists():
             news_message.update(carme_message=carme_message)
@@ -247,7 +247,8 @@ def index(request):
             else:
                 news=misaka.html(news_message.values_list('carme_message', flat=True)[0])
         else:
-            NewsMessage.objects.create(carme_message=carme_message)
+            news_message = NewsMessage.objects.create(carme_message=carme_message)
+            news=misaka.html(news_message.values_list('carme_message', flat=True)[0])
 
         # jobs history (uses ldap uID)
         myjobhist = CarmeJobTable.objects.filter(
@@ -377,7 +378,7 @@ def index(request):
             'mylist_long': mylist_long,
             'job_time' : job_time,
             'gpu_loop' : gpu_loop,
-            'news': news #news-card
+            'news': news, #news-card
             'gputype': gputype, #gpucard
             'cpupergpu': cpupergpu, #gpucard
             'rampergpu': rampergpu, #gpucard
