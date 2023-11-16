@@ -1,5 +1,5 @@
 BootStrap: debootstrap
-OSVersion: oldoldstable
+OSVersion: oldstable
 MirrorURL: http://ftp.de.debian.org/debian/
 
 %help
@@ -59,31 +59,24 @@ MirrorURL: http://ftp.de.debian.org/debian/
     #-------------------------------------------------------------------------------------------------------------------------------
     
     # install git to call git urls with pip
-    #apt install -y git
+    apt install -y git
 
     # create and activate a python environment -------------------------------------------------------------------------------------
     python3 -m venv /opt/.venv
     . /opt/.venv/bin/activate
 
-
-				pip3 install -U pip
-
     # install python dependencies
-    pip3 install Django numpy rpyc whitenoise bleach --no-cache-dir
-    #pip3 install git+https://github.com/django-wiki/django-wiki.git --no-cache-dir
-    pip3 install wiki
-    pip3 install django-autocomplete-light
+    pip3 install Django numpy rpyc whitenoise --no-cache-dir
+    pip3 install git+https://github.com/django-wiki/django-wiki.git --no-cache-dir
     pip3 install django-auth-ldap django-mathfilters django-classy-tags django-db-logger django-filter --no-cache-dir
     pip3 install django-two-factor-auth phonenumbers django-otp-yubikey --no-cache-dir
     pip3 install django-js-asset django-logtailer django-maintenance-mode django-material django-mptt django-nyt django-sekizai --no-cache-dir
     # install mysqlclient
-    #export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
-    #export MYSQLCLIENT_LDFLAGS=`pkg-config mysqlclient --libs`
+    export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
+    export MYSQLCLIENT_LDFLAGS=`pkg-config mysqlclient --libs`
     pip3 install mysqlclient --no-cache-dir
     # install python dependencies with --use-pep517 (due to deprecation, refer to https://github.com/pypa/pip/issues/8559)
-    pip3 install django-settings-export django-viewflow 
-    #pip3 instal django-todo
-    pip3 install misaka --no-cache-dir --use-pep517
+    pip3 install django-settings-export django-viewflow django-todo misaka --no-cache-dir --use-pep517
     #-------------------------------------------------------------------------------------------------------------------------------
     
     # set sourcing .venv as a singularity environment variable (needed to activate the environment inside the container)
