@@ -335,7 +335,33 @@
 								<tr class="border-bottom-solid">
                             		<!-- <job-form> -->
                    					<form class="form ajax" action="{% url 'start_job' %}" method="post">
-                    					{% csrf_token %}                    										
+                    					{% csrf_token %}
+
+																									 <th colspan="2" class="ps-0">                                                                                                  
+   																								<div class="input-group my-1">                                        
+     																							<div class="input-group-text fs--1 fw-400 text-body">                                                         
+    																									{{ start_job_form.gpu_type.label }}                                                                            
+  																										</div>                                                                                                           
+  																										<select name="{{ start_job_form.gpu_type.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
+   																										{% for choice in start_job_form.gpu_type.field.choices %}                                                       
+     																									<option value="{{ choice.0 }}">{{ choice.1 | upper }}</option>                                                
+      																							{% endfor %}                                                                                                 
+     																							</select>                                                                                                     
+   																								</div>                                                                                                          
+ 																									</th>                                                                                                             
+ 																									<th colspan="2">                                                                                                  
+   																								<div class="input-group my-1">                                        
+     																							<div class="input-group-text fs--1 fw-400 text-body">                                                         
+     																								{{ start_job_form.gpus.label }}                                                                               
+  																										</div>                                                                                                           
+     																							<select name="{{ start_job_form.gpus.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body"> 
+      																							{% for choice in start_job_form.gpus.field.choices %}                                                        
+     																									<option value="{{ choice.0 }}">{{ choice.1 }}</option>                                                        
+   																										{% endfor %}                                                                                                    
+  																										</select>                                                                                                        
+ 																										</div>                                                                                                            
+																										</th>                                                                                                              
+                    										
                     					<th colspan="2">
                      						<div class="input-group my-1">
                       							<div class="input-group-text fs--1 fw-400 text-body">
@@ -348,30 +374,6 @@
                        							</select>
                       						</div>
                      					</th>
-                     					<th colspan="2">
-                      						<div class="input-group my-1" style="width:12.2rem; max-wdith:12.2rem;">
-                       							<div class="input-group-text fs--1 fw-400 text-body">
-                     								{{ start_job_form.gpu_type.label }}
-                   								</div>
-                   								<select name="{{ start_job_form.gpu_type.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
-                   									{% for choice in start_job_form.gpu_type.field.choices %}
-                   	 									<option value="{{ choice.0 }}">{{ choice.1 | upper }}</option>
-                        							{% endfor %}
-                       							</select> 
-                      						</div>
-                     					</th>
-                     					<th colspan="2">
-                      						<div class="input-group my-1" style="width:11.1rem; max-width:11.1rem;">
-                       							<div class="input-group-text fs--1 fw-400 text-body">
-                      								{{ start_job_form.gpus.label }}
-                   								</div>
-                       							<select name="{{ start_job_form.gpus.html_name }}" class="form-select form-select-sm fs--1 fw-400 text-body">
-                        							{% for choice in start_job_form.gpus.field.choices %}
-                     									<option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                   									{% endfor %}
-                   								</select>
-                   							</div>
-                   						</th>
                    						<th colspan="2">
                       						<div class="input-group my-1">
                        							<div class="input-group-text fs--1 fw-400 text-body">
@@ -393,34 +395,34 @@
 												   	   value="{{ start_job_form.name.field.initial }}">
                       						</div>
                      					</th>
-                     					<th colspan="1">
+                     					<th colspan="1" class="pe-0">
                       						<button class="btn btn-primary start-job" type="submit">
-												<i class="fa fa-play fa-fw"></i>
-											</button>
+																													<i class="fa fa-play fa-fw"></i>
+																												</button>
                      					</th>
                    					</form>
                             		<!-- </job-form> -->
                   				</tr>
 								<tr class="border-bottom-double">
-                   					<th style="width: 5.0rem; max-width:5.0rem;">ID</th>
-                   					<th style="width: 7.0rem; max-width:7.0rem;">Name</th>
-                   					<th style="width: 7.0rem; max-width:7.0rem;">Image</th>
-                   					<th style="width: 5.0rem; max-width:5.0rem;">Nodes</th>
-                   					<th style="width: 5.0rem; max-width:5.0rem;"><span class="frac">
+                   					<th style="min-width:6.0rem;" class="ps-0">ID</th>
+                   					<th style="min-width:10.0rem;">Name</th>
+                   					<th style="min-width:10.0rem;">Image</th>
+                   					<th style="min-width:5.0rem;">Nodes</th>
+                   					<th style="min-width:5.0rem;"><span class="frac">
 										   											<sup>CPUs</sup>
 																					<span>&frasl;</span>
 																					<sub>node</sub>
 																				 </span></th>
-					              	<th style="width: 6.0rem; max-width:6.0rem;"><span class="frac">
-																					<sup>GPUs</sup>
+					              	<th style="min-width:6.0rem;"><span class="frac">
+																					<sup>Accelerators</sup>
 																					<span>&frasl;</span>
 																					<sub>node</sub>
 																				 </span></th>
-                   					<th style="width: 5.0rem; max-width:5.0rem;">Status</th>
-                   					<th style="width: 12rem; max-width:12rem;">Timing</th>
-                   					<th style="width: 10rem; max-width:10rem;">Entry points</th>
-                   					<th style="width: 5.0rem; max-width:5.0rem;">Details</th>
-                   					<th>Stop</th>
+                   					<th style="min-width:5.0rem;">Status</th>
+                   					<th style="min-width:12.0rem;">Timing</th>
+                   					<th style="min-width:8.0rem;">Entry points</th>
+                   					<th style="min-width:5.0rem;">Details</th>
+                   					<th class="pe-0">Stop</th>
                   				</tr>
 							</thead>
 

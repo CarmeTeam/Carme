@@ -41,6 +41,8 @@
 								<option class="bg-transparent" value="{{value}}" selected>
 								{% elif value == 'Highly Confidential'%}
 								<option class="bg-transparent" value="{{value}}" disabled>
+								{% else %}
+        <option class="bg-transparent" value="{{value}}">
 								{% endif %}								
 									{{text}}
 								</option>

@@ -14,6 +14,7 @@ class Project(models.Model):
     is_approved = models.BooleanField(default=False)
     num = models.CharField(max_length=255, unique=False)  
     name = models.CharField(max_length=255, unique=False)
+    type = models.CharField(max_length=255, unique=False, default="none")
     slug = models.SlugField(allow_unicode=True, unique=True)
     department = models.CharField(max_length=255, unique=False)
     classification = models.CharField(max_length=255, unique=False)
@@ -92,6 +93,7 @@ class ProjectMember(models.Model):
 # Project -- (ProjectHasTemplate) -- ResourceTemplate
 class ResourceTemplate(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    type = models.CharField(max_length=255, unique=False, default="none")
     maxjobs = models.IntegerField(default=4)
     maxnodes_per_job = models.CharField(max_length=50, default="1")
     maxaccels_per_node = models.CharField(max_length=50, default="1")
@@ -117,12 +119,13 @@ class ProjectHasTemplate(models.Model):
 
 # ResourceTemplate -- (TemplateHasAccelerator) -- Accelerator
 class Accelerator(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    type = models.CharField(max_length=50, default="NONE")
-    num_total = models.IntegerField(default=0)
+    name = models.CharField(max_length=255, default="none")
+    type = models.CharField(max_length=50, default="none")
     num_per_node = models.IntegerField(default=0)
-    num_cpus_per_acc = models.IntegerField(default=0)
-    num_ram_per_acc = models.IntegerField(default=0)
+    num_cpus_per_node = models.IntegerField(default=0)
+    main_mem_per_node = models.IntegerField(default=0)
+    node_name = models.CharField(max_length=255, unique=True, default="local")
+    node_status = models.IntegerField(default=0)
     accelerator = models.ManyToManyField(ResourceTemplate,through="TemplateHasAccelerator")
 
     def __str__(self):
@@ -138,3 +141,46 @@ class TemplateHasAccelerator(models.Model):
 
     class Meta:
         unique_together = ("resourcetemplate", "accelerator")
+
+# ResourceTemplate -- (TemplateHasImage) -- Image
+class Image(models.Model):
+    name = models.CharField(max_length=255, unique=True, default="Base")
+    type = models.CharField(max_length=255, unique=False, default="carme")
+    path = models.CharField(max_length=255, default='')
+    information = models.TextField(blank=True, default='')
+    status = models.BooleanField(default=False)
+    owner = models.CharField(max_length=50, default='admin')
+    image = models.ManyToManyField(ResourceTemplate,through="TemplateHasImage")
+
+    def __str__(self):
+        return f"{self.name}-{self.type}"
+
+class TemplateHasImage(models.Model):
+    resourcetemplate = models.ForeignKey(ResourceTemplate,on_delete=models.CASCADE,)
+    image = models.ForeignKey(Image,on_delete=models.CASCADE,)
+
+    def __str__(self):
+        return f"{self.resourcetemplate}-{self.image}"
+
+    class Meta:
+        unique_together = ("resourcetemplate", "image")
+
+# Image -- (ImageHasFlag) -- Flag
+class Flag(models.Model):
+    name = models.CharField(max_length=255, unique=True, default="none")
+    type = models.CharField(max_length=255, unique=False, default="none")
+    flag = models.ManyToManyField(Image,through="ImageHasFlag")
+
+    def __str__(self):
+        return f"{self.name}-{self.type}"
+
+class ImageHasFlag(models.Model):
+    image = models.ForeignKey(Image,on_delete=models.CASCADE,)
+    flag = models.ForeignKey(Flag,on_delete=models.CASCADE,)
+
+    def __str__(self):
+        return f"{self.image}-{self.flag}"
+
+    class Meta:
+        unique_together = ("image", "flag")
+

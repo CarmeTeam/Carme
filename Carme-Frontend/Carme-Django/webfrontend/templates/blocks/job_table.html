@@ -4,7 +4,7 @@
 
 {% for job, slurm in myjobtable_list %}
 	<tr class="dashboard-jobtable border-bottom-solid" data-jobid="{{ job.slurm_id }}">
-			<td>{{ job.slurm_id }}</th>
+			<td class="ps-0">{{ job.slurm_id }}</th>
 			<td>{{ job.name }}</td>
 			<td>{{ job.image_name }} </td>
 			<td><span class="i-orange py-1 px-2 rounded-circle fs--1 fw-700">{{ job.num_nodes }}</span></td>
@@ -180,7 +180,7 @@
 				 	{% else %}
 						---
 					{% endif %}</td>
-			<td><form class="ajax" action="{% url 'stop_job' %}" method="post">
+			<td class="pe-0"><form class="ajax" action="{% url 'stop_job' %}" method="post">
 						{% csrf_token %}
 						<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 						<input type="hidden" name="jobName" value="{{job.name}}">
