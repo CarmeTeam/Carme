@@ -28,3 +28,8 @@ register.filter(print_timestamp_small)
 @register.filter
 def index(indexable, i):
     return indexable[i]
+
+@register.filter(name='range')
+def filter_range(start, end):
+    end = int(end)+1
+    return range(start, end)

@@ -68,14 +68,14 @@ class SingleProject(LoginRequiredMixin,DetailView):
                                                              'template__walltime',
                                                              'template__partition',
                                                              'template__features')
-        templateQuerySet = templateQuerySet.filter(project__name=self.object.name)
+        templateQuerySet = templateQuerySet.filter(project__slug=self.object.slug)
         context['template_list'] = templateQuerySet
 
 
         # accelerator list
         acceleratorQuerySet = TemplateHasAccelerator.objects.values('accelerator__name',
                                                                     'accelerator__type',
-                                                                    'resourcetemplate__name')
+                                                                    'resourcetemplate__name').distinct()
         #.filter(resourcetemplate__name=resource_name)
         context['accelerator_list'] = acceleratorQuerySet
         

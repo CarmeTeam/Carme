@@ -151,6 +151,7 @@ class Image(models.Model):
     status = models.BooleanField(default=False)
     owner = models.CharField(max_length=50, default='admin')
     image = models.ManyToManyField(ResourceTemplate,through="TemplateHasImage")
+    bind = models.CharField(max_length=255, unique=True, default="none")
 
     def __str__(self):
         return f"{self.name}-{self.type}"

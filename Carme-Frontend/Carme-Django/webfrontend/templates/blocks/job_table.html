@@ -180,7 +180,7 @@
 				 	{% else %}
 						---
 					{% endif %}</td>
-			<td class="pe-0"><form class="ajax" action="{% url 'stop_job' %}" method="post">
+			<td><form class="ajax" action="{% url 'stop_job' %}" method="post">
 						{% csrf_token %}
 						<input type="hidden" name="jobID" value="{{job.slurm_id}}">
 						<input type="hidden" name="jobName" value="{{job.name}}">

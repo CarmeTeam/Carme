@@ -21,8 +21,8 @@ from django.http import HttpResponse
 from django.template import loader
 
 # Database
-from .models import NewsMessage, CarmeMessage, SlurmJob, Image, CarmeJobTable, ClusterStat, GroupResource
-from projects.models import ProjectMember, ProjectHasTemplate, TemplateHasAccelerator
+from .models import NewsMessage, CarmeMessage, SlurmJob, CarmeJobTable, ClusterStat, GroupResource
+from projects.models import ProjectMember, ProjectHasTemplate, TemplateHasAccelerator, Accelerator, TemplateHasImage, ResourceTemplate, Image
 
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
@@ -175,9 +175,7 @@ class AdminSiteOTPRequiredMixinRedirSetup(AdminSiteOTPRequired):
         return redirect_to_login(redirect_to)
 
 def ldap_username(request):
-    print('ldpan_username')
-    print(request.user.ldap_user.attrs['uid'][0])#e.g., 'demo-admin'
-    return request.user.ldap_user.attrs['uid'][0]
+    return request.user.ldap_user.attrs['uid'][0] #e.g., 'demo-admin'
 
 def ldap_home(request):
     return request.user.ldap_user.attrs['homeDirectory'][0]
@@ -190,7 +188,7 @@ def generateChoices(request):
     group_resources = GroupResource.objects.filter(name__exact=group)[0]
 
     # generate image choices
-    image_list = Image.objects.filter(group__exact=group, status__exact="active")
+    image_list = Image.objects.filter(status__exact=1)
     image_choices = set()
     for i in image_list:
         image_choices.add((i.name, i.name))
@@ -235,10 +233,8 @@ def index(request):
         group = list(request.user.ldap_user.group_names)[0]
         uID = request.user.ldap_user.attrs['uidNumber'][0]
         
-        # news card    
-        carme_message=os.popen("curl https://www.open-carme.org/message.md").read() 
-        print("NEWS IN PROBLEM")
-        print(carme_message)
+        # news card -----------------------------------------------------------------------------------   
+        carme_message=os.popen("curl https://www.open-carme.org/message.md").read()
         news_message = NewsMessage.objects.filter()
         if news_message.exists():
             news_message.update(carme_message=carme_message)
@@ -250,27 +246,171 @@ def index(request):
             news_message = NewsMessage.objects.create(carme_message=carme_message)
             news=misaka.html(news_message.values_list('carme_message', flat=True)[0])
 
-        # jobs history (uses ldap uID)
-        myjobhist = CarmeJobTable.objects.filter(
-            state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
+        # system card --------------------------------------------------------------------------------
+        acceleratorQuery = Accelerator.objects.filter()
     
-        myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
-    
-        cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
-        myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
-            sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
-    
-        mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
-        mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
+        accelerator_name = list(acceleratorQuery.order_by('id').values_list('name',flat=True))
+        accelerator_name = list(set(accelerator_name))
 
-        # compute total GPU hours in jobs history  (uses ldap uID)
-        job_time_end = CarmeJobTable.objects.filter(
-            state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
-        job_time_start = CarmeJobTable.objects.filter(
-            state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
-        job_time = 0
-        if (job_time_start and job_time_end):
-            job_time = round((job_time_end-job_time_start)/3600)
+        ## top panel--------------------
+        accelerator_type = []
+        accelerator_ratio = []
+        accelerator_name_num_total = []
+        accelerator_type_num_total = []
+        ## -----------------------------
+
+        ## bottom panel ----------------
+        accelerator_node = []
+        accelerator_num_per_node = []
+        accelerator_num_cpus_per_node = []
+        accelerator_main_mem_per_node = []
+        ## -----------------------------
+
+        for num in range(len(accelerator_name)):
+
+            ### top panel ---------------------------------------------
+
+            # type
+            acceleratorNameQuery=Accelerator.objects.filter(name__exact=accelerator_name[num])
+            accelerator_type_single = acceleratorNameQuery.order_by('id').values_list('type',flat=True).first()
+            accelerator_type.append(accelerator_type_single)
+            # name_total
+            accelerator_name_num_per_node = list(acceleratorNameQuery.order_by('id').values_list('num_per_node',flat=True))
+            accelerator_name_sum = sum(accelerator_name_num_per_node)
+            accelerator_name_num_total.append(accelerator_name_sum)
+            # type_total
+            acceleratorTypeQuery=Accelerator.objects.filter(type__exact=accelerator_type_single)
+            accelerator_type_num_per_node = list(acceleratorTypeQuery.order_by('id').values_list('num_per_node',flat=True))
+            accelerator_type_sum = sum(accelerator_type_num_per_node)
+            accelerator_type_num_total.append(accelerator_type_sum)
+            # ratio name/type
+            accelerator_ratio.append(round(accelerator_name_sum * 100 / accelerator_type_sum, 1))
+            ### -------------------------------------------------------
+
+            ### bottom panel ------------------------------------------
+
+            # nodes
+            accelerator_name_node = list(acceleratorNameQuery.order_by('id').values_list('node_name',flat=True))
+            accelerator_node.append(accelerator_name_node)
+            # num accelerator/node
+            accelerator_num_per_node.append(accelerator_name_num_per_node)
+            # num cpus/node
+            accelerator_name_num_cpus_per_node = list(acceleratorNameQuery.order_by('id').values_list('num_cpus_per_node',flat=True))
+            accelerator_num_cpus_per_node.append(accelerator_name_num_cpus_per_node)
+            # main mem/node
+            accelerator_name_main_mem_per_node = list(acceleratorNameQuery.order_by('id').values_list('main_mem_per_node',flat=True))
+            accelerator_main_mem_per_node.append(accelerator_name_main_mem_per_node)
+            ### -------------------------------------------------------
+            
+        ## zipping
+        accelerator_zip = zip(accelerator_type,accelerator_ratio,accelerator_name_num_total,accelerator_type_num_total,
+                              accelerator_node,accelerator_num_per_node,accelerator_num_cpus_per_node,accelerator_main_mem_per_node)
+        
+        accelerator_info = []
+        for a_type, a_ratio, a_name_num_total, a_type_num_total, a_node, a_num_per_node, a_num_cpus_per_node, a_main_mem_per_node in accelerator_zip:
+            a_per_node= []
+            for acc, cpu, mem in zip(a_num_per_node,a_num_cpus_per_node,a_main_mem_per_node):
+                a_per_node.append((acc,cpu,mem))
+
+            accelerator_info.append((a_type,a_ratio,a_name_num_total,a_type_num_total,a_node,a_per_node))
+
+        # jobs card ----------------------------------------------------------------------------------
+
+        ## card header -----------------
+        projectQueryActive = ProjectMember.objects.filter(user=request.user, 
+                                                          is_approved_by_admin=True,
+                                                          is_approved_by_manager=True,
+                                                          status='accepted',
+                                                          project__is_approved=True)
+        project_id = list(projectQueryActive.order_by('id').values_list('project_id',flat=True))
+        project_id = list(set(project_id))
+
+        templateQuerySet = ProjectHasTemplate.objects.filter(project_id__in=project_id)
+        project_name = list(templateQuerySet.order_by('id').values_list('project__name',flat=True))
+        template_name = list(templateQuerySet.order_by('id').values_list('template__name',flat=True))
+    
+        ### zipping
+        project_and_template = list(zip(project_name, template_name))
+
+        ## card body -------------------
+        accelerator_per_node_field = []
+        accelerator_name_field = []
+        accelerator_type_field = []
+        image_field = []
+        node_field = []
+        for num in range(len(template_name)):
+            #-----------------------------------------------------
+            # accelerator name field    
+            resourceTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(resourcetemplate__name=template_name[num])
+            accelerator_name_single = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__name',flat=True)
+            accelerator_type_single = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__type',flat=True)
+            accelerator_name_single_filtered = []
+            accelerator_type_single_filtered = []
+            for i in range(len(accelerator_name_single)):
+                if accelerator_name_single[i] not in accelerator_name_single_filtered:
+                    accelerator_name_single_filtered.append(accelerator_name_single[i])
+                    accelerator_type_single_filtered.append(accelerator_type_single[i])
+            accelerator_name_field.append(accelerator_name_single_filtered)
+            accelerator_type_field.append(accelerator_type_single_filtered)
+            #-----------------------------------------------------
+            # accelerators per node field
+            maxaccels_per_node_per_template = []
+            maxaccels_per_node = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('resourcetemplate__maxaccels_per_node',flat=True)
+            for acc in accelerator_name_single:
+                accTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(accelerator__name=acc, accelerator__node_status=1)
+                num_accels_per_node_per_accelerator_name = list(accTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__num_per_node',flat=True))
+                max_accels_per_node_per_accelerator_name = max(num_accels_per_node_per_accelerator_name)
+                for j in maxaccels_per_node:
+                    if j < max_accels_per_node_per_accelerator_name:
+                        max_accels_per_node_per_accelerator_name = j
+                maxaccels_per_node_per_template.append(max_accels_per_node_per_accelerator_name)
+
+            accelerator_per_node_field.append(maxaccels_per_node_per_template)
+            #-----------------------------------------------------
+            # nodes per job field
+            maxnodes_per_job_per_template = []
+            maxnodes_per_job = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('resourcetemplate__maxnodes_per_job',flat=True)
+            for acc in accelerator_name_single:
+                accTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(accelerator__name=acc, accelerator__node_status=1)
+                node_name_per_accelerator_name = list(accTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__node_name',flat=True))
+                num_nodes_per_accelerator_name = len(node_name_per_accelerator_name)
+                for j in maxnodes_per_job:
+                    if j < num_nodes_per_accelerator_name:
+                        num_nodes_per_accelerator_name = j
+                maxnodes_per_job_per_template.append(num_nodes_per_accelerator_name)
+
+            node_field.append(maxnodes_per_job_per_template)
+            #------------------------------------------------------
+            # image field
+            resourceTemplateHasImageQuery = TemplateHasImage.objects.filter(resourcetemplate__name=template_name[num])
+            image_name_single = resourceTemplateHasImageQuery.order_by('id').values_list('image__name',flat=True)
+            image_field.append(image_name_single)
+
+        jobs_field = zip(accelerator_name_field,accelerator_type_field,accelerator_per_node_field,node_field,image_field,template_name)
+        jobs_field_js = zip(accelerator_name_field,accelerator_per_node_field,node_field)
+
+
+        ## jobs history (uses ldap uID)
+        #myjobhist = CarmeJobTable.objects.filter(
+        #    state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
+        #
+        #myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
+        #
+        #cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
+        #myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
+        #    sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
+        # 
+        #mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
+        #mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
+        #  
+        ## compute total GPU hours in jobs history  (uses ldap uID)
+        #job_time_end = CarmeJobTable.objects.filter(
+        #    state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
+        #job_time_start = CarmeJobTable.objects.filter(
+        #    state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
+        #job_time = 0
+        #if (job_time_start and job_time_end):
+        #    job_time = round((job_time_end-job_time_start)/3600)
 
         # create start job form
         nodeC, gpuC, imageC, gpuT = generateChoices(request)
@@ -374,11 +514,10 @@ def index(request):
             'start_job_form': startForm,
             'CARME_VERSION': settings.CARME_VERSION,
             'DEBUG': settings.DEBUG,
-            'mylist_short': mylist_short,
-            'mylist_long': mylist_long,
-            'job_time' : job_time,
+            #'mylist_short': mylist_short, #history
+            #'mylist_long': mylist_long,   #history
+            #'job_time' : job_time,        #history
             'gpu_loop' : gpu_loop,
-            'news': news, #news-card
             'gputype': gputype, #gpucard
             'cpupergpu': cpupergpu, #gpucard
             'rampergpu': rampergpu, #gpucard
@@ -388,6 +527,15 @@ def index(request):
             'myprojects': myprojects, #projects
             'mytemplates': mytemplates, #projects
             'myaccelerators': myaccelerators, #projects
+            # news card -------------------------------------------------
+            'news': news,
+            # system card -----------------------------------------------
+            'accelerator_info': accelerator_info,
+            'accelerator_name': accelerator_name,
+            # jobs card -------------------------------------------------
+            'project_and_template': project_and_template,
+            'jobs_field': jobs_field,
+            'jobs_field_js': jobs_field_js,
         }
 
         return render(request, 'home.html', context)
@@ -478,72 +626,57 @@ def job_table(request):
 @login_required(login_url='/account/login')
 def start_job(request):
     """starts a new job (handing request to backend)"""
+    
     request.session.set_expiry(settings.SESSION_AUTO_LOGOUT_TIME)
 
-    group = list(request.user.ldap_user.group_names)[0] # e.g., 'itwm-admin'
-    partition = GroupResource.objects.filter(name__exact=group)[0].partition
-    print('PARTITION IS:')
-    print(partition)
-
-    nodeC, gpuC, imageC, gpuT = generateChoices(request)
-
-    # if this is a POST request we need to process the form data
     if request.method == 'POST':
-        print('STARTJOB POST')
-        # create a form instance and populate it with data from the request:
-        form = StartJobForm(
-            request.POST, image_choices=imageC, node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
+
+        if not str(request.POST['name']):
+            #dj_messages.error(request,'You need to specify a job name.')
+            return redirect('/')
         
-        # check whether it's valid:
-        if form.is_valid():
-            print('STARTJOB FORMVALID')
-            # get image path and mounts from choices
-            image_db = Image.objects.filter(group__exact=group,
-                                                   name__exact=form.cleaned_data['image'])[0]
-            flags = image_db.flags
-            image = image_db.path
-            name = image_db.name
-
-            # add job to db
-            num_nodes = int(form.cleaned_data['nodes'])
-            num_gpus = int(form.cleaned_data['gpus'])
-            job_name = str(form.cleaned_data['name'])[:32]
-
-            # gen unique job name
-            chars = string.ascii_uppercase + string.digits
-            gpus_type = str(form.cleaned_data['gpu_type'])
-
-            # backend call
-            conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
-                                    certfile=settings.BASE_DIR+"/SSL/frontend.crt")
-            job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(flags), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
-            print('LDAP_USERNAME IS')
-            print(ldap_username(request))
-            print('LDAP HOME IS')
-            print(ldap_home(request))
+        num_gpus = int(request.POST['accelerators_pernode'])
+        gpus_type = str(request.POST['accelerator']).lower()
+        job_name = str(request.POST['name'])[:32]
+        template = str(request.POST['template'])
+        num_nodes = int(request.POST['nodes']) 
+        
+        partition = ResourceTemplate.objects.filter(name__exact=template)[0].partition    
+        image_db = Image.objects.filter(name__exact=str(request.POST['image']))[0]
+        flags = image_db.bind
+        image = image_db.path
+        name = image_db.name
+        
+        ## gen unique job name
+        #chars = string.ascii_uppercase + string.digits
+            
+        # backend call
+        conn = rpyc.ssl_connect(settings.CARME_BACKEND_SERVER, settings.CARME_BACKEND_PORT, keyfile=settings.BASE_DIR+"/SSL/frontend.key",
+                                certfile=settings.BASE_DIR+"/SSL/frontend.crt")
+        job_id = conn.root.schedule(ldap_username(request), ldap_home(request), str(image), str(flags), str(partition), str(num_gpus), str(num_nodes), str(job_name), str(gpus_type))
      
-            if int(job_id) > 0:
-                SlurmJob.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
-                                         user=request.user.username, slurm_id=int(job_id), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
-                print("Queued job {} for user {} on {} nodes".format(job_id, ldap_username(request), num_nodes))
-            else:
-                print("ERROR queueing job {} for user {} on {} nodes".format(job_name, ldap_username(request), num_nodes))
+        if int(job_id) > 0:
+            SlurmJob.objects.create(name=job_name, image_name=name, num_gpus=num_gpus, num_nodes=num_nodes,
+                                    user=request.user.username, slurm_id=int(job_id), frontend=settings.CARME_FRONTEND_ID, gpu_type=gpus_type)
+            print("Queued job {} for user {} on {} nodes".format(job_id, ldap_username(request), num_nodes))
+        else:
+            print("ERROR queueing job {} for user {} on {} nodes".format(job_name, ldap_username(request), num_nodes))
 
-                raise Exception("ERROR starting job")
+            raise Exception("ERROR starting job")
 
-            return HttpResponseRedirect('/')
+        return HttpResponseRedirect('/')
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = StartJobForm(image_choices=imageC,
-                            node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
+        messages.error(self.request,'This is not a POST method.') 
+        #form = StartJobForm(image_choices=imageC, node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
     
     # render template
-    context = {
-        'form': form
-    }
+    #context = {
+    #    'form': form
+    #}
 
-    return render(request, 'jobs.html', context)
+    return render(request, 'home.html', context)
 
 @login_required(login_url='/account/login')
 def job_hist(request):

@@ -668,12 +668,15 @@ nav a.nav-link:hover{
 
 
 /*--------------------------------------------------*/
-/*               GPU Card - Dashboard               */
+/*              System Card - Dashboard             */
 /*--------------------------------------------------*/
 
-.option-gpu {
+.option-acc {
   display: none;
 }
+.option-nod {   
+  display: none;
+}               
 .dot {
   width: 0.625rem;
   height: 0.625rem;
@@ -730,6 +733,10 @@ nav a.nav-link:hover{
 /*--------------------------------------------------*/
 /*               Jobs Card - Dashboard              */
 /*--------------------------------------------------*/
+
+.option-proj {
+  display: none;
+} 
 
 /*--- fraction ---*/
 span.frac {
