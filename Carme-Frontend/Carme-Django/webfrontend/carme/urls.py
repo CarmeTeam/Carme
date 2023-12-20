@@ -20,12 +20,18 @@ from django.conf import settings
 from .views import AdminSiteOTPRequiredMixinRedirSetup
 admin.site.__class__ = AdminSiteOTPRequiredMixinRedirSetup
 
-gputype=[]
-        
-for num in range(len(settings.CARME_GPU_NUM.split())):
-    gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
-        
-gpus = gputype
+from projects.models import Accelerator
+
+
+acceleratorQuery = Accelerator.objects.filter()                                                                                                                             
+accelerator_name = list(acceleratorQuery.order_by('id').values_list('name',flat=True))
+accelerator_name = list({value:"" for value in accelerator_name}) # remove duplicates 
+
+#gputype=[]
+#for num in range(len(settings.CARME_GPU_NUM.split())):
+#    gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
+#        
+#gpus = gputype
 
 
 urlpatterns = [
@@ -47,17 +53,15 @@ urlpatterns = [
     re_path(r'^AdminJobTable/$', views.admin_job_table, name='admin_job_table'),
     re_path(r'^AdminAllJobs/$', views.admin_all_jobs, name='admin_all_jobs'),
     re_path(r'^maintenance-mode/', include('maintenance_mode.urls')),
-    ##path('linechart', line_chart_json, name="line_chart_json"),
-    ##path('linechart2', line_chart_json2, name="line_chart_json2"),
     path('line_chart_json_time/', line_chart_json_time, name="line_chart_json_time"),
     re_path(r'^Messages/$', views.messages, name='messages'), 
 ]
 
-if len(gpus)==0:
-    print('GPU_TYPE is empty')
-elif len(gpus)==1:
-    for i in range(len(gpus)):
+if len(accelerator_name)==0:
+    print('No accelerators available')
+elif len(accelerator_name)==1:
+    for i in range(len(accelerator_name)):
         exec("urlpatterns.append(path('line_chart_json_forecast"+str(i)+"', line_chart_json_forecast" +str(i)+", name='line_chart_json_forecast"+str(i)+"'))")
 else:
-    for i in range(len(gpus)+1):
+    for i in range(len(accelerator_name)+1):
         exec("urlpatterns.append(path('line_chart_json_forecast"+str(i)+"', line_chart_json_forecast" +str(i)+", name='line_chart_json_forecast"+str(i)+"'))")

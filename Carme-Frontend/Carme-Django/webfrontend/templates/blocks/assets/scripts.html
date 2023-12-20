@@ -53,27 +53,27 @@
 <!--         ( home.html )        -->
 <!----------------------------------> 
 <script>
-$(document).ready(function() {
-    if (!$("#twofactor").length > 0) {
-    // Note: set .option-gpu{display:none;} in style.css
-    var $list_gpu = $( '#list-gpu' );
-    var $option_gpu = $( '.option-gpu' );
-
-    $list_gpu.on( 'change', function ( e ) {
-        $option_gpu.hide();
-        $( '#option-gpu-' + this.value ).show();
-    } );
-
-    // Note: set .option-chart{display:none;} in style.css
-    var $list_chart = $( '#list-chart' );
-    var $option_chart = $( '.option-chart' );
-  
-    $list_chart.on( 'change', function ( e ) { 
-        $option_chart.hide();
-        $( '#option-chart-' + this.value ).show();
-    });
-    }
-})
+//$(document).ready(function() {
+//    if (!$("#twofactor").length > 0) {
+//    // Note: set .option-gpu{display:none;} in style.css
+//    var $list_gpu = $( '#list-gpu' );
+//    var $option_gpu = $( '.option-gpu' );
+//
+//    $list_gpu.on( 'change', function ( e ) {
+//        $option_gpu.hide();
+//        $( '#option-gpu-' + this.value ).show();
+//    } );
+//
+//    // Note: set .option-chart{display:none;} in style.css
+//    var $list_chart = $( '#list-chart' );
+//    var $option_chart = $( '.option-chart' );
+//  
+//    $list_chart.on( 'change', function ( e ) { 
+//        $option_chart.hide();
+//        $( '#option-chart-' + this.value ).show();
+//    });
+//    }
+//})
 </script>
 
 
@@ -136,26 +136,41 @@ $(document).ready(function() {
 												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
            
 												// history-chart
-												$.get('{% url 'line_chart_json_time' %}', function (data) {
-          				data["chart"] = {
-            				type: "areaspline",
-																styledMode: true,
-            		};
-            		data["legend"] = {
-            				layout: 'horizontal',
-             			align: 'center',
-              		verticalAlign: 'top',
-              		floating: false,
-            		};
-
-            		$("#myTimeChart").highcharts(data);
-          		});			
+												//$.get('{% url 'line_chart_json_time' %}', function (data) {
+          		//		data["chart"] = {
+            //				type: "areaspline",
+												//				styledMode: true,
+            //		};
+            //		data["legend"] = {
+            //				layout: 'horizontal',
+            // 			align: 'center',
+            //  		verticalAlign: 'top',
+            //  		floating: false,
+            //		};
+												//
+            //		$("#myTimeChart").highcharts(data);
+          		//});			
 	
 
 												// forecast-chart 
-												{% if gputype|length > 1 %}
-    										{% for gpu in gpu_loop %}
-            				$.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
+												{% if accelerator_name|length > 1 %}                                     
+																$.get('line_chart_json_forecast0', function (data) {
+  																data["chart"] = {                                                    
+    																type: "areaspline",                                                
+    																styledMode: true,                                                  
+  														};                                                                   
+  														data["legend"] = {                                                   
+    														layout: 'horizontal',                                              
+    														align: 'center',                                                   
+    														verticalAlign: 'top',                                              
+    														floating: false,                                                   
+  														};                                                                   
+                                                                       
+  														$("#myForecastChart0").highcharts(data);          
+														});                                                                    
+
+    										{% for acc in accelerator_name %}
+            				$.get('line_chart_json_forecast{{forloop.counter}}', function (data) {
               				data["chart"] = {
                 				type: "areaspline",
 																				styledMode: true,
@@ -167,11 +182,11 @@ $(document).ready(function() {
                  			floating: false,
                			};
 														
-																		$("#myForecastChart{{forloop.counter0}}").highcharts(data);
+																		$("#myForecastChart{{forloop.counter}}").highcharts(data);
            					});
     										{% endfor %}
 
-												{% elif  gputype|length == 1 %}
+												{% elif  accelerator_name|length == 1 %}
           						$.get('line_chart_json_forecast0', function (data) {
                			data["chart"] = {
                					type: "areaspline",
@@ -188,7 +203,7 @@ $(document).ready(function() {
             				});
 
 												{% else %}
-          						console.log('GPU_TYPE is empty');
+          						console.log('No accelerators');
 												{% endif %}
 							 		};
 
@@ -399,7 +414,8 @@ $(document).ready(function() {
 												update_chart();
 												setInterval(function() {
 														update_chart();
-												}, 1000 * 60 * 5);
+														$('#system').load(location.href + " #system-card");
+												}, 1000 * 60 * 1);
 
 										}
 

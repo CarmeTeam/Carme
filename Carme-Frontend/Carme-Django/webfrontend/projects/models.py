@@ -129,7 +129,7 @@ class Accelerator(models.Model):
     accelerator = models.ManyToManyField(ResourceTemplate,through="TemplateHasAccelerator")
 
     def __str__(self):
-        return f"{self.type}-{self.name}"
+        return f"{self.name} | {self.node_name} | node status = {self.node_status}"
 
 
 class TemplateHasAccelerator(models.Model):
@@ -137,7 +137,7 @@ class TemplateHasAccelerator(models.Model):
     accelerator = models.ForeignKey(Accelerator,on_delete=models.CASCADE,)
     
     def __str__(self):
-        return f"{self.resourcetemplate}-{self.accelerator}"
+        return f"{self.resourcetemplate} | {self.accelerator}"
 
     class Meta:
         unique_together = ("resourcetemplate", "accelerator")
@@ -151,7 +151,7 @@ class Image(models.Model):
     status = models.BooleanField(default=False)
     owner = models.CharField(max_length=50, default='admin')
     image = models.ManyToManyField(ResourceTemplate,through="TemplateHasImage")
-    bind = models.CharField(max_length=255, unique=True, default="none")
+    bind = models.CharField(max_length=255, unique=False, default="none")
 
     def __str__(self):
         return f"{self.name}-{self.type}"

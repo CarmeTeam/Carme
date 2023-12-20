@@ -283,14 +283,14 @@
 										<input type="hidden" id="project_pk" name="project_pk" value={{project.pk}}>
 										{% if project.is_approved == False %}
 										<input type="text" id="user_pk" name="user_pk" class="form-control fs-0 fw-400 text-body"  
-											   placeholder="...Waiting for approval" disabled>
-										<button class="btn btn-sm btn-custom text-body" type="submit" disabled>
+											   placeholder="Waiting for approval" disabled>
+										<button class="btn btn-sm btn-custom text-body w-50" type="submit" disabled>
 										{% else %}
 										<input type="text" id="user_pk" name="user_pk" class="form-control fs-0 fw-400 text-body"  
 											   placeholder="Type username" autocomplete="do-not-autofill" autocomplete="off">
-										<button class="btn btn-sm btn-custom text-body" type="submit">
+										<button class="btn btn-sm btn-custom text-body w-50" type="submit">
 										{% endif %}
-											<span class="pe-2">Add to Project</span>
+											<span class="pe-4">Add to Project</span>
 											<span class="fas fa-plus ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
 										</button>
 									</div>
@@ -301,16 +301,17 @@
 								<div class="input-group mb-3">
 									{% if project.is_approved == False %}
 										<input type="text" id="value_to_copy" name="value_to_copy" class="form-control"  
-											   placeholder="...Waiting for approval" disabled>
-										<button id="copy_value" class="btn btn-sm btn-custom text-body" disabled>
-											Copy Project ID
+											   placeholder="Waiting for approval" disabled>
+										<button id="copy_value" class="btn btn-sm btn-custom text-body w-50" disabled>
+											Copy Project Slug
 											<span class="far fa-copy ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
-										</button>										{% else %}
+										</button>
+									{% else %}
 										<input type="text" id="value_to_copy" name="value_to_copy" class="form-control fs-0 fw-400 text-disabled" 
 											   value="{{project.slug}}" readonly>
-										<button id="copy_value" class="btn btn-sm btn-custom text-body" onclick="myCopyFunction()" 
+										<button id="copy_value" class="btn btn-sm btn-custom text-body w-50" onclick="myCopyFunction()" 
 										 		data-bs-toggle="tooltip" data-bs-placement="top" title="Copy">
-											Copy Project ID 
+											Copy Project Slug 
 											<span class="far fa-copy ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
 										</button> 
 									{% endif %}
@@ -385,7 +386,7 @@
 
 										<div class="row flex-center text-center" style="padding: 50px 0 50px 0;">
 											<div class="fs-6 fw-900 text-watermark">Single Member Project</div>
-											<p class="mt-4 mx-auto fs--1 fw-200 text-body">To add members, share the project ID or submit an invitation</p>
+											<p class="mt-4 mx-auto fs--1 fw-200 text-body">To add members, share the project slug or submit an invitation</p>
 										</div>
 										<!-- </single-member> -->
 											
