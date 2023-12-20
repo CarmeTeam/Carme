@@ -23,6 +23,7 @@ from django.template import loader
 # Database
 from .models import NewsMessage, CarmeMessage, SlurmJob, CarmeJobTable, ClusterStat, GroupResource
 from projects.models import ProjectMember, ProjectHasTemplate, TemplateHasAccelerator, Accelerator, TemplateHasImage, ResourceTemplate, Image
+from django.db import connections # slurm_acct_db
 
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
@@ -250,7 +251,7 @@ def index(request):
         acceleratorQuery = Accelerator.objects.filter()
     
         accelerator_name = list(acceleratorQuery.order_by('id').values_list('name',flat=True))
-        accelerator_name = list(set(accelerator_name))
+        accelerator_name = list({value:"" for value in accelerator_name}) # remove duplicates
 
         ## top panel--------------------
         accelerator_type = []
@@ -261,6 +262,7 @@ def index(request):
 
         ## bottom panel ----------------
         accelerator_node = []
+        accelerator_node_status = []
         accelerator_num_per_node = []
         accelerator_num_cpus_per_node = []
         accelerator_main_mem_per_node = []
@@ -284,14 +286,20 @@ def index(request):
             accelerator_type_sum = sum(accelerator_type_num_per_node)
             accelerator_type_num_total.append(accelerator_type_sum)
             # ratio name/type
-            accelerator_ratio.append(round(accelerator_name_sum * 100 / accelerator_type_sum, 1))
+            if accelerator_type_sum == 0:
+                accelerator_ratio.append(0)
+            else:
+                accelerator_ratio.append(round(accelerator_name_sum * 100 / accelerator_type_sum, 1))
             ### -------------------------------------------------------
 
             ### bottom panel ------------------------------------------
 
-            # nodes
+            # node
             accelerator_name_node = list(acceleratorNameQuery.order_by('id').values_list('node_name',flat=True))
             accelerator_node.append(accelerator_name_node)
+            # node status
+            accelerator_name_node_status = list(acceleratorNameQuery.order_by('id').values_list('node_status',flat=True))
+            accelerator_node_status.append(accelerator_name_node_status)
             # num accelerator/node
             accelerator_num_per_node.append(accelerator_name_num_per_node)
             # num cpus/node
@@ -304,15 +312,18 @@ def index(request):
             
         ## zipping
         accelerator_zip = zip(accelerator_type,accelerator_ratio,accelerator_name_num_total,accelerator_type_num_total,
-                              accelerator_node,accelerator_num_per_node,accelerator_num_cpus_per_node,accelerator_main_mem_per_node)
+                              accelerator_node,accelerator_node_status,accelerator_num_per_node,accelerator_num_cpus_per_node,accelerator_main_mem_per_node)
         
         accelerator_info = []
-        for a_type, a_ratio, a_name_num_total, a_type_num_total, a_node, a_num_per_node, a_num_cpus_per_node, a_main_mem_per_node in accelerator_zip:
+        for a_type, a_ratio, a_name_num_total, a_type_num_total, a_node, a_node_status, a_num_per_node, a_num_cpus_per_node, a_main_mem_per_node in accelerator_zip:
             a_per_node= []
-            for acc, cpu, mem in zip(a_num_per_node,a_num_cpus_per_node,a_main_mem_per_node):
-                a_per_node.append((acc,cpu,mem))
+            a_node_and_status = []
+            for stat, acc, cpu, mem in zip(a_node_status,a_num_per_node,a_num_cpus_per_node,a_main_mem_per_node):
+                a_per_node.append((stat,acc,cpu,mem))
+            for nod, stat in zip(a_node, a_node_status):
+                a_node_and_status.append((nod,stat))    
 
-            accelerator_info.append((a_type,a_ratio,a_name_num_total,a_type_num_total,a_node,a_per_node))
+            accelerator_info.append((a_type,a_ratio,a_name_num_total,a_type_num_total,a_node_and_status,a_per_node))
 
         # jobs card ----------------------------------------------------------------------------------
 
@@ -339,47 +350,67 @@ def index(request):
         image_field = []
         node_field = []
         for num in range(len(template_name)):
+            
             #-----------------------------------------------------
-            # accelerator name field    
-            resourceTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(resourcetemplate__name=template_name[num])
-            accelerator_name_single = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__name',flat=True)
-            accelerator_type_single = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__type',flat=True)
-            accelerator_name_single_filtered = []
-            accelerator_type_single_filtered = []
-            for i in range(len(accelerator_name_single)):
-                if accelerator_name_single[i] not in accelerator_name_single_filtered:
-                    accelerator_name_single_filtered.append(accelerator_name_single[i])
-                    accelerator_type_single_filtered.append(accelerator_type_single[i])
-            accelerator_name_field.append(accelerator_name_single_filtered)
-            accelerator_type_field.append(accelerator_type_single_filtered)
-            #-----------------------------------------------------
-            # accelerators per node field
-            maxaccels_per_node_per_template = []
-            maxaccels_per_node = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('resourcetemplate__maxaccels_per_node',flat=True)
-            for acc in accelerator_name_single:
-                accTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(accelerator__name=acc, accelerator__node_status=1)
-                num_accels_per_node_per_accelerator_name = list(accTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__num_per_node',flat=True))
-                max_accels_per_node_per_accelerator_name = max(num_accels_per_node_per_accelerator_name)
-                for j in maxaccels_per_node:
-                    if j < max_accels_per_node_per_accelerator_name:
-                        max_accels_per_node_per_accelerator_name = j
-                maxaccels_per_node_per_template.append(max_accels_per_node_per_accelerator_name)
-
-            accelerator_per_node_field.append(maxaccels_per_node_per_template)
-            #-----------------------------------------------------
-            # nodes per job field
-            maxnodes_per_job_per_template = []
-            maxnodes_per_job = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('resourcetemplate__maxnodes_per_job',flat=True)
-            for acc in accelerator_name_single:
-                accTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(accelerator__name=acc, accelerator__node_status=1)
-                node_name_per_accelerator_name = list(accTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__node_name',flat=True))
-                num_nodes_per_accelerator_name = len(node_name_per_accelerator_name)
-                for j in maxnodes_per_job:
-                    if j < num_nodes_per_accelerator_name:
-                        num_nodes_per_accelerator_name = j
-                maxnodes_per_job_per_template.append(num_nodes_per_accelerator_name)
-
-            node_field.append(maxnodes_per_job_per_template)
+            # Filter by template_name TemplateHasAccelerator
+            resourceTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(resourcetemplate__name=template_name[num], accelerator__node_status=1)                      
+                                                                                                                                                                        
+            # accelerator name list                                                                                                                                                 
+            accelerator_name_single = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__name',flat=True)                                                 
+            accelerator_type_single = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__type',flat=True)                                                 
+                                                                                                                                                                        
+            # max accelerators per node & max nodes per job lists                                                                                                                   
+            maxnodes_per_job_per_template = []                                                                                                                                      
+            maxaccels_per_node_per_template = []                                                                                                                                    
+            
+            slurm_accounting_db = 0     
+            if slurm_accounting_db == 1:
+                cursor = connections['slurm'].cursor()                                                               
+                cursor.execute("select max_tres_pj from acheron_assoc_table where user=%s", (request.user.username,))
+                rows = cursor.fetchall()
+                if rows[0][0].split(",")[0].split("=")[0] == "4": # num nodes
+                    maxnodes_per_job = list(rows[0][0].split(",")[0].split("=")[1])
+                    maxnodes_per_job = list(map(int, maxnodes_per_job))
+                if rows[0][0].split(",")[1].split("=")[0] == "1001": # gres
+                    maxaccels_per_node = list(rows[0][0].split(",")[1].split("=")[1])
+                    maxaccels_per_node = list(map(int, maxaccels_per_node))                           
+            else:
+                maxnodes_per_job = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('resourcetemplate__maxnodes_per_job',flat=True) # single value                        
+                maxaccels_per_node = resourceTemplateHasAcceleratorQuery.order_by('id').values_list('resourcetemplate__maxaccels_per_node',flat=True) # single value                    
+            
+            for acc in accelerator_name_single:                                                                                                                                     
+                accTemplateHasAcceleratorQuery = TemplateHasAccelerator.objects.filter(resourcetemplate__name=template_name[num], accelerator__name=acc, accelerator__node_status=1)
+                # max nodes                                                                                                                                                         
+                node_name_per_accelerator_name = list(accTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__node_name',flat=True))                                
+                num_nodes_per_accelerator_name = len(node_name_per_accelerator_name)                                                                                                
+                for j in maxnodes_per_job:                                                                                                                                          
+                    if j < num_nodes_per_accelerator_name:                                                                                                                          
+                        num_nodes_per_accelerator_name = j                                                                                                                          
+                maxnodes_per_job_per_template.append(num_nodes_per_accelerator_name)                                                                                                
+                                                                                                                                                                        
+                # max accelerators                                                                                                                                                  
+                num_accels_per_node_per_accelerator_name = list(accTemplateHasAcceleratorQuery.order_by('id').values_list('accelerator__num_per_node',flat=True))                   
+                max_accels_per_node_per_accelerator_name = max(num_accels_per_node_per_accelerator_name)                                                                            
+                for j in maxaccels_per_node:                                                                                                                                        
+                    if j < max_accels_per_node_per_accelerator_name:                                                                                                                
+                        max_accels_per_node_per_accelerator_name = j                                                                                                                
+                maxaccels_per_node_per_template.append(max_accels_per_node_per_accelerator_name)                                                                                    
+            # --------------------------------------------------------                                                                                                              
+            # accelerator name, accelerator per node, and node fields                                                                                                               
+            accelerator_name_single_filtered = []                                                                                                                                   
+            accelerator_type_single_filtered = []                                                                                                                                   
+            accelerator_per_node_single_filtered = []                                                                                                                               
+            node_single_filtered = []                                                                                                                                               
+            for i in range(len(accelerator_name_single)):                                                                                                                           
+                if accelerator_name_single[i] not in accelerator_name_single_filtered:                                                                                              
+                    accelerator_name_single_filtered.append(accelerator_name_single[i])                                                                                             
+                    accelerator_type_single_filtered.append(accelerator_type_single[i])                                                                                             
+                    accelerator_per_node_single_filtered.append(maxaccels_per_node_per_template[i])                                                                                 
+                    node_single_filtered.append(maxnodes_per_job_per_template[i])                                                                                                   
+            accelerator_name_field.append(accelerator_name_single_filtered)                                                                                                         
+            accelerator_type_field.append(accelerator_type_single_filtered)                                                                                                         
+            accelerator_per_node_field.append(accelerator_per_node_single_filtered)                                                                                                 
+            node_field.append(node_single_filtered)
             #------------------------------------------------------
             # image field
             resourceTemplateHasImageQuery = TemplateHasImage.objects.filter(resourcetemplate__name=template_name[num])
@@ -390,33 +421,9 @@ def index(request):
         jobs_field_js = zip(accelerator_name_field,accelerator_per_node_field,node_field)
 
 
-        ## jobs history (uses ldap uID)
-        #myjobhist = CarmeJobTable.objects.filter(
-        #    state__gte=3, id_user__exact=uID).order_by('-time_end')[:20]
-        #
-        #myslurmid_list = list(myjobhist.values_list('id_job', flat=True))
-        #
-        #cases = [When(slurm_id=foo, then=sort_order) for sort_order, foo in enumerate(myslurmid_list)]
-        #myslurmjob = SlurmJob.objects.filter(slurm_id__in=myslurmid_list).annotate(
-        #    sort_order=Case(*cases, output_field=IntegerField())).order_by('sort_order')
-        # 
-        #mylist_short = zip( list(myjobhist[:4]), list(myslurmjob[:4]) ) # last 4
-        #mylist_long  = zip( list(myjobhist), list(myslurmjob) ) # last 20
-        #  
-        ## compute total GPU hours in jobs history  (uses ldap uID)
-        #job_time_end = CarmeJobTable.objects.filter(
-        #    state__gte=3, id_user__exact=uID).aggregate(Sum('time_end'))['time_end__sum']
-        #job_time_start = CarmeJobTable.objects.filter(
-        #    state__gte=3, id_user__exact=uID).aggregate(Sum('time_start'))['time_start__sum']
-        #job_time = 0
-        #if (job_time_start and job_time_end):
-        #    job_time = round((job_time_end-job_time_start)/3600)
-
-        # create start job form
-        nodeC, gpuC, imageC, gpuT = generateChoices(request)
-        startForm = StartJobForm(image_choices=imageC,
-                                 node_choices=nodeC, gpu_choices=gpuC, gpu_type_choices=gpuT)
-
+        # chart card
+        ## uses accelerator_name
+        
         # jobs table
         slurm_list_user = SlurmJob.objects.filter(user__exact=request.user.username, status__in=["queued", "running"])
         myslurmid_active_list = list(slurm_list_user.values_list('slurm_id', flat=True))
@@ -429,56 +436,56 @@ def index(request):
         # notifications
         message_list = list(CarmeMessage.objects.filter(user__exact=request.user.username).order_by('-id'))[:10] #select only 10 latest messages
     
-        # Projects list
-        projectQuerySetActive = ProjectMember.objects.filter(user=request.user, 
-                                                              is_approved_by_admin=True, 
-                                                              is_approved_by_manager=True,
-                                                              status='accepted',
-                                                              project__is_approved=True)
-        myprojects = projectQuerySetActive.values('project__name')
+        ## Projects list
+        #projectQuerySetActive = ProjectMember.objects.filter(user=request.user, 
+        #                                                      is_approved_by_admin=True, 
+        #                                                      is_approved_by_manager=True,
+        #                                                      status='accepted',
+        #                                                      project__is_approved=True)
+        #myprojects = projectQuerySetActive.values('project__name')
 
 
-        myprojectlist =[]
+        #myprojectlist =[]
         
-        # Template list
-        for item in myprojects:
-            myprojectlist.append(item['project__name'])
-        mytemplates = ProjectHasTemplate.objects.values('project__name','template__name',
-                                                        'template__maxjobs',
-                                                        'template__maxnodes_per_job',
-                                                        'template__maxaccels_per_node'
-        ).filter(project__name__in=myprojectlist)
+        ## Template list
+        #for item in myprojects:
+        #    myprojectlist.append(item['project__name'])
+        #mytemplates = ProjectHasTemplate.objects.values('project__name','template__name',
+        #                                                'template__maxjobs',
+        #                                                'template__maxnodes_per_job',
+        #                                                'template__maxaccels_per_node'
+        #).filter(project__name__in=myprojectlist)
 
         
-        # Accelerator list
-        myaccelerators = TemplateHasAccelerator.objects.values('accelerator__name',
-                                                               'accelerator__type',
-                                                               'resourcetemplate__name'
-        )
+        ## Accelerator list
+        #myaccelerators = TemplateHasAccelerator.objects.values('accelerator__name',
+        #                                                       'accelerator__type',
+        #                                                       'resourcetemplate__name'
+        #)
             
         # setting variables gpu card
-        gputype=[]
-        cpupergpu=[]
-        rampergpu=[]
-        gpupernode=[]
-        gputotal=[]
-        for num in range(len(settings.CARME_GPU_DEFAULTS.split())):
-            gputype.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[0])
-            cpupergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[1])
-            rampergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[2])
+        #gputype=[]
+        #cpupergpu=[]
+        #rampergpu=[]
+        #gpupernode=[]
+        #gputotal=[]
+        #for num in range(len(settings.CARME_GPU_DEFAULTS.split())):
+        #    gputype.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[0])
+        #    cpupergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[1])
+        #    rampergpu.append(settings.CARME_GPU_DEFAULTS.split()[num].split(":")[2])
         
-        for num in range(len(settings.CARME_GPU_NUM.split())):
-            gpupernode.append(settings.CARME_GPU_NUM.split()[num].split(":")[1])
-            gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
+        #for num in range(len(settings.CARME_GPU_NUM.split())):
+        #    gpupernode.append(settings.CARME_GPU_NUM.split()[num].split(":")[1])
+        #    gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
         
-        cpupergpu = list(map(int, cpupergpu))
-        rampergpu = list(map(int, rampergpu))
-        gpupernode = list(map(int, gpupernode))
-        gputotal = list(map(int, gputotal))
-        gpusum = sum(gputotal)
+        #cpupergpu = list(map(int, cpupergpu))
+        #rampergpu = list(map(int, rampergpu))
+        #gpupernode = list(map(int, gpupernode))
+        #gputotal = list(map(int, gputotal))
+        #gpusum = sum(gputotal)
     
-        # loop gpu type chart
-        gpu_loop = range(len(gputype)+1)
+        ## loop gpu type chart
+        #gpu_loop = range(len(gputype)+1)
     
         # calculate actual stats
         slurm_list = SlurmJob.objects.exclude(status__exact="timeout")
@@ -495,7 +502,7 @@ def index(request):
             elif j.status == "queued":
                 stats["queued"] += j.num_gpus * j.num_nodes 
 
-        stats["free"] = gpusum - (stats["used"] + stats["reserved"])
+        stats["free"] = accelerator_type_num_total[0] - (stats["used"] + stats["reserved"]) # before was gpusum
 
         # check if stats have to be updated
         try:
@@ -511,31 +518,32 @@ def index(request):
             'myjobtable_list': myjobtable_list,
             'myjobtable_script': myjobtable_script,
             'message_list': message_list,
-            'start_job_form': startForm,
+            #'start_job_form': startForm,
             'CARME_VERSION': settings.CARME_VERSION,
             'DEBUG': settings.DEBUG,
             #'mylist_short': mylist_short, #history
             #'mylist_long': mylist_long,   #history
             #'job_time' : job_time,        #history
-            'gpu_loop' : gpu_loop,
-            'gputype': gputype, #gpucard
-            'cpupergpu': cpupergpu, #gpucard
-            'rampergpu': rampergpu, #gpucard
-            'gpupernode':gpupernode, #gpucard
-            'gputotal':gputotal, #gpucard
-            'gpusum': gpusum, #gpucard
-            'myprojects': myprojects, #projects
-            'mytemplates': mytemplates, #projects
-            'myaccelerators': myaccelerators, #projects
+            #'gpu_loop' : gpu_loop,
+            #'gputype': gputype, #gpucard
+            #'cpupergpu': cpupergpu, #gpucard
+            #'rampergpu': rampergpu, #gpucard
+            #'gpupernode':gpupernode, #gpucard
+            #'gputotal':gputotal, #gpucard
+            #'gpusum': gpusum, #gpucard
+            #'myprojects': myprojects, #projects
+            #'mytemplates': mytemplates, #projects
+            #'myaccelerators': myaccelerators, #projects
             # news card -------------------------------------------------
             'news': news,
-            # system card -----------------------------------------------
+            # system & chart cards --------------------------------------
             'accelerator_info': accelerator_info,
             'accelerator_name': accelerator_name,
             # jobs card -------------------------------------------------
             'project_and_template': project_and_template,
-            'jobs_field': jobs_field,
             'jobs_field_js': jobs_field_js,
+            'jobs_field': jobs_field,
+
         }
 
         return render(request, 'home.html', context)
@@ -1076,24 +1084,58 @@ class LineChartJSONViewTime(HighchartPlotLineChartView):
 class BaseForecast():
     xAxispoints = 8 #choose number of points
     
-    # setting variables gpu card
-    gputype=[]
-    gputotal=[]
-        
-    for num in range(len(settings.CARME_GPU_NUM.split())):
-        gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
-        gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
-        
-    gputotal = list(map(int, gputotal))
+    acceleratorQuery = Accelerator.objects.filter()                                                                    
+                                                                                                                   
+    accelerator_name = list(acceleratorQuery.order_by('id').values_list('name',flat=True))                             
+    accelerator_name = list({value:"" for value in accelerator_name}) # remove duplicates                                                 
+                                                                                                                   
+    accelerator_type = []                                                                                              
+    accelerator_name_num_total = []                                                                                    
+    accelerator_type_num_total = []                                                                                    
+                                                                                                                   
+    for num in range(len(accelerator_name)):                                                                           
+                                                                                                                   
+        # type                                                                                                         
+        acceleratorNameQuery=Accelerator.objects.filter(name__exact=accelerator_name[num]) # e.g., all GTXs            
+        accelerator_type_single = acceleratorNameQuery.order_by('id').values_list('type',flat=True).first()            
+        accelerator_type.append(accelerator_type_single)                                                               
+        # name_total                                                                                                   
+        accelerator_name_num_per_node = list(acceleratorNameQuery.order_by('id').values_list('num_per_node',flat=True))
+        accelerator_name_sum = sum(accelerator_name_num_per_node)                                                      
+        accelerator_name_num_total.append(accelerator_name_sum)                                                        
+        # type_total                                                                                                   
+        acceleratorTypeQuery=Accelerator.objects.filter(type__exact=accelerator_type_single)                           
+        accelerator_type_num_per_node = list(acceleratorTypeQuery.order_by('id').values_list('num_per_node',flat=True))
+        accelerator_type_sum = sum(accelerator_type_num_per_node)                                                      
+        accelerator_type_num_total.append(accelerator_type_sum)                                                        
 
-    gpus=gputype # user sets the gpu_type list
-    numgpus = gputotal # user sets the total quantity of gpus available for each type   
+    # setting variables gpu card
+    #gputype=[]
+    #gputotal=[]
+        
+    #for num in range(len(settings.CARME_GPU_NUM.split())):
+    #    gputype.append(settings.CARME_GPU_NUM.split()[num].split(":")[0])
+    #    accelerator_db = Accelerator.objects.filter(name__exact="TITAN")[0]
+    #    nodestatus = accelerator_db.node_status                                                     
+    #    if nodestatus == 0:
+    #        gputotal.append("0")
+    #    else:
+    #        gputotal.append(settings.CARME_GPU_NUM.split()[num].split(":")[2])
+        
+    #gputotal = list(map(int, gputotal))
+
+    #gpus=gputype # user sets the gpu_type list
+    #numgpus = gputotal # user sets the total quantity of gpus available for each type   
+
+    gpus = accelerator_name             
+    numgpus = accelerator_name_num_total
+    
 
     def get_providers(self):
-        return ["Free", "Used", "Queued" ]
+        return ["Free", "Used", "Queued"]
     
     def get_colors(self):
-        color = [(45, 212, 191),(76, 157, 255),(0, 0, 0)]
+        color = [(45, 212, 191),(76, 157, 255),(0, 0, 0)] #red:(230,55,87)
         return next_color(color)
     
     def get_x_axis_options(self):
@@ -1114,7 +1156,8 @@ class BaseForecast():
     def get_markers(self):
         return [ {"symbol": 'circle', "radius":4.5},
                  {"symbol": 'square', "radius":3.9},
-                 {"symbol": 'diamond', "radius":5}  ]
+                 {"symbol": 'diamond', "radius":5} ]
+                 #{"symbol": 'triangle', "radius":4.5} ]
     
     title = _("") # Title shows None if removed
     y_axis_title = _("GPUs")  
@@ -1128,11 +1171,40 @@ class BaseForecast():
        
         run_sortedfuture=[]
         queue_sortedfuture=[]
+    
 
-        for k in range(len(self.gpus)):
+        acceleratorQuery = Accelerator.objects.filter()                                                                    
+                                                                                                                   
+        accelerator_name = list(acceleratorQuery.order_by('id').values_list('name',flat=True))                             
+        accelerator_name = list({value:"" for value in accelerator_name}) # remove duplicates                                                 
+                                                                                                                   
+        accelerator_type = []                                                                                              
+        accelerator_name_num_total = []                                                                                    
+        accelerator_type_num_total = []                                                                                    
+                                                                                                                   
+        for num in range(len(accelerator_name)):                                                                           
+                                                                                                                   
+            # type                                                                                                         
+            acceleratorNameQuery=Accelerator.objects.filter(name__exact=accelerator_name[num]) # e.g., all GTXs            
+            accelerator_type_single = acceleratorNameQuery.order_by('id').values_list('type',flat=True).first()            
+            accelerator_type.append(accelerator_type_single)                                                               
+            # name_total                                                                                                   
+            accelerator_name_num_per_node = list(acceleratorNameQuery.order_by('id').values_list('num_per_node',flat=True))
+            accelerator_name_sum = sum(accelerator_name_num_per_node)                                                      
+            accelerator_name_num_total.append(accelerator_name_sum)                                                        
+            # type_total                                                                                                   
+            acceleratorTypeQuery=Accelerator.objects.filter(type__exact=accelerator_type_single)                           
+            accelerator_type_num_per_node = list(acceleratorTypeQuery.order_by('id').values_list('num_per_node',flat=True))
+            accelerator_type_sum = sum(accelerator_type_num_per_node)                                                      
+            accelerator_type_num_total.append(accelerator_type_sum)                                                        
+
+        gpus = accelerator_name              
+        numgpus = accelerator_name_num_total 
+
+        for k in range(len(gpus)):####
 
             run_gpus = np.asarray(SlurmJob.objects.filter(
-                status__exact='running', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',self.gpus[k])])
+                status__exact='running', gpu_type__exact=gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',gpus[k])]) #### ####
             run_gpus[:,2] = run_gpus[:,1].astype(int)*run_gpus[:,2].astype(int)
             run_gpus = np.delete(run_gpus, 1, 1)  # (slurm_id, num_gpus = num_gpus * num_nodes, gpu_type)  
             run_time = np.asarray(CarmeJobTable.objects.filter(
@@ -1141,7 +1213,7 @@ class BaseForecast():
             run_sortedfuture.append(np.array(sorted(run_future.astype(int),key=lambda x: x[1]))) # sorted by time_end 
                 
             queue_gpus = np.asarray(SlurmJob.objects.filter(
-                status__exact='queued', gpu_type__exact=self.gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',self.gpus[k])])
+                status__exact='queued', gpu_type__exact=gpus[k]).values_list('slurm_id','num_nodes','num_gpus','gpu_type').order_by('slurm_id') or [('0','0','0',gpus[k])]) ### ###
             queue_gpus[:,2] = queue_gpus[:,1].astype(int)*queue_gpus[:,2].astype(int)
             queue_gpus = np.delete(queue_gpus, 1, 1) # (slurm_id, num_gpus = num_spus * num_nodes, gpu_type) 
             queue_time = np.asarray(CarmeJobTable.objects.filter(
@@ -1153,20 +1225,20 @@ class BaseForecast():
         free_0 = []
         queue_0 = []
         used_0 = []
-        for k in range(len(self.gpus)):
-            free_0.append(self.numgpus[k] - sum(run_sortedfuture[k][:,0])) # free gpus
+        for k in range(len(gpus)): ###
+            free_0.append(numgpus[k] - sum(run_sortedfuture[k][:,0])) # free gpus  ###
             queue_0.append(sum(queue_sortedfuture[k][:,0])) # queue gpus
-            used_0.append(self.numgpus[k] - free_0[k]) # used gpus
+            used_0.append(numgpus[k] - free_0[k]) # used gpus ###
 
         forecast = [] 
-        for k in range(len(self.gpus)):
+        for k in range(len(gpus)): ###
             if queue_sortedfuture[k][0,1]==0: 
                 forecast.append(np.zeros((len(run_sortedfuture[k]), 6)).astype(int))
             else:
                 forecast.append(np.zeros((len(run_sortedfuture[k])+len(queue_sortedfuture[k]),6)).astype(int))
 
         # Calculation starts
-        for k in range(len(self.gpus)):
+        for k in range(len(gpus)): ###
 
             # time = 0: when first running job ends 
             run_sortedfuture[k][0,0] = free_0[k] + run_sortedfuture[k][0,0] # free gpus at t=0
@@ -1186,7 +1258,7 @@ class BaseForecast():
             # time = 0: after processing queued jobs
             forecast[k][0,0] = run_sortedfuture[k][0,0] # free gpus at t=0
             forecast[k][0,1] = sum(queue_sortedfuture[k][:,0]) # queue gpus at t=0
-            forecast[k][0,2] = self.numgpus[k] - forecast[k][0,0] # used gpus at t=0
+            forecast[k][0,2] = numgpus[k] - forecast[k][0,0] # used gpus at t=0 ###
             forecast[k][0,3] = forecast[k][0,0] - free_0[k] # free per time 
             forecast[k][0,4] = forecast[k][0,1] - queue_0[k] # queue per time 
             forecast[k][0,5] = forecast[k][0,2] - used_0[k] # used per time 
@@ -1212,18 +1284,18 @@ class BaseForecast():
                 # time > 0: after processing queued jobs                
                 forecast[k][i,0] = run_sortedfuture[k][i,0] # free gpus at t_i        
                 forecast[k][i,1] = sum(queue_sortedfuture[k][:,0]) # queue gpus at t_i 
-                forecast[k][i,2] = self.numgpus[k] - forecast[k][i,0] # used gpus at t_i 
+                forecast[k][i,2] = numgpus[k] - forecast[k][i,0] # used gpus at t_i  ###
                 forecast[k][i,3] = forecast[k][i,0] - forecast[k][i-1,0] # free per time
                 forecast[k][i,4] = forecast[k][i,1] - forecast[k][i-1,1] # queue per time
                 forecast[k][i,5] = forecast[k][i,2] - forecast[k][i-1,2] # used per time
-        
+        ### 
         ### Compute Single Forecast (chart for each GPU) 
-        forecast_single = [np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))] # add time_end (doubled)
-        forecast_single = [forecast_single[k][:,[0,1,2,6,7]] for k in range(len(self.gpus))] # free / queue / used / time_end / time_end
-        forecast_single = [np.array(sorted(forecast_single[k],key=lambda x: x[3])) for k in range(len(self.gpus)) ] # sort by time_end
-        forecast_single = [forecast_single[k].astype(str) for k in range(len(self.gpus)) ] # convert to string        
+        forecast_single = [np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(gpus))] # add time_end (doubled) ###
+        forecast_single = [forecast_single[k][:,[0,1,2,6,7]] for k in range(len(gpus))] # free / queue / used / time_end / time_end ###
+        forecast_single = [np.array(sorted(forecast_single[k],key=lambda x: x[3])) for k in range(len(gpus)) ] # sort by time_end ## ####
+        forecast_single = [forecast_single[k].astype(str) for k in range(len(gpus)) ] # convert to string    ###    
         
-        for k in range(len(self.gpus)): # Express time in ECT datetime
+        for k in range(len(gpus)): # Express time in ECT datetime ###
             for count, x in enumerate(forecast_single[k][:,3]): 
                 if (forecast_single[k][count,3]) != '0':
                     forecast_single[k][count,3]=datetime.fromtimestamp(int(x)).strftime('%H:%M<br/>%b-%d')
@@ -1246,7 +1318,7 @@ class BaseForecast():
             #if (any(forecast_single[k][:,3])=='none'):
             forecast_single[k] = np.delete(forecast_single[k], forecast_single[k][:,3]=='none', axis=0) 
             
-        for k in range(len(self.gpus)):
+        for k in range(len(gpus)): ###
             if len(forecast_single[k]) < 8:
                 count = len(forecast_single[k])
                 while count < 8:
@@ -1263,7 +1335,7 @@ class BaseForecast():
 
 
         ### Compute Total Forecast (chart for all GPUs) 
-        forecast_total = np.concatenate([np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(self.gpus))]) # add time_end (doubled)
+        forecast_total = np.concatenate([np.c_[forecast[k],run_sortedfuture[k][:,1],run_sortedfuture[k][:,1]] for k in range(len(gpus))]) # add time_end (doubled) ###
         forecast_total = np.array(sorted(forecast_total,key=lambda x: x[6])) # sort by time_end
         #if (any(forecast_total[:,6])==0):
         forecast_total = np.delete(forecast_total, forecast_total[:,6] == 0, axis=0) # delete empty rows 
@@ -1328,10 +1400,10 @@ class LineChartJSONViewForecast(BaseForecast,HighchartPlotLineChartView):
 
 line_chart_json_time = LineChartJSONViewTime.as_view()
 
-if (len(BaseForecast().gpus)) == 0:
-    print('GPU_TYPE is empty')
-elif (len(BaseForecast().gpus)) == 1:
-    for i in range(len(BaseForecast().gpus)):
+if (len(BaseForecast().accelerator_name)) == 0:
+    print('Accelerators are not available')
+elif (len(BaseForecast().accelerator_name)) == 1:
+    for i in range(len(BaseForecast().accelerator_name)):
             def init_forecast(self,i=i): # equivalent to def __init__(self,i) in Class
                 self.k = i
                 self.xAxispoints = BaseForecast().xAxispoints
@@ -1340,7 +1412,7 @@ elif (len(BaseForecast().gpus)) == 1:
             exec("LineChartJSONViewForecast"+str(i)+"=type('LineChartJSONViewForecast"+str(i)+"',(LineChartJSONViewForecast,),{'__init__': init_forecast})")
             exec('line_chart_json_forecast' + str(i) + ' = ' + 'LineChartJSONViewForecast' + str(i)+ '.as_view()')
 else:
-    for i in range(len(BaseForecast().gpus)+1):
+    for i in range(len(BaseForecast().accelerator_name)+1):
         def init_forecast(self,i=i): # equivalent to def __init__(self,i) in Class
             self.k = i
             self.xAxispoints = BaseForecast().xAxispoints
@@ -1348,5 +1420,3 @@ else:
 
         exec("LineChartJSONViewForecast"+str(i)+"=type('LineChartJSONViewForecast"+str(i)+"',(LineChartJSONViewForecast,),{'__init__': init_forecast})")
         exec('line_chart_json_forecast' + str(i) + ' = ' + 'LineChartJSONViewForecast' + str(i)+ '.as_view()')
-
-

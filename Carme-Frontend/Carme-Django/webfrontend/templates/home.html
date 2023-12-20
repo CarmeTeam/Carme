@@ -44,7 +44,8 @@
 		<!-- </news> -->
 
 		<!-- <system> -->
-		<div class="col-lg-3 col-md-6 mb-4 pb-2">
+		<div id="system" class="col-lg-3 col-md-6 mb-4 pb-2">
+		<div id="system-card">
  		<div class="card h-100">              
    	
 				<!-- <system-header> -->
@@ -66,7 +67,7 @@
                 
    	<!-- <system-body> -->
 				<div class="card-body d-flex flex-column justify-content-between">
-				{% for a_type, a_ratio, a_name_num_total, a_type_num_total, a_node, a_per_node in accelerator_info %}
+				{% for a_type, a_ratio, a_name_num_total, a_type_num_total, a_node_and_status, a_per_node in accelerator_info %}
     	{% if forloop.first %}
      <div id="option-acc-acc{{forloop.counter0}}" class="option-acc" style="display: block;">
      {% else %}
@@ -110,16 +111,23 @@
           	Nodes
         		</h5>
         		<div class="w-50">
-											<select class="form-select form-select-sm fs--2 text-header" id="list-node{{forloop.counter}}">
-           	<option value="nod0" selected>{{ a_node.0 | upper }}</option>
-            {% for node in a_node|slice:"1:" %}
-            <option value="nod{{forloop.counter}}">{{ node | upper }}</option>
-            {% endfor %} 
-           </select> 
+											<select class="form-select form-select-sm fs--2 text-header pe-2 selected-nodes" id="list-node{{forloop.counter}}">
+												{% for node, status in a_node_and_status %}                                                        
+  											{% if forloop.first %}                                                                            
+    										<option value="nod0" selected>                                                                  
+     										{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}              
+    										</option>                                                                                       
+  											{% else %}                                                                                        
+    										<option value="nod{{forloop.counter0}}">                                                        
+     										{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}              
+    										</option>                                                                                                                                      
+  											{% endif %}                                                                                       
+ 											{% endfor %}                                                                                       
+											</select>                                                                                
         		</div> 
 									</div>
 
-									{% for acc, cpu, mem in a_per_node %}
+									{% for stat, acc, cpu, mem in a_per_node %}
 									
 									{% if forloop.first %}
 									<div id="option-nod{{forloop.parentloop.counter}}-nod{{forloop.counter0}}" class="option-nod" style="display: block;">
@@ -127,6 +135,18 @@
 									<div id="option-nod{{forloop.parentloop.counter}}-nod{{forloop.counter0}}" class="option-nod">
 									{% endif %}
 										<div class="mt-2 fs--1 fw-400 text-body">
+											<div class="row mb-1">                      
+ 											<div class="col-9 pt-1">                        
+  											Status              
+ 											</div>                                     
+ 											<div class="col-3 pe-2 d-flex flex-row-reverse">
+													{% if stat == 1 %}
+														<span class="i-blue py-1 px-1 rounded-pill-3 fs--2 fw-400">Active</span>                                                             
+  											{% else %}
+														<span class="i-red py-1 px-1 rounded-pill-3 fs--2 fw-400">Down</span>
+													{% endif %}                                 
+ 											</div>                                     
+											</div>                                      
           	<div class="row mb-1">
            	<div class="col-9">
             	{{ a_type | upper }}s / node
@@ -170,146 +190,152 @@
 
 			</div>
 		</div>
+		</div>
 		<!-- </system> -->
 
 		<!-- <chart> -->
 		<div class="col-12 col-lg-6 mb-4 pb-2">
 			<div class="card h-100">
-
-                <div class="card-header d-flex justify-content-between w-100">
-                	<div>
-                  		<h5 class="mb-0 py-2 fs-0 fw-400 text-header">
-							<i class="fas fa-chart-area"></i> 
-							Chart
-						</h5>
-                  	</div>
-                  	<div>
-                  		<select class="form-select form-select-sm text-header" id="list-chart">
+   	
+				<!-- <chart-header> -->
+				<div class="card-header d-flex justify-content-between w-100">
+     <h5 class="mb-0 pb-1 pt-2 fs-0 fw-400 text-header">
+						<i class="fas fa-chart-area"></i> Chart
+					</h5>
+     
+    	<div>
+     	<select class="form-select form-select-sm text-header" id="list-chart">
 							<option value="forecast" selected>Forecast</option>
-                   			<option value="time">History</option>
-                   		</select>
-                  	</div>
-                </div>
+       {% comment %}<option value="time">History</option> {% endcomment %}
+      </select>
+     </div>
+    </div>
+				<!-- </chart-header> -->
                 
-				<!-- <card-body> -->
+				<!-- <chart-body> -->
 				<div class="card-body d-flex flex-column justify-content-between">
 
-					<!-- <forecast-chart> -->
-                 	<div id="option-chart-forecast" class="option-chart" style="display: block;">
-                 		<ul class="nav nav-tabs" id="myTab" role="tablist">
-                  			{% if gputype|length > 1 %}
-                   				<li class="nav-item" role="presentation">
-                    				<a class="nav-link active fw-400 text-body" id="forecastchart-tab" data-bs-toggle="tab" 
-								   	   href="#forecastchart" role="tab" aria-controls="forecastchart" aria-selected="true">
+					<!-- <chart-body-forecast> -->
+     <div id="option-chart-forecast" class="option-chart" style="display: block;">
+     	<ul class="nav nav-tabs" id="myTab" role="tablist">
+      	{% if accelerator_name|length > 1 %}
+       	<li class="nav-item" role="presentation">
+       		<a class="nav-link active fw-400 text-body" id="forecastchart-tab" data-bs-toggle="tab" 
+								    href="#forecastchart" role="tab" aria-controls="forecastchart" aria-selected="true">
 										Total
 									</a>
-                    			</li>
-                    			{% for gpu in gputype %}
-                    			<li class="nav-item" role="presentation">
-                     				<a class="nav-link fw-400 text-body" id="forecast-gpu{{forloop.counter}}-tab" data-bs-toggle="tab" 
-									   href="#forecast-gpu{{forloop.counter}}" role="tab" aria-controls="forecast-gpu{{forloop.counter}}" aria-selected="false">
-										{{ gputype | index:forloop.counter0 | upper }}
+       	</li>
+       {% for acc in accelerator_name %}
+       	<li class="nav-item" role="presentation">
+       		<a class="nav-link fw-400 text-body" id="forecast-acc{{forloop.counter}}-tab" data-bs-toggle="tab" 
+									   href="#forecast-acc{{forloop.counter}}" role="tab" aria-controls="forecast-acc{{forloop.counter}}" aria-selected="false">
+								 	{{ acc | upper }}
 									</a>
-                    			</li>
-                    			{% endfor %}
-                   			{% elif  gputype|length == 1 %}
-                    			<li class="nav-item" role="presentation">
-                     				<a class="nav-link active fw-400 text-body" id="forecastchart-tab" data-bs-toggle="tab" 
+       	</li>
+       {% endfor %}
+       {% elif accelerator_name|length == 1 %}
+								{% for acc in accelerator_name %}
+       	<li class="nav-item" role="presentation">
+       		<a class="nav-link active fw-400 text-body" id="forecastchart-tab" data-bs-toggle="tab" 
 									   href="#forecastchart" role="tab" aria-controls="forecastchart" aria-selected="true">
-										{{ gputype | index:0 | upper }}
+										{{ acc | upper }}
 									</a>
-                    			</li>
-                   			{% else %}
-                    			<li class="nav-item" role="presentation">
-                     				<a class="nav-link active fw-400 text-body" id="forecastchart-tab" data-bs-toggle="tab" 
+      	 </li>
+								{% endfor %}
+       {% else %}
+       	<li class="nav-item" role="presentation">
+       		<a class="nav-link active fw-400 text-body" id="forecastchart-tab" data-bs-toggle="tab" 
 									   href="#forecastchart" role="tab" aria-controls="forecastchart" aria-selected="true">
 										NONE
 									</a>
-                    			</li>
-                   			{% endif %}
-                  		</ul>
-                  		<div class="tab-content " id="myTabContent">
-                  			{% if gputype|length > 1 %}
-                   				<div class="tab-pane fade show active" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
-                    				<div id="myForecastChart0" style="height: 250px;" class="me-2 pe-2"></div>
-                    			</div>
-                    			{% for gpu in gputype %}
-                    			<div class="tab-pane fade" id="forecast-gpu{{forloop.counter}}" role="tabpanel" aria-labelledby="forecast-gpu{{forloop.counter}}-tab">
-                    				<div id="myForecastChart{{forloop.counter}}" style="height: 250px;" class="me-2 pe-2"></div>
-                    			</div>
-                    			{% endfor %}
-                   			{% elif  gputype|length == 1 %}
-                   				<div class="tab-pane fade show active" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
-                    				<div id="myForecastChart0" style="height: 250px;" class="me-2 pe-2"></div>
-                    			</div>
-                   			{% else %}
-                   				<div class="tab-pane fade show active fw-400 text-body" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
-                    				GPU_TYPE is empty
-                    			</div>
-                   			{% endif %}
-                  		</div>
-                 	</div>
-					<!-- </forecast-chart> -->
+      	 </li>
+       {% endif %}
+      </ul>
+      <div class="tab-content " id="myTabContent">
+      	{% if accelerator_name|length > 1 %}
+      		<div class="tab-pane fade show active" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
+        	<div id="myForecastChart0" style="height: 250px;" class="me-2 pe-2"></div>
+        </div>
+        {% for acc in accelerator_name %}
+        <div class="tab-pane fade" id="forecast-acc{{forloop.counter}}" role="tabpanel" aria-labelledby="forecast-acc{{forloop.counter}}-tab">
+        	<div id="myForecastChart{{forloop.counter}}" style="height: 250px;" class="me-2 pe-2"></div>
+        </div>
+       	{% endfor %}
+       {% elif accelerator_name|length == 1 %}
+       	<div class="tab-pane fade show active" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
+        	<div id="myForecastChart0" style="height: 250px;" class="me-2 pe-2"></div>
+        </div>
+       {% else %}
+      		<div class="tab-pane fade show active fw-400 text-body" id="forecastchart" role="tabpanel" aria-labelledby="forecastchart-tab">
+        	Empty Chart
+        </div>
+       {% endif %}
+      </div>
+     </div>
+					<!-- </chart-body-forecast> -->
 
-					<!-- <time-chart> -->
-                	<div id="option-chart-time" class="option-chart">
-                 		<ul class="nav nav-tabs" id="myTab" role="tablist">
-                  			{% if gputype|length > 1 %}
-                   				<li class="nav-item" role="presentation">
-                    				<a class="nav-link active fw-400 text-body" id="timechart-tab" data-bs-toggle="tab" 
-								   	   href="#timechart" role="tab" aria-controls="timechart" aria-selected="true">
+					{% comment %}
+					<!-- <chart-body-history> -->
+     <div id="option-chart-time" class="option-chart">
+     	<ul class="nav nav-tabs" id="myTab" role="tablist">
+      	{% if accelerator_name|length > 1 %}
+       	<li class="nav-item" role="presentation">
+        	<a class="nav-link active fw-400 text-body" id="timechart-tab" data-bs-toggle="tab" 
+								    href="#timechart" role="tab" aria-controls="timechart" aria-selected="true">
 										Total
-							   		</a>
-                    			</li>
-                    			{% for gpu in gputype %}
-									{% comment %}none{% endcomment %}
-                    			{% endfor %}
-                   			{% elif  gputype|length == 1 %}
-                   				<li class="nav-item" role="presentation">
-                    				<a class="nav-link active fw-400 text-body" id="timechart-tab" data-bs-toggle="tab" 
+							 	</a>
+        </li>
+        {% for acc in accelerator_name %}
+									
+        {% endfor %}
+       {% elif accelerator_name|length == 1 %}
+								{% for acc in accelerator_name %}
+       	<li class="nav-item" role="presentation">
+        	<a class="nav-link active fw-400 text-body" id="timechart-tab" data-bs-toggle="tab" 
 									   href="#timechart" role="tab" aria-controls="timechart" aria-selected="true">
-										{{ gputype | index:0 | upper }}
+										{{ acc | upper }}
 									</a>
-                    			</li>
-                   			{% else %}
-                    			<li class="nav-item" role="presentation">
-                    				<a class="nav-link active fw-400 text-body" id="timechart-tab" data-bs-toggle="tab" 
+        </li>
+								{% endfor %}
+       {% else %}
+       	<li class="nav-item" role="presentation">
+        	<a class="nav-link active fw-400 text-body" id="timechart-tab" data-bs-toggle="tab" 
 									   href="#timechart" role="tab" aria-controls="timechart" aria-selected="true">
 										NONE
 									</a>
-                    			</li>
-                   			{% endif %}
-                  		</ul>
+        </li>
+       {% endif %}
+      </ul>
+      <div class="tab-content" id="myTabContent">
+      	{% if accelerator_name|length > 1 %}
+       	<div class="tab-pane fade show active" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
+       		<div id="myTimeChart" style="height: 230px;" class="ms-0 me-2"></div>
+        </div>
+        {% for acc in accelerator_name %}
+        <div class="tab-pane fade" id="time-acc{{forloop.counter}}" role="tabpanel" aria-labelledby="time-acc{{forloop.counter}}-tab">
+        	{{ acc }}-TIME
+        </div>
+       	{% endfor %}
+       {% elif  accelerator_name|length == 1 %}
+       	<div class="tab-pane fade show active" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
+        	<div id="myTimeChart" style="height: 230px;" class="ms-0 me-2"></div>
+        </div>
+       {% else %}
+      		<div class="tab-pane fade show active fw-400 text-body" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
+        	Empty Chart
+        </div>
+       {% endif %}
+      </div>
+     </div>
+					<!-- </chart-body-history> -->
+					{% endcomment %}
 
-                  		<div class="tab-content" id="myTabContent">
-                  			{% if gputype|length > 1 %}
-                   				<div class="tab-pane fade show active" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
-                    				<div id="myTimeChart" style="height: 230px;" class="ms-0 me-2"></div>
-                    			</div>
-                    			{% for gpu in gputype %}
-                    			<div class="tab-pane fade" id="time-gpu{{forloop.counter}}" role="tabpanel" aria-labelledby="time-gpu{{forloop.counter}}-tab">
-                    				{{ gputype | index:forloop.counter0 }}-TIME
-                    			</div>
-                    			{% endfor %}
-                   			{% elif  gputype|length == 1 %}
-                   				<div class="tab-pane fade show active" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
-                    				<div id="myTimeChart" style="height: 230px;" class="ms-0 me-2"></div>
-                    			</div>
-                   			{% else %}
-                   				<div class="tab-pane fade show active fw-400 text-body" id="timechart" role="tabpanel" aria-labelledby="timechart-tab">
-                    				GPU_TYPE is empty
-                    			</div>
-                   			{% endif %}
-                  		</div>
-                 	</div>
-					<!-- </time-chart> -->
-
-                </div>
-            </div> 
-        </div> 
+				</div>
+   </div> 
+  </div> 
 		<!-- </chart> -->
-    </div>
-    <!-- </top-layer> -->
+ </div>
+	<!-- </top-layer> -->
 										
  <!-- <jobs-card> -->
 	<div class="row mt-2">
@@ -433,8 +459,8 @@
            	<div class="input-group-text fs--1 fw-400 text-body">
             	Name
             </div>
-            <input type="text" name="{{ start_job_form.name.html_name }}" class="form-control fs--1 fw-400 text-body" 
-												   	   value="{{ start_job_form.name.field.initial }}" required>
+            <input type="text" name="name" class="form-control fs--1 fw-400 text-body" 
+												   	   value="My Job" required>
            </div>
           </th>
 
@@ -556,24 +582,26 @@ $('#scrollbarModal').on('show.bs.modal', function() {
 });
 </script>
 <script>
-// System Card & Jobs Card
+// System Card & Chart Card & Jobs Card
 $(document).ready(function() {
-        // Note: set .option-acc{display:none;} in style.css
+
+        // Note: set .option-acc{display:none;} in style.css -- system card
         var $list_acc = $( '#list-acc' );
         var $option_acc = $( '.option-acc' );
         var $option_node = $( '.option-nod' );
+								var $selected_nodes = $( '.selected-nodes' );
 
         $list_acc.on( 'change', function ( e ) {
                 $option_acc.hide();
                 $option_node.hide();
+																$selected_nodes.prop('selectedIndex',0);
                 $( '#option-acc-' + this.value ).show();
                 {% for acccelerator in accelerator_name %}
                         $( '#option-nod{{forloop.counter}}-nod0' ).show();
                 {% endfor %}
-
         });
 
-        // Note: set .option-nod{display:none;} in style.css
+        // Note: set .option-nod{display:none;} in style.css -- system card
         {% for acccelerator in accelerator_name %}
         var $list_node{{forloop.counter}} = $( '#list-node{{forloop.counter}}' );
         var $option_node = $( '.option-nod' );
@@ -584,7 +612,17 @@ $(document).ready(function() {
         });
         {% endfor %}
 
-								// Note: set .option-proj{display:none;} in style.css
+								// Note: set .option-chart{display:none;} in style.css -- chart card
+								var $list_chart = $( '#list-chart' );                 
+								var $option_chart = $( '.option-chart' );             
+                                                      
+								$list_chart.on( 'change', function ( e ) {            
+    												$option_chart.hide();                             
+    												$( '#option-chart-' + this.value ).show();        
+								});                                                   
+
+
+								// Note: set .option-proj{display:none;} in style.css -- jobs card
 								var $list_proj = $( '#list-proj' );
 								var $option_proj = $( '.option-proj' );
 
@@ -594,6 +632,19 @@ $(document).ready(function() {
 								});
 
 })
+</script>
+<script>
+// select2 in system card
+function iformat(icon) {
+    var originalOption = icon.element;
+    return $('<span><i class="fa ' + $(originalOption).data('icon') + '"></i> ' + icon.text + '</span>');
+}
+$('.icons_select2').select2({
+    width: "100%",
+    templateSelection: iformat,
+    templateResult: iformat,
+    allowHtml: true
+});
 </script>
 <script>
 // jobs card

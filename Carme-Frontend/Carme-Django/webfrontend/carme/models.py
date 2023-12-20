@@ -57,6 +57,7 @@ class SlurmJob(models.Model):
     name = models.CharField(max_length=128, default='unknown')
     frontend = models.CharField(max_length=64, default='main')
     gpu_type = models.CharField(max_length=64, default='none')
+    node_name = models.CharField(max_length=128, default='none')
 
 class Image(models.Model):
     """ available software images """
@@ -65,7 +66,7 @@ class Image(models.Model):
     group = models.CharField(max_length=64)
     flags = models.CharField(max_length=512)
     comment = models.CharField(
-        max_length=1024, default="image description")
+    max_length=1024, default="image description")
     status = models.CharField(max_length=128, default="active")
     owner = models.CharField(max_length=64, default="admin")
 
