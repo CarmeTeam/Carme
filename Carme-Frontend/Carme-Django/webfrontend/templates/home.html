@@ -583,35 +583,36 @@ $('#scrollbarModal').on('show.bs.modal', function() {
 </script>
 <script>
 // System Card & Chart Card & Jobs Card
-$(document).ready(function() {
-
-        // Note: set .option-acc{display:none;} in style.css -- system card
-        var $list_acc = $( '#list-acc' );
-        var $option_acc = $( '.option-acc' );
-        var $option_node = $( '.option-nod' );
+function register_system_events() {
+								// Note: set .option-acc{display:none;} in style.css -- system card
+								var $list_acc = $( '#list-acc' );
+								var $option_acc = $( '.option-acc' );
+								var $option_node = $( '.option-nod' );
 								var $selected_nodes = $( '.selected-nodes' );
 
-        $list_acc.on( 'change', function ( e ) {
-                $option_acc.hide();
-                $option_node.hide();
+								$list_acc.on( 'change', function ( e ) {
+																$option_acc.hide();
+																$option_node.hide();
 																$selected_nodes.prop('selectedIndex',0);
-                $( '#option-acc-' + this.value ).show();
-                {% for acccelerator in accelerator_name %}
-                        $( '#option-nod{{forloop.counter}}-nod0' ).show();
-                {% endfor %}
-        });
+																$( '#option-acc-' + this.value ).show();
+																{% for acccelerator in accelerator_name %}
+																								$( '#option-nod{{forloop.counter}}-nod0' ).show();
+																{% endfor %}
+								});
 
-        // Note: set .option-nod{display:none;} in style.css -- system card
-        {% for acccelerator in accelerator_name %}
-        var $list_node{{forloop.counter}} = $( '#list-node{{forloop.counter}}' );
-        var $option_node = $( '.option-nod' );
+								// Note: set .option-nod{display:none;} in style.css -- system card
+								{% for acccelerator in accelerator_name %}
+								var $list_node{{forloop.counter}} = $( '#list-node{{forloop.counter}}' );
+								var $option_node = $( '.option-nod' );
 
-        $list_node{{forloop.counter}}.on( 'change', function ( e ) {
-                $option_node.hide();
-                $( '#option-nod{{forloop.counter}}-' + this.value ).show();
-        });
-        {% endfor %}
+								$list_node{{forloop.counter}}.on( 'change', function ( e ) {
+																$option_node.hide();
+																$( '#option-nod{{forloop.counter}}-' + this.value ).show();
+								});
+								{% endfor %}
+};
 
+$(document).ready(function() {
 								// Note: set .option-chart{display:none;} in style.css -- chart card
 								var $list_chart = $( '#list-chart' );                 
 								var $option_chart = $( '.option-chart' );             
