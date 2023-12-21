@@ -11,7 +11,7 @@ an open source framework to manage resources for **multiple users** running **in
 ## **Presentations**
 
 ### Marketing Slides
-[CARME slides (11/2022)](./Slides/2022-11--carme--pr-slides.pdf)
+[CARME slides (11/2022)](docs/Slides/2022-11--carme--pr-slides.pdf)
 
 ## **Core Idea**
 
