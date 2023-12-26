@@ -111,19 +111,23 @@
           	Nodes
         		</h5>
         		<div class="w-50">
-											<select class="form-select form-select-sm fs--2 text-header pe-2 selected-nodes" id="list-node{{forloop.counter}}">
+											<div class="select2-wrapper">
+											<select class="input icons_select2 fs--2 text-header pe-2 selected-nodes" id="list-node{{forloop.counter}}">
 												{% for node, status in a_node_and_status %}                                                        
   											{% if forloop.first %}                                                                            
-    										<option value="nod0" selected>                                                                  
-     										{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}              
+    										<option value="nod0" selected data-icon="fa-check">
+															{{ node | upper }}                                                                  
+     										{% comment %}{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}{% endcomment %}              
     										</option>                                                                                       
   											{% else %}                                                                                        
-    										<option value="nod{{forloop.counter0}}">                                                        
-     										{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}              
+    										<option value="nod{{forloop.counter0}}" data-icon="fa-check">
+               {{ node | upper }}                                                        
+     										{% comment %}{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}{% endcomment %}              
     										</option>                                                                                                                                      
   											{% endif %}                                                                                       
  											{% endfor %}                                                                                       
-											</select>                                                                                
+											</select>
+											</div>                                                                                
         		</div> 
 									</div>
 
@@ -674,5 +678,18 @@ $(document).ready(function() {
 	});
 	{% endfor %}
 })
+</script>
+<script>
+// select2
+function iformat(icon) {
+    var originalOption = icon.element;
+    return $('<span><i class="fa ' + $(originalOption).data('icon') + '"></i> ' + icon.text + '</span>');
+}
+$('.icons_select2').select2({
+    width: "100%",
+    templateSelection: iformat,
+    templateResult: iformat,
+    allowHtml: true
+});
 </script>
 {% endblock %}
