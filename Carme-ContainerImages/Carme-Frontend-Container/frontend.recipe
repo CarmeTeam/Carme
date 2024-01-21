@@ -1,5 +1,5 @@
 BootStrap: debootstrap
-OSVersion: stable
+OSVersion: oldoldstable
 MirrorURL: http://ftp.de.debian.org/debian/
 
 %help
@@ -12,10 +12,10 @@ MirrorURL: http://ftp.de.debian.org/debian/
     mkdir -p ${SINGULARITY_ROOTFS}/opt/Carme
     mkdir -p ${SINGULARITY_ROOTFS}/etc/carme
 
-%files
-    Carme-Frontend /opt/Carme/Carme-Frontend
+%files 
+    /opt/Carme/Carme-Frontend /opt/Carme/Carme-Frontend
 
-%post
+%post  
     # update repos -----------------------------------------------------------------------------------------------------------------
     apt update
     apt upgrade -y
@@ -23,7 +23,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
     # install base stuff -----------------------------------------------------------------------------------------------------------
-    apt install -y vim nano less htop wget
+    apt install -y vim nano less htop wget curl
     #-------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -53,17 +53,41 @@ MirrorURL: http://ftp.de.debian.org/debian/
 
 
     # install basic python libs ----------------------------------------------------------------------------------------------------
-    apt install -y python3 python3-pip python3-dev python3-pyldap default-libmysqlclient-dev libsasl2-dev libldap2-dev libssl-dev
+    apt install -y python3 python3-pip python3-venv python3-dev python3-pyldap default-libmysqlclient-dev libsasl2-dev libldap2-dev libssl-dev 
+    # used by mysqlclient
+    apt install -y pkg-config
     #-------------------------------------------------------------------------------------------------------------------------------
+    
+    # install git to call git urls with pip
+    #apt install -y git
+
+    # create and activate a python environment -------------------------------------------------------------------------------------
+    python3 -m venv /opt/.venv
+    . /opt/.venv/bin/activate
 
 
-    # install python dependencies --------------------------------------------------------------------------------------------------
-    pip3 install mysqlclient numpy rpyc whitenoise wiki
-    pip3 install Django
-    pip3 install django-auth-ldap django-bootstrap-themes django-mathfilters django-two-factor-auth phonenumbers django-classy-tags django-db-logger django-filter
-    pip3 install django-js-asset django-logtailer django-maintenance-mode django-material django-mptt django-nyt django-sekizai
-    pip3 install django-settings-export django-viewflow django-todo
+				pip3 install -U pip
+
+    # install python dependencies
+    pip3 install Django numpy rpyc whitenoise bleach --no-cache-dir
+    #pip3 install git+https://github.com/django-wiki/django-wiki.git --no-cache-dir
+    pip3 install wiki
+    pip3 install django-autocomplete-light
+    pip3 install django-auth-ldap django-mathfilters django-classy-tags django-db-logger django-filter --no-cache-dir
+    pip3 install django-two-factor-auth phonenumbers django-otp-yubikey --no-cache-dir
+    pip3 install django-js-asset django-logtailer django-maintenance-mode==0.20.0 django-material django-mptt django-nyt django-sekizai --no-cache-dir
+    # install mysqlclient
+    #export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
+    #export MYSQLCLIENT_LDFLAGS=`pkg-config mysqlclient --libs`
+    pip3 install mysqlclient --no-cache-dir
+    # install python dependencies with --use-pep517 (due to deprecation, refer to https://github.com/pypa/pip/issues/8559)
+    pip3 install django-settings-export django-viewflow 
+    #pip3 instal django-todo
+    pip3 install misaka --no-cache-dir --use-pep517
     #-------------------------------------------------------------------------------------------------------------------------------
+    
+    # set sourcing .venv as a singularity environment variable (needed to activate the environment inside the container)
+    echo '. /opt/.venv/bin/activate' >> $SINGULARITY_ENVIRONMENT 
 
 
     # clean-up ---------------------------------------------------------------------------------------------------------------------
@@ -74,7 +98,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
 %environment
     export XDG_RUNTIME_DIR=""
 
-%runscript
+%runscript 
     # migrate database
     /bin/bash -c "cd /opt/Carme/Carme-Frontend/Carme-Django/webfrontend && python3 manage.py migrate carme"
 

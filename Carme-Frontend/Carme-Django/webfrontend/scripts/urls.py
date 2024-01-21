@@ -14,9 +14,10 @@ urlpatterns = [
     re_path(r'^logout/$', include('carme.urls'), name='logout'),
     path('carme/', include('carme.urls')),
     re_path(r'^notifications/', include('django_nyt.urls')),
-    re_path(r'^wiki/', include('wiki.urls')),
-    path('todo/', include('todo.urls', namespace="todo")),
-    path('admin/', admin.site.urls)
+    #re_path(r'^wiki/', include('wiki.urls')),
+    #path('todo/', include('todo.urls', namespace="todo")),
+    path('admin/', admin.site.urls),
+    path('projects/',include('projects.urls',namespace='projects')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

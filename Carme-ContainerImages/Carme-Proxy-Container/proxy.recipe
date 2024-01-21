@@ -22,7 +22,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
   # base stuff ---------------------------------------------------------------------------------------------------------------------
   apt install -y vim nano less htop wget
 
-  wget -qO- https://github.com/traefik/traefik/releases/download/v2.4.9/traefik_v2.4.9_linux_amd64.tar.gz | tar -xzf -  -C /opt/traefik traefik
+  wget -qO- https://github.com/traefik/traefik/releases/download/v2.8.1/traefik_v2.8.1_linux_amd64.tar.gz | tar -xzf -  -C /opt/traefik traefik
   chmod +x /opt/traefik/traefik
 
   chown -R www-data:www-data /opt/traefik

@@ -1,49 +1,96 @@
 {% load static %}
 
 {% if gputype|length > 1 %}
-    {% for gpu in gpu_loop %}
+   
         <script>
-            $.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
-                data["chart"] = {
-                type: "areaspline",
-                };
-                data["legend"] = {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'top',
-                    floating: false,
-                };
-                data["plotOptions"] = {
-                    areaspline: {
-                        fillOpacity: 0.2
-                    }    
-                };
-                $("#myForecastChart{{forloop.counter0}}").highcharts(data);
-            });
+            function myForecastChart() {
+                {% for gpu in gpu_loop %}
+                $.get('line_chart_json_forecast{{forloop.counter0}}', function (data) {
+                    data["chart"] = {
+                    type: "areaspline",
+                    backgroundColor: getGrays()[''],
+                    };
+                    data["legend"] = {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'top',
+                        floating: false,
+                        itemStyle: {
+                            color: getGrays()['black']
+                         },
+                    };
+                    data["plotOptions"] = {
+                        areaspline: {
+                            fillOpacity: 0.2
+                        }    
+                    };
+    
+                    $("#myForecastChart{{forloop.counter0}}").highcharts(data);
+                });
+                {% endfor %}
+            };
+
+            themeController.addEventListener(
+                "clickControl",
+                ({ detail: { control, value } }) => {
+                   
+                  if (control === "theme") {
+                        myForecastChart();
+                  }
+                }
+              );
+    
+              myForecastChart();
+            
         </script>
-    {% endfor %}
+ 
 {% elif  gputype|length == 1 %}
         <script>
-            $.get('line_chart_json_forecast0', function (data) {
-                data["chart"] = {
-                type: "areaspline",
-                };
-                data["legend"] = {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'top',
-                    floating: false,
-                };
-                data["plotOptions"] = {
-                    areaspline: {
-                        fillOpacity: 0.2
-                    }    
-                };
-                $("#myForecastChart0").highcharts(data);
-            });
+        
+            function myForecastChart() {
+
+                $.get('line_chart_json_forecast0', function (data) {
+                    data["chart"] = {
+                    type: "areaspline",
+                    backgroundColor: getGrays()[''],
+                    };
+                    data["legend"] = {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'top',
+                        floating: false,
+                        itemStyle: {
+                            color: getGrays()['1000']
+                        },
+                    };
+                    data["plotOptions"] = {
+                        areaspline: {
+                            fillOpacity: 0.2
+                        }    
+                    };
+
+                    $("#myForecastChart0").highcharts(data);
+                });
+            };
+
+
+            themeController.addEventListener(
+                "clickControl",
+                ({ detail: { control, value } }) => {
+                        
+                  if (control === "theme") {
+                        myForecastChart();
+                  }
+                }
+              );
+    
+              myForecastChart();
+
+
         </script>
 {% else %}
         <script>
             console.log('GPU_TYPE is empty')
         </script>
 {% endif %}
+

@@ -1,0 +1,62 @@
+{% extends "projects/project_base.html" %}
+
+{% block title %}Delete Project{% endblock title %}
+
+		<!-- <card-header> -->
+		{% block project_header_icon %}fas fa-trash{% endblock project_header_icon %} 
+		{% block project_header_title %}Delete Projec{% endblock project_header_title %}
+        <!-- </card-header> -->
+
+            <!-- <card-body> -->
+			{% block project_body %}
+				{% if request.user == project.owner %}
+				<div class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
+					<small class="fas fa-circle-exclamation"></small>&nbsp; This project will be removed from all member accounts.
+				</div>
+				{% else %}
+				<div class="alert alert-warning" style="padding: 3px 8px; font-size:14px;" role="alert">
+					<small class="fas fa-circle-exclamation"></small>&nbsp; You don't have the rights to delete this project.
+				</div>
+				{% endif %}
+				<div class="input-group mb-3">
+					<span class="input-group-text text-body" style="width:120px;">Name</span>
+					<input type="text" name="name" id="id_name" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{project.name|capfirst}}" 
+						   autocomplete="do-not-autofill" disabled>
+				</div>
+				<div class="input-group mb-3">
+					<span class="input-group-text" style="width:120px;">Description</span>
+					<input type="text" name="description" id="id_description" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{project.description|capfirst}}" 
+					       autocomplete="do-not-autofill" disabled>
+				</div>
+				<div class="input-group mb-3">
+					<span class="input-group-text" style="width:120px;">All Members</span>
+					<input type="text" name="member" id="id_member" maxlength="255" class="form-control fs-0 fw-400 text-body" value="{{project.members.count}}" 
+					       autocomplete="do-not-autofill" disabled>
+				</div>
+				{% if request.user == project.owner %}
+				<div class="fs-0 fw-400 text-body">
+					<p class="pt-3" style="padding-left: 0.8rem;">Are you sure that you want to delete this project?</p>
+					<div class="form-check" style="padding-left: 2.3rem;">
+						<input class="form-check-input" type="checkbox" value="" id="flexCheckDisabled" checked disabled>
+						<label class="form-check-label" for="flexCheckDisabled">Yes, I'm sure.</label>
+					</div>
+				</div>
+				{% endif %}
+
+				<div class="card-footer pb-0" style="padding-top:0.6rem;">
+					<div class="float-start">
+						{% if request.user == project.owner %}
+							<form action="" method="POST" >
+								{% csrf_token %}
+								<button type="submit" class="btn btn-sm btn-danger mb-0">Delete</button>
+							</form>
+						{% endif %}
+					</div>
+					<div class="float-end">
+						<a href="{% url 'projects:all' %}" class="text-decoration-none float-end">
+							  <button type="button" class="btn btn-sm btn-secondary mb-3">Back to Projects</button>
+						</a>
+					</div>
+				</div>
+			{% endblock project_body %}
+			<!-- </card-body> -->

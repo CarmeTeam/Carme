@@ -1,0 +1,486 @@
+<!---------------------------------->
+<!--        Footer: date          -->
+<!--       ( footer.html )        -->
+<!---------------------------------->                   
+<script>
+    document.getElementById("current-year").innerHTML = new Date().getFullYear();
+</script>
+
+<!---------------------------------->
+<!--      Tooltip: activate       -->
+<!--         ( project )          -->
+<!---------------------------------->
+<script>
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip()
+    });
+</script>
+
+<!----------------------------------> 
+<!--          Form Submit         -->  
+<!--         ( base.html )        --> 
+<!----------------------------------> 
+<script type="text/javascript">                                                              
+  if (!$) console.error('jQuery is required!');                                              
+  else {                                                                                     
+    $(document).on('submit', 'form.ajax', function (event) {                                 
+      // source: https://www.sanwebe.com/2016/07/ajax-form-submit-examples-using-jquery      
+      event.preventDefault(); //prevent default action                                       
+      var post_url = $(this).attr("action"); //get form action url                           
+      var request_method = $(this).attr("method"); //get form GET/POST method                
+      var form_data = $(this).serialize(); //Encode form elements for submission             
+      $.ajax({                                                                               
+        url: post_url,                                                                       
+        type: request_method,                                                                
+        data: form_data                                                                      
+      }).fail(function () {                                                                  
+        console.error('Request to ' + post_url + ' failed. Please try again.');              
+      }).always(function () {                                                                
+          setTimeout(function () {                                                           
+          //document.location.reload();                                                      
+          }, 1000);                                                                          
+        });                                                                                  
+    });                                                                                      
+  }                                                                                          
+</script>                                                                                    
+                                                                                             
+
+
+
+<!---------------------------------->
+<!--       GPU and Chart Card     -->
+<!--         <form-select>        -->
+<!--         ( home.html )        -->
+<!----------------------------------> 
+<script>
+//$(document).ready(function() {
+//    if (!$("#twofactor").length > 0) {
+//    // Note: set .option-gpu{display:none;} in style.css
+//    var $list_gpu = $( '#list-gpu' );
+//    var $option_gpu = $( '.option-gpu' );
+//
+//    $list_gpu.on( 'change', function ( e ) {
+//        $option_gpu.hide();
+//        $( '#option-gpu-' + this.value ).show();
+//    } );
+//
+//    // Note: set .option-chart{display:none;} in style.css
+//    var $list_chart = $( '#list-chart' );
+//    var $option_chart = $( '.option-chart' );
+//  
+//    $list_chart.on( 'change', function ( e ) { 
+//        $option_chart.hide();
+//        $( '#option-chart-' + this.value ).show();
+//    });
+//    }
+//})
+</script>
+
+
+<!---------------------------------->
+<!--   Main: dark-mode & update   -->
+<!--( home.html, job_table.html ) -->
+<!----------------------------------> 
+<script>
+// onload color
+var onloadJobTableColor = null;
+
+function onloadColor(){ 
+    $(document).ready(function() {
+        
+            const elementMode = document.querySelector(':root');
+            const carmeMode = getComputedStyle(elementMode);
+                
+            let lightMode  = carmeMode.getPropertyValue("--carme-light-mode").replace(/\s/g, '');
+            let darkMode   = carmeMode.getPropertyValue("--carme-dark-mode").replace(/\s/g, '');
+            let activeMode = carmeMode.getPropertyValue("--carme-body-bg").replace(/\s/g, '');
+    
+												var imgJobL = document.getElementsByClassName('carme-job-light');
+            var imgJobD = document.getElementsByClassName('carme-job-dark');
+    
+            if (activeMode==darkMode) {
+                if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD != null) {
+                    for(var i = 0, length = imgJobL.length; i < length; i++) {   
+                        imgJobL[i].style.display = 'none';          // hides light-mode img
+                        imgJobD[i].style.display = 'inline-block';  // shows dark-mode img
+                    }
+																				onloadJobTableColor = 'completed';
+                }
+            }
+                
+            if (activeMode==lightMode){
+																if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD != null) {
+                    for(var i = 0, length = imgJobL.length; i < length; i++) {
+                        imgJobL[i].style.display = 'inline-block';  // shows light-mode img 
+                        imgJobD[i].style.display = 'none';          // hides dark-mode img
+                    }
+																				onloadJobTableColor = 'completed';
+                }
+            }
+    
+        
+    })
+}
+
+
+
+$(document).ready(function() {
+    if (!$("#twofactor").length > 0) {
+        if (!$) console.error('jQuery is required!');
+        else {
+
+										////////////////////////////////////// Update Functions //////////////////////////////////////////////			    
+
+										// update highcharts
+										function update_chart() {
+												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
+           
+												// history-chart
+												//$.get('{% url 'line_chart_json_time' %}', function (data) {
+          		//		data["chart"] = {
+            //				type: "areaspline",
+												//				styledMode: true,
+            //		};
+            //		data["legend"] = {
+            //				layout: 'horizontal',
+            // 			align: 'center',
+            //  		verticalAlign: 'top',
+            //  		floating: false,
+            //		};
+												//
+            //		$("#myTimeChart").highcharts(data);
+          		//});			
+	
+
+												// forecast-chart 
+												{% if accelerator_name|length > 1 %}                                     
+																$.get('line_chart_json_forecast0', function (data) {
+  																data["chart"] = {                                                    
+    																type: "areaspline",                                                
+    																styledMode: true,                                                  
+  														};                                                                   
+  														data["legend"] = {                                                   
+    														layout: 'horizontal',                                              
+    														align: 'center',                                                   
+    														verticalAlign: 'top',                                              
+    														floating: false,                                                   
+  														};                                                                   
+                                                                       
+  														$("#myForecastChart0").highcharts(data);          
+														});                                                                    
+
+    										{% for acc in accelerator_name %}
+            				$.get('line_chart_json_forecast{{forloop.counter}}', function (data) {
+              				data["chart"] = {
+                				type: "areaspline",
+																				styledMode: true,
+               			};
+                		data["legend"] = {
+               					layout: 'horizontal',
+                 			align: 'center',
+                 			verticalAlign: 'top',
+                 			floating: false,
+               			};
+														
+																		$("#myForecastChart{{forloop.counter}}").highcharts(data);
+           					});
+    										{% endfor %}
+
+												{% elif  accelerator_name|length == 1 %}
+          						$.get('line_chart_json_forecast0', function (data) {
+               			data["chart"] = {
+               					type: "areaspline",
+																				styledMode: true,
+               			};
+               			data["legend"] = {
+                				layout: 'horizontal',
+                  		align: 'center',
+                  		verticalAlign: 'top',
+                  		floating: false,
+               			};
+
+                		$("#myForecastChart0").highcharts(data);
+            				});
+
+												{% else %}
+          						console.log('No accelerators');
+												{% endif %}
+							 		};
+
+
+										// update jobtable success
+										function update_jobtable_success(data) {
+          		var entries = $(data); // data: HTML page
+            entries.each(function( index, e ) {
+														if(typeof(e.cells)!='undefined'){ //valid for HTMLTableRowElement
+            				var jobid = $(this).data('jobid');
+              		var existing = $('#jobtable tr[data-jobid="' + jobid + '"]');
+    
+              		if(existing.length > 0) {
+              				if($(this).find('.job-status').text() == existing.find('.job-status').text() &&
+                     $(this).find('.job-extension').text() == existing.find('.job-extension').text()) {
+                				// content equals, just update csrf
+                  		var newTokens = $(this).find('input[name="csrfmiddlewaretoken"]');
+                  		existing.find('input[name="csrfmiddlewaretoken"]').each(function(index) {
+                  				$(this).val(newTokens[index].value);
+                  		});
+                		} 
+																		else {
+                				// content changed, replace element
+                  		$(this).replaceAll(existing);
+                  		onloadColor();
+                		}
+              		} 
+																else {
+              				// job not existing, remove element
+                		$('#jobtable').append($(this));
+																		onloadColor();
+              		}
+														}
+            });
+        
+            var sel = $(data).map(function() {
+														if(typeof($(this).data('jobid'))!='undefined'){
+            				var jobid = $(this).data('jobid');
+              		return 'tr[data-jobid="' + jobid + '"]';
+														}
+            }).get().join(',');
+            $('#jobtable tr.dashboard-jobtable').not(sel).remove();
+          };
+
+
+										// update jobtable
+          function update_jobtable() {
+										  if (onloadJobTableColor =='completed') {
+          				$.ajax('/carme/JobTable/',{
+            				type: "GET",
+              		error: {
+              				404: function (response) {
+                				window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+                		}
+              		}, 
+              		success: function(data){
+            						$.ajax({
+                				url:update_jobtable_success(data),
+                  		success:function(){
+                    		verified=true 
+                  		}
+                		})  
+              		}
+            		});
+												}
+          }
+	
+										// update admin jobtable
+										function update_jobtable_admin() {                                                                                  
+  										if (onloadJobTableColor =='completed') {                                                 
+    										$.ajax('/carme/AdminJobTable/',{                                                            
+      										type: "GET",                                                                         
+      										error: {                                                                             
+        										404: function (response) {                                                         
+          										window.location = '/login/?next=' + window.location.pathname + '&timeout=1';     
+        										}                                                                                  
+      										},                                                                                   
+      										success: function(data){                                                             
+        										$.ajax({                                                                           
+          										url:update_jobtable_success(data),                                               
+          										success:function(){                                         
+            										verified=true                                                                  
+          										}                                                                                
+        										})                                                                                 
+      										}                                                                                    
+    										});                                                                                    
+ 										 }                                                                                        
+										}                                                                                          
+ 
+  
+		
+										// update news
+										function update_news() {
+												$.ajax('/wiki/cluster_news/', {
+														type: "GET",
+														statusCode: {
+																401: function (response) {
+																		window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+																}
+														}, 
+														success: function (data) {
+																var content_reg = /<body.*?>([\S\s]*?)(?:<\/body>)/gmi;
+																var match = content_reg.exec(data);
+
+																if(match && match.length > 1) {
+																		document.getElementById('news').innerHTML = $(match[1]).find('.wiki-article').first().html();
+																}
+														}
+												});
+										}
+
+
+										// update messages
+										function update_messages() {
+												$.ajax('/carme/Messages/',{
+														type: "GET",
+														statusCode: {
+																401: function (response) {
+																		window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+																}
+														}, 
+														success: function (data) {
+																var entries = $(data);					
+																entries.each(function( index ) {
+																		var msgid = $(this).data('msgid');
+																		var existing = $('#messages div[data-msgid="' + msgid + '"]');
+
+																		if(existing.length == 0) {
+																				// message not existing, prepend element
+																				$('#messages').prepend($(this));
+																		}
+																});
+														}
+												});
+										}
+ 											
+
+										////////////////////////////////////// Modal Bootstrap ////////////////////////////////////////////// 
+
+										// stop SetInterval() for each running job  when Modal Boostrap is shown
+          {% for job, slurm in myjobtable_script %}   
+          		{% if job.status == "running" %}
+            		$(document).on('show.bs.modal', '#jobinfoModal{{ job.slurm_id }}', function (e) {
+                stopJobTimer();
+              });
+  
+              $(document).on('hidden.bs.modal', '#jobinfoModal{{ job.slurm_id }}', function (e) {
+                startJobTimer();
+              });
+            {% endif %}
+          {% endfor %}
+
+
+										//////////////////////////////////////// Dark - Mode /////////////////////////////////////////////// 
+
+										// theme Controller 
+										const themeController = document.body;
+ 									themeController.addEventListener("clickControl",({ detail: { control, value } }) => {
+     							if (control === "theme") {
+														var imgJobL = document.getElementsByClassName('carme-job-light');
+														var imgJobD = document.getElementsByClassName('carme-job-dark');
+        						if (value=="dark"){
+																if (typeof(imgJobL) != 'undefined' && imgJobL != null && typeof(imgJobD) != 'undefined' && imgJobD !=null) {
+                		for(var i = 0, length = imgJobL.length; i < length; i++) {
+                  		imgJobL[i].style.display = 'none';		       // hides light-mode img
+																				imgJobD[i].style.display = 'inline-block'; // shows dark-mode img
+                  }               
+               	}
+              }
+              if (value=='light') {
+              		if (typeof(imgJobD) != 'undefined' && imgJobD != null && typeof(imgJobL) != 'undefined' && imgJobL != null) {
+                		for(var i = 0, length = imgJobD.length; i < length; i++) { 
+                  		imgJobD[i].style.display = 'none';		       // hides dark-mode img
+																				imgJobL[i].style.display = 'inline-block'; //shows light-mode img
+                  } 
+               	} 
+     									}
+   									}
+ 									});
+
+
+
+										////////////////////////////////////// Calling Functions ////////////////////////////////////////////// 
+	
+
+										// in job-table, start and stop buttons on-click updates messages and jobtable
+										$( document ).on( "click", "button.start-job,button.stop-job", function() {
+												setTimeout(function() {
+														update_messages();
+														update_jobtable();
+												}, 175);
+										});
+																
+										// calling onloadColor
+										onloadColor();
+
+										// calling messages  
+										setInterval(function () {   
+  										update_messages();        
+										}, 2000);                   
+
+										if (!$("#admin-jobtable").length > 0) { 
+
+												// calling news
+												update_news();
+
+												// calling chart
+												update_chart();
+												register_system_events();
+												setInterval(function() {
+														update_chart();
+														$('#system').load(location.href + " #system-card", register_system_events);
+												}, 1000 * 60 * 1);
+
+										}
+
+										// calling job-table                   
+										var myJobTimer=null;                         
+										var verified=true;                           
+										function startJobTimer() {                   
+  										myJobTimer = setInterval(function () {     
+    										if(verified!=null) {                     
+      										verified=null;
+																if($("#admin-jobtable").length > 0){                         
+      												update_jobtable_admin();
+																}
+																else{
+																		update_jobtable();
+																}                     
+    										}                                        
+  										}, 2000);                                  
+										};                                           
+										function stopJobTimer() {                    
+  										clearInterval(myJobTimer);                 
+  										myJobTimer=null;                                         
+										};                                           
+																		
+          startJobTimer();
+
+								}
+				}
+})
+</script>
+
+
+<!---------------------------------->  
+<!--       Job Timing Script      -->  
+<!--      ( job_table.html )      -->  
+<!---------------------------------->  
+<!-----------  in file  ------------>
+
+
+<!---------------------------------->  
+<!--      Maintenance logout      -->  
+<!--     ( maintenance.html )     -->  
+<!---------------------------------->  
+<!-----------  in file  ------------>  
+
+
+<!---------------------------------->
+<!--       OverlayScrollbars      -->
+<!--         ( all pages )        -->
+<!----------------------------------> 
+  
+<script>
+    document.addEventListener("DOMContentLoaded", function() {      
+        OverlayScrollbars(document.getElementsByClassName('scrollbar-overlay'), {
+            className       : "os-theme-dark custom-scroll",
+            resize          : "none",
+            sizeAutoCapable : true,
+            paddingAbsolute : true,
+            scrollbars : {
+                clickScrolling : true,
+																autoHide: 'leave',
+																autoHidedelay: 50,
+            }
+        });
+    });
+</script>
+							

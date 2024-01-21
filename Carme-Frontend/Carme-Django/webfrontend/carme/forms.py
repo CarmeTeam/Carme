@@ -43,9 +43,9 @@ class StartJobForm(forms.Form):
         self.fields["nodes"] = forms.ChoiceField(
             label="Nodes", choices=node_choices)
         self.fields["gpu_type"] = forms.ChoiceField(
-            label="GPU type", choices=gpu_type_choices)
+            label="Accelerator", choices=gpu_type_choices)
         self.fields["gpus"] = forms.ChoiceField(
-            label="GPUs / node", choices=gpu_choices)
+            label="Accelerators / node", choices=gpu_choices)
         self.fields["image"] = forms.ChoiceField(
             label="Image", choices=image_choices)
         self.fields["name"] = forms.CharField(label="Name")

@@ -1,0 +1,46 @@
+<div class="modal fade pe-0" id="modal-action-{{obj.member_status}}{{ forloop.counter }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">		
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="mb-0 py-0 fs-0 fw-400 text-header">
+                    <!-- jquery header text -->
+                    <span id="headerText-action-{{obj.member_status}}{{ forloop.counter }}"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body fs-0 fw-400 text-body">
+                <div class="alert alert-warning py-1 px-2 fs--1" role="alert">
+                    <!-- jquery alert text -->
+                    <small class='fas fa-circle-exclamation pe-1'></small>
+                    <span id="alertText-action-{{obj.member_status}}{{ forloop.counter }}"></span>
+                </div>
+                <!-- jquery body text -->
+                <p id="bodyText-action-{{obj.member_status}}{{ forloop.counter }}" class="ps-2"></p>
+                <div class="form-check ps-4 ms-2">
+                    <input class="form-check-input" id="checkboxModal-action-{{obj.member_status}}{{ forloop.counter }}" type="checkbox" 
+                           onchange="document.getElementById('buttonModal-action-{{obj.member_status}}{{ forloop.counter }}').disabled = !this.checked;">
+                    <label class="form-check-label" for="checkboxModal-action-{{obj.member_status}}{{ forloop.counter }}">
+                        Yes, I'm sure.
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                {% if request.path == '/projects/' %}
+                <form id="formModal-action-{{obj.member_status}}{{ forloop.counter }}" method="POST" action="">
+                    <input type="hidden" name="project_pk" value={{obj.project__pk}}>
+                {% else %}
+                <form id="formModal-action-{{obj.member_status}}{{ forloop.counter }}" method="POST" action="{% url 'projects:delete' slug=project.slug %}">
+                    <input type="hidden" name="project_pk" value={{project.pk}}> 
+                    <input type="hidden" name="user_pk" value={{obj.user}}>
+                {% endif %}
+                    {% csrf_token %}
+                    <!-- jquery button text -->
+                    <button type="submit" class="btn btn-sm btn-danger" id="buttonModal-action-{{obj.member_status}}{{ forloop.counter }}" disabled></button>
+                </form>
+                    <button type="button" class="btn btn-sm btn-secondary ms-auto" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+                
+    </div>
+</div>
