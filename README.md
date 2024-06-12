@@ -1,7 +1,8 @@
 # Carme installation
 
 Carme is easy to install...
-**Note:** Refer to our Carme Documentation for further details.
+
+**Note:** Refer to our [Carme Documentation](https://docs.open-carme.org/InstallDoc/) for further details.
 
 #### Step 1: Clone the repo
 
