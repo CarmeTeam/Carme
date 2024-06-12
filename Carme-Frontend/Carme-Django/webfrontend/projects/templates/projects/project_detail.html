@@ -91,17 +91,17 @@
 
 		<!-- <form> -->
 		<div class="input-group mb-3">
-			<span class="input-group-text" style="width:130px;">ID</span>
+			<span class="input-group-text" style="width:120px;">ID</span>
 			<input type="text" name="num" id="id_num" maxlength="50" class="form-control fs-0 fw-400 text-body" 
 			   	   value="{{project.num}}" autocomplete="do-not-autofill" disabled>
 		</div>	
 		<div class="input-group mb-3">
-			<span class="input-group-text" style="width:130px;">Name</span>
+			<span class="input-group-text" style="width:120px;">Name</span>
 			<input type="text" name="name" id="id_name" maxlength="50" class="form-control fs-0 fw-400 text-body" 
 				   value="{{project.name|capfirst}}" autocomplete="do-not-autofill" disabled>
 		</div>
 		<div class="input-group mb-3">
-			<span class="input-group-text" style="width:130px;">Description</span>
+			<span class="input-group-text" style="width:120px;">Description</span>
 			<input type="text" name="description" id="id_description" maxlength="70" class="form-control fs-0 fw-400 text-body" 
 				   value="{{project.description|capfirst}}" autocomplete="do-not-autofill" disabled>
 		</div>
@@ -109,12 +109,12 @@
 			{% if is_member %}
 				<!-- <if-is-member> -->
 				<div class="input-group mb-3">
-					<span class="input-group-text" style="width:130px;">Department</span>
+					<span class="input-group-text" style="width:120px;">Department</span>
 					<input type="text" name="department" id="id_department" class="form-control fs-0 fw-400 text-body" 
 						   value="{{project.department}}" autocomplete="do-not-autofill" disabled>
 				</div>
 				<div class="input-group mb-3">
-					<span class="input-group-text" style="width:130px;">Classification</span>
+					<span class="input-group-text" style="width:120px;">Classification</span>
 					<input type="text" name="classification" id="id_classification" class="form-control fs-0 fw-400 text-body" 
 						   value="{{project.classification}}" autocomplete="do-not-autofill" disabled>
 				</div>
@@ -123,7 +123,7 @@
 
 					<!-- <if-project-approved> -->
 					<div class="input-group mb-3">
-						<span class="input-group-text" style="width:130px;">Members</span>
+						<span class="input-group-text" style="width:120px;">Members</span>
 						<input type="text" name="membercount" id="id_membercount" class="form-control fs-0 fw-400 text-body" 
 							   value="{% for count in count_list %} {{count.active_members}} {% endfor %}" autocomplete="do-not-autofill" disabled>
 					</div>
@@ -140,7 +140,7 @@
 								<p class="text-body mt-2">No resources have been allocated to this project. Please contact the administrator.</p>
 							{% else %}
 								<div class="input-group mb-3">
-									<span class="input-group-text" style="width:220px;">Template</span>
+									<span class="input-group-text" style="width:195px;">Template</span>
 									<select id="list-template" class="form-select form-select-sm bg-transparent fs-0 fw-400 text-body">
 										<option value="template0" class="bg-transparent" selected>
 											{% for resource in template_list|slice:"0:1" %}
@@ -162,8 +162,7 @@
 									{% endif %}
 										<!-- <form-resources> -->
 										<div class="input-group mb-3">
-											<span class="input-group-text" style="width:220px;">Accelerators
-												{% comment %} 
+											<span class="input-group-text" style="width:195px;">Accelerators 
 												{% with False as stop_loop %}
 													{% for accelerator in accelerator_list %}
 														{% if accelerator.resourcetemplate__name == resource.template__name%}
@@ -175,33 +174,32 @@
 														{% endif %}
 													{% endfor %}
 												{% endwith %}
-												{% endcomment %}
 											</span>
 											<input type="text" name="accels" id="id_accels" maxlength="255" class="form-control fs-0 fw-400 text-body" 
 												   value="{% with False as stop_loop %}{% for accelerator in accelerator_list %}{% if accelerator.resourcetemplate__name == resource.template__name%}{% if stop_loop %}, {{accelerator.accelerator__name}}{% else %}{{accelerator.accelerator__name}}{% update_variable True as stop_loop %}{% endif %}{% endif %}{% endfor %}{% endwith %}" autocomplete="do-not-autofill" disabled>
 										</div>
 										<div class="input-group mb-3">
-											<span class="input-group-text" style="width:220px;">Max Accelerators / Node</span>
+											<span class="input-group-text" style="width:195px;">Max Accelerators/Node</span>
 											<input type="text" name="maxaccelsnode" id="id_maxaccelsnode" maxlength="255" class="form-control fs-0 fw-400 text-body" 
 											       value="{{resource.template__maxaccels_per_node}}" autocomplete="do-not-autofill" disabled>
 										</div>
 										<div class="input-group mb-3">
-											<span class="input-group-text" style="width:220px;">Max Nodes / Job</span>
+											<span class="input-group-text" style="width:195px;">Max Nodes/Job</span>
 											<input type="text" name="maxnodesjob" id="id_maxnodesjob" maxlength="255" class="form-control fs-0 fw-400 text-body" 
 												   value="{{resource.template__maxnodes_per_job}}" autocomplete="do-not-autofill" disabled>
 										</div>
 										<div class="input-group mb-3">
-											<span class="input-group-text" style="width:220px;">Max Jobs</span>
+											<span class="input-group-text" style="width:195px;">Max Jobs</span>
 											<input type="text" name="maxjobs" id="id_maxjobs" maxlength="255" class="form-control fs-0 fw-400 text-body" 
 												   value="{{resource.template__maxjobs}}" autocomplete="do-not-autofill" disabled>
 										</div>
 										<div class="input-group mb-3">
-											<span class="input-group-text" style="width:220px;">Walltime</span>
+											<span class="input-group-text" style="width:195px;">Walltime</span>
 											<input type="text" name="walltime" id="id_walltime" maxlength="255" class="form-control fs-0 fw-400 text-body" 
 												   value="{% if resource.template__walltime == 1 %}{{resource.template__walltime}} day{% else %}{{resource.template__walltime}} days{% endif %}" autocomplete="do-not-autofill" disabled>
 										</div>
 										<div class="input-group mb-3">
-											<span class="input-group-text" style="width:220px;">Features</span>
+											<span class="input-group-text" style="width:195px;">Features</span>
 											<textarea cols="40" rows="3" name="features" id="id_features" maxlength="500" class="form-control fs-0 w-400 text-body" 
 													  autocomplete="do-not-autofill" disabled>{{resource.template__features}}</textarea>
 										</div>
@@ -253,7 +251,8 @@
 				{% if is_member %}       
  					{%for x in is_member%}  		
 						{% if x.is_manager and x.member_status == 'active' %}
-						
+							
+							{% if CARME_USERS == "multi" %}
 							<!-- <invite> -->
 							<div id="invite" class="mb-4">
 
@@ -283,14 +282,14 @@
 										<input type="hidden" id="project_pk" name="project_pk" value={{project.pk}}>
 										{% if project.is_approved == False %}
 										<input type="text" id="user_pk" name="user_pk" class="form-control fs-0 fw-400 text-body"  
-											   placeholder="Waiting for approval" disabled>
-										<button class="btn btn-sm btn-custom text-body w-50" type="submit" disabled>
+											   placeholder="...Waiting for approval" disabled>
+										<button class="btn btn-sm btn-custom text-body" type="submit" disabled>
 										{% else %}
 										<input type="text" id="user_pk" name="user_pk" class="form-control fs-0 fw-400 text-body"  
 											   placeholder="Type username" autocomplete="do-not-autofill" autocomplete="off">
 										<button class="btn btn-sm btn-custom text-body w-50" type="submit">
 										{% endif %}
-											<span class="pe-4">Add to Project</span>
+											<span class="pe-2">Add to Project</span>
 											<span class="fas fa-plus ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
 										</button>
 									</div>
@@ -301,17 +300,16 @@
 								<div class="input-group mb-3">
 									{% if project.is_approved == False %}
 										<input type="text" id="value_to_copy" name="value_to_copy" class="form-control"  
-											   placeholder="Waiting for approval" disabled>
-										<button id="copy_value" class="btn btn-sm btn-custom text-body w-50" disabled>
-											Copy Project Slug
+											   placeholder="...Waiting for approval" disabled>
+										<button id="copy_value" class="btn btn-sm btn-custom text-body" disabled>
+											Copy Project ID
 											<span class="far fa-copy ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
-										</button>
-									{% else %}
+										</button>										{% else %}
 										<input type="text" id="value_to_copy" name="value_to_copy" class="form-control fs-0 fw-400 text-disabled" 
 											   value="{{project.slug}}" readonly>
 										<button id="copy_value" class="btn btn-sm btn-custom text-body w-50" onclick="myCopyFunction()" 
 										 		data-bs-toggle="tooltip" data-bs-placement="top" title="Copy">
-											Copy Project Slug 
+											Copy Project ID 
 											<span class="far fa-copy ps-3 pe-2" data-fa-transform="shrink-5 left-2"></span>
 										</button> 
 									{% endif %}
@@ -320,6 +318,7 @@
 
 							</div>
 							<!-- </invite> -->
+							{% endif %}
 							
 						{% endif %}
 					{% endfor %}
@@ -335,11 +334,7 @@
 						<tr>
 							<td class="align-middle text-left">
 								<div class="d-flex align-items-center">
-									{% if project.owner != request.user %}
 									<a href="" class="ps-2">
-									{% else %}
-									<a href="" class="ps-2">
-									{% endif%}
 										<div class="avatar-icon position-relative d-inline-block my-2">
 											<span class="position-absolute top-50 start-50 translate-middle">
 												<img class="rounded-circle" style="width:50px;" src="/static/img/users/blank-user.png" />
@@ -348,7 +343,7 @@
 									</a>
 									<div class="flex-1 align-self-center ps-3">
 										<h6 class="fs-0 fw-500 mb-1">
-											{% if project.owner != request.user %}
+											{% if project.owner != request.user and CARME_USERS="multi" %}
 											<a href="" class="text-decoration-none">
 												{{ project.owner }}
 											{% else %}
@@ -357,13 +352,13 @@
 											{% endif%}
 										</h6>
 										<span class="i-gray py-1 px-2 rounded-pill-3 fs--1 fw-400">ADMIN</span>
-									</div>	
+									</div>
 								</div>
-							</td>		
+							</td>
 						</tr>
 					</tbody>
 				</table>
-				<!-- </creator> -->	
+				<!-- </creator> -->
 
 				
 				{% if is_member %}
@@ -386,7 +381,10 @@
 
 										<div class="row flex-center text-center" style="padding: 50px 0 50px 0;">
 											<div class="fs-6 fw-900 text-watermark">Single Member Project</div>
+											{% if CARME_USERS == "multi" %}
 											<p class="mt-4 mx-auto fs--1 fw-200 text-body">To add members, share the project slug or submit an invitation</p>
+											{% else %}
+											<p class="mt-4 mx-auto fs--1 fw-200 text-body">To add members, you must install Carme Multi-User</p>
 										</div>
 										<!-- </single-member> -->
 											
@@ -437,8 +435,6 @@
 																				{% endif %}
 																			</span>	
 																		</div>
-																	</div>
-																</td>
 		
 																{% if obj.user != request.user %}
 																<td>
@@ -799,3 +795,5 @@
 				  
 	</script>
 {% endblock project_script %}
+{% extends "projects/project_base.html" %}
+{% load indextags %}

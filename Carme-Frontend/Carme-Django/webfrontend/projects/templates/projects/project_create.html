@@ -5,11 +5,11 @@
 	<!-- <card-header> -->
 	{% block project_header_icon %}fas fa-pen-to-square{% endblock project_header_icon %}
 	{% block project_header_title %}Create Project{% endblock project_header_title %}
- {% block project_header_button %}
+ 	{% block project_header_button %}
 		<a href="https://gitlab.itwm.fraunhofer.de/styx/user-documentation" target="_blank" class="text-decoration-none">
 			<span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="left" title="How to create a project?">
 				<span class="fas fa-circle-question text-secondary me-1"></span>
-			</span>			
+			</span>
 		</a>	
 	{% endblock project_header_button %}
 	<!-- </card-header> -->
@@ -42,7 +42,7 @@
 								{% elif value == 'Highly Confidential'%}
 								<option class="bg-transparent" value="{{value}}" disabled>
 								{% else %}
-        <option class="bg-transparent" value="{{value}}">
+								<option class="bg-transparent" value="{{value}}">
 								{% endif %}								
 									{{text}}
 								</option>

@@ -24,8 +24,8 @@ CARME_BACKEND_PORT=sys.argv[10]
 USER=os.environ['USER']
 USER_HOME=os.environ['HOME']
 
-keyfile=USER_HOME+"/.config/carme/"+USER+".key"
-certfile=USER_HOME+"/.config/carme/"+USER+".crt"
+keyfile=USER_HOME+"/.config/carme/SSL/"+USER+".key"
+certfile=USER_HOME+"/.config/carme/SSL/"+USER+".crt"
 
 conn = rpyc.ssl_connect(CARME_BACKEND_SERVER, CARME_BACKEND_PORT, keyfile=keyfile,certfile=certfile)
 res = conn.root.update(IPADDR, HASH, NB_PORT, TB_PORT, TA_PORT, SLURM_JOBID, URL, GPUS)

@@ -1,0 +1,21 @@
+# static.toml
+[http.routers]
+  [http.routers.dashboard]
+    service = "api@internal"
+
+  [http.routers.carme]
+    entryPoints = ["https"]
+    rule = "Host(`localhost`)"
+    service = "carme"
+
+[http.services]
+
+  [[http.services.carme.loadBalancer.servers]]
+    url = "http://10.0.0.27:8888"
+
+[http.middlewares]
+  [http.middlewares.stripprefix-theia.stripPrefixRegex]
+    regex = ["/ta_[a-z0-9]+/"]
+
+  [http.middlewares.proxy-auth-Carme.forwardAuth]
+    address = "http://10.0.0.27:8888/proxy_auth/"

@@ -6,8 +6,8 @@ from .base import JSONView
 class HighchartPlotLineChartView(HighChartsView):
     y_axis_title = None
 
-    def get_y_axis_options(self):
-        return {"title": {"text": u"%s" % self.y_axis_title}, }
+    #def get_y_axis_options(self):
+    #    return {"title": {"text": u"%s" % self.y_axis_title}, }
 
     def get_x_axis_options(self):
         return {"categories": self.get_labels(), }

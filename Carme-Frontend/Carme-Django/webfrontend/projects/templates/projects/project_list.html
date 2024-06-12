@@ -17,7 +17,8 @@
 
     <!-- <card-body> -->
 	{% block project_body %}
-					
+		
+		{% if CARME_USERS == "multi" %}
 		<!-- <join-project> -->
 		<form onSubmit="return JoinProjectURL();">
 			{% csrf_token %} 
@@ -31,6 +32,7 @@
 		<!-- </join-project> -->
 
 		{% include "projects/blocks/alert_messages.html" %}
+		{% endif %}
 
 		{% if project_list.count == 0 %}
 
@@ -151,7 +153,7 @@
 												class="form-select form-select-sm px-2 py-1 bg-transparent text-body" style="width:105px;" onChange=selectChange(this)>
 											<option value="action" class="bg-transparent">Action</option>
 											{% if obj.member_status == 'active'%}
-												{% if obj.project__owner__username == request.user.username %}
+												{% if obj.project__owner__username == request.user.username or CARME_USERS == "single" %}
 													<!-- active creator -->
 													<option value="update" class="bg-transparent">Update</option>
 													<option value="delete" class="bg-transparent">Delete</option>

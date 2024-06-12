@@ -184,4 +184,3 @@ class ImageHasFlag(models.Model):
 
     class Meta:
         unique_together = ("image", "flag")
-

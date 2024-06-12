@@ -133,23 +133,7 @@ $(document).ready(function() {
 
 										// update highcharts
 										function update_chart() {
-												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;
-           
-												// history-chart
-												//$.get('{% url 'line_chart_json_time' %}', function (data) {
-          		//		data["chart"] = {
-            //				type: "areaspline",
-												//				styledMode: true,
-            //		};
-            //		data["legend"] = {
-            //				layout: 'horizontal',
-            // 			align: 'center',
-            //  		verticalAlign: 'top',
-            //  		floating: false,
-            //		};
-												//
-            //		$("#myTimeChart").highcharts(data);
-          		//});			
+												Highcharts.seriesTypes.areaspline.prototype.drawLegendSymbol = Highcharts.seriesTypes.line.prototype.drawLegendSymbol;			
 	
 
 												// forecast-chart 

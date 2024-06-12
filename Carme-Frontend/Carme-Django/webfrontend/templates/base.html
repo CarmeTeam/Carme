@@ -37,23 +37,14 @@
 		<div class="d-flex justify-content-between flex-column min-vh-100">
 			<div class="container" data-layout="container">
 
-  				{% if request.path != "/account/two_factor/setup/complete/" %}
-					{% if user.is_authenticated and user.is_verified %}
-						<!-- navbar -->
-						<div style="padding-top:90px;">
-							{% include "blocks/navbar.html" %}
-						</div>
-    				{% endif %}
-				{% endif %}
+				<!-- navbar -->
+				<div style="padding-top:90px;">
+					{% include "blocks/navbar.html" %}
+				</div>
 
    				<!-- main -->
 				<main role="main" class="flex-shrink-0">
-					{% if request.path != "/account/login/" %}
-						<!-- maintenance -->
-						{% include "blocks/maintenance.html" %}
-					{% endif %}
-
-    				{% block content %}{% endblock %}
+    					{% block content %}{% endblock %}
 				</main>
          
   			</div>

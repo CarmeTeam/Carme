@@ -14,7 +14,7 @@
       {% csrf_token %}
       {% for field in form %}
         <div class="input-group mb-3">
-          <span class="input-group-text" style="width:8.0rem;">{{ field.label }}</span>
+          <span class="input-group-text" style="width:7.5rem;">{{ field.label }}</span>
           {% if field.name == 'date_updated' and field.value == None %}
             <input type="text" name="date_updated" value="None" id="id_date_updated" 
                    class="fs-0 fw-400 text-body form-control" required disabled>                      

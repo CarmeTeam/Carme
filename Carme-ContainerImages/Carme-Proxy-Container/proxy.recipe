@@ -8,7 +8,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
   MAINTAINER CC-HPC Fraunhofer ITWM
 
 %setup
-  mkdir -p ${SINGULARITY_ROOTFS}/opt/traefik
+  mkdir -p '/opt/traefik'
 
 %files
   /opt/Carme/Carme-Proxy/SSL /opt/traefik/SSL
@@ -22,7 +22,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
   # base stuff ---------------------------------------------------------------------------------------------------------------------
   apt install -y vim nano less htop wget
 
-  wget -qO- https://github.com/traefik/traefik/releases/download/v2.8.1/traefik_v2.8.1_linux_amd64.tar.gz | tar -xzf -  -C /opt/traefik traefik
+  wget -qO- https://github.com/traefik/traefik/releases/download/v2.11.2/traefik_v2.11.2_Linux_amd64.tar.gz | tar -xzf -  -C /opt/traefik traefik
   chmod +x /opt/traefik/traefik
 
   chown -R www-data:www-data /opt/traefik

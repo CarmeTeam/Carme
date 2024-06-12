@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "carme_backend"
+version = "0.9.9"
+authors = [
+	{ name = "Carme Team", email = "carme@itwm.fraunhofer.de" },
+]
+description="Carme backend server"
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Operating System :: Linux",
+]
+requires-python = ">=3.6"
+dependencies = [
+	"ldap3",
+	"mysqlclient",
+	"rpyc>=5",
+]
+[project.urls]
+url="https://github.com/CarmeTeam/Carme"
+
+[project.scripts]
+carme-backend = "carme_backend.server:start"

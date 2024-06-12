@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import AccessMixin
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required 
 
 from projects.models import Project, ProjectMember, ProjectHasTemplate, TemplateHasAccelerator
@@ -21,8 +23,27 @@ from .forms import UpdateProjectForm, CreateProjectForm
 #################################################
 #################### CLASSES ####################
 #################################################
+def my_info(request):
+    """ user data """
+    if settings.CARME_USERS == "single":
+        my_id = list(User.objects.filter(username__exact=settings.CARME_USER).order_by('id').values_list('id',flat=True))[0]
 
-class CreateProject(LoginRequiredMixin, CreateView):
+    elif settings.CARME_USERS == "multi":
+        my_id = request.user
+
+    return my_id
+
+class CustomLoginRequiredMixin(AccessMixin):
+    """Verify that the current user is authenticated."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if settings.CARME_USERS != "single":
+            if not request.user.is_authenticated:
+                return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CreateProject(CustomLoginRequiredMixin, CreateView):
     """ create a project """
     template_name = 'projects/project_create.html'
     form_class = CreateProjectForm
@@ -30,9 +51,10 @@ class CreateProject(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         """ validate form """
-        
+        my_id = my_info(self.request)
+    
         if form.instance.checked:
-            form.instance.owner = self.request.user
+            form.instance.owner = my_id
             try:
                 response = super(CreateProject, self).form_valid(form)
                 messages.success(self.request, 'Project succesfully created.')
@@ -45,7 +67,7 @@ class CreateProject(LoginRequiredMixin, CreateView):
             return super().form_invalid(form)
         
 
-class SingleProject(LoginRequiredMixin,DetailView):
+class SingleProject(CustomLoginRequiredMixin,DetailView):
     model = Project
 
     def get(self, request, *args, **kwargs):
@@ -59,6 +81,8 @@ class SingleProject(LoginRequiredMixin,DetailView):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('slug')
 
+        my_id = my_info(self.request)
+
         ### Resources Forms ###
         # template list
         templateQuerySet = ProjectHasTemplate.objects.values('template__name',
@@ -68,14 +92,14 @@ class SingleProject(LoginRequiredMixin,DetailView):
                                                              'template__walltime',
                                                              'template__partition',
                                                              'template__features')
-        templateQuerySet = templateQuerySet.filter(project__slug=self.object.slug)
+        templateQuerySet = templateQuerySet.filter(project__name=self.object.name)
         context['template_list'] = templateQuerySet
 
 
         # accelerator list
         acceleratorQuerySet = TemplateHasAccelerator.objects.values('accelerator__name',
                                                                     'accelerator__type',
-                                                                    'resourcetemplate__name').distinct()
+                                                                    'resourcetemplate__name')
         #.filter(resourcetemplate__name=resource_name)
         context['accelerator_list'] = acceleratorQuerySet
         
@@ -94,7 +118,7 @@ class SingleProject(LoginRequiredMixin,DetailView):
                                                      )
 
         # Step 3: Set if request.user is active or inactive member
-        is_memberQuery = ProjectMember.objects.filter(project__slug=slug,user=self.request.user
+        is_memberQuery = ProjectMember.objects.filter(project__slug=slug,user=my_id
                                                      ).annotate(member_status=
                                                         Case(When(Q(is_approved_by_admin=True) & Q(is_approved_by_manager=True) & Q(status='accepted'), then=Value('active')),
                                                         default=Value('inactive'))
@@ -112,26 +136,28 @@ class SingleProject(LoginRequiredMixin,DetailView):
         context['is_member'] = is_memberQuery
         context['count_list'] = countQuery
 
+        context['CARME_USERS'] = settings.CARME_USERS
+        
         return context 
 
-class ListProjects(LoginRequiredMixin,ListView):
+class ListProjects(CustomLoginRequiredMixin,ListView):
     model = Project
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        myself = self.request.user
+        my_id = my_info(self.request)
         
         # Step 1: List my projects for each group 
-        projectQueryActive = ProjectMember.objects.filter(user=myself, status='accepted', is_approved_by_manager=True, is_approved_by_admin=True)
+        projectQueryActive = ProjectMember.objects.filter(user=my_id, status='accepted', is_approved_by_manager=True, is_approved_by_admin=True)
         my_project_list_active=list(set(projectQueryActive.values_list('project', flat=True)))
         
-        projectQueryWaiting = ProjectMember.objects.filter(user=myself, status='accepted', is_approved_by_manager=True, is_approved_by_admin=False)
+        projectQueryWaiting = ProjectMember.objects.filter(user=my_id, status='accepted', is_approved_by_manager=True, is_approved_by_admin=False)
         my_project_list_waiting=list(set(projectQueryWaiting.values_list('project', flat=True)))
 
-        projectQueryReceived = ProjectMember.objects.filter(user=myself, status='sent', is_approved_by_manager=True)
+        projectQueryReceived = ProjectMember.objects.filter(user=my_id, status='sent', is_approved_by_manager=True)
         my_project_list_received=list(set(projectQueryReceived.values_list('project', flat=True)))
 
-        projectQueryRequested = ProjectMember.objects.filter(user=myself, status='sent', is_approved_by_manager=False)
+        projectQueryRequested = ProjectMember.objects.filter(user=my_id, status='sent', is_approved_by_manager=False)
         my_project_list_requested=list(set(projectQueryRequested.values_list('project', flat=True)))
  
         # Step 2: Filter all members in my projects for each group
@@ -189,11 +215,12 @@ class ListProjects(LoginRequiredMixin,ListView):
         context = {
             'project_manager' : managerQueryActive,
             'project_list': countQuery,
+            'CARME_USERS': settings.CARME_USERS,
         }
         
         return context
 
-class DeleteProject(LoginRequiredMixin, DeleteView):
+class DeleteProject(CustomLoginRequiredMixin, DeleteView):
     """ delete a project """
     model = Project
     template_name = 'projects/project_delete.html'
@@ -205,8 +232,11 @@ class DeleteProject(LoginRequiredMixin, DeleteView):
         return project
 
     def dispatch(self, request, *args, **kwargs):
+
+        my_id = my_info(self.request)
+
         project = self.get_object()
-        if project.owner != self.request.user:
+        if project.owner != my_id:
             messages.error(self.request,'You need to be the project owner to delete it.')
             return redirect('projects:single', slug=project.slug)
         else:
@@ -214,7 +244,7 @@ class DeleteProject(LoginRequiredMixin, DeleteView):
             return super(DeleteProject, self).dispatch(request, *args, **kwargs)
 
 
-class UpdateProject(LoginRequiredMixin, UpdateView):
+class UpdateProject(CustomLoginRequiredMixin, UpdateView):
     """ update a project """
     template_name = 'projects/project_update.html'
     form_class = UpdateProjectForm
@@ -229,8 +259,11 @@ class UpdateProject(LoginRequiredMixin, UpdateView):
         return project
 
     def dispatch(self, request, *args, **kwargs):
+
+        my_id = my_info(self.request)
+
         project = self.get_object()
-        members = ProjectMember.objects.filter(project=project,user=self.request.user)
+        members = ProjectMember.objects.filter(project=project,user=my_id)
 
         if self.request.GET.get('path','') == 'list':
             return HttpResponseRedirect(request.path+"?path=main")
@@ -243,7 +276,10 @@ class UpdateProject(LoginRequiredMixin, UpdateView):
         return redirect('projects:single', slug=project.slug)
 
     def form_valid(self, form):
-        if form.instance.owner == self.request.user:
+
+        my_id = my_info(self.request)
+
+        if form.instance.owner == my_id:
             form.instance.date_updated = timezone.now()
             messages.success(self.request, 'Project succesfully updated.')
             return super().form_valid(form)
@@ -251,13 +287,15 @@ class UpdateProject(LoginRequiredMixin, UpdateView):
             return super().form_invalid(form)
 
 
-class JoinProject(LoginRequiredMixin, RedirectView):
+class JoinProject(CustomLoginRequiredMixin, RedirectView):
     """ join an existing project """
 
     def get_redirect_url(self, *args, **kwargs):
         return reverse("projects:single",kwargs={"slug": self.kwargs.get("slug")})
 
     def get(self, request, *args, **kwargs):
+
+        my_id = my_info(self.request)
 
         try:
             project = get_object_or_404(Project,slug=self.kwargs.get("slug"))
@@ -266,9 +304,9 @@ class JoinProject(LoginRequiredMixin, RedirectView):
             return redirect('projects:all')
 
 
-        if self.request.user == project.owner :
+        if my_id == project.owner :
             try:
-                ProjectMember.objects.create(user=self.request.user,project=project,is_manager=True, 
+                ProjectMember.objects.create(user=my_id,project=project,is_manager=True, 
                                              is_approved_by_admin=True,is_approved_by_manager=True,status="accepted")
 
             except IntegrityError:
@@ -279,7 +317,7 @@ class JoinProject(LoginRequiredMixin, RedirectView):
                 pass
 
         else:
-            member = ProjectMember.objects.filter(user=self.request.user,project=project)
+            member = ProjectMember.objects.filter(user=my_id,project=project)
             if member:
                 messages.warning(self.request,"You are already a member of the project")
                 return redirect('projects:all') 
@@ -288,14 +326,14 @@ class JoinProject(LoginRequiredMixin, RedirectView):
                     messages.warning(self.request,"To join the project, first verify the information and then click on join.")
                     return redirect("projects:single",slug=project.slug) 
                 else:
-                    ProjectMember.objects.create(user=self.request.user,project=project,status="sent")
+                    ProjectMember.objects.create(user=my_id,project=project,status="sent")
                     messages.success(self.request,'You have submitted a request to join the project.')
                 
         return super().get(request, *args, **kwargs)
 
 
 
-class LeaveProject(LoginRequiredMixin, RedirectView):
+class LeaveProject(CustomLoginRequiredMixin, RedirectView):
     """ leave an existing project """
 
     def get_redirect_url(self, *args, **kwargs):
@@ -306,9 +344,11 @@ class LeaveProject(LoginRequiredMixin, RedirectView):
 
     def get(self, request, *args, **kwargs):
 
+        my_id = my_info(self.request)
+
         try:
             membership = ProjectMember.objects.filter(
-                user=self.request.user,
+                user=my_id,
                 project__slug=self.kwargs.get("slug")
             ).get()
 

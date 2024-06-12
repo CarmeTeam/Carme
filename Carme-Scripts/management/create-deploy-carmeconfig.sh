@@ -316,8 +316,8 @@ if [[ "${DEPLOY_CONF}" == "true" ]];then
 
 
   for COMPUTE_NODE in ${CARME_NODES_LIST}; do
-    ssh -o LogLevel=QUIET "${COMPUTE_NODE}" -t "mkdir -p ${CONF_PATH}" || true
-    scp -o LogLevel=QUIET -p "${NODE_CONFIG}" "${COMPUTE_NODE}:${NODE_CONFIG}" || echo "skipping ${COMPUTE_NODE}"
+    ssh -o LogLevel=QUIET "${COMPUTE_NODE}" -t "mkdir -p ${CONF_PATH}"
+    scp -o LogLevel=QUIET -p "${NODE_CONFIG}" "${COMPUTE_NODE}:${NODE_CONFIG}"
   done
 
 fi

@@ -46,17 +46,17 @@ MirrorURL: http://ftp.de.debian.org/debian/
   bash /opt/install/install_miniconda.sh
 
   # set default userspace package manager
-  bash /opt/install/define_default_package_manager.sh mambaforge
+  bash /opt/install/set_default_conda.sh mambaforge
   # options: 'miniconda' or 'mambaforge'
 
   # install jupyterlab
   bash /opt/install/install_jupyterlab.sh
 
-  # install theia.ide and basic plugins
-  bash /opt/install/install_theia.sh
+  # install codeserver
+  bash /opt/install/install_codeserver.sh
 
   # build and install gpi 
-  bash /opt/install/install_gpi.sh
+  #bash /opt/install/install_gpi.sh
   #---------------------------------------------------------------------------------------------------------------------------------
 
 

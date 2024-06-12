@@ -24,6 +24,7 @@ set -o pipefail
 # define variables -----------------------------------------------------------------------------------------------------------------
 
 #SINGULARITY_BIN="/usr/bin/singularity"
+SINGULARITY_BIN="/opt/Carme/Carme-Vendors/singularity/bin/singularity"
 #NOTE: This variable can be used to define a local singularity version that is not part of "${PATH}". If the variable is not used
 #      it is assumed that "singularity" is available via "${PATH}" and respective checks are preformed later in this script.
 #NOTE: If set it has to be the FULL PATH to the singularity binary including the binary itself.
@@ -107,7 +108,7 @@ source "${HOME}/.local/share/carme/job/${SLURM_JOB_ID}/bashrc" || die "cannot so
 
 
 #source job ports ------------------------------------------------------------------------------------------------------------------
-if [[ "$(hostname -s)" == "${CARME_MASTER}" || ("${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1")) ]];then
+if [[ "$(hostname -s)" == "${CARME_MASTER}" || ("${CARME_START_SSHD}" == "yes" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1")) ]];then
   source "${CARME_JOBDIR}/ports/$(hostname -s)" || die "cannot source job ports"
 fi
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -164,7 +165,7 @@ fi
 
 
 # write node specific env variables to file so that they can be made available via ssh ---------------------------------------------
-if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
+if [[ "${CARME_START_SSHD}" == "yes" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
 
   [[ -z ${CARME_SSHDIR} ]] && die "CARME_SSHDIR not set"
 

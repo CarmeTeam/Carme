@@ -68,7 +68,7 @@ fi
 if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
 
   # start SSHD server --------------------------------------------------------------------------------------------------------------
-  if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
+  if [[ "${CARME_START_SSHD}" == "yes" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     if command_exists sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
       /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname -s).log" -f "${CARME_SSHDIR}/sshd/$(hostname -s).conf" &
@@ -87,23 +87,16 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
   #---------------------------------------------------------------------------------------------------------------------------------
 
 
-  # start Theia IDE ----------------------------------------------------------------------------------------------------------------
-  THEIA_BASE_DIR="/opt/theia-ide/"
-  if [[ -d "${THEIA_BASE_DIR}" ]]; then
-    cd "${THEIA_BASE_DIR}" || die "ERROR: $(hostname -s): cannot open ${THEIA_BASE_DIR}"
-    if [[ -f "node_modules/.bin/theia" ]];then
-      if command_exists node;then
-        log "start Theia at ${CARME_MASTER_IP}:${TA_PORT}"
-        THEIA_WEBVIEW_EXTERNAL_ENDPOINT={{hostname}} THEIA_MINI_BROWSER_HOST_PATTERN={{hostname}} node node_modules/.bin/theia start "${HOME}" --hostname "${CARME_MASTER_IP}" --port "${TA_PORT}" --plugins=local-dir:plugins --startup-timeout -1 &
-      else
-        die "cannot start TheiaIDE (no executable found)"
-      fi
-    else
-      die "cannot find TheiaIDE start script"
-    fi
-    cd || die "cannot change directory"
-  fi
-  #---------------------------------------------------------------------------------------------------------------------------------
+  ## start code-server --------------------------------------------------------------------------------------------------------------
+  #if [[ ! -d "${THEIA_BASE_DIR}" ]]; then
+  #  if command_exists code-server;then
+  #    log "start Code-Server at ${CARME_MASTER_IP}:${TA_PORT}"
+  #    code-server --auth none --disable-telemetry --bind-addr ${CARME_MASTER_IP}:${TA_PORT} --app-name CARME-IDE --user-data-dir "${HOME}/.local/share/code-server" --extensions-dir "${HOME}/.local/share/code-server/extensions" &
+  #  else
+  #    die "cannot start Code-Server (no executable found)"
+  #  fi
+  #fi
+  ##---------------------------------------------------------------------------------------------------------------------------------
 
 
   # start code-server --------------------------------------------------------------------------------------------------------------
@@ -130,7 +123,7 @@ if [[ "$(hostname -s)" == "${CARME_MASTER}" ]];then
 else
 
   # start SSHD ---------------------------------------------------------------------------------------------------------------------
-  if [[ "${CARME_START_SSHD}" == "always" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
+  if [[ "${CARME_START_SSHD}" == "yes" || ("${CARME_START_SSHD}" == "multi" && "${NUMBER_OF_NODES}" -gt "1") ]];then
     if command_exists sshd;then
       log "start SSHD server at port ${SSHD_PORT}"
       /usr/sbin/sshd -p "${SSHD_PORT}" -D -h "${CARME_SSHDIR}/server_key" -E "${CARME_SSHDIR}/sshd/$(hostname -s).log" -f "${CARME_SSHDIR}/sshd/$(hostname -s).conf" &

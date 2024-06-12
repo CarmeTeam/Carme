@@ -1,24 +1,22 @@
-# ---------------------------------------------- 
+# ----------------------------------------------
 # Carme
 # ----------------------------------------------
-# models.py                                                                                                                                                                     
-#                                                                                                                                                                                                            
-# see Carme development guide for documentation: 
+# models.py
+#
+# see Carme development guide for documentation:
 # * Carme/Carme-Doc/DevelDoc/CarmeDevelopmentDocu.md
 #
-# Copyright 2019 by Fraunhofer ITWM  
-# License: http://open-carme.org/LICENSE.md 
+# Copyright 2019 by Fraunhofer ITWM
+# License: http://open-carme.org/LICENSE.md
 # Contact: info@open-carme.org
 # ---------------------------------------------
 
 import os
 from django.db import models
 from datetime import datetime
-from importlib.machinery import SourceFileLoader
+from django.conf import settings
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SourceFileLoader('CarmeConfigFrontend', '/etc/carme/CarmeConfig.frontend').load_module()
-from CarmeConfigFrontend import CARME_SLURM_ClusterName
 
 class NewsMessage(models.Model):
     """ news message """
@@ -27,13 +25,13 @@ class NewsMessage(models.Model):
     carme_message = models.TextField(default='', blank=True)
 
 class CarmeMessage(models.Model):
-    """ user notifications """
+    """ user message """
     user = models.CharField(max_length=64)
     message = models.CharField(max_length=512, default='message')
     color = models.CharField(max_length=16, default='gray')
 
 class ClusterStat(models.Model):
-    """ cluster usage statistics """
+    """ sluster usage statistics """
     date = models.DateTimeField(default=datetime.now, blank=True)
     free = models.IntegerField(default=0)
     used = models.IntegerField(default=0)
@@ -57,27 +55,6 @@ class SlurmJob(models.Model):
     name = models.CharField(max_length=128, default='unknown')
     frontend = models.CharField(max_length=64, default='main')
     gpu_type = models.CharField(max_length=64, default='none')
-    node_name = models.CharField(max_length=128, default='none')
-
-class Image(models.Model):
-    """ available software images """
-    name = models.CharField(max_length=128)
-    path = models.CharField(max_length=512)
-    group = models.CharField(max_length=64)
-    flags = models.CharField(max_length=512)
-    comment = models.CharField(
-    max_length=1024, default="image description")
-    status = models.CharField(max_length=128, default="active")
-    owner = models.CharField(max_length=64, default="admin")
-
-class GroupResource(models.Model):
-    """ resources allocated to each group """
-    name = models.CharField(max_length=128)
-    partition = models.CharField(max_length=128)
-    default = models.BooleanField() 
-    max_jobs = models.IntegerField()
-    max_nodes = models.IntegerField()
-    max_gpus_per_node = models.IntegerField()
 
 # -- external Slurm DB (read only)
 # python manage.py inspectdb --database slurm
@@ -120,28 +97,15 @@ class CarmeJobTable(models.Model):
     time_start = models.BigIntegerField()
     time_end = models.BigIntegerField()
     time_suspended = models.BigIntegerField()
-    gres_req = models.TextField()
-    gres_alloc = models.TextField()
+    #gres_req = models.TextField()
+    #gres_alloc = models.TextField()
     gres_used = models.TextField()
     wckey = models.TextField()
-    track_steps = models.IntegerField()
+    #track_steps = models.IntegerField()
     tres_alloc = models.TextField()
     tres_req = models.TextField()
 
     class Meta:
         managed = False
-        db_table = str(CARME_SLURM_ClusterName) + '_job_table'
+        db_table = settings.CARME_SLURM_CLUSTER_NAME+'_job_table'
         unique_together = (('id_job', 'id_assoc', 'time_submit'),)
-
-
-#class Accelerator(models.Model):
-#    name = models.CharField(max_length=255, unique=True)
-#    type = models.CharField(max_length=50, default="NONE")
-#    num_total = models.IntegerField(default=0)
-#    num_per_node = models.IntegerField(default=0)
-#    num_cpus_per_acc = models.IntegerField(default=0)
-#    num_ram_per_acc = models.IntegerField(default=0)
-#    accelerator = models.ManyToManyField(ResourceTemplate,through="TemplateHasAccelerator")
-#
-#    def __str__(self):
-#        return f"{self.type}-{self.name}"

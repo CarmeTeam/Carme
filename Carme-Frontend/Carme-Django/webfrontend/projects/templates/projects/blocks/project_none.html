@@ -7,21 +7,21 @@
                 <td class="d-none d-lg-table-cell" colspan="5">
                     <div class="row flex-center text-center p-4">
                         <div class="fs-40 fw-900 text-watermark">No Projects</div>
-                        <p class="mt-4 mx-auto fs-2 fw-200 text-body">Create a new project or join one</p>
+			<p class="mt-4 mx-auto fs-2 fw-200 text-body">{% if CARME_USERS == "multi" %}Create a new project or join one{% else %}Create a new project{% endif %}</p>
                     </div>
                 </td>
                 <!-- middle screen -->
                 <td class="d-none d-md-table-cell d-lg-none" colspan="4">
                     <div class="row flex-center text-center p-4">
                         <div class="fs-30 fw-900 text-watermark">No Projects</div>
-                        <p class="mt-4 mx-auto fs-0 fw-200 text-body">Create a new project or join one</p>
+                        <p class="mt-4 mx-auto fs-0 fw-200 text-body">{% if CARME_USERS == "multi" %}Create a new project or join one{% else %}Create a new project{% endif %}</p>
                     </div>
                 </td>
                 <!-- small screen -->
                 <td class="d-md-none" colspan="3">
                     <div class="row flex-center text-center p-4">
                         <div class="fs-20 fw-900 text-watermark">No Projects</div>
-                        <p class="mt-4 mx-auto fs-1 fw-200 text-body">Create a new project or join one</p>
+                        <p class="mt-4 mx-auto fs-1 fw-200 text-body">{% if CARME_USERS == "multi" %}Create a new project or join one{% else %}Create a new project{% endif %}</p>
                     </div>
                 </td>
             </tr>
