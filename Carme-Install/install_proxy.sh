@@ -65,6 +65,8 @@ if ! [ ${SYSTEM_OS,} = "linux" ]; then
 fi
 
 # create static.toml and traefik.toml -----------------------------------------------------
+mkdir -p ${PATH_PROXY_CONFIG}
+
 if [[ ${CARME_SYSTEM} == "single" ]]; then
   HOSTNAME_IP="127.0.0.1"
 else
@@ -155,6 +157,7 @@ systemctl daemon-reload
 # make proxy directories ---------------------------------------------------------------
 log "creating proxy directories..."
 
+mkdir -p ${PATH_PROXY_CONTAINERIMAGE}
 mkdir -p ${PATH_PROXY_ROUTES}/routes
 mkdir -p ${PATH_PROXY_LOG}
 
@@ -162,10 +165,8 @@ chown -R www-data:www-data ${PATH_PROXY_ROUTES}
 chown -R www-data:www-data ${PATH_PROXY_LOG}
 
 # make proxy singularity recipe --------------------------------------------------------
-#
-if [[ -f ${FILE_PROXY_RECIPE} ]]; then
-    rm ${FILE_PROXY_RECIPE}
-fi
+
+[[ -f ${FILE_PROXY_RECIPE} ]] && rm ${FILE_PROXY_RECIPE}
 touch ${FILE_PROXY_RECIPE}
 
 cat << EOF >> ${FILE_PROXY_RECIPE}
