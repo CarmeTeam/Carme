@@ -57,7 +57,7 @@ if [[ -f ${FILE_BACKEND_SYSTEMD} ]]; then
   rm ${FILE_BACKEND_SYSTEMD}
 fi
 
-[[ -f ${FILE_BACKEND_SYSTEMD_MULTI} ]] && rm -f ${FILE_BACKEND_SYSTEMD_MULTI}
+[[ -h ${FILE_BACKEND_SYSTEMD_MULTI} ]] && rm -f ${FILE_BACKEND_SYSTEMD_MULTI}
 
 systemctl daemon-reload
 

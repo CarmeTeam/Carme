@@ -52,7 +52,7 @@ if [[ -f ${FILE_PROXY_SYSTEMD} ]]; then
   rm -f ${FILE_PROXY_SYSTEMD}
 fi
 
-[[ -f ${FILE_PROXY_SYSTEMD_MULTI} ]] && rm -f ${FILE_PROXY_SYSTEMD_MULTI}
+[[ -h ${FILE_PROXY_SYSTEMD_MULTI} ]] && rm -f ${FILE_PROXY_SYSTEMD_MULTI}
 
 systemctl daemon-reload
 

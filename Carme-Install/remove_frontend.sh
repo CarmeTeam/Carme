@@ -82,7 +82,7 @@ if [[ -f ${FILE_FRONTEND_SYSTEMD} ]]; then
     rm -f ${FILE_FRONTEND_SYSTEMD}
 fi
 
-[[ -f ${FILE_FRONTEND_SYSTEMD_MULTI} ]] && rm -f ${FILE_FRONTEND_SYSTEMD_MULTI}
+[[ -h ${FILE_FRONTEND_SYSTEMD_MULTI} ]] && rm -f ${FILE_FRONTEND_SYSTEMD_MULTI}
 
 systemctl daemon-reload
 
