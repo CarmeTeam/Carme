@@ -44,6 +44,7 @@ PATH_MAMBAFORGE=${PATH_CARME}/Carme-Vendors/mambaforge
 PATH_SYSTEMD=/etc/systemd/system
 PATH_CONFIG=/etc/carme
 
+FILE_BACKEND_SYSTEMD_MULTI=${PATH_SYSTEMD}/multi-user.target.wants/carme-backend.service
 FILE_BACKEND_SYSTEMD=${PATH_SYSTEMD}/carme-backend.service
 FILE_BACKEND_CONFIG=${PATH_CONFIG}/CarmeConfig.backend
 FILE_NODE_CONFIG=${PATH_CONFIG}/CarmeConfig.node
@@ -55,6 +56,8 @@ if [[ -f ${FILE_BACKEND_SYSTEMD} ]]; then
   systemctl stop carme-backend.service
   rm ${FILE_BACKEND_SYSTEMD}
 fi
+
+[[ -f ${FILE_BACKEND_SYSTEMD_MULTI} ]] && rm -f ${FILE_BACKEND_SYSTEMD_MULTI}
 
 systemctl daemon-reload
 

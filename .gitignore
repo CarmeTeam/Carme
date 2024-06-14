@@ -6,6 +6,7 @@ Carme-Install/singularity*
 Carme-ContainerImages/Carme-Base-Image/base.sif
 Carme-ContainerImages/Carme-Base-Image/base.sif.bak
 Carme-ContainerImages/Carme-Proxy-Container/proxy.sif
+Carme-ContainerImages/Carme-Proxy-Container/proxy.recipe
 Carme-ContainerImages/Carme-Proxy-Container/proxy.sif.bak
 Carme-ContainerImages/Carme-Frontend-Container/frontend.sif
 Carme-ContainerImages/Carme-Frontend-Container/frontend.sif.bak
@@ -27,7 +28,11 @@ Carme-Frontend/Carme-Django/webfrontend/projects/migrations/__pycache__
 Carme-Frontend/Carme-Django/webfrontend/profiles/migrations/__pycache__
 Carme-Frontend/Carme-Django/webfrontend/projects/templatetags/__pycache__
 
+Carme-Proxy/traefik-conf/static.toml
+Carme-Proxy/traefik-conf/traefik.toml
+
+Carme-Proxy/SSL
+Carme-Scripts/SSL
+Carme-Backend/SSL
 Carme-Backend/Python/dist
-Carme-Backend/SSL/
-Carme-Scripts/SSL/
-Carme-Proxy/SSL/
+

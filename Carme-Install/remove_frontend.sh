@@ -30,6 +30,7 @@ PATH_SERVER_CONF=${PATH_CARME}/Carme-Frontend/Carme-Server-Conf
 PATH_SYSTEMD=/etc/systemd/system
 PATH_CONFIG=/etc/carme
 
+FILE_FRONTEND_SYSTEMD_MULTI=${PATH_SYSTEMD}/multi-user.target.wants/carme-frontend.service
 FILE_FRONTEND_SYSTEMD=${PATH_SYSTEMD}/carme-frontend.service
 FILE_FRONTEND_CONFIG=${PATH_CONFIG}/CarmeConfig.frontend
 
@@ -80,6 +81,8 @@ if [[ -f ${FILE_FRONTEND_SYSTEMD} ]]; then
     systemctl stop carme-frontend.service
     rm -f ${FILE_FRONTEND_SYSTEMD}
 fi
+
+[[ -f ${FILE_FRONTEND_SYSTEMD_MULTI} ]] && rm -f ${FILE_FRONTEND_SYSTEMD_MULTI}
 
 systemctl daemon-reload
 

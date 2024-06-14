@@ -14,12 +14,16 @@ source ${PATH_CARME}/Carme-Install/basic_functions.sh
 # uninstall variables ---------------------------------------------------------------------
 PATH_PROXY_CONTAINERIMAGE=${PATH_CARME}/Carme-ContainerImages/Carme-Proxy-Container
 PATH_PROXY_ROUTES=/opt/Carme-Proxy-Routes
+PATH_PROXY_CONF=${PATH_CARME}/Carme-Proxy/traefik-conf
 PATH_PROXY_LOG=/var/log/carme/proxy
 PATH_SYSTEMD=/etc/systemd/system
 
+FILE_PROXY_STATIC=${PATH_PROXY_CONF}/static.toml
+FILE_PROXY_TRAEFIK=${PATH_PROXY_CONF}/traefik.toml
 FILE_PROXY_RECIPE=${PATH_PROXY_CONTAINERIMAGE}/proxy.recipe
 FILE_PROXY_SYSTEMD=${PATH_SYSTEMD}/carme-proxy.service
 FILE_FRONTEND_SYSTEMD=${PATH_SYSTEMD}/carme-frontend.service
+FILE_PROXY_SYSTEMD_MULTI=${PATH_SYSTEMD}/multi-user.target.wants/carme-proxy.service
 
 # remove static.toml symlink --------------------------------------------------------------
 log "removing symlink..."
@@ -48,6 +52,8 @@ if [[ -f ${FILE_PROXY_SYSTEMD} ]]; then
   rm -f ${FILE_PROXY_SYSTEMD}
 fi
 
+[[ -f ${FILE_PROXY_SYSTEMD_MULTI} ]] && rm -f ${FILE_PROXY_SYSTEMD_MULTI}
+
 systemctl daemon-reload
 
 # remove proxy image ----------------------------------------------------------------------
@@ -55,6 +61,12 @@ log "removing proxy image..."
 
 rm -f "${PATH_PROXY_CONTAINERIMAGE}/proxy.sif"
 rm -f "${PATH_PROXY_CONTAINERIMAGE}/proxy.sif.bak"
+
+# remove proxy .toml files ----------------------------------------------------------------
+log "removing proxy .toml files..."
+
+rm -f ${FILE_PROXY_STATIC}
+rm -f ${FILE_PROXY_TRAEFIK}
 
 # remove proxy singularity recipe ---------------------------------------------------------
 log "removing proxy recipe..."
