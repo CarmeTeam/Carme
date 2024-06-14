@@ -138,4 +138,37 @@ if [[ ${CARME_SYSTEM} == "multi" ]]; then
   done
 fi
 
+if [[ -f "/boot/firmware/cmdline.txt" ]]; then
+  echo "enabling cgroup_memory..."
+
+  if grep -Fxq "cgroup_enable=memory" /boot/firmware/cmdline.txt
+  then
+    echo "cgroup_memory is already enabled."
+  else
+    echo "$(cat /boot/firmware/cmdline.txt) cgroup_enable=memory" > /boot/firmware/cmdline.txt
+    echo "To continue, you must reboot your system first. Do you want to reboot it now [y/N]:"
+  fi
+fi
+
+# enable cgroup memory (RPi) --------------------------------------------------------------
+if [[ -f "/boot/firmware/cmdline.txt" ]]; then
+  log "enabling cgroup_memory..."
+
+  if grep -Fxq "cgroup_enable=memory" /boot/firmware/cmdline.txt
+  then
+    log "cgroup_memory is already enabled."
+  else
+    echo "$(cat /boot/firmware/cmdline.txt) cgroup_enable=memory" > /boot/firmware/cmdline.txt
+    CHECK_REBOOT_MESSAGE="To continue, you must reboot your system. Do you want to reboot it now? [y/N]:"
+    read -rp "${CHECK_REBOOT_MESSAGE} " REPLY
+    if ! [[ $REPLY =~ ^[Yy]$ ]]; then
+      die "[install_system]: Installation stopped. Please reboot and try again."
+    else
+      log "Your system will reboot (10s)... Once back, rerun \`bash start.sh\`..."
+      sleep 10
+      reboot
+    fi
+  fi
+fi
+
 log "system successfully configured."

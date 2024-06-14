@@ -579,7 +579,7 @@ elif [[ ${CARME_SYSTEM} == "multi" ]]; then
 fi
 
 if [[ ${CARME_SLURM} == "yes" ]]; then
-  log "slurm succesfully installed."
+  log "slurm successfully installed."
 else
   log "slurm successfully configured."
 fi
