@@ -209,8 +209,8 @@ conda update -n base -c defaults conda
 conda install -y -c conda-forge mamba
 
 # install python packages for formatting and linting --------------------------------------
-pip install --no-cache-dir autopep8
-pip install --no-cache-dir pylint
+pip install --no-cache-dir --root-user-action ignore autopep8
+pip install --no-cache-dir --root-user-action ignore pylint
 
 # clean up --------------------------------------------------------------------------------
 conda clean --all -y
@@ -247,8 +247,8 @@ mamba activate base
 mamba update -n base -y mamba
 
 # install python packages for formatting and linting --------------------------------------
-pip install --no-cache-dir autopep8
-pip install --no-cache-dir pylint
+pip install --no-cache-dir --root-user-action ignore autopep8
+pip install --no-cache-dir --root-user-action ignore pylint
 
 # clean up --------------------------------------------------------------------------------
 mamba clean --all -y
