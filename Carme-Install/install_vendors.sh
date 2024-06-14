@@ -11,6 +11,12 @@ set -o pipefail
 PATH_CARME=/opt/Carme
 source ${PATH_CARME}/Carme-Install/basic_functions.sh
 
+# unset proxy -----------------------------------------------------------------------------
+if [[ $http_proxy != "" || $https_proxy != "" ]]; then
+    http_proxy=""
+    https_proxy=""
+fi
+
 # config variables ------------------------------------------------------------------------
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
@@ -66,13 +72,6 @@ apt-get install -y build-essential libseccomp-dev libglib2.0-dev \
 log "creating vendors directory..."
 
 mkdir -p ${PATH_VENDORS}
-
-# unset proxy if exists -------------------------------------------------------------------
-log "unsetting proxy if exists..."
-if [[ $http_proxy != "" || $https_proxy != "" ]]; then
-    http_proxy=""
-    https_proxy=""
-fi
 
 # install go ------------------------------------------------------------------------------
 log "installing go..."

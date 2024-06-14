@@ -11,6 +11,12 @@ set -o pipefail
 PATH_CARME=/opt/Carme
 source ${PATH_CARME}/Carme-Install/basic_functions.sh
 
+# unset proxy -----------------------------------------------------------------------------
+if [[ $http_proxy != "" || $https_proxy != "" ]]; then
+    http_proxy=""
+    https_proxy=""
+fi
+
 # config variables ------------------------------------------------------------------------
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
@@ -166,7 +172,7 @@ EOF
 elif [[ ${NOT_FOUND_COUNTER} == 0 ]]; then
   true
 else
-  die "[install_mysql.sh]: ${NOT_FOUND_COUNTER}. To proceed, you need to add the following to \`/etc/mysql/my.cnf\`
+  die "[install_mysql.sh]: To proceed, you first need to add the following to \`/etc/mysql/my.cnf\`. Please try again.
   
 [mysqld]
 innodb_buffer_pool_size=4096M
@@ -176,6 +182,30 @@ max_allowed_packet=16M
 port=${CARME_DB_DEFAULT_PORT}"
 fi
 
+# configure debian.cnf: password restriction in mariadb -----------------------------------
+if [[ -f "/etc/mysql/debian.cnf" ]]; then
+  mv "/etc/mysql/debian.cnf" "/etc/mysql/debian.cnf.bak"
+  touch /etc/mysql/debian.cnf
+  cat << EOF >> /etc/mysql/debian.cnf
+# THIS FILE IS OBSOLETE. STOP USING IT IF POSSIBLE.
+# This file exists only for backwards compatibility for
+# tools that run '--defaults-file=/etc/mysql/debian.cnf'
+# and have root level access to the local filesystem.
+# With those permissions one can run 'mariadb' directly
+# anyway thanks to unix socket authentication and hence
+# this file is useless. See package README for more info.
+[client]
+host     = localhost
+user     = root
+password = ${CARME_PASSWORD_MYSQL}
+[mysql_upgrade]
+host     = localhost
+user     = root
+password = ${CARME_PASSWORD_MYSQL}
+# THIS FILE WILL BE REMOVED IN A FUTURE DEBIAN RELEASE.
+EOF
+
+fi
 
 # configure mysqld.cnf: localhost restriction ---------------------------------------------
 if [[ ${CARME_SYSTEM} == "multi" ]]; then

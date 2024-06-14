@@ -13,6 +13,12 @@ set -o pipefail
 PATH_CARME=/opt/Carme
 source ${PATH_CARME}/Carme-Install/basic_functions.sh
 
+# unset proxy -----------------------------------------------------------------------------
+if [[ $http_proxy != "" || $https_proxy != "" ]]; then
+    http_proxy=""
+    https_proxy=""
+fi
+
 # config variables --------------------------------------------------------------------
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 

@@ -13,6 +13,7 @@ source ${PATH_CARME}/Carme-Install/basic_functions.sh
 # check compatibility ---------------------------------------------------------------------
 log "checking system..."
 
+
 SYSTEM_ARCH=$(dpkg --print-architecture)
 if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
   die "amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
@@ -27,6 +28,12 @@ SYSTEM_OS=$(uname -s)
 if ! [ ${SYSTEM_OS,} = "linux" ]; then
   die "linux OS is supported. Yours is ${SYSTEM_OS,}. Please contact us."
 fi
+
+SYSTEM_DIST=$(awk -F= '$1=="ID" { print $2 ;}' /etc/os-release)
+if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian"  ]];then
+  die "ubuntu and debian distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
+fi
+
 
 # set the config file ---------------------------------------------------------------------
 log "setting CarmeConfig.start..."
@@ -159,7 +166,7 @@ CARME_HOME=$(eval echo ~${CARME_USER})
 
 # set database ---------------------------------------------------------------------------
 REPLY=""
-if [[ ${SYSTEM_ARCH} == "amd64" ]]; then
+if [[ ${SYSTEM_ARCH} == "amd64" && ${SYSTEM_DIST} == "ubuntu" ]]; then
   CHECK_DATABASE_MESSAGE=$'\n(5/8) Do you want to install mysql database management tool? \nType `No` if you want Carme-demo to use an already existing mysql in your system [y/N]:'
   while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
     read -rp "${CHECK_DATABASE_MESSAGE} " REPLY
@@ -333,14 +340,12 @@ CARME_PASSWORD_DJANGO="djangopwd"
 CARME_DB="${CARME_DB}"
 CARME_DB_SERVER="${CARME_DB_SERVER}"
 
-CARME_DB_DEFAULT_ENGINE="django.db.backends.mysql"
 CARME_DB_DEFAULT_NAME="webfrontend"
 CARME_DB_DEFAULT_NODE="${HEAD_NODE}"
 CARME_DB_DEFAULT_HOST="${HEAD_NODE}"
 CARME_DB_DEFAULT_USER="django"
 CARME_DB_DEFAULT_PORT=3306
 
-CARME_DB_SLURM_ENGINE="django.db.backends.mysql"
 CARME_DB_SLURM_NAME="slurm_acct_db"
 CARME_DB_SLURM_NODE="${HEAD_NODE}"
 CARME_DB_SLURM_HOST="${HEAD_NODE}"

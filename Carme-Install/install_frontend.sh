@@ -11,6 +11,12 @@ set -o pipefail
 PATH_CARME=/opt/Carme
 source ${PATH_CARME}/Carme-Install/basic_functions.sh
 
+# unset proxy -----------------------------------------------------------------------------
+if [[ $http_proxy != "" || $https_proxy != "" ]]; then
+    http_proxy=""
+    https_proxy=""
+fi
+
 # config variables ------------------------------------------------------------------------
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
@@ -43,13 +49,11 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_DB_SLURM_HOST=$(get_variable CARME_DB_SLURM_HOST ${FILE_START_CONFIG})
   CARME_DB_SLURM_PORT=$(get_variable CARME_DB_SLURM_PORT ${FILE_START_CONFIG})
   CARME_DB_SLURM_USER=$(get_variable CARME_DB_DEFAULT_USER ${FILE_START_CONFIG})
-  CARME_DB_SLURM_ENGINE=$(get_variable CARME_DB_SLURM_ENGINE ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_NAME=$(get_variable CARME_DB_DEFAULT_NAME ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_NODE=$(get_variable CARME_DB_DEFAULT_NODE ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_HOST=$(get_variable CARME_DB_DEFAULT_HOST ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_PORT=$(get_variable CARME_DB_DEFAULT_PORT ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_USER=$(get_variable CARME_DB_DEFAULT_USER ${FILE_START_CONFIG})
-  CARME_DB_DEFAULT_ENGINE=$(get_variable CARME_DB_DEFAULT_ENGINE ${FILE_START_CONFIG})
 
   [[ -z ${CARME_UID} ]] && die "[install_frontend.sh]: CARME_UID not set."
   [[ -z ${CARME_USER} ]] && die "[install_frontend.sh]: CARME_USER not set."
@@ -77,13 +81,11 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   [[ -z ${CARME_DB_SLURM_HOST} ]] && die "[install_frontend.sh]: CARME_DB_SLURM_HOST not set."
   [[ -z ${CARME_DB_SLURM_PORT} ]] && die "[install_frontend.sh]: CARME_DB_SLURM_PORT not set."
   [[ -z ${CARME_DB_SLURM_USER} ]] && die "[install_frontend.sh]: CARME_DB_SLURM_USER not set."
-  [[ -z ${CARME_DB_SLURM_ENGINE} ]] && die "[install_frontend.sh]: CARME_DB_SLURM_ENGINE not set."
   [[ -z ${CARME_DB_DEFAULT_NAME} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_NAME not set."
   [[ -z ${CARME_DB_DEFAULT_NODE} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_NODE not set."
   [[ -z ${CARME_DB_DEFAULT_HOST} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_HOST not set."
   [[ -z ${CARME_DB_DEFAULT_PORT} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_PORT not set."
   [[ -z ${CARME_DB_DEFAULT_USER} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_USER not set."
-  [[ -z ${CARME_DB_DEFAULT_ENGINE} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_ENGINE not set."
 
   [[ -z ${CARME_LDAP} ]] && CARME_LDAP="null"
   
@@ -243,13 +245,6 @@ if ! command -v "${FILE_SINGULARITY}" >/dev/null 2>&1; then
     die "[install_frontend.sh]: Singularity is not installed in ${PATH_SINGULARITY}."
 fi
 
-# unset proxy if exists -------------------------------------------------------------------
-log "unsetting proxy if exists..."
-if [[ $http_proxy != "" || $https_proxy != "" ]]; then
-    http_proxy=""
-    https_proxy=""
-fi
-
 # create config ---------------------------------------------------------------------------
 log "creating frontend config..."
 
@@ -291,13 +286,13 @@ CARME_DB_SLURM_NODE="${CARME_DB_SLURM_NODE}"
 CARME_DB_SLURM_HOST="${CARME_DB_SLURM_HOST}"
 CARME_DB_SLURM_PORT="${CARME_DB_SLURM_PORT}"
 CARME_DB_SLURM_USER="${CARME_DB_DEFAULT_USER}"
-CARME_DB_SLURM_ENGINE="${CARME_DB_SLURM_ENGINE}"
+CARME_DB_SLURM_ENGINE="django.db.backends.mysql"
 CARME_DB_DEFAULT_NAME="${CARME_DB_DEFAULT_NAME}"
 CARME_DB_DEFAULT_NODE="${CARME_DB_DEFAULT_NODE}"
 CARME_DB_DEFAULT_HOST="${CARME_DB_DEFAULT_HOST}"
 CARME_DB_DEFAULT_PORT="${CARME_DB_DEFAULT_PORT}"
 CARME_DB_DEFAULT_USER="${CARME_DB_DEFAULT_USER}"
-CARME_DB_DEFAULT_ENGINE="${CARME_DB_DEFAULT_ENGINE}"
+CARME_DB_DEFAULT_ENGINE="django.db.backends.mysql"
 #
 # FRONTEND --------------------------------------------------------------------------------
 CARME_FRONTEND_ID="${CARME_FRONTEND_ID}"

@@ -11,6 +11,12 @@ set -o pipefail
 PATH_CARME=/opt/Carme
 source ${PATH_CARME}/Carme-Install/basic_functions.sh
 
+# unset proxy -----------------------------------------------------------------------------
+if [[ $http_proxy != "" || $https_proxy != "" ]]; then
+    http_proxy=""
+    https_proxy=""
+fi
+
 # config variables ------------------------------------------------------------------------
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
@@ -59,13 +65,6 @@ fi
 SYSTEM_OS=$(uname -s)
 if ! [ ${SYSTEM_OS,} = "linux" ]; then
   die "[install_base.sh]: linux OS is supported. Yours is ${SYSTEM_OS,}. Please contact us."
-fi
-
-# unset proxy if exists -------------------------------------------------------------------
-log "unsetting proxy if exists..."
-if [[ $http_proxy != "" || $https_proxy != "" ]]; then
-    http_proxy=""
-    https_proxy=""
 fi
 
 # installation starts ---------------------------------------------------------------------

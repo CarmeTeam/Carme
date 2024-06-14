@@ -11,6 +11,12 @@ set -o pipefail
 PATH_CARME=/opt/Carme
 source ${PATH_CARME}/Carme-Install/basic_functions.sh
 
+# unset proxy -----------------------------------------------------------------------------
+if [[ $http_proxy != "" || $https_proxy != "" ]]; then
+    http_proxy=""
+    https_proxy=""
+fi
+
 # config variables ------------------------------------------------------------------------
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
@@ -102,11 +108,9 @@ if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
   die "[install_backend.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
 fi
 
-# unset proxy if exists -------------------------------------------------------------------
-log "unsetting proxy if exists..."
-if [[ $http_proxy != "" || $https_proxy != "" ]]; then
-    http_proxy=""
-    https_proxy=""
+SYSTEM_DIST=$(awk -F= '$1=="ID" { print $2 ;}' /etc/os-release)
+if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian"  ]];then
+  die "ubuntu and debian distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
 fi
 
 # create carme user directories -----------------------------------------------------------
@@ -257,9 +261,9 @@ else
   mamba activate carme-backend
 fi
 
-[[ $SYSTEM_ARCH == "arm64" ]] && 
-apt-get install libmariadb-dev -y || 
-apt-get install libmysqlclient-dev -y
+[[ ${SYSTEM_ARCH} == "amd64" && ${SYSTEM_DIST} == "ubuntu" ]] && 
+apt-get install libmysqlclient-dev -y ||
+apt-get install libmariadb-dev -y
 apt-get install gcc -y
 
 pip install --force-reinstall ${PATH_BACKEND}/Python/dist/carme_backend*.whl --root-user-action=ignore

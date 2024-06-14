@@ -11,6 +11,12 @@ set -o pipefail
 PATH_CARME=/opt/Carme
 source ${PATH_CARME}/Carme-Install/basic_functions.sh
 
+# unset proxy -----------------------------------------------------------------------------
+if [[ $http_proxy != "" || $https_proxy != "" ]]; then
+    http_proxy=""
+    https_proxy=""
+fi
+
 # config variables ------------------------------------------------------------------------
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
@@ -35,12 +41,12 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   [[ -z ${CARME_SYSTEM} ]] && die "[install_slurm.sh]: CARME_SYSTEM not set."
   [[ -z ${CARME_NODE_LIST} ]] && die "[install_slurm.sh]: CARME_NODE_LIST not set."
   [[ -z ${CARME_DB_SLURM_NAME} ]] && die "[install_slurm.sh]: CARME_DB_SLURM_NAME not set."
-  [[ -z ${CARME_DB_SLURM_USER} ]] && die "[install_slurm.sh]: not set."
-  [[ -z ${CARME_PASSWORD_SLURM} ]] && die "[install_slurm.sh]: not set."
-  [[ -z ${CARME_SLURM_SLURMD_PORT} ]] && die "[install_slurm.sh]: not set."
-  [[ -z ${CARME_SLURM_CLUSTER_NAME} ]] && die "[install_slurm.sh]: not set."
-  [[ -z ${CARME_SLURM_PARTITION_NAME} ]] && die "[install_slurm.sh]: not set."
-  [[ -z ${CARME_SLURM_SLURMCTLD_PORT} ]] && die "[install_slurm.sh]: not set."
+  [[ -z ${CARME_DB_SLURM_USER} ]] && die "[install_slurm.sh]: CARME_DB_SLURM_USER not set."
+  [[ -z ${CARME_PASSWORD_SLURM} ]] && die "[install_slurm.sh]: CARME_PASSWORD_SLURM not set."
+  [[ -z ${CARME_SLURM_SLURMD_PORT} ]] && die "[install_slurm.sh]: CARME_SLURM_SLURMD_PORT not set."
+  [[ -z ${CARME_SLURM_CLUSTER_NAME} ]] && die "[install_slurm.sh]: CARME_SLURM_CLUSTER_NAME not set."
+  [[ -z ${CARME_SLURM_PARTITION_NAME} ]] && die "[install_slurm.sh]: CARME_SLURM_PARTITION_NAME not set."
+  [[ -z ${CARME_SLURM_SLURMCTLD_PORT} ]] && die "[install_slurm.sh]: CARME_SLURM_SLURMCTLD_PORT not set."
 
 else
   die "[install_slurm.sh]: ${FILE_START_CONFIG} not found."
