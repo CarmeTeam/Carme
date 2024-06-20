@@ -21,8 +21,11 @@ fi
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
-
+  
+  CARME_FRONTEND_IP=$(get_variable CARME_FRONTEND_IP ${FILE_START_CONFIG})	
   PROXY_VERSION=$(get_variable PROXY_VERSION ${FILE_START_CONFIG})
+
+  [[ -z ${CARME_FRONTEND_IP} ]] && die "[install_proxy.sh]: CARME_FRONTEND_IP not set."
   [[ -z ${PROXY_VERSION} ]] && die "[install_proxy.sh]: PROXY_VERSION not set."
 
 else
@@ -67,12 +70,6 @@ fi
 # create static.toml and traefik.toml -----------------------------------------------------
 mkdir -p ${PATH_PROXY_CONFIG}
 
-if [[ ${CARME_SYSTEM} == "single" ]]; then
-  HOSTNAME_IP="127.0.0.1"
-else
-  HOSTNAME_IP="$(echo $(hostname -I))"
-fi
-
 [[ -f ${FILE_PROXY_STATIC} ]] && rm ${FILE_PROXY_STATIC}
 touch ${FILE_PROXY_STATIC}
 cat << EOF >> ${FILE_PROXY_STATIC}
@@ -89,14 +86,14 @@ cat << EOF >> ${FILE_PROXY_STATIC}
 [http.services]
 
   [[http.services.carme.loadBalancer.servers]]
-    url = "http://${HOSTNAME_IP}:8888"
+    url = "http://${CARME_FRONTEND_IP}:8888"
 
 [http.middlewares]
   [http.middlewares.stripprefix-theia.stripPrefixRegex]
     regex = ["/ta_[a-z0-9]+/"]
 
   [http.middlewares.proxy-auth-Carme.forwardAuth]
-    address = "http://${HOSTNAME_IP}:8888/proxy_auth/"
+    address = "http://${CARME_FRONTEND_IP}:8888/proxy_auth/"
 EOF
 
 [[ -f ${FILE_PROXY_TRAEFIK} ]] && rm ${FILE_PROXY_TRAEFIK}

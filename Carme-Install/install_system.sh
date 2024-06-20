@@ -61,12 +61,12 @@ log "checking hostname in /etc/hosts..."
 if grep -qEh '127.0.1.1' /etc/hosts
 then
   HOSTNAME_IN_HOSTS=$(grep -Eh '127.0.1.1' /etc/hosts)
-  if ! [[ ${HOSTNAME_IN_HOSTS} == *"$(hostname -s)"* ]]; then
-    sed -i "s/${HOSTNAME_IN_HOSTS}/& $(hostname -s)/" /etc/hosts
+  if ! [[ ${HOSTNAME_IN_HOSTS} == *"$(hostname -s | awk '{print $1}')"* ]]; then
+    sed -i "s/${HOSTNAME_IN_HOSTS}/& $(hostname -s | awk '{print $1}')/" /etc/hosts
   fi
 else
   echo "" >> /etc/hosts
-  echo "127.0.1.1 $(hostname -s)" >> /etc/hosts
+  echo "127.0.1.1 $(hostname -s | awk '{print $1}')" >> /etc/hosts
 fi
 
 # check localhost in /etc/hosts -----------------------------------------------------------
@@ -104,9 +104,9 @@ if [[ ${CARME_SYSTEM} == "single" ]]; then
 elif [[ ${CARME_SYSTEM} == "multi" ]]; then
   log "checking ssh connection from the head-node to the head-node..."
 
-  if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $(hostname -s) true &>/dev/null
+  if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $(hostname -s | awk '{print $1}') true &>/dev/null
   then
-    die "[install_system.sh] ssh to $(hostname -s) failed. Carme-demo requires that you ssh from the head-node to the head-node without a password."
+    die "[install_system.sh] ssh to $(hostname -s | awk '{print $1}') failed. Carme-demo requires that you ssh from the head-node to itself without a password."
   fi
 fi
 
@@ -138,36 +138,34 @@ if [[ ${CARME_SYSTEM} == "multi" ]]; then
   done
 fi
 
-if [[ -f "/boot/firmware/cmdline.txt" ]]; then
-  echo "enabling cgroup_memory..."
-
-  if grep -Fxq "cgroup_enable=memory" /boot/firmware/cmdline.txt
-  then
-    echo "cgroup_memory is already enabled."
-  else
-    echo "$(cat /boot/firmware/cmdline.txt) cgroup_enable=memory" > /boot/firmware/cmdline.txt
-    echo "To continue, you must reboot your system first. Do you want to reboot it now [y/N]:"
-  fi
-fi
-
 # enable cgroup memory (RPi) --------------------------------------------------------------
 if [[ -f "/boot/firmware/cmdline.txt" ]]; then
   log "enabling cgroup_memory..."
 
-  if grep -Fxq "cgroup_enable=memory" /boot/firmware/cmdline.txt
-  then
+  MEMORY_ENABLED=$(echo $(cat /proc/cgroups | grep memory) | awk '{print substr($0,length,1)}')
+  if [[ ${MEMORY_ENABLED} == 1 ]]; then
     log "cgroup_memory is already enabled."
   else
-    echo "$(cat /boot/firmware/cmdline.txt) cgroup_enable=memory" > /boot/firmware/cmdline.txt
-    CHECK_REBOOT_MESSAGE="To continue, you must reboot your system. Do you want to reboot it now? [y/N]:"
+
+    if ! grep -Fq "cgroup_enable=memory" /boot/firmware/cmdline.txt
+    then
+      echo "$(cat /boot/firmware/cmdline.txt) cgroup_enable=memory" > /boot/firmware/cmdline.txt
+      if ! grep -Fq "cgroup_enable=memory" /boot/firmware/cmdline.txt
+      then
+        die "[install_system.sh]: \`cgroup_enable=memory\` was not added to \`/boot/firmware/cmdline.txt\`. Please do it manually and try again."
+      fi
+    fi
+    CHECK_REBOOT_MESSAGE="
+To continue, you must reboot your system. Do you want to reboot it now? [y/N]:"
     read -rp "${CHECK_REBOOT_MESSAGE} " REPLY
     if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-      die "[install_system]: Installation stopped. Please reboot and try again."
+      die "[install_system.sh]: Installation stopped. Please reboot and try again."
     else
       log "Your system will reboot (10s)... Once back, rerun \`bash start.sh\`..."
       sleep 10
       reboot
     fi
+
   fi
 fi
 

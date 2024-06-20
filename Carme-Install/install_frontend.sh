@@ -105,7 +105,7 @@ fi
 ACCELERATOR_LIST=()
 for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
   if [[ ${COMPUTE_NODE} == "localhost" ]]; then
-    COMPUTE_NODE="$(hostname -s)"
+    COMPUTE_NODE="$(hostname -s | awk '{print $1}')"
   fi 
   COMPUTE_NODE_DATA=$(scontrol show nodes -o | grep "${COMPUTE_NODE}" | awk '
   {

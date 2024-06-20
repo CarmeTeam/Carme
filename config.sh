@@ -70,9 +70,9 @@ if [[ ${CARME_SYSTEM} == "multi" ]]; then
   if ! [[ $REPLY =~ ^[Yy]$ ]]; then
     die "config file creation stopped. You are not in the head-node."
   else
-    HEAD_NODE=$(hostname -s)
-    LOGIN_NODE=$(hostname -s)
-    LOGIN_NODE_IP=$(echo $(hostname -I))
+    HEAD_NODE=$(hostname -s | awk '{print $1}')
+    LOGIN_NODE=$(hostname -s | awk '{print $1}')
+    LOGIN_NODE_IP=$(hostname -I | awk '{print $1}')
   fi
 else
   HEAD_NODE="localhost"
@@ -84,7 +84,7 @@ fi
 #if [[ ${CARME_SYSTEM} == "multi" ]]; then
 #  CHECK_LOGINNODE_MESSAGE=$"
 #(2/8 (2/3)) Type the login-node IP.
-#If the head-node is also the login-node, type the head-node IP, i.e., $(hostname -I) [IP]:"
+#If the head-node is also the login-node, type the head-node IP, i.e., $(hostname -I | awk '{print $1}') [IP]:"
 #  read -rp "${CHECK_LOGINNODE_MESSAGE} " REPLY
 #  if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $REPLY true &>/dev/null
 #  then

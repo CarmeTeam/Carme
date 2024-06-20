@@ -127,8 +127,8 @@ if [[ ${CARME_SYSTEM} == "single" ]]; then
   scontrol reconfig
 
   sleep 10
-  scontrol update nodename=$(hostname -s) state=idle
-  node_state=$(scontrol show node=$(hostname -s) State | grep State | awk '{print $1;}')
+  scontrol update nodename=$(hostname -s | awk '{print $1}') state=idle
+  node_state=$(scontrol show node=$(hostname -s | awk '{print $1}') State | grep State | awk '{print $1;}')
   if [[ $node_state != "State=IDLE" ]];then
     die "[install_scripts.sh]: node state is not idle."
   fi

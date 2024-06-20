@@ -102,7 +102,7 @@ apt update
 apt upgrade -y
 
 # install basic ---------------------------------------------------------------------------
-apt install -y bash-completion fd-find fzf htop less locales man-db nano rsync screen time tmux unzip vim wget zip
+apt install -y bash-completion fd-find fzf htop less locales man-db nano rsync screen time tmux unzip vim wget zip curl
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 dpkg-reconfigure --frontend=noninteractive locales
 
@@ -346,7 +346,24 @@ EOF
 
 [[ -f "${FILE_INSTALL_CODESERVER}" ]] && rm "${FILE_INSTALL_CODESERVER}"
 touch ${FILE_INSTALL_CODESERVER}
-cat << EOF >> ${FILE_INSTALL_CODESERVER}
+
+if [[ ${SYSTEM_ARCH} == "arm64" ]]; then
+  cat << EOF >> ${FILE_INSTALL_CODESERVER}
+#!/bin/bash
+#------------------------------------------------------------------------------------------
+# This file is generated automatically via ${PATH_CARME}/Carme-Install/install_base.sh
+# Copyright 2024 by CarmeTeam @ CC-HPC Fraunhofer ITWM
+# License: http://open-carme.org/LICENSE.md
+# install_condeserver.sh
+#------------------------------------------------------------------------------------------
+
+# install codeserver ----------------------------------------------------------------------
+curl -sL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
+npm install --unsafe-perm --global code-server
+EOF
+else
+  cat << EOF >> ${FILE_INSTALL_CODESERVER}
 #!/bin/bash
 #------------------------------------------------------------------------------------------
 # This file is generated automatically via ${PATH_CARME}/Carme-Install/install_base.sh
@@ -380,6 +397,7 @@ fi
 # clean up --------------------------------------------------------------------------------
 "\${PACKAGE_MANAGER}" clean --all -y
 EOF
+fi
 
 ############################# ends install-scripts ########################################
 

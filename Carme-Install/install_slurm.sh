@@ -298,7 +298,7 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
   if [[ ${CARME_SYSTEM} == "single" ]]; then
     SLURM_CONTROLLER_HOST="localhost"
   elif [[ ${CARME_SYSTEM} == "multi" ]]; then
-    SLURM_CONTROLLER_HOST=$(hostname -s)
+    SLURM_CONTROLLER_HOST=$(hostname -s | awk '{print $1}')
   fi
 
   cat << EOF >> ${FILE_SLURM_CONFIG}
@@ -373,7 +373,7 @@ EOF
     elif [[ -z "${SLURMD_C}" ]]; then
       die "[install_slurm.sh]: slurmd -C info is empty in compute-node ${COMPUTE_NODE}."
     else
-      NODE_HOSTNAME=$(hostname -s)
+      NODE_HOSTNAME=$(hostname -s | awk '{print $1}')
       NODE_INFO=${SLURMD_C%UpTime*}
       NODE_INFO_REAL=$(echo $NODE_INFO | sed "s/$REAL_MEMORY/$REAL_MEMORY_SMALLER/")
       NODE_INFO_REAL=$(echo "${NODE_INFO_REAL}" | sed 's/^.*CPU/CPU/')
