@@ -280,24 +280,24 @@ $(document).ready(function() {
   
 		
 										// update news
-										function update_news() {
-												$.ajax('/wiki/cluster_news/', {
-														type: "GET",
-														statusCode: {
-																401: function (response) {
-																		window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
-																}
-														}, 
-														success: function (data) {
-																var content_reg = /<body.*?>([\S\s]*?)(?:<\/body>)/gmi;
-																var match = content_reg.exec(data);
-
-																if(match && match.length > 1) {
-																		document.getElementById('news').innerHTML = $(match[1]).find('.wiki-article').first().html();
-																}
-														}
-												});
-										}
+										
+		                                                                //function update_news() {
+										// $.ajax('/wiki/cluster_news/', {
+										//  type: "GET",
+										//  statusCode: {
+										//   401: function (response) {
+										//    window.location = '/login/?next=' + window.location.pathname + '&timeout=1';
+										//   }
+										//  }, 
+										//  success: function (data) {
+										//   var content_reg = /<body.*?>([\S\s]*?)(?:<\/body>)/gmi;
+										//   var match = content_reg.exec(data);
+										//   if(match && match.length > 1) {
+										//    document.getElementById('news').innerHTML = $(match[1]).find('.wiki-article').first().html();
+										//   }
+										//  }
+										// });
+										//}
 
 
 										// update messages
@@ -392,7 +392,7 @@ $(document).ready(function() {
 										if (!$("#admin-jobtable").length > 0) { 
 
 												// calling news
-												update_news();
+												// update_news();
 
 												// calling chart
 												update_chart();

@@ -388,57 +388,62 @@
 								{% else %}
 								<tr id="option-proj-proj{{forloop.counter0}}" class="border-bottom-solid option-proj">
 								{% endif %}
-        	<!-- <job-form> -->
-         <form class="form ajax" action="{% url 'start_job' %}" method="post">
-         	{% csrf_token %}
-
-										<input type="hidden" name="template" value="{{template}}">
-										<th colspan="2" class="ps-0">                                                                                                  
-   							 <div class="input-group my-1">                                        
-     						 <div class="input-group-text fs--1 fw-400 text-body">                                                         
-    								 Accelerator                                                                            
-  										</div>                                                                                                           
-  										<select id="select-acc{{forloop.counter0}}" name="accelerator" class="form-select form-select-sm fs--1 fw-400 text-body">
-													{% for a_field_name_single in a_field_name %}
- 												<option value="{{ a_field_name_single }}">{{ a_field_name_single | upper }}</option>
+        							<!-- <job-form> -->
+         							<form class="form ajax" action="{% url 'start_job' %}" method="post">
+         								{% csrf_token %}
+									<input type="hidden" name="template" value="{{template}}">
+									<th colspan="2" class="ps-0">                                                                                                  
+   							 			<div class="input-group my-1">                                        
+     							 				<div class="input-group-text fs--1 fw-400 text-body">                                                         
+    									 			Accelerator                                                                            
+  											</div>                                                                                                           
+  											<select id="select-acc{{forloop.counter0}}" name="accelerator" class="form-select form-select-sm fs--1 fw-400 text-body" onchange="acceleratorselect()">
+												{% for a_field_name_single, a_field_type_single in a_field_name|zip:a_field_type %}
+ 												 <option value="{{ a_field_name_single }}">
+												  {% if a_field_name_single != 'cpu' and a_field_name_single != 'CPU' %}
+												   {{ a_field_name_single | upper }} - {{ a_field_type_single | upper }}
+												  {% else %}
+												   NONE - {{ a_field_name_single | upper }}
+												  {% endif %}
+												 </option>
 	 											{% endfor %}                                                                                               
-     							</select>                                                                                                     
-   								</div>                                                                                                          
+     											</select>                                                                                                     
+   										</div>                                                                                                          
  									</th>
                                                                                                              
  									<th colspan="2">                                                                                                  
-   								<div class="input-group my-1">                                        
-     							<div class="input-group-text fs--1 fw-400 text-body">                                                         
-     								Accelerators / node                                                                               
-  										</div>                                                                                                           
-     							<select id="select-accpernode{{forloop.counter0}}" name="accelerators_pernode" class="form-select form-select-sm fs--1 fw-400 text-body">
-													{% for a_field_node_single in a_field_node %}
-														{% if forloop.first %}
-													 	{% for i in 1|range:a_field_node_single  %}
-               	<option value="{{ i }}">{{ i }}</option>
-        							{% endfor %}
-														{% endif %}
-													{% endfor %}                                                                                                    
-  										</select>                                                                                                        
+   										<div class="input-group my-1">                                        
+     											<div class="input-group-text fs--1 fw-400 text-body">                                                         
+												<span id="acceleratortype{{forloop.counter0}}">{% for a_field_type_single in a_field_type %}{% if forloop.first %}{{ a_field_type_single | upper }}{% endif %}{% endfor %}</span>s / node                                                                               
+  											</div>                                                                                                           
+     											<select id="select-accpernode{{forloop.counter0}}" name="accelerators_pernode" class="form-select form-select-sm fs--1 fw-400 text-body">
+												{% for a_field_node_single in a_field_node %}
+												{% if forloop.first %}
+													{% for i in 1|range:a_field_node_single  %}
+               													<option value="{{ i }}">{{ i }}</option>
+        												{% endfor %}
+												{% endif %}
+												{% endfor %}                                                                                                    
+  											</select>                                                                                                        
  										</div>                                                                                                            
-										</th>                                                                                                              
+									</th>                                                                                                              
                     										
-          <th colspan="2">
-          	<div class="input-group my-1">
-           	<div class="input-group-text fs--1 fw-400 text-body">
-            	Nodes 
-            </div>
-            <select id="select-node{{forloop.counter0}}" name="nodes" class="form-select form-select-sm fs--1 fw-400 text-body">
-													{% for n_field_single in n_field %}
-												 	{% if forloop.first %}
-              	{% for i in 1|range:n_field_single  %}
-               	<option value="{{ i }}">{{ i }}</option>
-               {% endfor %}
-        						{% endif %}
-													{% endfor %} 
-            </select>
-           </div>
-          </th>
+          								<th colspan="2">
+          									<div class="input-group my-1">
+           										<div class="input-group-text fs--1 fw-400 text-body">
+            											Nodes 
+           				 						</div>
+            										<select id="select-node{{forloop.counter0}}" name="nodes" class="form-select form-select-sm fs--1 fw-400 text-body">
+												{% for n_field_single in n_field %}
+												{% if forloop.first %}
+              												{% for i in 1|range:n_field_single  %}
+               													<option value="{{ i }}">{{ i }}</option>
+               												{% endfor %}
+        											{% endif %}
+												{% endfor %} 
+            										</select>
+           									</div>
+          								</th>
 
          	<th colspan="2">
           	<div class="input-group my-1">
@@ -635,16 +640,31 @@ $(document).ready(function() {
 </script>
 <script>
 // select2 in system card
-function iformat(icon) {
-    var originalOption = icon.element;
-    return $('<span><i class="fa ' + $(originalOption).data('icon') + '"></i> ' + icon.text + '</span>');
+//function iformat(icon) {
+//  var originalOption = icon.element;
+//    return $('<span><i class="fa ' + $(originalOption).data('icon') + '"></i> ' + icon.text + '</span>');
+//}
+//$('.icons_select2').select2({
+//    width: "100%",
+//    templateSelection: iformat,
+//    templateResult: iformat,
+//    allowHtml: true
+//});
+</script>
+<script>
+// jobs field: accelerator/node
+$(window).on('load', function(){
+ acceleratorselect();
+})
+function acceleratorselect() {
+    {% for a_select_name, a_select_type in accs_field_js %}
+	{% for a_select_name_single, a_select_type_single in a_select_name|zip:a_select_type %}
+	if (document.getElementById("select-acc{{forloop.parentloop.counter0}}").value == "{{ a_select_name_single }}") {
+		$("#acceleratortype{{forloop.parentloop.counter0}}").html('{{ a_select_type_single | upper }}');
+	}
+	{% endfor %}
+    {% endfor %}
 }
-$('.icons_select2').select2({
-    width: "100%",
-    templateSelection: iformat,
-    templateResult: iformat,
-    allowHtml: true
-});
 </script>
 <script>
 // jobs card

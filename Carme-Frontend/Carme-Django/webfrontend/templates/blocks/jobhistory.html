@@ -6,9 +6,11 @@
 <div class="container">
 
 	<p class="pb-3 fs--1 fw-400 text-body">
+	 	{% comment %}
 		<span class=" float-end">
 			<b class="pe-1">Total job runtime:</b> {{job_time}} hours
 		</span>
+		{% endcomment %}
 	</p>
 
 	<div class="table-responsive scrollbar-overlay">	           
@@ -30,7 +32,7 @@
 													<sub>node</sub>
 												   </span></th>
 					<th style="min-width: 6.0rem;"><span class="frac">
-											 		<sup>GPUs</sup>
+											 		<sup>Accelerators</sup>
 													<span>&frasl;</span>
 													<sub>node</sub>
 												   </span></th>
@@ -53,9 +55,15 @@
 					<td>{{ slurm.image_name }}</td>
 					<td>{{ job.nodelist }}</td>
 					<td><span class="i-orange py-1 px-2 rounded-circle fs--1 fw-700">{{ job.nodes_alloc}}</span></td>
+					{% if slurm.gpu_type != 'cpu' and slurm.gpu_type != 'CPU' %}
 					<td><span class="i-cyan py-1 px-2 rounded-circle fs--1 fw-700">{% widthratio job.cpus_req slurm.num_nodes 1 %}</span></td>
 					<td><span class="i-blue py-1 px-2 rounded-circle fs--1 fw-700">{{slurm.num_gpus}}</span> 
-						<span class="i-blue py-1 px-2 rounded-pill-3 fs--2 fw-400">{{ slurm.gpu_type | upper }}</span></td>
+					    <span class="i-blue py-1 px-2 rounded-pill-3 fs--2 fw-400">{{ slurm.gpu_type | upper }}</span></td>
+					{% else %}
+					<td><span class="i-cyan py-1 px-2 rounded-circle fs--1 fw-700">{{slurm.num_gpus}}</span></td>
+					<td><span class="i-blue py-1 px-2 rounded-circle fs--1 fw-700">0</span>
+					    <span class="i-blue py-1 px-2 rounded-pill-3 fs--2 fw-400">NONE</span></td>
+					{% endif %}
 				</tr>
 				{% endfor %}
 			</tbody>

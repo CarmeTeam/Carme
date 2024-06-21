@@ -280,6 +280,7 @@ def index(request):
 
     jobs_field = zip(accelerator_name_field,accelerator_type_field,accelerator_per_node_field,node_field,image_field,template_name)
     jobs_field_js = zip(accelerator_name_field,accelerator_per_node_field,node_field)
+    accs_field_js = zip(accelerator_name_field,accelerator_type_field)
 
 
     # jobs card -> jobs table ----------------------------------------------------------------------------
@@ -338,6 +339,7 @@ def index(request):
         'accelerator_name': accelerator_name,
         # jobs card -------------------------------------------------
         'project_and_template': project_and_template,
+        'accs_field_js': accs_field_js,
         'jobs_field_js': jobs_field_js,
         'jobs_field': jobs_field,
     }

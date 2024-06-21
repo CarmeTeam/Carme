@@ -24,9 +24,11 @@
     			<li class="nav-item{% if '/carme/JobHist' in request.path %} active{% endif %}">
      				<a class="nav-link" href="/carme/JobHist/">History</a>
     			</li>
-				<li class="nav-item">
+			{% comment %}
+			<li class="nav-item">
         			<a class="nav-link" href="{% url 'projects:all' %}">Projects</a>
-    			</li>        
+    			</li>
+			{% endcomment %}
     			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle dropdown-left" href="#" id="dropdownHelp" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 					Help
@@ -139,33 +141,35 @@
     			</li>
 				<!-- </settings> -->
     
-    			<!-- <notifications> -->
+    				<!-- <notifications> -->
+			  	{% comment %}
 				<li class="nav-item dropdown me-3 me-md-1">
-    				<a class="nav-link dropdown-toggle dropdown-right" href="#" id="dropdownNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-      					<i class="fas fa-bell fa-border position-relative"></i>
+    					<a class="nav-link dropdown-toggle dropdown-right" href="#" id="dropdownNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      						<i class="fas fa-bell fa-border position-relative"></i>
 					</a>
 					<ul class="dropdown-menu dropdown-menu-notifications position-absolute" style="width: 220px"  aria-labelledby="dropdownNotifications">
 						<li>
      						<dl class="row no-gutters mb-0 px-3 py-1">
-                				<dt class="col-12 fw-400"><i class="fas fa-circle-exclamation"></i>&nbsp; Last 10 notifications</dt>
-              				</dl>
+                					<dt class="col-12 fw-400"><i class="fas fa-circle-exclamation"></i>&nbsp; Last 10 notifications</dt>
+              					</dl>
 						</li>
-      					<div class="dropdown-divider"></div>
+      						<div class="dropdown-divider"></div>
 						<div class="scrollbar-overlay" style="max-height: 240px;">
 							<li>
-      						{% for message in message_list %}
-       							{% if message.color == "red" %}
+      							{% for message in message_list %}
+       								{% if message.color == "red" %}
         							<div data-msgid="{{ message.id }}" class="alert alert-danger px-2 mx-2" role="alert">{{ message.message }}</div>
-       							{% elif message.color == "#e8be17" %}
+       								{% elif message.color == "#e8be17" %}
         							<div data-msgid="{{ message.id }}" class="alert alert-info px-2 mx-2" role="alert">{{ message.message }}</div>
-       							{% else %}
+       								{% else %}
         							<div data-msgid="{{ message.id }}" class="alert alert-success px-2 mx-2" role="alert">{{ message.message }}</div>
-       							{% endif %}
-      						{% endfor %}
+       								{% endif %}
+      							{% endfor %}
 							</li>
-     					</div>
+     						</div>
 					</ul>
-    			</li>
+    				</li>
+			        {% endcomment %}
 				<!-- </notifications> -->
 				
 				<!-- <user> -->

@@ -33,3 +33,7 @@ def index(indexable, i):
 def filter_range(start, end):
     end = int(end)+1
     return range(start, end)
+
+@register.filter(name='zip')
+def zip_lists(a, b):
+  return zip(a, b)
