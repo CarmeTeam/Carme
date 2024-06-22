@@ -103,10 +103,15 @@ if [[ ${CARME_SYSTEM} == "single" ]]; then
 
 elif [[ ${CARME_SYSTEM} == "multi" ]]; then
   log "checking ssh connection from the head-node to the head-node..."
-
-  if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $(hostname -s | awk '{print $1}') true &>/dev/null
+  
+  MY_HOSTNAME=$(hostname -s | awk '{print $1}') 
+  if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" ${MY_HOSTNAME} true &>/dev/null
   then
-    die "[install_system.sh] ssh to $(hostname -s | awk '{print $1}') failed. Carme-demo requires that you ssh from the head-node to itself without a password."
+    die "[install_system.sh] ssh to ${MY_HOSTNAME} failed. Carme-demo requires that you ssh from the head-node to itself  without a password. Test \`ssh ${MY_HOSTNAME}\` and try again."
+  fi
+  if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" localhost true &>/dev/null
+  then
+    die "[install_system.sh] ssh to localhost failed. Carme-demo requires that you ssh from the head-node to localhost without a password. Test `ssh localhost` and try again."
   fi
 fi
 
@@ -123,20 +128,20 @@ if [[ ${CARME_SYSTEM} == "multi" ]]; then
 fi
 
 # check ssh connection between compute nodes ----------------------------------------------
-if [[ ${CARME_SYSTEM} == "multi" ]]; then
-  log "checking ssh connection between the compute nodes..."
-
-  for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
-    for SUB_COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
-      if [[ ${COMPUTE_NODE} != ${SUB_COMPUTE_NODE} ]]; then
-        if ! ssh $COMPUTE_NODE ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $SUB_COMPUTE_NODE true &>/dev/null
-        then
-          die "[install_system.sh] ssh from ${COMPUTE_NODE} to ${SUB_COMPUTE_NODE} failed. Carme-demo requires that you ssh between the compute-nodes without a password."
-        fi
-      fi
-    done
-  done
-fi
+#if [[ ${CARME_SYSTEM} == "multi" ]]; then
+#  log "checking ssh connection between the compute nodes..."
+#
+#  for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
+#    for SUB_COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
+#      if [[ ${COMPUTE_NODE} != ${SUB_COMPUTE_NODE} ]]; then
+#        if ! ssh $COMPUTE_NODE ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $SUB_COMPUTE_NODE true &>/dev/null
+#        then
+#          die "[install_system.sh] ssh from ${COMPUTE_NODE} to ${SUB_COMPUTE_NODE} failed. Carme-demo requires that you ssh between the compute-nodes without a password."
+#        fi
+#      fi
+#    done
+#  done
+#fi
 
 # enable cgroup memory (RPi) --------------------------------------------------------------
 if [[ -f "/boot/firmware/cmdline.txt" ]]; then
