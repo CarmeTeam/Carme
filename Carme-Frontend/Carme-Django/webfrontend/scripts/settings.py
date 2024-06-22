@@ -21,7 +21,7 @@ from CarmeConfig.frontend import *
 # variables ------------------------------------------------------------------------------------------------------------------------
 
 ## security
-DEBUG = True 
+DEBUG = False 
 SECRET_KEY = CARME_KEY
 ALLOWED_HOSTS = ['*', '10.0.0.27']
 

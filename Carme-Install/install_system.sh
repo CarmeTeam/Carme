@@ -107,11 +107,11 @@ elif [[ ${CARME_SYSTEM} == "multi" ]]; then
   MY_HOSTNAME=$(hostname -s | awk '{print $1}') 
   if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" ${MY_HOSTNAME} true &>/dev/null
   then
-    die "[install_system.sh] ssh to ${MY_HOSTNAME} failed. Carme-demo requires that you ssh from the head-node to itself  without a password. Test \`ssh ${MY_HOSTNAME}\` and try again."
+    die "[install_system.sh] ssh to \`${MY_HOSTNAME}\` failed. Carme-demo requires that you ssh from the head-node to itself without a password. Test \`ssh ${MY_HOSTNAME}\` and try again."
   fi
   if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" localhost true &>/dev/null
   then
-    die "[install_system.sh] ssh to localhost failed. Carme-demo requires that you ssh from the head-node to localhost without a password. Test `ssh localhost` and try again."
+    die "[install_system.sh] ssh to \`localhost\` failed. Carme-demo requires that you ssh from the head-node to localhost without a password. Test `ssh localhost` and try again."
   fi
 fi
 
