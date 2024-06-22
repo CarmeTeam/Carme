@@ -34,6 +34,7 @@ function check_command () {
 check_command grep
 check_command eval
 check_command sed
+check_command lsof
 
 # check sudo ---------------------------------------------------------------------------------------
 function check_sudo () {

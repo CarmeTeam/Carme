@@ -9,22 +9,27 @@ Carme is easy to install in...
 - Devices
   - Laptops, PCs, RPis, VMs using Linux or WSL. Windows users, refer to our documentation.
 
-    **Note**: Check [Carme Install Documentation](https://docs.open-carme.org/InstallDoc/) for further details.
+    Check [Carme Install Documentation](https://docs.open-carme.org/InstallDoc/) for further details
 
 #### Step 1: Clone the repo
 
-- `cd /opt/` (root user is required)
-- `git clone -b demo-0.9.9 --single-branch https://github.com/CarmeTeam/Carme.git Carme` 
+**Note**: root user is required.
+
+```
+git clone -b demo-0.9.9 --single-branch https://github.com/CarmeTeam/Carme.git /opt/Carme
+```
 
 #### Step 2: Create the config file 
 
-- `cd /opt/Carme`
-- `bash config.sh` 
+```
+cd /opt/Carme && bash config.sh
+```
 
 #### Step 3: Run the installation script 
 
-- `cd /opt/Carme`
-- `bash start.sh` 
+```
+bash start.sh
+```
 
 #### Step 4: Access Carme
 
@@ -38,3 +43,4 @@ Carme is easy to install in...
 
 - [Carme User Documentation](https://docs.open-carme.org/UserDoc/).
 - [Carme Admin Documentation](https://docs.open-carme.org/AdminDoc/).
+

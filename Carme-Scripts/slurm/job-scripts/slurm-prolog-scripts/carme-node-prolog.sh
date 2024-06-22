@@ -196,7 +196,7 @@ JUPYTERLAB_BASEDIR="${JOBDIR}/jupyter"
 JUPYTERLAB_WORKSPACESDIR="${JUPYTERLAB_BASEDIR}/workspaces"
 
 
-#if [[ "${CARME_NODEID}" == "0" ]];then
+if [[ "${CARME_NODEID}" == "0" || "${CARME_LOGINNODE_IP}" == "127.0.0.1" ]];then
 
   # create the primary folders
   log "create ${LOGDIR}"
@@ -305,12 +305,12 @@ Include ${JOBDIR}/ssh/ssh_config.d/*
   log "change ownership of ${JOBDIR}"
   chown -R "${SLURM_JOB_USER}":"${USER_GROUP}" "${JOBDIR}"
 
-#fi
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
 # do only once on master node ------------------------------------------------------------------------------------------------------
-#if [[ "$(hostname -s)" == "${MASTER_NODE}" ]];then
+if [[ "$(hostname -s)" == "${MASTER_NODE}" || "${CARME_LOGINNODE_IP}" == "127.0.0.1" ]];then
 
   #determine jupyterlab port
   get_free_port "6000" "7000" "NB_PORT"
@@ -338,7 +338,7 @@ export CARME_HASH=${HASH}
   log "register job with frontend db"
   runuser -u "${SLURM_JOB_USER}" -- "${PYTHON_BIN}" "${CARME_SCRIPTS_PATH}/frontend/alter_jobDB_entry.py" "unused_url" "${SLURM_JOB_ID}" "${HASH}" "${IPADDR}" "${NB_PORT}" "${TB_PORT}" "${TA_PORT}" "${SLURM_JOB_GPUS}" "${CARME_BACKEND_SERVER}" "${CARME_BACKEND_PORT}"
 
-#fi
+fi
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 
