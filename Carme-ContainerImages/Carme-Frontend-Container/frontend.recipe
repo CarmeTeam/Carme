@@ -1,5 +1,5 @@
 BootStrap: debootstrap
-OSVersion: oldoldstable
+OSVersion: stable
 MirrorURL: http://ftp.de.debian.org/debian/
 
 %help
@@ -74,7 +74,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
     pip3 install wiki
     pip3 install django-autocomplete-light
     pip3 install django-auth-ldap django-mathfilters django-classy-tags django-db-logger django-filter --no-cache-dir
-    pip3 install django-two-factor-auth phonenumbers django-otp-yubikey --no-cache-dir
+    pip3 install django-two-factor-auth phonenumbers django-otp==1.3.0 django-otp-yubikey --no-cache-dir
     pip3 install django-js-asset django-logtailer django-maintenance-mode==0.20.0 django-material django-mptt django-nyt django-sekizai --no-cache-dir
     # install mysqlclient
     #export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
