@@ -341,8 +341,12 @@ class Backend(Service):
             template += " --gres=\"gpu:{num_gpus}\" --gres-flags=\"enforce-binding\""
         elif not gpu_type == 'cpu': # this is inconsistent and should be implemented by changing carme-wide "gpu_" variables to "accelerator_"
             template += " --gres=\"gpu:{gpu_type}:{num_gpus}\" --gres-flags=\"enforce-binding\""
-        
+
+        #print(template)
+        #print(user)
+        #print(self.user)
         params = template.format(**values)
+        #print(params)
 
         com = "runuser -u {user} -- bash -l -c 'cd ${{HOME}}; SHELL=/bin/bash sbatch {params} << EOF\n#!/bin/bash\nsrun \"{script}\" \"{image}\" {flags}\nEOF'".format(user=user, params=params, script=os.path.join(CARME_SCRIPTS_PATH, "slurm/job-scripts/slurm.sh"), image=image, flags=quote(flags))
 
@@ -350,6 +354,10 @@ class Backend(Service):
 
         # execute sbatch as user
         proc = subprocess.Popen(com, shell=True, stdout=subprocess.PIPE)
+        #print("AFTER SUBPROCESS")
+        #print(proc)
+        #stdout = process.communicate()
+        #print(stdout)
 
         try:
             proc.wait(10) # wait at most 10 seconds for sbatch to terminate
@@ -358,7 +366,8 @@ class Backend(Service):
 
         # read job_id from output
         job_id = 0
-
+        #print("LAST PROC PRINT")
+        #print(proc.returncode)
         if proc.returncode == 0:
             job_id = proc.stdout.read().decode("utf-8").split(";")[0].strip()
 
