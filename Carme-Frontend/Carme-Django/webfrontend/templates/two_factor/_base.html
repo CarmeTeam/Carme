@@ -43,10 +43,12 @@
 		if( yubikey == 0){
   	token.bind("change keyup paste input", function(){
    	if( $(this).val().length < 6 || $(this).val().length > 6){
+   		$('.btn.btn-lg').prop("disabled", false);
    		validated = 0; 
    	}
    	if( $(this).val().length == 6 && validated == 0 ) {
    		$('.btn.btn-lg').click();
+   		$('.btn.btn-lg').prop("disabled", true);
     	validated = 1; 
    	}
   	});
@@ -54,10 +56,12 @@
 
   backup.bind("change keyup paste input", function(){
     if( $(this).val().length < 8 || $(this).val().length > 8){
+   		$('.btn.btn-lg').prop("disabled", false);
       validated = 0; 
     }
     if( $(this).val().length == 8 && validated == 0 ) {
       $('.btn.btn-lg').click();
+   		$('.btn.btn-lg').prop("disabled", true);
       validated = 1; 
     }
   });
