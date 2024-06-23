@@ -111,18 +111,24 @@
           	Nodes
         		</h5>
         		<div class="w-50">
-											<div class="select2-wrapper">
-											<select class="input icons_select2 fs--2 text-header pe-2 selected-nodes" id="list-node{{forloop.counter}}">
+           {% comment %} below change select2-rapper-dectivated with select2-wrapper{% endcomment %}
+											<div class="select2-wrapper-deactivated">
+           {% comment %} below change "form-select form-select-sm" with input icons_select2{% endcomment %}
+											<select class="form-select form-select-sm fs--2 text-header pe-2 selected-nodes" id="list-node{{forloop.counter}}">
 												{% for node, status in a_node_and_status %}                                                        
-  											{% if forloop.first %}                                                                            
-    										<option value="nod0" selected data-icon="fa-check">
-															{{ node | upper }}                                                                  
-     										{% comment %}{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}{% endcomment %}              
+  											{% if forloop.first %}
+              {% comment %} below after selected add 'data-icon="fa-check"'{% endcomment %}                                                                            
+    										<option value="nod0" selected>
+															{% comment %}{{ node | upper }}{% endcomment %}
+ 					         {% comment %}use above instead of below{% endcomment %}                                                                  
+     										{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}           
     										</option>                                                                                       
-  											{% else %}                                                                                        
-    										<option value="nod{{forloop.counter0}}" data-icon="fa-check">
-               {{ node | upper }}                                                        
-     										{% comment %}{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}{% endcomment %}              
+  											{% else %}
+              {% comment %} below after selected add 'data-icon="fa-check"'{% endcomment %}                                                                                        
+    										<option value="nod{{forloop.counter0}}">
+               {% comment %}{{ node | upper }}{% endcomment %}        
+               {% comment %}use above instead of below{% endcomment %}                                         
+     										{% if status == 0 %}✖ {{ node | upper }}{% else %}✔ {{ node | upper }}{% endif %}              
     										</option>                                                                                                                                      
   											{% endif %}                                                                                       
  											{% endfor %}                                                                                       
