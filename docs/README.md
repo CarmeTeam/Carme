@@ -75,7 +75,7 @@ _Job submission scheme_
   * Carme-demo 1.0: 
     * Adapted to GPU clusters with pre-set SLURM.
     * Adapted to RedHat (currently is Debian-based).
-    * Adpated to multi-users (currently is single-user).
+    * Adapted to multi-users (currently is single-user).
   * Carme r1.0:
     * Carme runs in AWS (Amazon Web Services).
     
