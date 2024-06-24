@@ -8,12 +8,36 @@ _or in our case..._
 
 an open source framework to manage resources for **multiple users** running **interactive jobs** on a **Cluster** of (GPU) compute nodes.
 
-## **Presentations**
+This documentation is divided in the following sections:
 
-### Marketing Slides
-[CARME slides (11/2022)](Slides/2022-11--carme--pr-slides.pdf)
+#### Introduction
 
-## **Core Idea**
+- [Carme Presentation](#carme-presentation)
+- [Core Idea](#core-idea)
+- [Key features](#key-features)
+
+#### Documentation
+
+- [How to install Carme](#how-to-install-carme)
+- [How to use Carme](#how-to-use-carme)
+- [Roadmap](#roadmap)
+- [Releases](#releases)
+
+#### Team
+- [Authors](#authors)
+- [Contact](#contact)
+- [Sponsors](#sponsors)
+
+
+
+
+## Carme Presentation
+
+Refer to our marketing slides: 
+
+- [CARME slides (06/2024)](Slides/[2024-06]--carme--pr-slides.pdf)
+
+## Core Idea
 
 _We combine established open source ML and DS tools with HPC backends and use therefore_
 
@@ -34,7 +58,7 @@ _Job submission scheme_
 
 * **Open source**
   * we use only open source components that allow commercial usage
-  * *Carme* is open source, allowing commercial usage
+  * Carme is open source, allowing commercial usage
 * **Seamless integration with available HPC tools**
   * Job scheduling via **SLURM**
   * Native **LDAP** support for user authentication
@@ -62,15 +86,23 @@ _Job submission scheme_
     (easy updates, project / user specific environments)
   * **Built-in matching between GPU driver and ML/DL tools**
 
+## How to install Carme
+
+Refer to our [installation documentation](https://docs.open-carme.org/InstallDoc).
+
+## How to use Carme
+
+Refer to our [documentation](https://docs.open-carme.org).
+
 ## **Roadmap**
 
-### Current release:
+#### Current release:
 * **06/2024**
-  * Carme-demo 0.9.9: Installation script to test Carme in single-devices and clusters. Refer to [Installation Documentation](https://docs.open-carme.org/InstallDoc).
+  * Carme-demo 0.9.9: Installation script to test Carme in single-devices and clusters. Refer to our [installation documentation](https://docs.open-carme.org/InstallDoc).
   * Carme r0.9.9: Automatically syncs slurm.conf with Carme database.
   * Documentation is extended.
 
-### Next release: 
+#### Next release: 
 * **10/2024**
   * Carme-demo 1.0: 
     * Adapted to GPU clusters with pre-set SLURM.
@@ -81,7 +113,7 @@ _Job submission scheme_
     
 ## Releases
 
-* 04/2018: _Carme prototype_ at ITWM
+* 04/2018: Carme prototype at ITWM
 
 * 03/2019: r0.3.0 (first public release)
 
@@ -107,23 +139,19 @@ _Job submission scheme_
 
 * 06/2024: **r0.9.9 (latest)**
 
-## **Documentation**
+## Authors
 
-Visit our [documentation](https://docs.open-carme.org/).
-
-## **Who is behind Carme?**
-
-_Carme_ is developed by the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
+Carme is developed by the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
 
 <img src="Images/logo-itwm.png" width="200">
 
-## **Contact**
+## Contact
 
-&rarr; christian.ortiz@itwm.fraunhofer.de
+&rarr; [christian.ortiz@itwm.fraunhofer.de](christian.ortiz@itwm.fraunhofer.de)
 
-## **Sponsors**
+## Sponsors
 
-**The development of *Carme* is financed by research grants from**
+**The development of Carme is financed by research grants from**
 
 <img src="Images/logo-bmbf.png" width="200" height="100">  
 
