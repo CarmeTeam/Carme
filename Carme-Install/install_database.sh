@@ -125,28 +125,74 @@ fi
 log "configuring ${DB_SERVER}..."
 
 export MYSQL_PWD=${CARME_PASSWORD_MYSQL}
-mysql -uroot -e "CREATE DATABASE IF NOT EXISTS ${CARME_DB_SLURM_NAME};
-                 CREATE DATABASE IF NOT EXISTS ${CARME_DB_DEFAULT_NAME};
-                 CREATE USER IF NOT EXISTS '${CARME_DB_SLURM_USER}'@'localhost' IDENTIFIED BY '$CARME_PASSWORD_SLURM';
-                 CREATE USER IF NOT EXISTS '${CARME_DB_DEFAULT_USER}'@'localhost' IDENTIFIED BY '$CARME_PASSWORD_DJANGO';
-                 GRANT ALL PRIVILEGES ON ${CARME_DB_SLURM_NAME}.* TO '${CARME_DB_SLURM_USER}'@'localhost';
-                 GRANT ALL PRIVILEGES ON ${CARME_DB_SLURM_NAME}.* to '${CARME_DB_DEFAULT_USER}'@'localhost';
-                 GRANT ALL PRIVILEGES ON ${CARME_DB_DEFAULT_NAME}.* to '${CARME_DB_DEFAULT_USER}'@'localhost';
-		 ALTER USER 'root'@'localhost' IDENTIFIED BY '${CARME_PASSWORD_MYSQL}';
-                 FLUSH PRIVILEGES;";
+if  [[ ${CARME_DB} == "no" ]]; then
+
+  # check mysql root password
+  if ! mysql -uroot -e 'quit' &> /dev/null; then
+    die "[install_mysql.sh]: CARME_PASSWORD_MYSQL in CarmeConfig.start was not set properly. It must be your database root password. Modify it and try again."
+  fi
+
+  # check mysql port
+  MYSQL_PORT=$(mysql -uroot -e 'show global variables like "port"' | grep "port")
+  if ! [[ ${MYSQL_PORT} =~ "${CARME_DB_DEFAULT_PORT}" ]]; then
+    die "[install_mysql.sh]: CARME_DB_DEFAULT_PORT in CarmeConfig.start was not set properly. Your database port is ${MYSQL_PORT}. Modify and try again."
+  fi
+  
+  # check password policy
+  MYSQL_POLICY=$(mysql -uroot -e "SHOW VARIABLES LIKE 'validate_password.policy';")
+
+  if [[ ${MYSQL_POLICY} =~ "MEDIUM" ]]; then
+    PASSWORD_POLICY="MEDIUM"
+  elif [[ ${MYSQL_POLICY} =~ "STRONG" ]]; then
+    PASSWORD_POLICY="STRONG"
+  else
+    PASSWORD_POLICY="LOW"
+  fi
+
+  mysql -uroot -e "SET GLOBAL validate_password.policy=LOW;
+                   CREATE DATABASE IF NOT EXISTS ${CARME_DB_SLURM_NAME};
+                   CREATE DATABASE IF NOT EXISTS ${CARME_DB_DEFAULT_NAME};
+                   CREATE USER IF NOT EXISTS '${CARME_DB_SLURM_USER}'@'localhost' IDENTIFIED BY '$CARME_PASSWORD_SLURM';
+                   CREATE USER IF NOT EXISTS '${CARME_DB_DEFAULT_USER}'@'localhost' IDENTIFIED BY '$CARME_PASSWORD_DJANGO';
+                   GRANT ALL PRIVILEGES ON ${CARME_DB_SLURM_NAME}.* TO '${CARME_DB_SLURM_USER}'@'localhost';
+                   GRANT ALL PRIVILEGES ON ${CARME_DB_SLURM_NAME}.* to '${CARME_DB_DEFAULT_USER}'@'localhost';
+                   GRANT ALL PRIVILEGES ON ${CARME_DB_DEFAULT_NAME}.* to '${CARME_DB_DEFAULT_USER}'@'localhost';
+		   SET GLOBAL validate_password.policy=${PASSWORD_POLICY};
+                   FLUSH PRIVILEGES;";
+
+elif [[ ${CARME_DB} == "yes" ]]; then
+  mysql -uroot -e "CREATE DATABASE IF NOT EXISTS ${CARME_DB_SLURM_NAME};
+                   CREATE DATABASE IF NOT EXISTS ${CARME_DB_DEFAULT_NAME};
+                   CREATE USER IF NOT EXISTS '${CARME_DB_SLURM_USER}'@'localhost' IDENTIFIED BY '$CARME_PASSWORD_SLURM';
+                   CREATE USER IF NOT EXISTS '${CARME_DB_DEFAULT_USER}'@'localhost' IDENTIFIED BY '$CARME_PASSWORD_DJANGO';
+                   GRANT ALL PRIVILEGES ON ${CARME_DB_SLURM_NAME}.* TO '${CARME_DB_SLURM_USER}'@'localhost';
+                   GRANT ALL PRIVILEGES ON ${CARME_DB_SLURM_NAME}.* to '${CARME_DB_DEFAULT_USER}'@'localhost';
+                   GRANT ALL PRIVILEGES ON ${CARME_DB_DEFAULT_NAME}.* to '${CARME_DB_DEFAULT_USER}'@'localhost';
+                   ALTER USER 'root'@'localhost' IDENTIFIED BY '${CARME_PASSWORD_MYSQL}';
+                   FLUSH PRIVILEGES;";  
+fi
 
 # configure my.cnf: memory restriction -----------------------------------------------------
 log "configuring my.cnf..."
 
 systemctl stop ${DB_SERVICE}.service
 
-MYCNF="
+if [[ "${CARME_DB_DEFAULT_PORT}" == "3306" ]]; then
+  MYCNF="
+\[mysqld\]
+innodb_buffer_pool_size=4096M
+innodb_log_file_size=64M
+innodb_lock_wait_timeout=900
+max_allowed_packet=16M"
+else
+  MYCNF="
 \[mysqld\]
 innodb_buffer_pool_size=4096M
 innodb_log_file_size=64M
 innodb_lock_wait_timeout=900
 max_allowed_packet=16M
 port=${CARME_DB_DEFAULT_PORT}"
+fi
 
 readarray -t <<< $MYCNF
 
@@ -169,10 +215,22 @@ max_allowed_packet=16M
 port=${CARME_DB_DEFAULT_PORT}
 EOF
 
+elif [[ ${NOT_FOUND_COUNTER} == 5 && ${CARME_DB_DEFAULT_PORT} == "3306" ]]; then
+  cat << EOF >> /etc/mysql/my.cnf
+
+# carme-innodb 
+[mysqld]
+innodb_buffer_pool_size=4096M
+innodb_log_file_size=64M
+innodb_lock_wait_timeout=900
+max_allowed_packet=16M
+port=${CARME_DB_DEFAULT_PORT}
+EOF
+
 elif [[ ${NOT_FOUND_COUNTER} == 0 ]]; then
   true
 else
-  die "[install_mysql.sh]: To proceed, you first need to add the following to \`/etc/mysql/my.cnf\`. Please try again.
+  die "[install_mysql.sh]: To proceed, you first need to add the following to \`/etc/mysql/my.cnf\`. Please add it and try again.
   
 [mysqld]
 innodb_buffer_pool_size=4096M

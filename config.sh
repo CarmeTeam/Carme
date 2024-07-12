@@ -16,22 +16,22 @@ log "checking system..."
 
 SYSTEM_ARCH=$(dpkg --print-architecture)
 if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
-  die "amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
+  die "[config.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
 fi
 
 SYSTEM_HDWR=$(uname -m)
 if ! [[ $SYSTEM_HDWR == "aarch64" || $SYSTEM_HDWR == "x86_64"  ]];then
-  die "aarch64 and x86_64 hardwares are supported. Yours is $SYSTEM_HDWR. Please contact us."
+  die "[config.sh]: aarch64 and x86_64 hardwares are supported. Yours is $SYSTEM_HDWR. Please contact us."
 fi
 
 SYSTEM_OS=$(uname -s)
 if ! [ ${SYSTEM_OS,} = "linux" ]; then
-  die "linux OS is supported. Yours is ${SYSTEM_OS,}. Please contact us."
+  die "[config.sh]: linux OS is supported. Yours is ${SYSTEM_OS,}. Please contact us."
 fi
 
 SYSTEM_DIST=$(awk -F= '$1=="ID" { print $2 ;}' /etc/os-release)
 if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian"  ]];then
-  die "ubuntu and debian distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
+  die "[config.sh]: ubuntu and debian distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
 fi
 
 
@@ -44,12 +44,13 @@ CHECK_CONFIG_MESSAGE=$"
 #######     Welcome to Carme-demo ${CARME_VERSION} Config     #######
 ##########################################################
 
-To create the config file, we need to ask a few questions.
+To create the config file, we need to ask a few questions. 
+To exit, press \`Ctrl + C\`  at any time.
 (1/8) Do you want to proceed? [y/N]:"
 
 read -rp "${CHECK_CONFIG_MESSAGE} " REPLY
 if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-  die "config file creation stopped."
+  die "[config.sh]: config file creation stopped."
 fi
 
 # set system ------------------------------------------------------------------------------
@@ -68,7 +69,7 @@ if [[ ${CARME_SYSTEM} == "multi" ]]; then
   CHECK_HEADNODE_MESSAGE=$'\n(2/8 (1/2)) Are you in the head-node?\nCarme-demo must be installed in the head-node. [y/N]:'
   read -rp "${CHECK_HEADNODE_MESSAGE} " REPLY
   if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-    die "config file creation stopped. You are not in the head-node."
+    die "[config.sh]: config file creation stopped. You are not in the head-node."
   else
     HEAD_NODE=$(hostname -s | awk '{print $1}')
     LOGIN_NODE=$(hostname -s | awk '{print $1}')
@@ -104,11 +105,13 @@ Use a blank space to separate them [IPs]:'
   MY_COMPUTE_NODES=($REPLY)
   COMPUTE_NODES=""
   echo checking...
+  echo ""
   for MY_COMPUTE_NODE in ${MY_COMPUTE_NODES[@]}; do
     if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $MY_COMPUTE_NODE true &>/dev/null
     then
-      die "ssh to ${MY_COMPUTE_NODE} failed. Carme-demo requires that you ssh to the compute-nodes without a password. Refer to our documentation and try again."
+      die "[config.sh]: ssh to ${MY_COMPUTE_NODE} failed. Carme-demo requires that you ssh to the compute-nodes without a password. Refer to our documentation and try again."
     else
+      echo "Compute node IP ${MY_COMPUTE_NODE} will be used."
       COMPUTE_NODES+=" $(ssh ${MY_COMPUTE_NODE} 'echo "$(hostname -s)"')"
       COMPUTE_NODES=$(echo "${COMPUTE_NODES}" | sed 's/^ *//')
     fi
@@ -131,7 +134,7 @@ REPLY=""
 CHECK_USERS_MESSAGE=$'\n(3/8) Do you want to proceed with a single-user installation? \nCarme-demo does not support multi-users [y/N]:'
 read -rp "${CHECK_USERS_MESSAGE} " REPLY
 if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-  die "config file creation stopped."
+  die "[config.sh]: config file creation stopped."
 else
   CARME_USERS="single"
 fi
@@ -167,31 +170,88 @@ CARME_HOME=$(eval echo ~${CARME_USER})
 # set database ---------------------------------------------------------------------------
 REPLY=""
 if [[ ${SYSTEM_ARCH} == "amd64" && ${SYSTEM_DIST} == "ubuntu" ]]; then
-  CHECK_DATABASE_MESSAGE=$'\n(5/8) Do you want to install mysql database management tool? \nType `No` if you want Carme-demo to use an already existing mysql in your system [y/N]:'
-  while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
-    read -rp "${CHECK_DATABASE_MESSAGE} " REPLY
-    if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
-      CARME_DB="yes"
-    elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
-      CARME_DB="no"
-    else
-      CHECK_DATABASE_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
-    fi
-  done
   CARME_DB_SERVER="mysql"
-else	
-  CHECK_DATABASE_MESSAGE=$'\n(5/9) Do you want to install mariadb database management tool? \nType `No` if you want Carme-demo to use an already existing mariadb in your system [y/N]:'
-  while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
-    read -rp "${CHECK_DATABASE_MESSAGE} " REPLY
-    if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
-      CARME_DB="yes"
-    elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
-      CARME_DB="no"
+else
+  CARME_DB_SERVER="mariadb"
+fi
+
+CHECK_DATABASE_MESSAGE=$"
+(5/8) Do you want to install ${CARME_DB_SERVER} database management tool? 
+Type \`No\` if you want Carme-demo to use an already existing ${CARME_DB_SERVER} in your system [y/N]:"
+while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
+  read -rp "${CHECK_DATABASE_MESSAGE} " REPLY
+  if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
+    CARME_DB="yes"
+  elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
+    CARME_DB="no"
+  else
+    CHECK_DATABASE_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
+  fi
+done
+
+# set database parameters ----------------------------------------------------------------
+DB_PASS_STOP=""
+if [[ ${CARME_DB} == "no" ]]; then
+  CHECK_DATABASE_PASSWORD_MESSAGE=$"
+(5/8 (1/1)) Carme requires access to your already existing ${CARME_DB_SERVER} server. 
+Type your ${CARME_DB_SERVER} root password (if no password, press enter) [mysql -uroot -p]:"
+  while ! [[ ${DB_PASS_STOP} == "yes" ]]
+  do
+    read -rp "${CHECK_DATABASE_PASSWORD_MESSAGE} " REPLY
+    export MYSQL_PWD=${REPLY}
+    if ! mysql -uroot -e 'quit' &> /dev/null; then
+      CHECK_DATABASE_PASSWORD_MESSAGE=$"You did not type the correct ${CARME_DB_SERVER} root password. Please try again. [mysql -uroot -p]:"
     else
-      CHECK_DATABASE_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
+      CARME_PASSWORD_MYSQL=${REPLY}
+      CARME_DB_DEFAULT_PORT=$(mysql -uroot -e 'show global variables like "port"')
+      CARME_DB_DEFAULT_PORT=$(echo $CARME_DB_DEFAULT_PORT | grep -o -E '[0-9]+')
+      [[ -z ${CARME_DB_DEFAULT_PORT} ]] && die "[config.sh]: ${CARME_DB_SERVER} command \`show global variables like \"port\"\` must list the port. Verify and try again."
+      SCHEMA=$(mysql -uroot -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='webfrontend'")
+      if [[ ${SCHEMA} =~ "webfrontend" ]]; then
+	DB_NAME_STOP=""
+	CHECK_DATABASE_NAME_MESSAGE=$"
+Type a name for your Carme database [database name]: "
+        while ! [[ ${DB_NAME_STOP} == "yes" ]]
+	do
+          read -rp "${CHECK_DATABASE_NAME_MESSAGE} " REPLY
+	  if [[ $REPLY =~ ^[0-9a-zA-Z]+$ ]]; then
+            SCHEMA=$(mysql -uroot -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='${REPLY}'")
+	    if [[ ${SCHEMA} =~ "${REPLY}" ]]; then 
+	      CHECK_DATABASE_NAME_MESSAGE=$"\`${REPLY}\` database already exists in your ${CARME_DB_SERVER} server. To use it, Carme will empty it. Do you want to proceed?
+Type \`Yes\` if you are ok emptying your database. Type \`No\` if you prefer to use a different database name [y/N]: "
+              while ! [[ ${DB_EMPTY_STOP} == "yes" ]]
+	      do
+                read -rp "${CHECK_DATABASE_NAME_MESSAGE} " REPLY
+                if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
+                  CARME_DB_DEFAULT_NAME="webfrontend"
+		  DB_NAME_STOP="yes"
+		  DB_EMPTY_STOP="yes"
+                elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
+                  CHECK_DATABASE_NAME_MESSAGE=$"Type another name for your Carme database [database name]: "
+		  DB_EMPTY_STOP="yes"
+                else
+                  CHECK_DATABASE_NAME_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
+                fi
+              done		
+            else
+	      CARME_DB_DEFAULT_NAME="${REPLY}"
+	      DB_NAME_STOP="yes"
+	    fi
+          else
+	    CHECK_DATABASE_NAME_MESSAGE=$"Sorry, special characters are not allowed.
+Type another name for your Carme database [database name]: "
+	  fi
+	done
+      else
+        CARME_DB_DEFAULT_NAME="webfrontend"
+      fi
+      DB_PASS_STOP="yes"
     fi
   done
-  CARME_DB_SERVER="mariadb"
+elif [[ ${CARME_DB} == "yes" ]]; then
+  CARME_PASSWORD_MYSQL="mysqlpwd"
+  CARME_DB_DEFAULT_NAME="webfrontend"
+  CARME_DB_DEFAULT_PORT=3306 
 fi
 
 # set slurm ------------------------------------------------------------------------------
@@ -207,6 +267,83 @@ while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^
     CHECK_SLURM_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
   fi
 done
+
+# set slurmdbd.conf and slurm.conf parameters ----------------------------------------------
+if [[ ${CARME_SLURM} == "no" ]]; then
+  PATH_ETC_SLURM=$(dpkg -L slurmctld | grep '/etc/slurm' | head -n1)
+  FILE_SLURMDBD_CONF=${PATH_ETC_SLURM}/slurmdbd.conf
+  FILE_SLURM_CONF=${PATH_ETC_SLURM}/slurm.conf
+
+  if ! [[ -f ${FILE_SLURMDBD_CONF} ]]; then
+    die "[config.sh]: ${FILE_SLURMDBD_CONF} does not exist. Please, contact us. Carme requires \`slurmdbd.conf\`."
+  elif ! [[ -f ${FILE_SLURM_CONF} ]]; then
+    die "[config.sh]: ${FILE_SLURM_CONF} does not exist. Please, contact us. Carme requires \`slurm.conf\`."
+  else
+    CARME_PASSWORD_SLURM=$(get_variable StoragePass ${FILE_SLURMDBD_CONF})
+    CARME_DB_SLURM_USER=$(get_variable StorageUser ${FILE_SLURMDBD_CONF})
+    CARME_DB_SLURM_PORT=$(get_variable StoragePort ${FILE_SLURMDBD_CONF})
+    CARME_DB_SLURM_NAME=$(get_variable StorageLoc ${FILE_SLURMDBD_CONF})
+    CARME_SLURM_SLURMD_PORT=$(get_variable SlurmdPort ${FILE_SLURM_CONF})
+    CARME_SLURM_CLUSTER_NAME=$(get_variable ClusterName ${FILE_SLURM_CONF})
+    CARME_SLURM_SLURMCTLD_PORT=$(get_variable SlurmctldPort ${FILE_SLURM_CONF})
+
+    [[ -z ${CARME_PASSWORD_SLURM} ]] && die "[config.sh]: StoragePass in slurmdbd.conf not set."
+    [[ -z ${CARME_DB_SLURM_USER} ]] && die "[config.sh]: StorageUser in slurmdbd.conf not set."
+    [[ -z ${CARME_DB_SLURM_PORT} ]] && CARME_DB_SLURM_PORT=3306
+    [[ -z ${CARME_DB_SLURM_NAME} ]] && CARME_DB_SLURM_NAME="slurm_acct_db"
+    [[ -z ${CARME_SLURM_SLURMD_PORT} ]] && CARME_SLURM_SLURMD_PORT=6818
+    [[ -z ${CARME_SLURM_CLUSTER_NAME} ]] && die "[config.sh]: ClusterName in slurm.conf not set."
+    [[ -z ${CARME_SLURM_SLURMCTLD_PORT} ]] && CARME_SLURM_SLURMCTLD_PORT=6817
+  fi
+elif [[ ${CARME_SLURM} == "yes" ]]; then
+  CARME_PASSWORD_SLURM="slurmpwd"
+  CARME_DB_SLURM_USER="slurm"
+  CARME_DB_SLURM_PORT=3306
+  CARME_DB_SLURM_NAME="slurm_acct_db"
+  CARME_SLURM_SLURMD_PORT=6818
+  CARME_SLURM_CLUSTER_NAME="mycluster"
+  CARME_SLURM_SLURMCTLD_PORT=6817
+fi
+
+# set slurm partitions -------------------------------------------------------------------
+AGREE=""
+if [[ ${CARME_SLURM} == "no" ]]; then
+	CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`. If you want to use a new partition, then you must manually create it before running this script). \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
+  while ! [[ $AGREE == "yes" ]]; do
+    read -rp "${CHECK_PARTITIONNAMES_MESSAGE} " REPLY
+    MY_PARTITION_NAMES=($REPLY)
+    PARTITION_NAMES=""
+    echo "checking..."
+    echo ""
+    for MY_PARTITION_NAME in ${MY_PARTITION_NAMES[@]}; do
+      if grep -q -i "^PartitionName=${MY_PARTITION_NAME}" "${FILE_SLURM_CONF}"; then
+	echo "PartitionName=${MY_PARTITION_NAME} will be used."
+	PARTITION_NAMES+=" ${MY_PARTITION_NAME}"
+	PARTITION_NAMES=$(echo "${PARTITION_NAMES}" | sed 's/^ *//')
+      else
+        echo "PartitionName=${MY_PARTITION_NAME} will be omitted (it does not exist or is not active)."
+      fi    
+    done
+    REPLY=""
+    RECHECK_PARTITIONNAMES_MESSAGE=$"
+(6/8 (2/2)) Do you agree with the partitions that will be used?
+Type \`No\` if you think you made a typo and need to fix the partition list [y/N]:"
+    while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
+      read -rp "${RECHECK_PARTITIONNAMES_MESSAGE} " REPLY
+      if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
+        AGREE="yes"
+      elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
+        AGREE="no"
+	CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in \`slurm.conf\`. If you want to use a new partition, then you must manually create it before running this script). \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
+      else
+        RECHECK_PARTITIONNAMES_MESSAGE=$'You did not choose yes or no. Please try again. Do you agree? [y/N]:'
+      fi
+    done
+  done
+elif [[ ${CARME_SLURM} == "yes" ]]; then
+  PARTITION_NAMES="carme"
+fi
+
 
 # set ldap -------------------------------------------------------------------------------
 REPLY=""
@@ -294,7 +431,7 @@ You can manually modify this information once the config file is created.
 IMPORTANT:
 ${MESSAGE_IMPORTANT}
 
-(8/8) Do you want proceed and create the config file? [y/N]:"
+(8/8) Do you want to proceed and create the config file? [y/N]:"
 fi
 read -rp "${CHECK_ALL_MESSAGE} " REPLY
 if ! [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -332,33 +469,34 @@ CARME_TIMEZONE="Europe/Berlin"
 
 # PASSWORDS -------------------------------------------------------------------------------
 CARME_PASSWORD_USER="usrpwd"
-CARME_PASSWORD_MYSQL="mysqlpwd"
-CARME_PASSWORD_SLURM="slurmpwd"
+CARME_PASSWORD_MYSQL="${CARME_PASSWORD_MYSQL}"
+CARME_PASSWORD_SLURM="${CARME_PASSWORD_SLURM}"
 CARME_PASSWORD_DJANGO="djangopwd"
 
 # DATABASE --------------------------------------------------------------------------------
 CARME_DB="${CARME_DB}"
 CARME_DB_SERVER="${CARME_DB_SERVER}"
 
-CARME_DB_DEFAULT_NAME="webfrontend"
+CARME_DB_DEFAULT_NAME="${CARME_DB_DEFAULT_NAME}"
 CARME_DB_DEFAULT_NODE="${HEAD_NODE}"
 CARME_DB_DEFAULT_HOST="${HEAD_NODE}"
 CARME_DB_DEFAULT_USER="django"
-CARME_DB_DEFAULT_PORT=3306
+CARME_DB_DEFAULT_PORT=${CARME_DB_DEFAULT_PORT}
 
-CARME_DB_SLURM_NAME="slurm_acct_db"
+CARME_DB_SLURM_NAME="${CARME_DB_SLURM_NAME}"
 CARME_DB_SLURM_NODE="${HEAD_NODE}"
 CARME_DB_SLURM_HOST="${HEAD_NODE}"
-CARME_DB_SLURM_USER="slurm"
-CARME_DB_SLURM_PORT=3306
+CARME_DB_SLURM_USER="${CARME_DB_SLURM_USER}"
+CARME_DB_SLURM_PORT=${CARME_DB_SLURM_PORT}
 
 # SLURM -----------------------------------------------------------------------------------
 CARME_SLURM="${CARME_SLURM}"
-CARME_SLURM_CLUSTER_NAME="mycluster"
-CARME_SLURM_PARTITION_NAME="carme"
-CARME_SLURM_ACCELERATOR_TYPE="cpu"
-CARME_SLURM_SLURMCTLD_PORT=6817
-CARME_SLURM_SLURMD_PORT=6818
+CARME_SLURM_CLUSTER_NAME="${CARME_SLURM_CLUSTER_NAME}"
+CARME_SLURM_PARTITION_NAME="${PARTITION_NAMES}"
+CARME_SLURM_SLURMCTLD_PORT=${CARME_SLURM_SLURMCTLD_PORT}
+CARME_SLURM_SLURMD_PORT=${CARME_SLURM_SLURMD_PORT}
+CARME_MUNGE_PATH_RUN="/var/run/munge"
+CARME_MUNGE_FILE_KEY="/etc/munge/munge.key"
 
 # VENDORS ---------------------------------------------------------------------------------
 # go to https://github.com/conda-forge/miniforge/releases for a different version.
