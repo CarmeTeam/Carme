@@ -28,6 +28,7 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_HOME=$(get_variable CARME_HOME ${FILE_START_CONFIG})
   CARME_USERS=$(get_variable CARME_USERS ${FILE_START_CONFIG})
   CARME_GROUP=$(get_variable CARME_GROUP ${FILE_START_CONFIG})
+  CARME_SLURM=$(get_variable CARME_SLURM ${FILE_START_CONFIG})
   CARME_SYSTEM=$(get_variable CARME_SYSTEM ${FILE_START_CONFIG})
   CARME_TIMEZONE=$(get_variable CARME_TIMEZONE ${FILE_START_CONFIG})
   CARME_NODE_LIST=$(get_variable CARME_NODE_LIST ${FILE_START_CONFIG})
@@ -42,7 +43,6 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_PASSWORD_DJANGO=$(get_variable CARME_PASSWORD_DJANGO ${FILE_START_CONFIG})
   CARME_SLURM_CLUSTER_NAME=$(get_variable CARME_SLURM_CLUSTER_NAME ${FILE_START_CONFIG})
   CARME_SLURM_PARTITION_NAME=$(get_variable CARME_SLURM_PARTITION_NAME ${FILE_START_CONFIG})
-  CARME_SLURM_ACCELERATOR_TYPE=$(get_variable CARME_SLURM_ACCELERATOR_TYPE ${FILE_START_CONFIG})
 
   CARME_DB_SLURM_NAME=$(get_variable CARME_DB_SLURM_NAME ${FILE_START_CONFIG})
   CARME_DB_SLURM_NODE=$(get_variable CARME_DB_SLURM_NODE ${FILE_START_CONFIG})
@@ -74,7 +74,6 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   [[ -z ${CARME_PASSWORD_DJANGO} ]] && die "[install_frontend.sh]: CARME_PASSWORD_DJANGO not set."
   [[ -z ${CARME_SLURM_CLUSTER_NAME} ]] && die "[install_frontend.sh]: CARME_SLURM_CLUSTER_NAME not set."
   [[ -z ${CARME_SLURM_PARTITION_NAME} ]] && die "[install_frontend.sh]: CARME_SLURM_PARTITION_NAME not set."
-  [[ -z ${CARME_SLURM_ACCELERATOR_TYPE} ]] && die "[install_frontend.sh]: CARME_SLURM_ACCELERATOR_TYPE not set."
 
   [[ -z ${CARME_DB_SLURM_NAME} ]] && die "[install_frontend.sh]: CARME_DB_SLURM_NAME not set."
   [[ -z ${CARME_DB_SLURM_NODE} ]] && die "[install_frontend.sh]: CARME_DB_SLURM_NODE not set."
@@ -125,13 +124,17 @@ for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
           name = toupper(type)
           num_per_node = num_cpus_per_node
         } else {
-          if (n != 3) {
-            printf "ERROR: unknown gres format: NodeName=%s\n", node_name
-            next
-          } else {
+          if (n == 3) {
             type = toks[1]
             name = toupper(toks[2])
-            num_per_node = toks[3]
+            num_per_node = toks[2]
+          } else if (n == 2) {
+            type = toks[1]
+            name = toupper(type)
+            num_per_node = toks[2]
+          } else {
+            printf "ERROR: unknown gres format: NodeName=%s\n", node_name
+            next
           }
         }
         break
@@ -152,39 +155,161 @@ for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
   ACCELERATOR_LIST+=("$COMPUTE_NODE_DATA")
 done
 
-# projects_resourcetemplate DB:
+# set projects_resourcetemplate DB:
 # name, type, max_jobs, max_nodes_per_job, max_accelerators_per_node, walltime (in days), partition, features
-TEMPLATE_NAME=${CARME_GROUP}
-TEMPLATE_TYPE="linux" # linux (group) or carme (projects)
+if [[ ${CARME_SLURM} == "yes" ]]; then
+  TEMPLATE_NAME=${CARME_GROUP}
+  TEMPLATE_TYPE="linux" # linux (group), slurm (partition), or carme (projects)
 
-LEN=${#ACCELERATOR_LIST[@]}
-NUM_ACCS_TOTAL=0
-MAX_ACCS_PER_NODE=0
-for (( i=0; i<$LEN; i++ )); do
-  STR="${ACCELERATOR_LIST[$i]}"
-  SUBCOUNT=1
-  for VALUE in $STR; do
-    if [[ "$SUBCOUNT" -eq 3 ]]; then
-      # num_per_node from ACCELERATOR_LIST
-      NUM_ACCS_TOTAL=$(($VALUE + $NUM_ACCS_TOTAL))
-      if [[ $VALUE > $MAX_ACCS_PER_NODE ]]; then
-        MAX_ACCS_PER_NODE=$VALUE
+  LEN=${#ACCELERATOR_LIST[@]}
+  NUM_ACCS_TOTAL=0
+  MAX_ACCS_PER_NODE=0
+  for (( i=0; i<$LEN; i++ )); do
+    STR="${ACCELERATOR_LIST[$i]}"
+    SUBCOUNT=1
+    for VALUE in $STR; do
+      if [[ "$SUBCOUNT" -eq 3 ]]; then
+        # num_per_node from ACCELERATOR_LIST
+        NUM_ACCS_TOTAL=$(($VALUE + $NUM_ACCS_TOTAL))
+        if [[ $VALUE > $MAX_ACCS_PER_NODE ]]; then
+          MAX_ACCS_PER_NODE=$VALUE
+        fi
+      fi
+      (( SUBCOUNT=SUBCOUNT+1 ))
+    done
+  done
+  if [[ ${CARME_SYSTEM} == "multi" ]]; then
+    if [[ $NUM_ACCS_TOTAL > 10 ]]; then
+      NUM_ACCS_TOTAL=10
+    fi
+  fi
+  TEMPLATE_MAX_JOBS=${NUM_ACCS_TOTAL}
+  TEMPLATE_MAX_NODES_PER_JOB=${#ACCELERATOR_LIST[@]}
+  TEMPLATE_MAX_ACCELERATORS_PER_NODE=${MAX_ACCS_PER_NODE}
+  TEMPLATE_WALLTIME=7
+  TEMPLATE_PARTITION=${CARME_SLURM_PARTITION_NAME}
+  TEMPLATE_FEATURES="Default_system"
+
+elif [[ ${CARME_SLURM} == "no" ]]; then
+  
+  TEMPLATE_NAME=()
+  TEMPLATE_TYPE=()
+  TEMPLATE_MAX_JOBS=()
+  TEMPLATE_MAX_NODES_PER_JOB=()
+  TEMPLATE_MAX_ACCELERATORS_PER_NODE=()
+  TEMPLATE_WALLTIME=()
+  TEMPLATE_PARTITION=()
+  TEMPLATE_FEATURES=()
+  VAR=slurm 
+  LEN_SLURM_PARTITIONS=${#CARME_SLURM_PARTITION_NAME[@]}
+  for (( i=0; i<$LEN_SLURM_PARTITIONS; i++ )); do
+    TEMPLATE_NAME+=("${CARME_SLURM_PARTITION_NAME[$i]}")
+    TEMPLATE_TYPE+=("${VAR}")
+
+    NODE_DATA_IN_PARTITION_LIST=()
+    NODE_NAME_IN_PARTITION_LIST=$(sinfo -p ${CARME_SLURM_PARTITION_NAME[$i]} -Nh --format="%N")
+    for NODE in ${NODE_NAME_IN_PARTITION_LIST[@]}; do
+      if [[ ${NODE} == "localhost" ]]; then
+        NODE="$(hostname -s | awk '{print $1}')"
+      fi
+      NODE_DATA=$(scontrol show nodes -o | grep "${NODE}" | awk '
+      {
+        for (i = 1; i <= NF; i++) {
+          split($i, pair, "=")
+          switch (pair[1]) {
+          case "NodeName":
+            node_name = pair[2]
+            break
+          case "CPUTot":
+            num_cpus_per_node = pair[2]
+            break
+          case "Gres":
+            n = split(pair[2], toks, ":") 
+            if (toks[1] == "(null)" ){
+              type = "cpu"
+              name = toupper(type)
+              num_per_node = num_cpus_per_node
+            } else {
+              if (n == 3) {
+                type = toks[1]
+                name = toupper(toks[2])
+                num_per_node = toks[2]
+              } else if (n == 2) {
+                type = toks[1]
+                name = toupper(type)
+                num_per_node = toks[2]
+              } else {
+                printf "ERROR: unknown gres format: NodeName=%s\n", node_name
+                next
+              }
+            }
+            break
+          case "RealMemory":
+            main_mem_per_node = pair[2]
+            break
+          case "State":
+            node_status = 0
+            if (pair[2] == "IDLE" || pair[2] == "MIX" || pair[2] == "ALLOC") {
+              node_status = 1
+            }
+            break
+          }
+        }
+        print name, type, num_per_node, num_cpus_per_node, main_mem_per_node, node_name, node_status
+      }
+      ')
+      NODE_DATA_IN_PARTITION_LIST+=("$NODE_DATA")
+    done
+
+    LEN_NODES_IN_PARTITION=${#NODE_DATA_IN_PARTITION_LIST[@]}
+    NUM_ACCS_TOTAL_IN_PARTITION=0
+    MAX_ACCS_PER_NODE_IN_PARTITION=0
+    for (( i=0; i<$LEN_NODES_IN_PARTITION; i++ )); do
+      STR="${NODE_DATA_IN_PARTITION_LIST[$i]}"
+      SUBCOUNT=1
+      for VALUE in $STR; do
+        if [[ "$SUBCOUNT" -eq 3 ]]; then
+          # get num_per_node from NODE_DATA_IN_PARTITION_LIST
+          NUM_ACCS_TOTAL_IN_PARTITION=$(($VALUE + $NUM_ACCS_TOTAL_IN_PARTITION))
+          if [[ $VALUE > $MAX_ACCS_PER_NODE_IN_PARTITION ]]; then
+            MAX_ACCS_PER_NODE_IN_PARTITION=$VALUE
+          fi
+        fi
+        (( SUBCOUNT=SUBCOUNT+1 ))
+      done
+    done
+    if [[ ${CARME_SYSTEM} == "multi" ]]; then
+      if [[ $NUM_ACCS_TOTAL_IN_PARTITION > 10 ]]; then
+        NUM_ACCS_TOTAL_IN_PARTITION=10
       fi
     fi
-    (( SUBCOUNT=SUBCOUNT+1 ))
+    TEMPLATE_MAX_JOBS+=(${NUM_ACCS_TOTAL_IN_PARTITION})
+    TEMPLATE_MAX_NODES_PER_JOB+=(${#NODE_DATA_IN_PARTITION_LIST[@]})
+    TEMPLATE_MAX_ACCELERATORS_PER_NODE+=(${MAX_ACCS_PER_NODE_IN_PARTITION})
+    TEMPLATE_WALLTIME+=(7)
+    TEMPLATE_PARTITION+=("${CARME_SLURM_PARTITION_NAME[$i]}")
+    TEMPLATE_FEATURES+=("Default_system")
   done
-done
-if [[ ${CARME_SYSTEM} == "multi" ]]; then
-  if [[ $NUM_ACCS_TOTAL > 10 ]]; then
-    NUM_ACCS_TOTAL=10
-  fi
+
 fi
+
+echo "${TEMPLATE_NAME}"
+echo "${TEMPLATE_TYPE}"
+echo "${TEMPLATE_MAX_JOBS}"
+echo "${TEMPLATE_MAX_NODES_PER_JOB}"
+echo "${TEMPLATE_MAX_ACCELERATORS_PER_NODE}"
+echo "${TEMPLATE_WALLTIME}"
+echo "${TEMPLATE_PARTITION}"
+echo "${TEMPLATE_FEATURES}"
+die "ENDS"
+
+
 TEMPLATE_MAX_JOBS=${NUM_ACCS_TOTAL}
 TEMPLATE_MAX_NODES_PER_JOB=${#ACCELERATOR_LIST[@]}
 TEMPLATE_MAX_ACCELERATORS_PER_NODE=${MAX_ACCS_PER_NODE}
 TEMPLATE_WALLTIME=7
 TEMPLATE_PARTITION=${CARME_SLURM_PARTITION_NAME}
-TEMPLATE_FEATURES="CPU_system"
+TEMPLATE_FEATURES="Default_system"
 
 # projects_project DB:
 # name, type, slug, is_approved, description, description_html, classification, information, date_updated, dated_created, owner_id, department, checked, num, date_approved, date_expired
@@ -195,7 +320,7 @@ PROJECT_IS_APPROVED=1
 PROJECT_DESCRIPTION="Single_user_system"
 PROJECT_DESCRIPTION_HTML="<p>Single_user_system</p>"
 PROJECT_CLASSIFICATION="local"
-PROJECT_INFORMATION="CPU_system"
+PROJECT_INFORMATION="Default_system"
 #PROJECT_OWNER_ID=[[SET IN DATABASE]]
 PROJECT_DEPARTMENT="home"
 PROJECT_CHECKED=1

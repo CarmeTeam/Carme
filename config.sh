@@ -308,37 +308,45 @@ fi
 # set slurm partitions -------------------------------------------------------------------
 AGREE=""
 if [[ ${CARME_SLURM} == "no" ]]; then
-	CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`. If you want to use a new partition, then you must manually create it before running this script). \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
+	CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`). \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
   while ! [[ $AGREE == "yes" ]]; do
     read -rp "${CHECK_PARTITIONNAMES_MESSAGE} " REPLY
     MY_PARTITION_NAMES=($REPLY)
     PARTITION_NAMES=""
     echo "checking..."
     echo ""
+    AT_LEAST_ONE_PARTITION_EXISTS=""
     for MY_PARTITION_NAME in ${MY_PARTITION_NAMES[@]}; do
       if grep -q -i "^PartitionName=${MY_PARTITION_NAME}" "${FILE_SLURM_CONF}"; then
 	echo "PartitionName=${MY_PARTITION_NAME} will be used."
 	PARTITION_NAMES+=" ${MY_PARTITION_NAME}"
 	PARTITION_NAMES=$(echo "${PARTITION_NAMES}" | sed 's/^ *//')
+	AT_LEAST_ONE_PARTITION_EXISTS="yes"
       else
         echo "PartitionName=${MY_PARTITION_NAME} will be omitted (it does not exist or is not active)."
       fi    
     done
-    REPLY=""
-    RECHECK_PARTITIONNAMES_MESSAGE=$"
-(6/8 (2/2)) Do you agree with the partitions that will be used?
+    if [[ $AT_LEAST_ONE_PARTITION_EXISTS == "yes" ]]; then
+      REPLY=""
+      RECHECK_PARTITIONNAMES_MESSAGE=$"
+(6/8 (2/2)) Do you agree with the partitions to be used?
 Type \`No\` if you think you made a typo and need to fix the partition list [y/N]:"
-    while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
-      read -rp "${RECHECK_PARTITIONNAMES_MESSAGE} " REPLY
-      if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
-        AGREE="yes"
-      elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
-        AGREE="no"
-	CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in \`slurm.conf\`. If you want to use a new partition, then you must manually create it before running this script). \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
-      else
-        RECHECK_PARTITIONNAMES_MESSAGE=$'You did not choose yes or no. Please try again. Do you agree? [y/N]:'
-      fi
-    done
+      while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
+        read -rp "${RECHECK_PARTITIONNAMES_MESSAGE} " REPLY
+        if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
+          AGREE="yes"
+        elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
+          AGREE="no"
+	  CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`. \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
+        else
+          RECHECK_PARTITIONNAMES_MESSAGE=$'You did not choose yes or no. Please try again. Do you agree? [y/N]:'
+        fi
+      done
+    else
+      REPLY=""
+      AGREE="no"
+      CHECK_PARTITIONNAMES_MESSAGE=$'\nSorry, the partitions were not found. Try again. \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
+    fi
   done
 elif [[ ${CARME_SLURM} == "yes" ]]; then
   PARTITION_NAMES="carme"

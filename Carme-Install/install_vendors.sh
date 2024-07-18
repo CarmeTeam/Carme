@@ -22,11 +22,17 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
   
+  SYSTEM_OS=$(get_variable SYSTEM_OS ${FILE_START_CONFIG})
   GO_VERSION=$(get_variable GO_VERSION ${FILE_START_CONFIG})
+  SYSTEM_ARCH=$(get_variable SYSTEM_ARCH ${FILE_START_CONFIG})
+  SYSTEM_HDWR=$(get_variable SYSTEM_HDWR ${FILE_START_CONFIG})
   MAMBAFORGE_VERSION=$(get_variable MAMBAFORGE_VERSION ${FILE_START_CONFIG})
   SINGULARITY_VERSION=$(get_variable SINGULARITY_VERSION ${FILE_START_CONFIG})
 
+  [[ -z ${SYSTEM_OS} ]] && die "[install_vendors.sh]: SYSTEM_OS not set."
   [[ -z ${GO_VERSION} ]] && die "[install_vendors.sh]: GO_VERSION not set."
+  [[ -z ${SYSTEM_ARCH} ]] && die "[install_vendors.sh]: SYSTEM_ARCH not set."
+  [[ -z ${SYSTEM_HDWR} ]] && die "[install_vendors.sh]: SYSTEM_HDWR not set."
   [[ -z ${MAMBAFORGE_VERSION} ]] && die "[install_vendors.sh]: MAMBAFORGE_VERSION not set."
   [[ -z ${SINGULARITY_VERSION} ]] && die "[install_vendors.sh]: SINGULARITY_VERSION not set."
 
@@ -43,24 +49,6 @@ PATH_GO=${PATH_VENDORS}/go
 
 # installation starts ---------------------------------------------------------------------
 log "starting vendors installation..."
-
-# check compatibility ---------------------------------------------------------------------
-log "checking system..."
-
-SYSTEM_ARCH=$(dpkg --print-architecture)
-if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
-  die "[install_vendors.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
-fi
-
-SYSTEM_HDWR=$(uname -m)
-if ! [[ $SYSTEM_HDWR == "aarch64" || $SYSTEM_HDWR == "x86_64"  ]];then
-  die "[install_vendors.sh]: aarch64 and x86_64 hardwares are supported. Yours is $SYSTEM_HDWR. Please contact us."
-fi
-
-SYSTEM_OS=$(uname -s)
-if ! [ ${SYSTEM_OS,} = "linux" ]; then
-    die "[install_vendors.sh]: linux OS is supported. Yours is ${SYSTEM_OS,}. Please contact us."
-fi
 
 # install packages ------------------------------------------------------------------------
 log "installing packages..."
