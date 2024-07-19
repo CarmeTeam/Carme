@@ -121,51 +121,77 @@ else
 fi
 
 # set users ------------------------------------------------------------------------------
-#REPLY=""
-#CHECK_USERS_MESSAGE=$'\n(3/8) Do you want to use a single-user or multi-user interface? \nType `single` for personal use or `multi` for multi-users [single/multi]:'
-#while ! [[ $REPLY == "single" || $REPLY == "multi" ]]; do
-#  read -rp "${CHECK_USERS_MESSAGE} " REPLY
-#  if ! [[ $REPLY == "single" || $REPLY == "multi" ]]; then
-#    CHECK_USERS_MESSAGE=$'You did not type `single` or `multi`. Please try again [single/multi]:'
-#  fi
-#  CARME_USERS=$REPLY
-#done
 REPLY=""
-CHECK_USERS_MESSAGE=$'\n(3/8) Do you want to proceed with a single-user installation? \nCarme-demo does not support multi-users [y/N]:'
-read -rp "${CHECK_USERS_MESSAGE} " REPLY
-if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-  die "[config.sh]: config file creation stopped."
+CHECK_USERS_MESSAGE=$'\n(3/8) Do you want to use a single-user or multi-user interface? \nType `single` for personal use or `multi` for multi-users [single/multi]:'
+while ! [[ $REPLY == "single" || $REPLY == "multi" ]]; do
+  read -rp "${CHECK_USERS_MESSAGE} " REPLY
+  if ! [[ $REPLY == "single" || $REPLY == "multi" ]]; then
+    CHECK_USERS_MESSAGE=$'You did not type `single` or `multi`. Please try again [single/multi]:'
+  fi
+  CARME_USERS=$REPLY
+done
+
+# set ldap -------------------------------------------------------------------------------
+REPLY=""
+if [[ ${CARME_USERS} == "single" ]]; then
+  CHECK_LDAP_MESSAGE=$'\n(4/8) ldap user management tool won\'t be installed in your system. Do you want to proceed? [y/N]:'
+  while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
+    read -rp "${CHECK_LDAP_MESSAGE} " REPLY
+    if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
+      CARME_LDAP="null"
+    elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
+      die "config file creation stopped."
+    else
+      CHECK_LDAP_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
+    fi
+  done
 else
-  CARME_USERS="single"
+  CHECK_LDAP_MESSAGE=$'\n(4/8) Do you want to install ldap user management tool? \nType `No` if you want Carme to use an already existing ldap in your system. [y/N]:'
+  while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
+    read -rp "${CHECK_LDAP_MESSAGE} " REPLY
+    if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
+      CARME_LDAP="yes"
+    elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
+      CARME_LDAP="no"
+    else
+      CHECK_LDAP_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
+    fi
+  done
 fi
 
 # set username ---------------------------------------------------------------------------	
-#CHECK_USER_MESSAGE=$'\n(4/8) Please enter your username (root user is not allowed). If you use a multi-user interface, this user becomes the admin:'
-CHECK_USER_MESSAGE=$'\n(4/8) Please enter your username (root user is not allowed):'
+CHECK_USER_MESSAGE=$'\n(5/8) Please enter your username (root user is not allowed). If you use a multi-user interface, this user becomes the admin:'
 
 read -rp "${CHECK_USER_MESSAGE} " REPLY
 CARME_USER=$REPLY
 
-CARME_UID="$(id -u ${CARME_USER} 2>/dev/null)" || CARME_UID=""
-while [[ -z ${CARME_UID} || ${CARME_UID} -lt 1000 ]]; do
-  if [[ -z ${CARME_UID} ]]; then
-    CHECK_UID_MESSAGE=$"User \"${CARME_USER}\" does not exist in your Linux system. Please try again:"
-    read -rp "${CHECK_UID_MESSAGE} " REPLY
-  elif [[ ${CARME_UID} -lt 1000 ]]; then
-    if [[ -z $CARME_USER ]]; then
-      CHECK_UID_MESSAGE=$"You did not type a username. Please try again:"
-      read -rp "${CHECK_UID_MESSAGE} " REPLY
-    else
-      CHECK_UID_MESSAGE=$"User ${CARME_USER} is not a valid user. UID must be larger than 999. Yours is ${CARME_UID}. Please try again:"
-      read -rp "${CHECK_UID_MESSAGE} " REPLY
-    fi
-  fi
-  CARME_USER=$REPLY
+if [[ ${CARME_USERS} == "single" || ${CARME_LDAP} == "no" ]]; then
   CARME_UID="$(id -u ${CARME_USER} 2>/dev/null)" || CARME_UID=""
-done
-
-CARME_GROUP=$(id -gn ${CARME_USER})
-CARME_HOME=$(eval echo ~${CARME_USER})
+  while [[ -z ${CARME_UID} || ${CARME_UID} -lt 1000 ]]; do
+    if [[ -z ${CARME_UID} ]]; then
+      CHECK_UID_MESSAGE=$"User \"${CARME_USER}\" does not exist in your Linux system. Please try again:"
+      read -rp "${CHECK_UID_MESSAGE} " REPLY
+    elif [[ ${CARME_UID} -lt 1000 ]]; then
+      if [[ -z $CARME_USER ]]; then
+        CHECK_UID_MESSAGE=$"You did not type a username. Please try again:"
+        read -rp "${CHECK_UID_MESSAGE} " REPLY
+      else
+        CHECK_UID_MESSAGE=$"User ${CARME_USER} is not a valid user. UID must be larger than 999. Yours is ${CARME_UID}. Please try again:"
+        read -rp "${CHECK_UID_MESSAGE} " REPLY
+      fi
+    fi
+    CARME_USER=$REPLY
+    CARME_UID="$(id -u ${CARME_USER} 2>/dev/null)" || CARME_UID=""
+  done
+  
+  CARME_GROUP=$(id -gn ${CARME_USER})
+  CARME_HOME=$(eval echo ~${CARME_USER})
+else
+  # CARME_UID will be assigned by LDAP
+  # CARME_USER will be created in LDAP
+  CARME_GROUP=carme-admin
+  # CARME_HOME should exist?
+fi
 
 # set database ---------------------------------------------------------------------------
 REPLY=""
@@ -176,7 +202,7 @@ else
 fi
 
 CHECK_DATABASE_MESSAGE=$"
-(5/8) Do you want to install ${CARME_DB_SERVER} database management tool? 
+(6/8) Do you want to install ${CARME_DB_SERVER} database management tool? 
 Type \`No\` if you want Carme-demo to use an already existing ${CARME_DB_SERVER} in your system [y/N]:"
 while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
   read -rp "${CHECK_DATABASE_MESSAGE} " REPLY
@@ -193,7 +219,7 @@ done
 DB_PASS_STOP=""
 if [[ ${CARME_DB} == "no" ]]; then
   CHECK_DATABASE_PASSWORD_MESSAGE=$"
-(5/8 (1/1)) Carme requires access to your already existing ${CARME_DB_SERVER} server. 
+(6/8 (1/1)) Carme requires access to your already existing ${CARME_DB_SERVER} server. 
 Type your ${CARME_DB_SERVER} root password (if no password, press enter) [mysql -uroot -p]:"
   while ! [[ ${DB_PASS_STOP} == "yes" ]]
   do
@@ -256,7 +282,7 @@ fi
 
 # set slurm ------------------------------------------------------------------------------
 REPLY=""
-CHECK_SLURM_MESSAGE=$'\n(6/8) Do you want to install slurm workload management tool? \nType `No` if you want Carme-demo to use an already existing slurm in your system. [y/N]:'
+CHECK_SLURM_MESSAGE=$'\n(7/8) Do you want to install slurm workload management tool? \nType `No` if you want Carme-demo to use an already existing slurm in your system. [y/N]:'
 while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
   read -rp "${CHECK_SLURM_MESSAGE} " REPLY
   if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
@@ -308,7 +334,7 @@ fi
 # set slurm partitions -------------------------------------------------------------------
 AGREE=""
 if [[ ${CARME_SLURM} == "no" ]]; then
-	CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`). \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
+	CHECK_PARTITIONNAMES_MESSAGE=$'\n(7/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`). \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
   while ! [[ $AGREE == "yes" ]]; do
     read -rp "${CHECK_PARTITIONNAMES_MESSAGE} " REPLY
     MY_PARTITION_NAMES=($REPLY)
@@ -337,7 +363,7 @@ Type \`No\` if you think you made a typo and need to fix the partition list [y/N
           AGREE="yes"
         elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
           AGREE="no"
-	  CHECK_PARTITIONNAMES_MESSAGE=$'\n(6/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`. \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
+	  CHECK_PARTITIONNAMES_MESSAGE=$'\n(7/8 (1/2)) Type the slurm partition name(s) that you want Carme to use (the partition must exist in `slurm.conf`. \nFor multiple partitions, use a blank space to separate them [partition name(s)]:'
         else
           RECHECK_PARTITIONNAMES_MESSAGE=$'You did not choose yes or no. Please try again. Do you agree? [y/N]:'
         fi
@@ -350,35 +376,6 @@ Type \`No\` if you think you made a typo and need to fix the partition list [y/N
   done
 elif [[ ${CARME_SLURM} == "yes" ]]; then
   PARTITION_NAMES="carme"
-fi
-
-
-# set ldap -------------------------------------------------------------------------------
-REPLY=""
-if [[ ${CARME_USERS} == "single" ]]; then
-  CHECK_LDAP_MESSAGE=$'\n(7/8) ldap user management tool won\'t be installed in your system. Do you want to proceed? [y/N]:'
-  while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
-    read -rp "${CHECK_LDAP_MESSAGE} " REPLY
-    if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
-      CARME_LDAP="null"
-    elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
-      die "config file creation stopped."
-    else
-      CHECK_LDAP_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
-    fi
-  done
-else
-  CHECK_LDAP_MESSAGE=$'\n(7/8) Do you want to install ldap user management tool? \nType `No` if you want Carme to use an already existing ldap in your system. [y/N]:'
-  while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
-    read -rp "${CHECK_LDAP_MESSAGE} " REPLY
-    if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
-      CARME_LDAP="yes"
-    elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
-      CARME_LDAP="no"
-    else
-      CHECK_LDAP_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
-    fi
-  done
 fi
 
 # set message -----------------------------------------------------------------------------
