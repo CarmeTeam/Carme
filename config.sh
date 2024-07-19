@@ -223,7 +223,7 @@ if [[ ${CARME_DB} == "no" ]]; then
 Type your ${CARME_DB_SERVER} root password (if no password, press enter) [mysql -uroot -p]:"
   while ! [[ ${DB_PASS_STOP} == "yes" ]]
   do
-    read -rp "${CHECK_DATABASE_PASSWORD_MESSAGE} " REPLY
+    read -rsp "${CHECK_DATABASE_PASSWORD_MESSAGE} " REPLY && echo
     export MYSQL_PWD=${REPLY}
     if ! mysql -uroot -e 'quit' &> /dev/null; then
       CHECK_DATABASE_PASSWORD_MESSAGE=$"You did not type the correct ${CARME_DB_SERVER} root password. Please try again. [mysql -uroot -p]:"
