@@ -94,13 +94,13 @@ fi
 
 # frontend variables ---------------------------------------------------------------------------
  
-## cpu info 
+# cpu info (not used)
 #CPU_NAME=$(lscpu | sed -nr '/Model name/ s/.*:\s*//p' | sed 's/\s*@.*//' | sed 's/([^)]*)//g' | sed 's/CPU//g')
 #MAIN_MEM_NODE=$(grep "^MemTotal:" /proc/meminfo | awk '{print int($2/1024)}')
 #NUM_CPUS_NODE=$(grep -c ^processor /proc/cpuinfo)  
 
-# projects_accelerators DB: 
-# name, type, num_per_node, num_cpus_per_node, main_mem_per_node (in MB), node_name, node_status
+# set projects_accelerators DB 
+# fields: name, type, num_per_node, num_cpus_per_node, main_mem_per_node (in MB), node_name, node_status
 ACCELERATOR_LIST=()
 for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
   if [[ ${COMPUTE_NODE} == "localhost" ]]; then
@@ -156,160 +156,120 @@ for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
 done
 
 # set projects_resourcetemplate DB:
-# name, type, max_jobs, max_nodes_per_job, max_accelerators_per_node, walltime (in days), partition, features
-if [[ ${CARME_SLURM} == "yes" ]]; then
-  TEMPLATE_NAME=${CARME_GROUP}
-  TEMPLATE_TYPE="linux" # linux (group), slurm (partition), or carme (projects)
+# fields: name, type, max_jobs, max_nodes_per_job, max_accelerators_per_node, walltime (in days), partition, features
+  
+TEMPLATE_NAME=()
+TEMPLATE_TYPE=()
+TEMPLATE_WALLTIME=()
+TEMPLATE_FEATURES=()
+TEMPLATE_PARTITION=()
+TEMPLATE_MAX_JOBS_TOTAL=()
+TEMPLATE_MAX_NODES_PER_JOB=()
+TEMPLATE_MAX_ACCELERATORS_PER_NODE=()
+  
+CARME_SLURM_PARTITION_NAME=(${CARME_SLURM_PARTITION_NAME}) 
+LEN_PARTITIONS=${#CARME_SLURM_PARTITION_NAME[@]}
+for (( i=0; i<${LEN_PARTITIONS}; i++ )); do
+  if [[ ${CARME_SLURM} == "yes" ]]; then
+    TEMPLATE_NAME+=" ${CARME_GROUP}"
+    TEMPLATE_TYPE+=" linux"
+  elif [[ ${CARME_SLURM} == "no" ]]; then
+    TEMPLATE_NAME+=" ${CARME_SLURM_PARTITION_NAME[$i]}"
+    TEMPLATE_TYPE+=" slurm"
+  fi
+  TEMPLATE_WALLTIME+=" 7"
+  TEMPLATE_FEATURES+=" Default_system"
+  TEMPLATE_PARTITION+=" ${CARME_SLURM_PARTITION_NAME[$i]}"
 
-  LEN=${#ACCELERATOR_LIST[@]}
-  NUM_ACCS_TOTAL=0
-  MAX_ACCS_PER_NODE=0
-  for (( i=0; i<$LEN; i++ )); do
-    STR="${ACCELERATOR_LIST[$i]}"
+  NODE_DATA_IN_PARTITION_LIST=()
+  NODE_NAME_IN_PARTITION_LIST=$(sinfo -p ${CARME_SLURM_PARTITION_NAME[$i]} -Nh --format="%N") 
+  for NODE in ${NODE_NAME_IN_PARTITION_LIST[@]}; do
+    if [[ ${NODE} == "localhost" ]]; then
+      NODE="$(hostname -s | awk '{print $1}')"
+    fi
+    NODE_DATA=$(scontrol show nodes -o | grep "${NODE}" | awk '
+    {
+      for (i = 1; i <= NF; i++) {
+        split($i, pair, "=")
+        switch (pair[1]) {
+        case "NodeName":
+          node_name = pair[2]
+          break
+        case "CPUTot":
+          num_cpus_per_node = pair[2]
+          break
+        case "Gres":
+          n = split(pair[2], toks, ":") 
+          if (toks[1] == "(null)" ){
+            type = "cpu"
+            name = toupper(type)
+            num_per_node = num_cpus_per_node
+          } else {
+            if (n == 3) {
+              type = toks[1]
+              name = toupper(toks[2])
+              num_per_node = toks[2]
+            } else if (n == 2) {
+              type = toks[1]
+              name = toupper(type)
+              num_per_node = toks[2]
+            } else {
+              printf "ERROR: unknown gres format: NodeName=%s\n", node_name
+              next
+            }
+          }
+          break
+        case "RealMemory":
+          main_mem_per_node = pair[2]
+          break
+        case "State":
+          node_status = 0
+          if (pair[2] == "IDLE" || pair[2] == "MIX" || pair[2] == "ALLOC") {
+            node_status = 1
+          }
+          break
+        }
+      }
+      print name, type, num_per_node, num_cpus_per_node, main_mem_per_node, node_name, node_status
+    }
+    ')
+    NODE_DATA_IN_PARTITION_LIST+=("$NODE_DATA")
+  done
+  LEN_NODES_IN_PARTITION=${#NODE_DATA_IN_PARTITION_LIST[@]}
+  MAX_JOBS_TOTAL_IN_PARTITION=0
+  MAX_ACCS_PER_NODE_IN_PARTITION=0
+  for (( j=0; j<$LEN_NODES_IN_PARTITION; j++ )); do
+    STR="${NODE_DATA_IN_PARTITION_LIST[$j]}"
     SUBCOUNT=1
     for VALUE in $STR; do
       if [[ "$SUBCOUNT" -eq 3 ]]; then
-        # num_per_node from ACCELERATOR_LIST
-        NUM_ACCS_TOTAL=$(($VALUE + $NUM_ACCS_TOTAL))
-        if [[ $VALUE > $MAX_ACCS_PER_NODE ]]; then
-          MAX_ACCS_PER_NODE=$VALUE
+        # get num_per_node from NODE_DATA_IN_PARTITION_LIST
+        MAX_JOBS_TOTAL_IN_PARTITION=$(($VALUE + $MAX_JOBS_TOTAL_IN_PARTITION)) # max jobs equals total number of accelerators
+        if [[ $VALUE -gt $MAX_ACCS_PER_NODE_IN_PARTITION ]]; then
+          MAX_ACCS_PER_NODE_IN_PARTITION=$VALUE
         fi
       fi
       (( SUBCOUNT=SUBCOUNT+1 ))
     done
   done
   if [[ ${CARME_SYSTEM} == "multi" ]]; then
-    if [[ $NUM_ACCS_TOTAL > 10 ]]; then
-      NUM_ACCS_TOTAL=10
+    if [[ ${MAX_JOBS_TOTAL_IN_PARTITION} -gt 10 ]]; then
+      MAX_JOBS_TOTAL_IN_PARTITION=10 # if total number of accelerators > 10, then max jobs equals 10
     fi
   fi
-  TEMPLATE_MAX_JOBS=${NUM_ACCS_TOTAL}
-  TEMPLATE_MAX_NODES_PER_JOB=${#ACCELERATOR_LIST[@]}
-  TEMPLATE_MAX_ACCELERATORS_PER_NODE=${MAX_ACCS_PER_NODE}
-  TEMPLATE_WALLTIME=7
-  TEMPLATE_PARTITION=${CARME_SLURM_PARTITION_NAME}
-  TEMPLATE_FEATURES="Default_system"
+  TEMPLATE_MAX_JOBS_TOTAL+=" $MAX_JOBS_TOTAL_IN_PARTITION"
+  TEMPLATE_MAX_NODES_PER_JOB+=" ${#NODE_DATA_IN_PARTITION_LIST[@]}"
+  TEMPLATE_MAX_ACCELERATORS_PER_NODE+=" ${MAX_ACCS_PER_NODE_IN_PARTITION}"
+done
+TEMPLATE_NAME=($(echo "${TEMPLATE_NAME}" | sed 's/^ *//'))
+TEMPLATE_TYPE=($(echo "${TEMPLATE_TYPE}" | sed 's/^ *//')) 
+TEMPLATE_WALLTIME=($(echo "${TEMPLATE_WALLTIME}" | sed 's/^ *//'))
+TEMPLATE_FEATURES=($(echo "${TEMPLATE_FEATURES}" | sed 's/^ *//'))
+TEMPLATE_PARTITION=($(echo "${TEMPLATE_PARTITION}" | sed 's/^ *//'))
+TEMPLATE_MAX_JOBS_TOTAL=($(echo "${TEMPLATE_MAX_JOBS_TOTAL}" | sed 's/^ *//'))
+TEMPLATE_MAX_NODES_PER_JOB=($(echo "${TEMPLATE_MAX_NODES_PER_JOB}" | sed 's/^ *//'))
+TEMPLATE_MAX_ACCELERATORS_PER_NODE=($(echo "${TEMPLATE_MAX_ACCELERATORS_PER_NODE}" | sed 's/^ *//'))
 
-elif [[ ${CARME_SLURM} == "no" ]]; then
-  
-  TEMPLATE_NAME=()
-  TEMPLATE_TYPE=()
-  TEMPLATE_MAX_JOBS=()
-  TEMPLATE_MAX_NODES_PER_JOB=()
-  TEMPLATE_MAX_ACCELERATORS_PER_NODE=()
-  TEMPLATE_WALLTIME=()
-  TEMPLATE_PARTITION=()
-  TEMPLATE_FEATURES=()
-  VAR=slurm 
-  LEN_SLURM_PARTITIONS=${#CARME_SLURM_PARTITION_NAME[@]}
-  for (( i=0; i<$LEN_SLURM_PARTITIONS; i++ )); do
-    TEMPLATE_NAME+=("${CARME_SLURM_PARTITION_NAME[$i]}")
-    TEMPLATE_TYPE+=("${VAR}")
-
-    NODE_DATA_IN_PARTITION_LIST=()
-    NODE_NAME_IN_PARTITION_LIST=$(sinfo -p ${CARME_SLURM_PARTITION_NAME[$i]} -Nh --format="%N")
-    for NODE in ${NODE_NAME_IN_PARTITION_LIST[@]}; do
-      if [[ ${NODE} == "localhost" ]]; then
-        NODE="$(hostname -s | awk '{print $1}')"
-      fi
-      NODE_DATA=$(scontrol show nodes -o | grep "${NODE}" | awk '
-      {
-        for (i = 1; i <= NF; i++) {
-          split($i, pair, "=")
-          switch (pair[1]) {
-          case "NodeName":
-            node_name = pair[2]
-            break
-          case "CPUTot":
-            num_cpus_per_node = pair[2]
-            break
-          case "Gres":
-            n = split(pair[2], toks, ":") 
-            if (toks[1] == "(null)" ){
-              type = "cpu"
-              name = toupper(type)
-              num_per_node = num_cpus_per_node
-            } else {
-              if (n == 3) {
-                type = toks[1]
-                name = toupper(toks[2])
-                num_per_node = toks[2]
-              } else if (n == 2) {
-                type = toks[1]
-                name = toupper(type)
-                num_per_node = toks[2]
-              } else {
-                printf "ERROR: unknown gres format: NodeName=%s\n", node_name
-                next
-              }
-            }
-            break
-          case "RealMemory":
-            main_mem_per_node = pair[2]
-            break
-          case "State":
-            node_status = 0
-            if (pair[2] == "IDLE" || pair[2] == "MIX" || pair[2] == "ALLOC") {
-              node_status = 1
-            }
-            break
-          }
-        }
-        print name, type, num_per_node, num_cpus_per_node, main_mem_per_node, node_name, node_status
-      }
-      ')
-      NODE_DATA_IN_PARTITION_LIST+=("$NODE_DATA")
-    done
-
-    LEN_NODES_IN_PARTITION=${#NODE_DATA_IN_PARTITION_LIST[@]}
-    NUM_ACCS_TOTAL_IN_PARTITION=0
-    MAX_ACCS_PER_NODE_IN_PARTITION=0
-    for (( i=0; i<$LEN_NODES_IN_PARTITION; i++ )); do
-      STR="${NODE_DATA_IN_PARTITION_LIST[$i]}"
-      SUBCOUNT=1
-      for VALUE in $STR; do
-        if [[ "$SUBCOUNT" -eq 3 ]]; then
-          # get num_per_node from NODE_DATA_IN_PARTITION_LIST
-          NUM_ACCS_TOTAL_IN_PARTITION=$(($VALUE + $NUM_ACCS_TOTAL_IN_PARTITION))
-          if [[ $VALUE > $MAX_ACCS_PER_NODE_IN_PARTITION ]]; then
-            MAX_ACCS_PER_NODE_IN_PARTITION=$VALUE
-          fi
-        fi
-        (( SUBCOUNT=SUBCOUNT+1 ))
-      done
-    done
-    if [[ ${CARME_SYSTEM} == "multi" ]]; then
-      if [[ $NUM_ACCS_TOTAL_IN_PARTITION > 10 ]]; then
-        NUM_ACCS_TOTAL_IN_PARTITION=10
-      fi
-    fi
-    TEMPLATE_MAX_JOBS+=(${NUM_ACCS_TOTAL_IN_PARTITION})
-    TEMPLATE_MAX_NODES_PER_JOB+=(${#NODE_DATA_IN_PARTITION_LIST[@]})
-    TEMPLATE_MAX_ACCELERATORS_PER_NODE+=(${MAX_ACCS_PER_NODE_IN_PARTITION})
-    TEMPLATE_WALLTIME+=(7)
-    TEMPLATE_PARTITION+=("${CARME_SLURM_PARTITION_NAME[$i]}")
-    TEMPLATE_FEATURES+=("Default_system")
-  done
-
-fi
-
-echo "${TEMPLATE_NAME}"
-echo "${TEMPLATE_TYPE}"
-echo "${TEMPLATE_MAX_JOBS}"
-echo "${TEMPLATE_MAX_NODES_PER_JOB}"
-echo "${TEMPLATE_MAX_ACCELERATORS_PER_NODE}"
-echo "${TEMPLATE_WALLTIME}"
-echo "${TEMPLATE_PARTITION}"
-echo "${TEMPLATE_FEATURES}"
-die "ENDS"
-
-
-TEMPLATE_MAX_JOBS=${NUM_ACCS_TOTAL}
-TEMPLATE_MAX_NODES_PER_JOB=${#ACCELERATOR_LIST[@]}
-TEMPLATE_MAX_ACCELERATORS_PER_NODE=${MAX_ACCS_PER_NODE}
-TEMPLATE_WALLTIME=7
-TEMPLATE_PARTITION=${CARME_SLURM_PARTITION_NAME}
-TEMPLATE_FEATURES="Default_system"
 
 # projects_project DB:
 # name, type, slug, is_approved, description, description_html, classification, information, date_updated, dated_created, owner_id, department, checked, num, date_approved, date_expired
@@ -698,7 +658,7 @@ log "filling tables..."
 ###  primary tables  ####
 #########################
 
-# auth_user
+# auth_user # note that CARME_PASSWORD_USER is not set properly (is also not used for single-user install). Correct way to add passwords is via django.
 mysql --user=django webfrontend -e "INSERT INTO auth_user (\`username\`, \`password\`, \`first_name\`, \`last_name\`, \`email\`, \`is_superuser\`, \`is_staff\`, \`is_active\`, \`date_joined\`) VALUES ('$CARME_USER', '$CARME_PASSWORD_USER', '', '', '', 1, 1, 1, curdate())"
 PROJECT_OWNER_ID=$(mysql --user=django webfrontend -se "SELECT id FROM auth_user where username='$CARME_USER'")
 
@@ -706,9 +666,33 @@ PROJECT_OWNER_ID=$(mysql --user=django webfrontend -se "SELECT id FROM auth_user
 mysql --user=django webfrontend -e "INSERT INTO projects_project (\`name\`, \`type\`, \`slug\`, \`is_approved\`, \`description\`, \`description_html\`, \`classification\`, \`information\`, \`date_created\`, \`owner_id\`, \`department\`, \`checked\`, \`num\`) VALUES ('$PROJECT_NAME', '$PROJECT_TYPE', '$PROJECT_SLUG', $PROJECT_IS_APPROVED, '${PROJECT_DESCRIPTION//_/ }', '${PROJECT_DESCRIPTION_HTML//_/ }', '$PROJECT_CLASSIFICATION', '${PROJECT_INFORMATION//_/ }', curdate(), $PROJECT_OWNER_ID, '$PROJECT_DEPARTMENT', $PROJECT_CHECKED, '$PROJECT_NUM')"
 PROJECT_ID=$(mysql --user=django webfrontend -se "SELECT id FROM projects_project where owner_id='$PROJECT_OWNER_ID'")
 
-# projects_resourcetemplate
-mysql --user=django webfrontend -e "INSERT INTO projects_resourcetemplate (\`name\`, \`type\`, \`maxjobs\`, \`maxnodes_per_job\`, \`maxaccels_per_node\`, \`walltime\`, \`partition\`, \`features\`) VALUES ('$TEMPLATE_NAME', '$TEMPLATE_TYPE', $TEMPLATE_MAX_JOBS, $TEMPLATE_MAX_NODES_PER_JOB, $TEMPLATE_MAX_ACCELERATORS_PER_NODE, $TEMPLATE_WALLTIME, '$TEMPLATE_PARTITION', '${TEMPLATE_FEATURES//_/ }')"
-TEMPLATE_ID=$(mysql --user=django webfrontend -se "SELECT id FROM projects_resourcetemplate where name='$TEMPLATE_NAME'")
+# projects_resourcetemplate # For x slurm partitions, we have x resource templates.
+# e.g.:
+#RESOURCETEMPLATE_LIST=('name_1 type_1 maxjobs_1 maxnodes_per_job_1 maxaccels_per_node_1 walltime_1 partition_1 features_1'\
+#                       'name_2 type_2 maxjobs_2 maxnodes_per_job_2 maxaccels_per_node_2 walltime_2 partition_2 features_2'\
+#                                                           ...                                                            \ 
+#                       'gpu    slurm  10        4                  4                    7          gpu          Default  '\
+#                       'cpu    slurm  10        2                  12                   7          cpu          Default  '\
+#                       'group  linux  5         2                  10                   7          carme        Default  ')
+
+CARME_SLURM_PARTITION_NAME=(${CARME_SLURM_PARTITION_NAME})
+LEN_PARTITIONS=${#CARME_SLURM_PARTITION_NAME[@]}
+TEMPLATE_ID=()
+for (( i=0; i<$LEN_PARTITIONS; i++ )); do
+  tmp_name=${TEMPLATE_NAME[$i]}
+  tmp_type=${TEMPLATE_TYPE[$i]}
+  tmp_walltime=${TEMPLATE_WALLTIME[$i]}
+  tmp_features=${TEMPLATE_FEATURES[$i]}
+  tmp_partition=${TEMPLATE_PARTITION[$i]}
+  tmp_max_jobs_total=${TEMPLATE_MAX_JOBS_TOTAL[$i]}
+  tmp_max_nodes_per_job=${TEMPLATE_MAX_NODES_PER_JOB[$i]}
+  tmp_max_accelerators_per_node=${TEMPLATE_MAX_ACCELERATORS_PER_NODE[$i]}
+
+  mysql --user=django webfrontend -e "INSERT INTO projects_resourcetemplate (\`name\`, \`type\`, \`maxjobs\`, \`maxnodes_per_job\`, \`maxaccels_per_node\`, \`walltime\`, \`partition\`, \`features\`) VALUES ('$tmp_name', '$tmp_type', $tmp_max_jobs_total, $tmp_max_nodes_per_job, $tmp_max_accelerators_per_node, $tmp_walltime, '$tmp_partition', '${tmp_features//_/ }')"
+  TMP_ID=$(mysql --user=django webfrontend -se "SELECT id FROM projects_resourcetemplate where name='$tmp_name'")
+  TEMPLATE_ID+=" $TMP_ID"
+done
+TEMPLATE_ID=($(echo "${TEMPLATE_ID}" | sed 's/^ *//'))
 
 # projects_accelerator
 # e.g.:
@@ -753,9 +737,6 @@ for (( i=0; i<$len; i++ )); do
 
 done
 
-#mysql --user=django webfrontend -e "INSERT INTO projects_accelerator (\`name\`, \`type\`, \`num_per_node\`, \`num_cpus_per_node\`, \`main_mem_per_node\`, \`node_name\`, \`node_status\`) VALUES ('${ACCELERATOR_NAME//_/ }', '$ACCELERATOR_TYPE', $ACCELERATOR_NUM_PER_NODE, $ACCELERATOR_NUM_CPUS_PER_NODE, $ACCELERATOR_MAIN_MEM_PER_NODE, '$ACCELERATOR_NODE_NAME', $ACCELERATOR_NODE_STATUS)"
-#ACCELERATOR_ID=$(mysql --user=django webfrontend -se "SELECT id FROM projects_accelerator where name='${ACCELERATOR_NAME//_/ }'")
-
 # projects_image
 mysql --user=django webfrontend -e "INSERT INTO projects_image (\`name\`, \`type\`, \`path\`, \`information\`, \`status\`, \`owner\`, \`bind\`) VALUES ('$IMAGE_NAME', '$IMAGE_TYPE', '$IMAGE_PATH', '${IMAGE_INFO//_/ }', '$IMAGE_STATUS', '$IMAGE_OWNER', '$IMAGE_BIND')"
 IMAGE_ID=$(mysql --user=django webfrontend -se "SELECT id FROM projects_image where name='$IMAGE_NAME'")
@@ -772,7 +753,12 @@ FLAG_ID=$(mysql --user=django webfrontend -se "SELECT id FROM projects_flag wher
 mysql --user=django webfrontend -e "INSERT INTO projects_projectmember (\`status\`, \`is_manager\`, \`is_approved_by_manager\`, \`is_approved_by_admin\`, \`project_id\`, \`user_id\`) VALUES ('accepted', 1, 1, 1, ${PROJECT_ID}, ${PROJECT_OWNER_ID})"
 
 # projects_projecthastemplate
-mysql --user=django webfrontend -e "INSERT INTO projects_projecthastemplate (\`project_id\`, \`template_id\`) VALUES (${PROJECT_ID}, ${TEMPLATE_ID})"
+CARME_SLURM_PARTITION_NAME=(${CARME_SLURM_PARTITION_NAME})
+LEN_PARTITIONS=${#CARME_SLURM_PARTITION_NAME[@]}
+for (( i=0; i<$LEN_PARTITIONS; i++ )); do
+  tmp_id=${TEMPLATE_ID[$i]}
+  mysql --user=django webfrontend -e "INSERT INTO projects_projecthastemplate (\`project_id\`, \`template_id\`) VALUES (${PROJECT_ID}, ${tmp_id})"
+done
 
 # projects_templatehasaccelerator
 len=${#ACCELERATOR_LIST[@]}

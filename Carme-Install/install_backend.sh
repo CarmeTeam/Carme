@@ -22,6 +22,9 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
 
+  SYSTEM_ARCH=$(get_variable SYSTEM_ARCH ${FILE_START_CONFIG})
+  SYSTEM_DIST=$(get_variable SYSTEM_DIST ${FILE_START_CONFIG})
+
   CARME_UID=$(get_variable CARME_UID ${FILE_START_CONFIG})
   CARME_USER=$(get_variable CARME_USER ${FILE_START_CONFIG})
   CARME_HOME=$(get_variable CARME_HOME ${FILE_START_CONFIG})
@@ -47,6 +50,9 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_NODE_LIST=$(get_variable CARME_NODE_LIST ${FILE_START_CONFIG})
   CARME_NODE_SSD_PATH=$(get_variable CARME_NODE_SSD_PATH ${FILE_START_CONFIG})
   CARME_NODE_TMP_PATH=$(get_variable CARME_NODE_TMP_PATH ${FILE_START_CONFIG})
+
+  [[ -z ${SYSTEM_ARCH} ]] && die "[install_backend.sh]: SYSTEM_ARCH not set."
+  [[ -z ${SYSTEM_DIST} ]] && die "[install_backend.sh]: SYSTEM_DIST not set."
 
   [[ -z ${CARME_UID} ]] && die "[install_backend.sh]: CARME_UID not set."
   [[ -z ${CARME_USER} ]] && die "[install_backend.sh]: CARME_USER not set."
@@ -100,19 +106,6 @@ FILE_NODE_CONFIG=${PATH_CONFIG}/CarmeConfig.node
 # installation starts ---------------------------------------------------------------------
 log "starting backend installation..."
 
-# check compatibility ---------------------------------------------------------------------
-log "checking system..."
-
-SYSTEM_ARCH=$(dpkg --print-architecture)
-if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
-  die "[install_backend.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
-fi
-
-SYSTEM_DIST=$(awk -F= '$1=="ID" { print $2 ;}' /etc/os-release)
-if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian"  ]];then
-  die "ubuntu and debian distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
-fi
-
 # create carme user directories -----------------------------------------------------------
 log "creating carme user directories..."
 
@@ -150,9 +143,8 @@ CARME_DB_DEFAULT_PORT="${CARME_DB_DEFAULT_PORT}"
 #
 # FRONTEND --------------------------------------------------------------------------------
 CARME_FRONTEND_ID="${CARME_FRONTEND_ID}"
-CARME_GPU_DEFAULTS="cpu:1:2"
-CARME_FRONTEND_NODE="${CARME_FRONTEND_NODE}"
 CARME_FRONTEND_URL="${CARME_FRONTEND_URL}"
+CARME_FRONTEND_NODE="${CARME_FRONTEND_NODE}"
 #
 # BACKEND ---------------------------------------------------------------------------------
 CARME_BACKEND_PORT="${CARME_BACKEND_PORT}"

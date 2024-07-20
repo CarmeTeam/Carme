@@ -13,7 +13,6 @@ source ${PATH_CARME}/Carme-Install/basic_functions.sh
 # check compatibility ---------------------------------------------------------------------
 log "checking system..."
 
-
 SYSTEM_ARCH=$(dpkg --print-architecture)
 if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
   die "[config.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
@@ -33,7 +32,6 @@ SYSTEM_DIST=$(awk -F= '$1=="ID" { print $2 ;}' /etc/os-release)
 if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian"  ]];then
   die "[config.sh]: ubuntu and debian distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
 fi
-
 
 # set the config file ---------------------------------------------------------------------
 log "setting CarmeConfig.start..."
@@ -55,7 +53,7 @@ fi
 
 # set system ------------------------------------------------------------------------------
 REPLY=""
-CHECK_SYSTEM_MESSAGE=$'\n(2/8) Do you want to install Carme-demo in a single device or in a cluster? \nType `single` for a single device or `multi` for a cluster [single/multi]:'
+CHECK_SYSTEM_MESSAGE=$'\n(2/8) Do you want to install Carme-demo in a single device or in a cluster?\nType `single` for a single device or `multi` for a cluster [single/multi]:'
 while ! [[ $REPLY == "single" || $REPLY == "multi" ]]; do
   read -rp "${CHECK_SYSTEM_MESSAGE} " REPLY
   if ! [[ $REPLY == "single" || $REPLY == "multi" ]]; then
@@ -64,8 +62,13 @@ while ! [[ $REPLY == "single" || $REPLY == "multi" ]]; do
   CARME_SYSTEM=$REPLY
 done
 
-# set head-node ----------------------------------------------------------------------------
-if [[ ${CARME_SYSTEM} == "multi" ]]; then
+# set head-node / login-node --------------------------------------------------------------
+if [[ ${CARME_SYSTEM} == "single" ]]; then
+  HEAD_NODE="localhost"
+  LOGIN_NODE="localhost"
+  LOGIN_NODE_IP="127.0.0.1"
+
+elif [[ ${CARME_SYSTEM} == "multi" ]]; then
   CHECK_HEADNODE_MESSAGE=$'\n(2/8 (1/2)) Are you in the head-node?\nCarme-demo must be installed in the head-node. [y/N]:'
   read -rp "${CHECK_HEADNODE_MESSAGE} " REPLY
   if ! [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -75,32 +78,14 @@ if [[ ${CARME_SYSTEM} == "multi" ]]; then
     LOGIN_NODE=$(hostname -s | awk '{print $1}')
     LOGIN_NODE_IP=$(hostname -I | awk '{print $1}')
   fi
-else
-  HEAD_NODE="localhost"
-  LOGIN_NODE="localhost"
-  LOGIN_NODE_IP="127.0.0.1"
 fi
 
-# set login-node ----------------------------------------------------------------------------
-#if [[ ${CARME_SYSTEM} == "multi" ]]; then
-#  CHECK_LOGINNODE_MESSAGE=$"
-#(2/8 (2/3)) Type the login-node IP.
-#If the head-node is also the login-node, type the head-node IP, i.e., $(hostname -I | awk '{print $1}') [IP]:"
-#  read -rp "${CHECK_LOGINNODE_MESSAGE} " REPLY
-#  if ! ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking="no" $REPLY true &>/dev/null
-#  then
-#    die "ssh to ${REPLY} failed. Carme requires that you ssh to the login-node without a password. Refer to our documentation and try again."
-#  else
-#    LOGIN_NODE=$(ssh ${REPLY} 'echo "$(hostname -s)"')
-#  fi
-#else
-#  LOGIN_NODE="localhost"
-#fi
+# set compute-nodes -----------------------------------------------------------------------
+if [[ ${CARME_SYSTEM} == "single" ]]; then
+  COMPUTE_NODES="localhost"
 
-# set compute-nodes -------------------------------------------------------------------------
-if [[ ${CARME_SYSTEM} == "multi" ]]; then
-  CHECK_COMPUTENODES_MESSAGE=$'\n(2/8 (2/2)) Type the compute-nodes IPs. 
-Use a blank space to separate them [IPs]:'
+elif [[ ${CARME_SYSTEM} == "multi" ]]; then
+  CHECK_COMPUTENODES_MESSAGE=$'\n(2/8 (2/2)) Type the compute-nodes IPs or hostnames.\nUse a blank space to separate them [IPs/hostnames]:'
   read -rp "${CHECK_COMPUTENODES_MESSAGE} " REPLY
   MY_COMPUTE_NODES=($REPLY)
   COMPUTE_NODES=""
@@ -111,18 +96,23 @@ Use a blank space to separate them [IPs]:'
     then
       die "[config.sh]: ssh to ${MY_COMPUTE_NODE} failed. Carme-demo requires that you ssh to the compute-nodes without a password. Refer to our documentation and try again."
     else
-      echo "Compute node IP ${MY_COMPUTE_NODE} will be used."
-      COMPUTE_NODES+=" $(ssh ${MY_COMPUTE_NODE} 'echo "$(hostname -s)"')"
-      COMPUTE_NODES=$(echo "${COMPUTE_NODES}" | sed 's/^ *//')
+      MY_COMPUTE_NODE_HOSTNAME=$(ssh ${MY_COMPUTE_NODE} 'echo "$(hostname -s | awk '\''{print $1}'\'')"')
+      if [[ ${MY_COMPUTE_NODE_HOSTNAME} == ${HEAD_NODE} ]]; then
+        die "[config.sh]: Your compute-node cannot be your head-node. Please do not use \`${MY_COMPUTE_NODE}\` as a compute-node."
+      elif [[ ${MY_COMPUTE_NODE_HOSTNAME} == ${LOGIN_NODE} ]]; then
+        die "[config.sh]: Your compute-node cannot be your login-node. Please do not use \`${MY_COMPUTE_NODE}\` as a compute-node."
+      else
+        echo "Compute node ${MY_COMPUTE_NODE} will be used."
+        COMPUTE_NODES+=" ${MY_COMPUTE_NODE_HOSTNAME}"
+        COMPUTE_NODES=$(echo "${COMPUTE_NODES}" | sed 's/^ *//')
+      fi
     fi
   done
-else
-  COMPUTE_NODES="localhost"
 fi
 
 # set users ------------------------------------------------------------------------------
 REPLY=""
-CHECK_USERS_MESSAGE=$'\n(3/8) Do you want to use a single-user or multi-user interface? \nType `single` for personal use or `multi` for multi-users [single/multi]:'
+CHECK_USERS_MESSAGE=$'\n(3/8) Do you want to use a single-user or multi-user interface?\nType `single` for personal use or `multi` for multi-users [single/multi]:'
 while ! [[ $REPLY == "single" || $REPLY == "multi" ]]; do
   read -rp "${CHECK_USERS_MESSAGE} " REPLY
   if ! [[ $REPLY == "single" || $REPLY == "multi" ]]; then
@@ -134,7 +124,7 @@ done
 # set ldap -------------------------------------------------------------------------------
 REPLY=""
 if [[ ${CARME_USERS} == "single" ]]; then
-  CHECK_LDAP_MESSAGE=$'\n(4/8) ldap user management tool won\'t be installed in your system. Do you want to proceed? [y/N]:'
+  CHECK_LDAP_MESSAGE=$'\n(4/8) Carme-demo single-user does not require ldap user management tool. It won\'t be installed. Do you want to proceed? [y/N]:'
   while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
     read -rp "${CHECK_LDAP_MESSAGE} " REPLY
     if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
@@ -145,8 +135,9 @@ if [[ ${CARME_USERS} == "single" ]]; then
       CHECK_LDAP_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
     fi
   done
-else
-  CHECK_LDAP_MESSAGE=$'\n(4/8) Do you want to install ldap user management tool? \nType `No` if you want Carme to use an already existing ldap in your system. [y/N]:'
+
+elif [[ ${CARME_USERS} == "multi" ]]; then
+  CHECK_LDAP_MESSAGE=$'\n(4/8) Carme-demo multi-user requires ldap user management tool. Do you want to install it?\nType `No` if you want Carme-demo to use an already existing ldap in your system. [y/N]:'
   while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
     read -rp "${CHECK_LDAP_MESSAGE} " REPLY
     if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
@@ -160,7 +151,11 @@ else
 fi
 
 # set username ---------------------------------------------------------------------------	
-CHECK_USER_MESSAGE=$'\n(5/8) Please enter your username (root user is not allowed). If you use a multi-user interface, this user becomes the admin:'
+if [[ ${CARME_USERS} == "single" ]]; then
+  CHECK_USER_MESSAGE=$'\n(5/8) Type your username (root user is not allowed) [username]:'
+elif [[ ${CARME_USERS} == "multi" ]]; then
+  CHECK_USER_MESSAGE=$'\n(5/8) Create a Carme admin name [admin name]:'
+fi
 
 read -rp "${CHECK_USER_MESSAGE} " REPLY
 CARME_USER=$REPLY
@@ -202,7 +197,7 @@ else
 fi
 
 CHECK_DATABASE_MESSAGE=$"
-(6/8) Do you want to install ${CARME_DB_SERVER} database management tool? 
+(6/8) Carme-demo requires ${CARME_DB_SERVER} database management tool. Do you want to install it? 
 Type \`No\` if you want Carme-demo to use an already existing ${CARME_DB_SERVER} in your system [y/N]:"
 while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
   read -rp "${CHECK_DATABASE_MESSAGE} " REPLY
@@ -219,7 +214,7 @@ done
 DB_PASS_STOP=""
 if [[ ${CARME_DB} == "no" ]]; then
   CHECK_DATABASE_PASSWORD_MESSAGE=$"
-(6/8 (1/1)) Carme requires access to your already existing ${CARME_DB_SERVER} server. 
+(6/8 (1/1)) Carme-demo requires access to your already existing ${CARME_DB_SERVER} server. 
 Type your ${CARME_DB_SERVER} root password (if no password, press enter) [mysql -uroot -p]:"
   while ! [[ ${DB_PASS_STOP} == "yes" ]]
   do
@@ -236,7 +231,7 @@ Type your ${CARME_DB_SERVER} root password (if no password, press enter) [mysql 
       if [[ ${SCHEMA} =~ "webfrontend" ]]; then
 	DB_NAME_STOP=""
 	CHECK_DATABASE_NAME_MESSAGE=$"
-Type a name for your Carme database [database name]: "
+Type a name for your Carme-demo database [database name]: "
         while ! [[ ${DB_NAME_STOP} == "yes" ]]
 	do
           read -rp "${CHECK_DATABASE_NAME_MESSAGE} " REPLY
@@ -282,7 +277,7 @@ fi
 
 # set slurm ------------------------------------------------------------------------------
 REPLY=""
-CHECK_SLURM_MESSAGE=$'\n(7/8) Do you want to install slurm workload management tool? \nType `No` if you want Carme-demo to use an already existing slurm in your system. [y/N]:'
+CHECK_SLURM_MESSAGE=$'\n(7/8) Carme-demo requires slurm workload management tool. Do you want to install it? \nType `No` if you want Carme-demo to use an already existing slurm in your system. [y/N]:'
 while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
   read -rp "${CHECK_SLURM_MESSAGE} " REPLY
   if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
@@ -462,6 +457,7 @@ cat << EOF >> CarmeConfig.start
 SYSTEM_OS="${SYSTEM_OS}"
 SYSTEM_ARCH="${SYSTEM_ARCH}"
 SYSTEM_HDWR="${SYSTEM_HDWR}"
+SYSTEM_DIST="${SYSTEM_DIST}"
 
 # USER/ADMIN ------------------------------------------------------------------------------
 CARME_UID="${CARME_UID}"
