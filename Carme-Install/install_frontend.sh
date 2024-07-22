@@ -55,6 +55,12 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_DB_DEFAULT_PORT=$(get_variable CARME_DB_DEFAULT_PORT ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_USER=$(get_variable CARME_DB_DEFAULT_USER ${FILE_START_CONFIG})
 
+  CARME_LDAP_SERVER_PROTO=$(get_variable CARME_LDAP_SERVER_PROTO ${FILE_START_CONFIG})
+  CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP ${FILE_START_CONFIG})
+  CARME_LDAP_BASE_DN=$(get_variable CARME_LDAP_BASE_DN ${FILE_START_CONFIG})
+  CARME_LDAP_BIND_DN=$(get_variable CARME_LDAP_BIND_DN ${FILE_START_CONFIG})
+  CARME_LDAP_SERVER_PW=$(get_variable CARME_LDAP_SERVER_PW ${FILE_START_CONFIG})
+
   [[ -z ${CARME_UID} ]] && die "[install_frontend.sh]: CARME_UID not set."
   [[ -z ${CARME_USER} ]] && die "[install_frontend.sh]: CARME_USER not set."
   [[ -z ${CARME_HOME} ]] && die "[install_frontend.sh]: CARME_HOME not set."
@@ -87,7 +93,13 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   [[ -z ${CARME_DB_DEFAULT_USER} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_USER not set."
 
   [[ -z ${CARME_LDAP} ]] && CARME_LDAP="null"
-  
+
+  [[ -z ${CARME_LDAP_SERVER_PROTO} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_PROTO not set."
+  [[ -z ${CARME_LDAP_SERVER_IP} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_IP not set."
+  [[ -z ${CARME_LDAP_BASE_DN} ]] && die "[install_frontend.sh]: CARME_LDAP_BASE_DN not set."
+  [[ -z ${CARME_LDAP_BIND_DN} ]] && die "[install_frontend.sh]: CARME_LDAP_BIND_DN not set."
+  [[ -z ${CARME_LDAP_SERVER_PW} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_PW not set."
+
 else
   die "[install_frontend.sh]: ${FILE_START_CONFIG} not found."
 fi
@@ -378,6 +390,13 @@ CARME_DB_DEFAULT_HOST="${CARME_DB_DEFAULT_HOST}"
 CARME_DB_DEFAULT_PORT="${CARME_DB_DEFAULT_PORT}"
 CARME_DB_DEFAULT_USER="${CARME_DB_DEFAULT_USER}"
 CARME_DB_DEFAULT_ENGINE="django.db.backends.mysql"
+#
+# LDAP ------------------------------------------------------------------------------------
+CARME_LDAP_SERVER_PROTO="${CARME_LDAP_SERVER_PROTO}"
+CARME_LDAP_SERVER_IP="${CARME_LDAP_SERVER_IP}"
+CARME_LDAP_BASE_DN="${CARME_LDAP_BASE_DN}"
+CARME_LDAP_BIND_DN="${CARME_LDAP_BIND_DN}"
+CARME_LDAP_SERVER_PW="${CARME_LDAP_SERVER_PW}"
 #
 # FRONTEND --------------------------------------------------------------------------------
 CARME_FRONTEND_ID="${CARME_FRONTEND_ID}"
