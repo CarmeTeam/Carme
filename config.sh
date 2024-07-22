@@ -534,7 +534,13 @@ if [[ ${CARME_LDAP} == "yes" || ${CARME_LDAP} == "no" ]]; then
   sed -i "/CARME_PASSWORD_USER/a CARME_PASSWORD_LDAP=\"ldappwd\"" CarmeConfig.start
   sed -i "/GO_VERSION/a # LDAP ------------------------------------------------------------------------------------" CarmeConfig.start
   sed -i "/GO_VERSION/G" CarmeConfig.start
-  sed -i "/# LDAP ---/a CARME_LDAP=\"${CARME_LDAP}\"" CarmeConfig.start
+  sed -i "/# LDAP ---/a CARME_LDAP=\"${CARME_LDAP}\"\n\
+CARME_LDAP_SERVER_PROTO=\"ldap://\"\n\
+CARME_LDAP_SERVER_IP=\"${LOGIN_NODE_IP}\"\n\
+CARME_LDAP_BASE_DN=\"dc=carme,dc=local\"\n\
+CARME_LDAP_BIND_DN=\"cn=admin,dc=nodomain\"\n\
+CARME_LDAP_SERVER_PW=\"ldappwdroot\"\n\
+  " CarmeConfig.start
 fi
 
 [[ -s CarmeConfig.start ]] && log "CarmeConfig.start successfully created." \
