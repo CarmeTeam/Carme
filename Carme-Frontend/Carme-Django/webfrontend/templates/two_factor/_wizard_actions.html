@@ -1,0 +1,63 @@
+{% load i18n %}
+
+{% if wizard.steps.current == 'auth' %}
+	<!-- sign-in -->
+	<h6>
+		<a href="https://gitlab.cc-asp.fraunhofer.de/carme/user-documentation/-/blob/main/System/account/account.md" 
+					target="_blank" class="fs--2 fw-400 text-underline-hover float-end">Not a member?
+		</a> 
+	</h6>
+ <button class="mt-2 btn btn-lg btn-primary btn-block w-100" type="submit">
+		{% trans "Sign in" %}
+ </button>
+{% elif wizard.steps.current == 'token' %}
+	{% if backup_tokens %}
+		<!-- login: 2FA with backup tokens -->
+		<button class="btn btn-lg btn-primary btn-block w-100" type="submit">
+			{% trans "Verify Code" %}
+		</button>
+		<button name="wizard_goto_step" type="submit" value="backup" class="btn btn-secondary btn-block w-100 mt-2">
+			{% trans "Backup Token" %}
+		</button>
+	{% else %}
+		<!-- login: 2FA without backup tokens -->
+		<button class="btn btn-lg btn-primary btn-block w-100" type="submit">
+			{% trans "Verify Code" %}
+		</button>
+	{% endif %}
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-link pe-1 text-decoration-none float-end">
+		{% trans "Back" %}
+	</button>
+{% elif wizard.steps.current == 'backup' %}
+	<!-- login: backup token -->
+	<button class="btn btn-lg btn-primary btn-block w-100" type="submit">
+		{% trans "Verify Backup Token" %}
+	</button>
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-link pe-1 text-decoration-none float-end">
+		{% trans "Back" %}
+	</button>
+{% elif wizard.steps.current == 'welcome' %}
+	<!-- first login: set 2FA welcome message -->
+	<button class="btn btn-lg btn-primary btn-block w-100" type="submit">
+		{% trans "Continue" %}
+	</button>
+	{% if cancel_url %}
+ 	<a href="/logout/" class="btn btn-link pe-1 text-decoration-none float-end">{% trans "Log out" %}</a>
+	{% endif %}
+{% elif wizard.steps.current == 'method' %}
+	<!-- first login: choose yubikey or TOPT -->
+	<button class="btn btn-lg btn-primary btn-block w-100" type="submit">
+		{% trans "Continue" %}
+	</button>
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-link pe-1 text-decoration-none float-end">
+		{% trans "Back" %}
+	</button>
+{% elif wizard.steps.current == 'yubikey' or wizard.steps.current == 'generator' %}
+	<!-- first login: yubikey -->
+	<button class="btn btn-lg btn-primary btn-block w-100" type="submit">
+		{% trans "Verify Code" %}
+	</button>
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-link pe-1 text-decoration-none float-end">
+		{% trans "Back" %}
+	</button>
+{% endif %}

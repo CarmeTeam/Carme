@@ -1,0 +1,67 @@
+{% extends "two_factor/_base.html" %}
+{% load i18n %}
+
+{% block subcontent %}
+<div class="row flex-center-carme align-middle min-vh-85 py-4">
+  <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+  		<div id="login-box">
+    		
+						<!-- <row> -->
+						<div class="row">
+
+      		<div class="col-12">
+										<!-- <logo> -->
+        		<div class="text-center my-4">
+          		<img class="mb-4" src="/static/img/logo/carme-dark.svg"/>
+            <h5 class="fs-6 fw-600 text-title">Carme</h5>
+          </div>
+										<!-- </logo> -->
+                       
+										<!-- <alert> -->   
+          <div id="timeout-message" class="alert alert-warning py-2" role="alert" style="display: none;">
+												<i class="fas fa-warning"></i>&nbsp; Your session has expired! Log in again.
+										</div>
+          <div id="logout-message" class="alert alert-success py-2" role="alert" style="display: none;">
+												<i class="fas fa-check-circle"></i>&nbsp; Successfully logged out.
+										</div>
+          {% if form.errors %}
+          <div id="error-message" class="alert alert-danger py-2" role="alert">
+												<i class="fas fa-times-circle"></i>&nbsp; Incorrect information. Please Try again.
+										</div>
+          {% endif %}
+										<!-- </alert> -->
+        </div>
+							
+								<!-- <setup-complete>  -->
+        <div class="col-12">
+        		<h5 class="text-center mb-4 fs-2 fw-500 text-title">{% block title %}{% trans "Enable Two-Factor Authentication" %}{% endblock %}</h5>
+          <p class="fs-0 fw-400 text-body text-justify">
+												{% blocktrans trimmed %}
+														Congratulations, you've successfully enabled two-factor
+              authentication. You can now access your account security 
+              to generate your backup tokens. 
+												{% endblocktrans %}
+										</p>
+          <p>
+												<a href="{% url 'two_factor:profile' %}" class="btn btn-lg btn-block btn-secondary w-100">
+														{% trans "Get backup tokens" %}
+												</a>
+										</p>
+										<p>
+												<a href="{% url 'index' %}" class="btn btn-block btn-primary w-100">
+														{% trans "Go to Home" %}
+												</a>
+										</p>
+        </div>
+        <!-- </setup-complete> -->
+      
+						</div>
+						<!-- </row> -->
+
+						<!-- sponsor -->
+      {% include "two_factor/core/sponsor.html" %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
