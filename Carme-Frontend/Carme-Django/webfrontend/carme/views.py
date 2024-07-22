@@ -27,6 +27,7 @@ from carme.forms import StopJobForm, JobInfoForm
 from carme.models import NewsMessage, CarmeMessage, SlurmJob, CarmeJobTable, ClusterStat
 from projects.models import ProjectMember, ProjectHasTemplate, TemplateHasAccelerator, Accelerator, TemplateHasImage, ResourceTemplate, Image
 from django.contrib.auth.models import User 
+from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
@@ -42,6 +43,8 @@ from .highcharts.lines import HighchartPlotLineChartView
 
 # History card
 from django.db.models import Sum, Case, Value, When, IntegerField 
+
+from two_factor.views.core import LoginView
 
 #try:
 #    from django.utils.http import url_has_allowed_host_and_scheme
@@ -79,7 +82,18 @@ def my_info(request):
 def csrf_failure(request, reason=""):
     return redirect("/")             
 
+# Login
+class myLogin(LoginView):
+    #redirect to the next page
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect('/')
+        else:
+            return super(LoginView, self).dispatch(request, *args, **kwargs)
 
+myLogin = myLogin.as_view()
+
+@login_required(login_url='/account/login')
 def index(request):
     """ dashboard page : news, system, chart, and jobs cards """
     
