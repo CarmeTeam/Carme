@@ -37,6 +37,12 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_DB_DEFAULT_USER=$(get_variable CARME_DB_DEFAULT_USER ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_PORT=$(get_variable CARME_DB_DEFAULT_PORT ${FILE_START_CONFIG})
   
+  CARME_LDAP_SERVER_PROTO=$(get_variable CARME_LDAP_SERVER_PROTO ${FILE_START_CONFIG})
+  CARME_LDAP_SERVER_IP=$(get_variable CARME_LDAP_SERVER_IP ${FILE_START_CONFIG})
+  CARME_LDAP_BASE_DN=$(get_variable CARME_LDAP_BASE_DN ${FILE_START_CONFIG})
+  CARME_LDAP_BIND_DN=$(get_variable CARME_LDAP_BIND_DN ${FILE_START_CONFIG})
+  CARME_LDAP_SERVER_PW=$(get_variable CARME_LDAP_SERVER_PW ${FILE_START_CONFIG})
+
   CARME_FRONTEND_IP=$(get_variable CARME_FRONTEND_IP ${FILE_START_CONFIG})
   CARME_FRONTEND_ID=$(get_variable CARME_FRONTEND_ID ${FILE_START_CONFIG})
   CARME_FRONTEND_URL=$(get_variable CARME_FRONTEND_URL ${FILE_START_CONFIG})
@@ -84,6 +90,12 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
     [[ ! -d ${CARME_NODE_TMP_PATH} ]] && mkdir ${CARME_NODE_TMP_PATH}
     [[ ! -d ${CARME_NODE_TMP_PATH} ]] && die "[install_backend.sh]: ${CARME_NODE_TMP_PATH} directory was not created."
   fi
+
+  [[ -z ${CARME_LDAP_SERVER_PROTO} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_PROTO not set."
+  [[ -z ${CARME_LDAP_SERVER_IP} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_IP not set."
+  [[ -z ${CARME_LDAP_BASE_DN} ]] && die "[install_frontend.sh]: CARME_LDAP_BASE_DN not set."
+  [[ -z ${CARME_LDAP_BIND_DN} ]] && die "[install_frontend.sh]: CARME_LDAP_BIND_DN not set."
+  [[ -z ${CARME_LDAP_SERVER_PW} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_PW not set."
 
 else
   die "[install_backend.sh]: ${FILE_START_CONFIG} not found."
@@ -156,10 +168,11 @@ CARME_PATH_SCRIPTS="${PATH_SCRIPTS}"
 CARME_PATH_PROXY_ROUTES="${PATH_PROXY}"
 #
 # LDAP ------------------------------------------------------------------------------------
-CARME_LDAP_SERVER_IP=""
-CARME_LDAP_SERVER_PW=""
-CARME_LDAP_BIND_DN=""
-CARME_LDAP_BASE_DN=""
+CARME_LDAP_SERVER_PROTO="${CARME_LDAP_SERVER_PROTO}"
+CARME_LDAP_SERVER_IP="${CARME_LDAP_SERVER_IP}"
+CARME_LDAP_BASE_DN="${CARME_LDAP_BASE_DN}"
+CARME_LDAP_BIND_DN="${CARME_LDAP_BIND_DN}"
+CARME_LDAP_SERVER_PW="${CARME_LDAP_SERVER_PW}"
 EOF
 
 
