@@ -22,11 +22,17 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
   
-  CARME_FRONTEND_IP=$(get_variable CARME_FRONTEND_IP ${FILE_START_CONFIG})	
+  SYSTEM_OS=$(get_variable SYSTEM_OS ${FILE_START_CONFIG})
+  SYSTEM_ARCH=$(get_variable SYSTEM_ARCH ${FILE_START_CONFIG})
+  SYSTEM_HDWR=$(get_variable SYSTEM_HDWR ${FILE_START_CONFIG})
   PROXY_VERSION=$(get_variable PROXY_VERSION ${FILE_START_CONFIG})
+  CARME_FRONTEND_IP=$(get_variable CARME_FRONTEND_IP ${FILE_START_CONFIG})	
 
-  [[ -z ${CARME_FRONTEND_IP} ]] && die "[install_proxy.sh]: CARME_FRONTEND_IP not set."
+  [[ -z ${SYSTEM_OS} ]] && die "[install_proxy.sh]: SYSTEM_OS not set."
+  [[ -z ${SYSTEM_ARCH} ]] && die "[install_proxy.sh]: SYSTEM_ARCH not set."
+  [[ -z ${SYSTEM_HDWR} ]] && die "[install_proxy.sh]: SYSTEM_HDWR not set."
   [[ -z ${PROXY_VERSION} ]] && die "[install_proxy.sh]: PROXY_VERSION not set."
+  [[ -z ${CARME_FRONTEND_IP} ]] && die "[install_proxy.sh]: CARME_FRONTEND_IP not set."
 
 else
   die "[install_proxy.sh] ${FILE_START_CONFIG} not found."
@@ -49,25 +55,9 @@ FILE_PROXY_SYSTEMD=${PATH_SYSTEMD}/carme-proxy.service
 FILE_FRONTEND_SYSTEMD=${PATH_SYSTEMD}/carme-frontend.service
 FILE_SINGULARITY=${PATH_SINGULARITY}/singularity
 
-# check compatibility ---------------------------------------------------------------------
-log "checking system..."
-
-SYSTEM_ARCH=$(dpkg --print-architecture)
-if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
-  die "[install_proxy.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
-fi
-
-SYSTEM_HDWR=$(uname -m)
-if ! [[ $SYSTEM_HDWR == "aarch64" || $SYSTEM_HDWR == "x86_64"  ]];then
-  die "[install_proxy.sh]: aarch64 and x86_64 hardwares are supported. Yours is $SYSTEM_HDWR. Please contact us."
-fi
-
-SYSTEM_OS=$(uname -s)
-if ! [ ${SYSTEM_OS,} = "linux" ]; then
-  die "[install_proxy.sh]: linux OS is supported. Yours is ${SYSTEM_OS,}. Please contact us"
-fi
-
 # create static.toml and traefik.toml -----------------------------------------------------
+log "creating static.toml and traefik.toml files"
+
 mkdir -p ${PATH_PROXY_CONFIG}
 
 [[ -f ${FILE_PROXY_STATIC} ]] && rm ${FILE_PROXY_STATIC}

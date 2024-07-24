@@ -23,6 +23,7 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 if [[ -f ${FILE_START_CONFIG} ]]; then
 
   CARME_USER=$(get_variable CARME_USER ${FILE_START_CONFIG})
+  CARME_SLURM=$(get_variable CARME_SLURM ${FILE_START_CONFIG})
   CARME_SYSTEM=$(get_variable CARME_SYSTEM ${FILE_START_CONFIG})
   CARME_NODE_LIST=$(get_variable CARME_NODE_LIST ${FILE_START_CONFIG})
 
@@ -112,6 +113,10 @@ else
   die "[install_scripts.sh]: EpilogSlurmctld does not exist in ${PATH_SLURM}/slurm.conf. Please contact us."
 fi
 
+# remove duplicates (if exists) -----------------------------------------------------------
+awk '!seen[$0]++' ${PATH_SLURM}/slurm.conf > ${PATH_SLURM}/slurm.conf.tmp
+mv ${PATH_SLURM}/slurm.conf.tmp ${PATH_SLURM}/slurm.conf
+
 # create log directories ------------------------------------------------------------------
 mkdir -p ${PATH_SLURMCTLD_LOG}/prolog/
 mkdir -p ${PATH_SLURMCTLD_LOG}/epilog/
@@ -133,9 +138,22 @@ if [[ ${CARME_SYSTEM} == "single" ]]; then
     die "[install_scripts.sh]: node state is not idle."
   fi
 else
+
+  # set compute node list
+  if [[ ${CARME_SLURM} == "yes" ]]; then
+    NODE_LIST=${CARME_NODE_LIST}
+  elif [[ ${CARME_SLURM} == "no" ]]; then
+    CLUSTER_NODE_LIST=$(sinfo -Nh --format="%N")
+    # remove repetitive names in list
+    declare -A uniq
+    for k in ${CLUSTER_NODE_LIST} ; do uniq[$k]=1 ; done
+    NODE_LIST=${!uniq[@]}
+  fi
+   
   # copy slurm.conf to all compute nodes ----------------------------------------------------
   log "copying files to compute-nodes..."
-  for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
+
+  for COMPUTE_NODE in ${NODE_LIST[@]}; do
     scp -q ${FILE_SLURM_CONFIG} ${COMPUTE_NODE}:${FILE_SLURM_CONFIG} && log "slurm.conf copied to ${COMPUTE_NODE}"
   done
 
@@ -146,7 +164,7 @@ else
   systemctl is-active --quiet slurmctld || die "[install_scripts.sh]: slurmctld.service in head-node is not running."
   systemctl is-active --quiet slurmdbd || die "[install_scripts.sh]: slurmdbd.service in head-node is not running."
 
-  for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
+  for COMPUTE_NODE in ${NODE_LIST[@]}; do
     ssh ${COMPUTE_NODE} 'systemctl restart slurmd'
     SLURMD_STATUS=$(ssh ${COMPUTE_NODE} 'systemctl is-active --quiet slurmd && echo "running" || echo "not running"')
     if [[ $SLURMD_STATUS == "not running" ]]; then
