@@ -103,10 +103,13 @@ log "removing server config..."
 
 rm -rf ${PATH_SERVER_CONF}
 
-# remove frontend config ---------------------------------------------------------------------------
+# remove frontend config ---------------------------------------------------------------------
 log "removing frontend config..."
 
 rm -f "${FILE_FRONTEND_CONFIG}"
 rm -f "${FILE_FRONTEND_CONFIG}.bak"
+
+# remove etc/carme ---------------------------------------------------------------------------
+rm -rf "${PATH_CONFIG}" 
 
 log "carme-frontend successfully removed."
