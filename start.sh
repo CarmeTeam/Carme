@@ -16,8 +16,8 @@ source ${PATH_CARME}/Carme-Install/basic_functions.sh
 FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
-  CARME_SYSTEM=$(get_variable CARME_SYSTEM ${FILE_START_CONFIG})
-  [[ -z ${CARME_SYSTEM} ]] && die "[start.sh]: CARME_SYSTEM not set."
+  CARME_USERS=$(get_variable CARME_USERS ${FILE_START_CONFIG})
+  [[ -z ${CARME_USERS} ]] && die "[start.sh]: CARME_USERS in CarmeConfig.start not set."
 else
   die "[start.sh]: ${FILE_START_CONFIG} not found."
 fi
@@ -44,31 +44,36 @@ log "installation starts..."
 # step 1: install SYSTEM
 bash ${PATH_CARME}/Carme-Install/install_system.sh
 
-# step 2: install DATABASE 
+# step 2: install LDAP
+if [[ ${CARME_USERS} == "multi" ]]; then 
+  bash ${PATH_CARME}/Carme-Install/install_ldap.sh
+fi
+
+# step 3: install DATABASE 
 bash ${PATH_CARME}/Carme-Install/install_database.sh
 
-# step 3: install SLURM
+# step 4: install SLURM
 bash ${PATH_CARME}/Carme-Install/install_slurm.sh
 
-# step 4: install VENDORS
+# step 5: install VENDORS
 bash ${PATH_CARME}/Carme-Install/install_vendors.sh
 
-# step 5: install CERTS
+# step 6: install CERTS
 bash ${PATH_CARME}/Carme-Install/install_certs.sh
 
-# step 6: install FRONTEND
+# step 7: install FRONTEND
 bash ${PATH_CARME}/Carme-Install/install_frontend.sh
 
-# step 7: install BACKEND
+# step 8: install BACKEND
 bash ${PATH_CARME}/Carme-Install/install_backend.sh
 
-# step 8: install BASE
+# step 9: install BASE
 bash ${PATH_CARME}/Carme-Install/install_base.sh
 
-# step 9: install SCRIPTS
+# step 10: install SCRIPTS
 bash ${PATH_CARME}/Carme-Install/install_scripts.sh
 
-# step 10: install PROXY
+# step 11: install PROXY
 bash ${PATH_CARME}/Carme-Install/install_proxy.sh
 
 echo "

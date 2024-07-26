@@ -22,17 +22,17 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
 
+  CARME_LDAP=$(get_variable CARME_LDAP ${FILE_START_CONFIG})
   CARME_USER=$(get_variable CARME_USER ${FILE_START_CONFIG})
   CARME_GROUP=$(get_variable CARME_GROUP ${FILE_START_CONFIG})
-  CARME_LDAP=$(get_variable CARME_LDAP ${FILE_START_CONFIG})
   CARME_SYSTEM=$(get_variable CARME_SYSTEM ${FILE_START_CONFIG})
   CARME_NODE_LIST=$(get_variable CARME_NODE_LIST ${FILE_START_CONFIG})
   CARME_PASSWORD_USER=$(get_variable CARME_PASSWORD_USER ${FILE_START_CONFIG})
   CARME_PASSWORD_LDAP=$(get_variable CARME_PASSWORD_LDAP ${FILE_START_CONFIG})
 
+  [[ -z ${CARME_LDAP} ]] && die "[install_ldap.sh]: CARME_LDAP not set."
   [[ -z ${CARME_USER} ]] && die "[install_ldap.sh]: CARME_USER not set."
   [[ -z ${CARME_GROUP} ]] && die "[install_ldap.sh]: CARME_GROUP not set."
-  [[ -z ${CARME_LDAP} ]] && die "[install_ldap.sh]: CARME_LDAP not set."
   [[ -z ${CARME_SYSTEM} ]] && die "[install_ldap.sh]: CARME_SYSTEM not set."
   [[ -z ${CARME_NODE_LIST} ]] && die "[install_ldap.sh]: CARME_NODE_LIST not set."
   [[ -z ${CARME_PASSWORD_USER} ]] && die "[install_ldap.sh]: CARME_PASSWORD_USER not set."
@@ -42,19 +42,19 @@ else
   die "[install_ldap.sh]: ${FILE_START_CONFIG} not found."
 fi
 
-# installation / configuration starts -----------------------------------------------------
-if [[ ${CARME_LDAP} == "yes" ]]; then
-  log "starting ldap installation..."
-else
-  log "starting ldap configuration..."
-fi
-
 # check system ----------------------------------------------------------------------------
 if ! [[ ${CARME_SYSTEM} == "single" || ${CARME_SYSTEM} == "multi" ]]; then
   die "[install_ldap.sh]: CARME_SYSTEM in CarmeConfig.start was not set properly. It must be \`single\` or \`multi\`."
 fi
 if ! [[ ${CARME_LDAP} == "yes" || ${CARME_LDAP} == "no" ]]; then
   die "[install_ldap.sh]: CARME_LDAP in CarmeConfig.start was not set properly. It must be \`yes\` or \`no\`."
+fi
+
+# installation / configuration starts -----------------------------------------------------
+if [[ ${CARME_LDAP} == "yes" ]]; then
+  log "starting ldap installation..."
+else
+  log "starting ldap configuration..."
 fi
 
 # install packages ------------------------------------------------------------------------
