@@ -29,8 +29,8 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_GROUP=$(get_variable CARME_GROUP ${FILE_START_CONFIG})
 
   [[ -z ${CARME_USER} ]] && die "[install_certs.sh]: CARME_USER not set."
-  [[ -z ${CARME_HOME} ]] && die "[install_certs.sh]: CARME_USER not set."
-  [[ -z ${CARME_GROUP} ]] && die "[install_certs.sh]: CARME_USER not set."
+  [[ -z ${CARME_HOME} ]] && die "[install_certs.sh]: CARME_HOME not set."
+  [[ -z ${CARME_GROUP} ]] && die "[install_certs.sh]: CARME_GROUP not set."
 
 else
   die "[install_certs.sh]: ${FILE_START_CONFIG} not found."

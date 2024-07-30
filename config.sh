@@ -199,7 +199,7 @@ else
   # CARME_UID will be assigned by LDAP
   # CARME_USER will be created in LDAP
   CARME_GROUP=carme-admin
-  # CARME_HOME should exist?
+  CARME_HOME="/home/${CARME_USER}"
 fi
 
 # set database ---------------------------------------------------------------------------
