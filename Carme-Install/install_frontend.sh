@@ -23,7 +23,6 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 if [[ -f ${FILE_START_CONFIG} ]]; then
 
   CARME_UID=$(get_variable CARME_UID ${FILE_START_CONFIG})	
-  CARME_LDAP=$(get_variable CARME_LDAP ${FILE_START_CONFIG})
   CARME_USER=$(get_variable CARME_USER ${FILE_START_CONFIG})
   CARME_HOME=$(get_variable CARME_HOME ${FILE_START_CONFIG})
   CARME_USERS=$(get_variable CARME_USERS ${FILE_START_CONFIG})
@@ -91,8 +90,6 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   [[ -z ${CARME_DB_DEFAULT_HOST} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_HOST not set."
   [[ -z ${CARME_DB_DEFAULT_PORT} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_PORT not set."
   [[ -z ${CARME_DB_DEFAULT_USER} ]] && die "[install_frontend.sh]: CARME_DB_DEFAULT_USER not set."
-
-  [[ -z ${CARME_LDAP} ]] && CARME_LDAP="null"
 
   [[ -z ${CARME_LDAP_SERVER_PROTO} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_PROTO not set."
   [[ -z ${CARME_LDAP_SERVER_IP} ]] && die "[install_frontend.sh]: CARME_LDAP_SERVER_IP not set."
@@ -366,7 +363,6 @@ CARME_PASSWORD_DJANGO="${CARME_PASSWORD_DJANGO}"
 # USER ------------------------------------------------------------------------------------
 CARME_UID="${CARME_UID}"
 CARME_HOME="${CARME_HOME}"
-CARME_LDAP="${CARME_LDAP}"
 CARME_USER="${CARME_USER}"
 CARME_USERS="${CARME_USERS}"
 CARME_GROUP="${CARME_GROUP}"

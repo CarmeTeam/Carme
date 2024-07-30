@@ -136,6 +136,13 @@ if [[ ${CARME_USERS} == "single" ]]; then
     fi
   done
 
+  CARME_PASSWORD_LDAP="null"
+  CARME_LDAP_SERVER_PROTO="null"
+  CARME_LDAP_SERVER_IP="null"
+  CARME_LDAP_BASE_DN="null"
+  CARME_LDAP_BIND_DN="null"
+  CARME_LDAP_SERVER_PW="null"
+
 elif [[ ${CARME_USERS} == "multi" ]]; then
   CHECK_LDAP_MESSAGE=$'\n(4/8) Carme-demo multi-user requires ldap user management tool. Do you want to install it?\nType `No` if you want Carme-demo to use an already existing ldap in your system. [y/N]:'
   while ! [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" || $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no" ]]; do
@@ -148,6 +155,13 @@ elif [[ ${CARME_USERS} == "multi" ]]; then
       CHECK_LDAP_MESSAGE=$'You did not choose yes or no. Please try again [y/N]:'
     fi
   done
+
+  CARME_PASSWORD_LDAP="ldappwd"
+  CARME_LDAP_SERVER_PROTO="ldap://"
+  CARME_LDAP_SERVER_IP="${LOGIN_NODE_IP}"
+  CARME_LDAP_BASE_DN="dc=carme,dc=local"
+  CARME_LDAP_BIND_DN="cn=admin,dc=nodomain"
+  CARME_LDAP_SERVER_PW="ldappwdroot"
 fi
 
 # set username ---------------------------------------------------------------------------	
@@ -474,6 +488,15 @@ CARME_PASSWORD_MYSQL="${CARME_PASSWORD_MYSQL}"
 CARME_PASSWORD_SLURM="${CARME_PASSWORD_SLURM}"
 CARME_PASSWORD_DJANGO="djangopwd"
 
+# LDAP ------------------------------------------------------------------------------------
+CARME_LDAP="${CARME_LDAP}"
+CARME_PASSWORD_LDAP="${CARME_PASSWORD_LDAP}"
+CARME_LDAP_SERVER_PROTO="${CARME_LDAP_SERVER_PROTO}"
+CARME_LDAP_SERVER_IP="${CARME_LDAP_SERVER_IP}"
+CARME_LDAP_BASE_DN="${CARME_LDAP_BASE_DN}"
+CARME_LDAP_BIND_DN="${CARME_LDAP_BIND_DN}"
+CARME_LDAP_SERVER_PW="${CARME_LDAP_SERVER_PW}"
+
 # DATABASE --------------------------------------------------------------------------------
 CARME_DB="${CARME_DB}"
 CARME_DB_SERVER="${CARME_DB_SERVER}"
@@ -529,19 +552,6 @@ CARME_NODE_SSHD="yes"
 CARME_NODE_SSD_PATH="/scratch"
 CARME_NODE_TMP_PATH="/tmp"
 EOF
-
-if [[ ${CARME_LDAP} == "yes" || ${CARME_LDAP} == "no" ]]; then
-  sed -i "/CARME_PASSWORD_USER/a CARME_PASSWORD_LDAP=\"ldappwd\"" CarmeConfig.start
-  sed -i "/GO_VERSION/a # LDAP ------------------------------------------------------------------------------------" CarmeConfig.start
-  sed -i "/GO_VERSION/G" CarmeConfig.start
-  sed -i "/# LDAP ---/a CARME_LDAP=\"${CARME_LDAP}\"\n\
-CARME_LDAP_SERVER_PROTO=\"ldap://\"\n\
-CARME_LDAP_SERVER_IP=\"${LOGIN_NODE_IP}\"\n\
-CARME_LDAP_BASE_DN=\"dc=carme,dc=local\"\n\
-CARME_LDAP_BIND_DN=\"cn=admin,dc=nodomain\"\n\
-CARME_LDAP_SERVER_PW=\"ldappwdroot\"\n\
-  " CarmeConfig.start
-fi
 
 [[ -s CarmeConfig.start ]] && log "CarmeConfig.start successfully created." \
 	                   || log "CarmeConfig.start was not set. Please contact us."
