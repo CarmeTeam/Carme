@@ -91,6 +91,11 @@ bash ${PATH_CARME}/Carme-Install/remove_slurm.sh
 # step 8: uninstall DATABASE
 bash ${PATH_CARME}/Carme-Install/remove_database.sh
 
+# step 9: uninstall LDAP
+if [[ ${CARME_USERS} == "multi" ]]; then 
+  bash ${PATH_CARME}/Carme-Install/remove_ldap.sh
+fi
+
 echo "
 #########################################################
 ######    Carme-demo ${CARME_VERSION} successfully removed    ######
