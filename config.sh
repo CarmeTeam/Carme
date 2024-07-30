@@ -196,8 +196,8 @@ if [[ ${CARME_USERS} == "single" || ${CARME_LDAP} == "no" ]]; then
   CARME_GROUP=$(id -gn ${CARME_USER})
   CARME_HOME=$(eval echo ~${CARME_USER})
 else
-  # CARME_UID will be assigned by LDAP
   # CARME_USER will be created in LDAP
+  CARME_UID=10000
   CARME_GROUP=carme-admin
   CARME_HOME="/home/${CARME_USER}"
 fi
