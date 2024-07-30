@@ -394,7 +394,7 @@ EOF
 
   # set single device ------------------------------------------ 
   if [[ ${CARME_SYSTEM} == "single" ]]; then
-    nvidia-smi --query-gpu=gpu_name --format=csv >/dev/null 2>&1
+    which nvidia-smi && nvidia-smi --query-gpu=gpu_name --format=csv >/dev/null 2>&1
     
     # set single device as cpu or gpu system
     if [ $? -eq 0 ]; then
