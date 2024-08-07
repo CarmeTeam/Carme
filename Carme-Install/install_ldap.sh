@@ -132,6 +132,9 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
   log "configuring packages..."
 
   if [[ ${CARME_SYSTEM} == "single" ]]; then
+    echo 'BASE   dc=nodomain' >> /etc/ldap/ldap.conf
+    echo 'URI    ldap://127.0.0.1' >> /etc/ldap/ldap.conf
+
     sed -i 's/^BINDDN=.*/BINDDN="cn=admin,dc=nodomain"/' /etc/ldapscripts/ldapscripts.conf
     echo -n ${CARME_PASSWORD_LDAP} > /etc/ldapscripts/ldapscripts.passwd
 
@@ -163,6 +166,9 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
   elif [[ ${CARME_SYSTEM} == "multi" ]]; then
 
     # head-node -----------------------------------
+    echo 'BASE   dc=nodomain' >> /etc/ldap/ldap.conf
+    echo 'URI    ldap://127.0.0.1' >> /etc/ldap/ldap.conf
+
     sed -i 's/^BINDDN=.*/BINDDN="cn=admin,dc=nodomain"/' /etc/ldapscripts/ldapscripts.conf
     echo -n ${CARME_PASSWORD_LDAP} > /etc/ldapscripts/ldapscripts.passwd
 
