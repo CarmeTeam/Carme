@@ -135,6 +135,7 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     sed -i 's/^BINDDN=.*/BINDDN="cn=admin,dc=nodomain"/' /etc/ldapscripts/ldapscripts.conf
     echo -n ${CARME_PASSWORD_LDAP} > /etc/ldapscripts/ldapscripts.passwd
 
+    sed -i "s|^uri .*|uri ldap://127.0.0.1|" /etc/nslcd.conf
     sed -i 's/base .*/base dc=nodomain/' /etc/nslcd.conf
     sed -i '/^passwd:.*ldap/b; /^passwd:/ s/\s*$/ ldap/' /etc/nsswitch.conf
     sed -i '/^group:.*ldap/b; /^group:/ s/\s*$/ ldap/' /etc/nsswitch.conf
@@ -165,6 +166,7 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     sed -i 's/^BINDDN=.*/BINDDN="cn=admin,dc=nodomain"/' /etc/ldapscripts/ldapscripts.conf
     echo -n ${CARME_PASSWORD_LDAP} > /etc/ldapscripts/ldapscripts.passwd
 
+    sed -i "s|^uri .*|uri ldap://127.0.0.1|" /etc/nslcd.conf
     sed -i 's/base .*/base dc=nodomain/' /etc/nslcd.conf
     sed -i '/^passwd:.*ldap/b; /^passwd:/ s/\s*$/ ldap/' /etc/nsswitch.conf
     sed -i '/^group:.*ldap/b; /^group:/ s/\s*$/ ldap/' /etc/nsswitch.conf
