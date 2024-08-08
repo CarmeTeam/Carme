@@ -157,7 +157,7 @@ elif [[ ${CARME_USERS} == "multi" ]]; then
 
   CARME_LDAP_SERVER_PROTO="ldap://"
   CARME_LDAP_SERVER_IP="${LOGIN_NODE_IP}"
-  CARME_LDAP_BASE_DN="dc=carme,dc=local"
+  CARME_LDAP_BASE_DN="dc=nodomain"
   CARME_LDAP_BIND_DN="cn=admin,dc=nodomain"
   CARME_LDAP_SERVER_PW="ldappwdroot"
 fi
