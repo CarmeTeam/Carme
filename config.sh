@@ -136,7 +136,6 @@ if [[ ${CARME_USERS} == "single" ]]; then
     fi
   done
 
-  CARME_PASSWORD_LDAP="null"
   CARME_LDAP_SERVER_PROTO="null"
   CARME_LDAP_SERVER_IP="null"
   CARME_LDAP_BASE_DN="null"
@@ -156,7 +155,6 @@ elif [[ ${CARME_USERS} == "multi" ]]; then
     fi
   done
 
-  CARME_PASSWORD_LDAP="ldappwd"
   CARME_LDAP_SERVER_PROTO="ldap://"
   CARME_LDAP_SERVER_IP="${LOGIN_NODE_IP}"
   CARME_LDAP_BASE_DN="dc=carme,dc=local"
@@ -490,7 +488,6 @@ CARME_PASSWORD_DJANGO="djangopwd"
 
 # LDAP ------------------------------------------------------------------------------------
 CARME_LDAP="${CARME_LDAP}"
-CARME_PASSWORD_LDAP="${CARME_PASSWORD_LDAP}"
 CARME_LDAP_SERVER_PROTO="${CARME_LDAP_SERVER_PROTO}"
 CARME_LDAP_SERVER_IP="${CARME_LDAP_SERVER_IP}"
 CARME_LDAP_BASE_DN="${CARME_LDAP_BASE_DN}"

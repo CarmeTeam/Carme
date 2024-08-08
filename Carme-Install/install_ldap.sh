@@ -28,7 +28,7 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_SYSTEM=$(get_variable CARME_SYSTEM ${FILE_START_CONFIG})
   CARME_NODE_LIST=$(get_variable CARME_NODE_LIST ${FILE_START_CONFIG})
   CARME_PASSWORD_USER=$(get_variable CARME_PASSWORD_USER ${FILE_START_CONFIG})
-  CARME_PASSWORD_LDAP=$(get_variable CARME_PASSWORD_LDAP ${FILE_START_CONFIG})
+  CARME_LDAP_SERVER_PW=$(get_variable CARME_LDAP_SERVER_PW ${FILE_START_CONFIG})
 
   [[ -z ${CARME_LDAP} ]] && die "[install_ldap.sh]: CARME_LDAP not set."
   [[ -z ${CARME_USER} ]] && die "[install_ldap.sh]: CARME_USER not set."
@@ -36,7 +36,7 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   [[ -z ${CARME_SYSTEM} ]] && die "[install_ldap.sh]: CARME_SYSTEM not set."
   [[ -z ${CARME_NODE_LIST} ]] && die "[install_ldap.sh]: CARME_NODE_LIST not set."
   [[ -z ${CARME_PASSWORD_USER} ]] && die "[install_ldap.sh]: CARME_PASSWORD_USER not set."
-  [[ -z ${CARME_PASSWORD_LDAP} ]] && die "[install_ldap.sh]: CARME_PASSWORD_LDAP not set."
+  [[ -z ${CARME_LDAP_SERVER_PW} ]] && die "[install_ldap.sh]: CARME_LDAP_SERVER_PW not set."
 
 else
   die "[install_ldap.sh]: ${FILE_START_CONFIG} not found."
@@ -136,7 +136,7 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     echo 'URI    ldap://127.0.0.1' >> /etc/ldap/ldap.conf
 
     sed -i 's/^BINDDN=.*/BINDDN="cn=admin,dc=nodomain"/' /etc/ldapscripts/ldapscripts.conf
-    echo -n ${CARME_PASSWORD_LDAP} > /etc/ldapscripts/ldapscripts.passwd
+    echo -n ${CARME_LDAP_SERVER_PW} > /etc/ldapscripts/ldapscripts.passwd
 
     sed -i "s|^uri .*|uri ldap://127.0.0.1|" /etc/nslcd.conf
     sed -i 's/base .*/base dc=nodomain/' /etc/nslcd.conf
@@ -148,7 +148,7 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     systemctl enable --now nslcd
     systemctl enable --now nscd
 
-    LDAP_PASSWORD_HASH=$(slappasswd -s "${CARME_PASSWORD_LDAP}")
+    LDAP_PASSWORD_HASH=$(slappasswd -s "${CARME_LDAP_SERVER_PW}")
 
     printf "dn: olcDatabase={1}mdb,cn=config\nchangetype: modify\nreplace: olcRootPW\nolcRootPW: ${LDAP_PASSWORD_HASH}\n" | ldapmodify -Q -Y EXTERNAL -H ldapi:///
 
@@ -170,7 +170,7 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     echo 'URI    ldap://127.0.0.1' >> /etc/ldap/ldap.conf
 
     sed -i 's/^BINDDN=.*/BINDDN="cn=admin,dc=nodomain"/' /etc/ldapscripts/ldapscripts.conf
-    echo -n ${CARME_PASSWORD_LDAP} > /etc/ldapscripts/ldapscripts.passwd
+    echo -n ${CARME_LDAP_SERVER_PW} > /etc/ldapscripts/ldapscripts.passwd
 
     sed -i "s|^uri .*|uri ldap://127.0.0.1|" /etc/nslcd.conf
     sed -i 's/base .*/base dc=nodomain/' /etc/nslcd.conf
@@ -182,7 +182,7 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     systemctl enable --now nslcd
     systemctl enable --now nscd
 
-    LDAP_PASSWORD_HASH=$(slappasswd -s "${CARME_PASSWORD_LDAP}")
+    LDAP_PASSWORD_HASH=$(slappasswd -s "${CARME_LDAP_SERVER_PW}")
 
     printf "dn: olcDatabase={1}mdb,cn=config\nchangetype: modify\nreplace: olcRootPW\nolcRootPW: ${LDAP_PASSWORD_HASH}\n" | ldapmodify -Q -Y EXTERNAL -H ldapi:///
 
