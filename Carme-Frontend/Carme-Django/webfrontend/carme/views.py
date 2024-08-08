@@ -67,14 +67,11 @@ def my_info(request):
         my_id = list(User.objects.filter(username__exact=settings.CARME_USER).order_by('id').values_list('id',flat=True))[0]
 
     elif settings.CARME_USERS == "multi":
-        if settings.CARME_LDAP == "yes":
-            my_username = request.user.ldap_user.attrs['uid'][0]
-            my_group = request.user.ldap_user.attrs['group'][0] #to verify
-            my_home = request.user.ldap_user.attrs['homeDirectory'][0]
-            my_uid = request.user.ldap_user.attrs['uid'][0] #to verify
-            my_id = request.user
-        else:
-            pass
+        my_username = request.user.ldap_user.attrs['uid'][0]
+        my_group = request.user.ldap_user.attrs['group'][0] #to verify
+        my_home = request.user.ldap_user.attrs['homeDirectory'][0]
+        my_uid = request.user.ldap_user.attrs['uid'][0] #to verify
+        my_id = request.user
 
     return my_username, my_group, my_home, my_uid, my_id
 
