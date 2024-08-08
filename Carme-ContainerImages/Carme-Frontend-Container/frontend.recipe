@@ -59,7 +59,7 @@ MirrorURL: http://ftp.de.debian.org/debian/
     # python dependencies
     pip3 install Django numpy rpyc whitenoise requests mysqlclient django-mathfilters --no-cache-dir
     pip3 install misaka --no-cache-dir --use-pep517
-    #pip3 install django-auth-ldap django-two-factor-auth two_factor phonenumbers
+    pip3 install django-auth-ldap django-two-factor-auth two_factor phonenumbers
    
     # source .venv as a singularity environment variable (needed to activate the environment inside the container)
     echo '. /opt/.venv/bin/activate' >> $SINGULARITY_ENVIRONMENT 

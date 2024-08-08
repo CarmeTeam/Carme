@@ -26,7 +26,7 @@ except:
 
 urlpatterns = [
     path('', views.index, name='index'),
-    #path('account/login/', views.myLogin, name='mylogin'),
+    path('account/login/', views.myLogin, name='mylogin'),
     path('StartJob/', views.start_job, name='start_job'),
     path('StopJob/', views.stop_job, name='stop_job'),
     path('JobInfo/', views.job_info, name='job_info'),

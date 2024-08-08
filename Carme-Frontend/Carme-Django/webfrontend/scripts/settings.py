@@ -13,8 +13,8 @@
 
 import os
 import logging
-#import ldap
-#from django_auth_ldap.config import LDAPSearch, PosixGroupType, LDAPGroupQuery, GroupOfNamesType
+import ldap
+from django_auth_ldap.config import LDAPSearch, PosixGroupType, LDAPGroupQuery, GroupOfNamesType
 from django.urls import reverse_lazy
 from importlib.machinery import SourceFileLoader
 SourceFileLoader('CarmeConfig.frontend', '/etc/carme/CarmeConfig.frontend').load_module()
@@ -57,8 +57,8 @@ INSTALLED_APPS = [
     'misaka',
     #'dal',
     #'dal_select2', 
-    #'django_otp.plugins.otp_static',
-    #'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
 ]
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -192,7 +192,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #-----------------------------------------------------------------------------------------------------------------------------------
 
-"""
 # Login ----------------------------------------------------------------------------------------------------------------------------
 LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = '/'
@@ -317,4 +316,3 @@ logger = logging.getLogger('django_auth_ldap')
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.DEBUG)
 # ----------------------------------------------------------------------------------------------------------------------------------
-"""
