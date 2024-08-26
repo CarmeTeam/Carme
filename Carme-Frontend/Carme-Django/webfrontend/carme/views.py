@@ -45,6 +45,7 @@ from .highcharts.lines import HighchartPlotLineChartView
 from django.db.models import Sum, Case, Value, When, IntegerField 
 
 from two_factor.views.core import LoginView
+from django.contrib.auth import logout as auth_logout
 
 #try:
 #    from django.utils.http import url_has_allowed_host_and_scheme
@@ -68,16 +69,26 @@ def my_info(request):
 
     elif settings.CARME_USERS == "multi":
         my_username = request.user.ldap_user.attrs['uid'][0]
-        my_group = request.user.ldap_user.attrs['group'][0] #to verify
+        my_group = list(request.user.ldap_user.group_names)[0]
         my_home = request.user.ldap_user.attrs['homeDirectory'][0]
-        my_uid = request.user.ldap_user.attrs['uid'][0] #to verify
+        my_uid = request.user.ldap_user.attrs['uidNumber'][0]
         my_id = request.user
 
     return my_username, my_group, my_home, my_uid, my_id
 
 
 def csrf_failure(request, reason=""):
-    return redirect("/")             
+    return redirect("/")
+
+def logout(request):
+    path = '/account/login/'
+
+    if request.user.is_authenticated:
+        auth_logout(request)
+        path += '?logout=1'
+    
+    return HttpResponseRedirect(path)
+
 
 # Login
 class myLogin(LoginView):

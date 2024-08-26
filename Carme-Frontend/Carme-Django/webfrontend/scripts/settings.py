@@ -271,23 +271,23 @@ AUTH_LDAP_GROUP_TYPE = PosixGroupType()
 # restricts groups that are allowed to user CARME
 # NOTE: If you don't want to restrict the access to specific LDAP groups simply comment the AUTH_LDAP_REQUIRE_GROUP variable
 # NOTE: This is an example!
-AUTH_LDAP_REQUIRE_GROUP = (LDAPGroupQuery('cn=admins,' + AUTH_LDAP_GROUP_BASE)
-                           | LDAPGroupQuery('cn=users,' + AUTH_LDAP_GROUP_BASE)
-                          )
+#AUTH_LDAP_REQUIRE_GROUP = (LDAPGroupQuery('cn=admins,' + AUTH_LDAP_GROUP_BASE)
+#                           | LDAPGroupQuery('cn=users,' + AUTH_LDAP_GROUP_BASE)
+#                          )
 
 
 # set user flags by ldap groups
 # NOTE: If you cannot modify AUTH_LDAP_GROUP_BASE in such a way that it maps all your possible groups modify it directly
 # NOTE: there is no limitation regarding the goups you can add here
 # NOTE: This is an example!
-AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    'is_active': (
-        LDAPGroupQuery('cn=admins,' + AUTH_LDAP_GROUP_BASE)
-        | LDAPGroupQuery('cn=users,' + AUTH_LDAP_GROUP_BASE)
-    ),
-    'is_staff': 'cn=admins,' + AUTH_LDAP_GROUP_BASE,
-    'is_superuser': 'cn=admins,' + AUTH_LDAP_GROUP_BASE,
-}
+#AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+#    'is_active': (
+#        LDAPGroupQuery('cn=admins,' + AUTH_LDAP_GROUP_BASE)
+#        | LDAPGroupQuery('cn=users,' + AUTH_LDAP_GROUP_BASE)
+#    ),
+#    'is_staff': 'cn=admins,' + AUTH_LDAP_GROUP_BASE,
+#    'is_superuser': 'cn=admins,' + AUTH_LDAP_GROUP_BASE,
+#}
 
 
 # mirror a user’s ldap group membership
