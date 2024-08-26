@@ -402,6 +402,7 @@ def job_table(request):
     return render(request, 'blocks/job_table.html', context)
 
 
+@login_required_if_ldap
 def start_job(request):
     """starts a new job (handing request to backend). Uses ResourceTemplate and Image"""
 
@@ -444,6 +445,7 @@ def start_job(request):
     return render(request, 'home.html', context)
 
 
+@login_required_if_ldap
 def job_hist(request):
     """renders the job history page"""
    
@@ -486,6 +488,7 @@ def job_hist(request):
     return render(request, 'job_hist.html', context)
 
 
+@login_required_if_ldap
 def job_info(request):
     """ renders the job info modal page"""
 
@@ -556,6 +559,7 @@ def job_info(request):
     return render(request, 'job_info.html', context)
 
 
+@login_required_if_ldap
 def stop_job(request):
     """stopping a job (handing request to backend)"""
 
