@@ -21,6 +21,7 @@ import misaka
 import requests
 import numpy as np
 from datetime import datetime
+from functools import wraps
 
 from django.db import connections # slurm
 from carme.forms import StopJobForm, JobInfoForm
@@ -101,7 +102,16 @@ class myLogin(LoginView):
 
 myLogin = myLogin.as_view()
 
-@login_required(login_url='/account/login')
+
+def login_required_if_ldap(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        if settings.CARME_USERS == "multi":
+            return login_required(login_url='/account/login')(view_func)(request, *args, **kwargs)
+        return view_func(request, *args, **kwargs)
+    return wraps(view_func)(_wrapped_view)
+
+
+@login_required_if_ldap
 def index(request):
     """ dashboard page : news, system, chart, and jobs cards """
     
