@@ -81,25 +81,39 @@ log "starting certs creation..."
 
 # verify www-data --------------------------------------------------------------------------
 
-if id -u www-data &>/dev/null;then
-  WWW_DATA_USER="true"
-else
-  WWW_DATA_USER="false"
+if [[ $SYSTEM_DIST == "rocky" ]]; then
+  if ! id -g www-data &>/dev/null; then
+    if grep '^tape:x:33' /etc/group &>/dev/null; then
+      groupmod -g 34 tape
+    fi
+    groupadd -g 33 www-data
+  fi
+  if ! id -u www-data &>/dev/null; then
+    useradd www-data -u 33 -g www-data -d /var/www -M -s /usr/sbin/nologin
+  fi
 fi
 
-if id -g www-data &>/dev/null;then
-  WWW_DATA_GROUP="true"
-else
-  WWW_DATA_GROUP="false"
-fi
+if ! [[ $SYSTEM_DIST == "rocky" ]]; then
+  if id -u www-data &>/dev/null;then
+    WWW_DATA_USER="true"
+  else
+    WWW_DATA_USER="false"
+  fi
 
-if ! [[ "${WWW_DATA_USER}" == "true" && "${WWW_DATA_GROUP}" == "true" ]];then
-  if [[ "${WWW_DATA_USER}" == "false" && "${WWW_DATA_GROUP}" == "false" ]]; then
-    die "[install_certs.sh]: www-data user and group do not exist in your system."
-  elif [[ "${WWW_DATA_USER}" == "false" ]]; then
-    die "[install_certs.sh]: www-data user does not exist in your system. Please contact us."
-  elif [[ "${WWW_DATA_GROUP}" == "false" ]]; then
-    die "[install_certs.sh]: www-data group does not exist in your system. Please contact us."
+  if id -g www-data &>/dev/null;then
+    WWW_DATA_GROUP="true"
+  else
+    WWW_DATA_GROUP="false"
+  fi
+
+  if ! [[ "${WWW_DATA_USER}" == "true" && "${WWW_DATA_GROUP}" == "true" ]];then
+    if [[ "${WWW_DATA_USER}" == "false" && "${WWW_DATA_GROUP}" == "false" ]]; then
+      die "[install_certs.sh]: www-data user and group do not exist in your system."
+    elif [[ "${WWW_DATA_USER}" == "false" ]]; then
+      die "[install_certs.sh]: www-data user does not exist in your system. Please contact us."
+    elif [[ "${WWW_DATA_GROUP}" == "false" ]]; then
+      die "[install_certs.sh]: www-data group does not exist in your system. Please contact us."
+    fi
   fi
 fi
 
@@ -149,8 +163,10 @@ openssl x509 -req -days "${CERT_DAYS}" -in "${FILE_SLURMCTLD_CSR}" -CA "${FILE_B
 [[ -f "${FILE_SLURMCTLD_CRT}" ]] || die "[install_certs.sh]: cannot create '${FILE_SLURMCTLD_CRT}'."
 [[ -f "${FILE_SLURMCTLD_CSR}" ]] && rm "${FILE_SLURMCTLD_CSR}"
 
-chown slurm:slurm "${FILE_SLURMCTLD_KEY}"
-chown slurm:slurm "${FILE_SLURMCTLD_CRT}"
+if ! [[ $SYSTEM_DIST == "rocky" ]]; then
+  chown slurm:slurm "${FILE_SLURMCTLD_KEY}"
+  chown slurm:slurm "${FILE_SLURMCTLD_CRT}"
+fi
 chmod 600 "${FILE_SLURMCTLD_KEY}"
 chmod 600 "${FILE_SLURMCTLD_CRT}"
 

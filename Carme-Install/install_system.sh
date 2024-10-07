@@ -39,7 +39,7 @@ log "starting system configuration..."
 # update packages -------------------------------------------------------------------------
 log "updating packages..."
 
-apt-get update -y
+update_packages
 
 # modify ubuntu 22.04 needrestart ---------------------------------------------------------
 if [[ -f /etc/needrestart/needrestart.conf ]]; then
@@ -87,7 +87,7 @@ fi
 if [[ ${CARME_SYSTEM} == "single" ]]; then
   log "configuring ssh connection to localhost..."
 
-  [[ $(installed "openssh-server" "single") == "not installed" ]] && apt install openssh-server -y
+  [[ $(installed "openssh-server" "single") == "not installed" ]] && install_packages openssh-server
   ssh-keygen -A
   if systemctl cat sshd &>/dev/null
   then

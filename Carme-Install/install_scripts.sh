@@ -36,7 +36,12 @@ fi
 [[ -z ${CARME_NODE_LIST} ]] && die "[install_scripts.sh]: CARME_NODE_LIST not set."
 
 # install variables ----------------------------------------------------------------------
-PATH_SLURM=$(dpkg -L slurmctld | grep '/etc/slurm' | head -n1)
+SLURM_PATHS_PACKAGE=slurmctld
+if [[ $SYSTEM_DIST == "rocky" ]]; then
+  SLURM_PATHS_PACKAGE=slurm
+fi
+
+PATH_SLURM=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/etc/slurm' | head -n1)
 PATH_SLURMCTLD_LOG="/var/log/carme/slurmctld"
 PATH_SCRIPTS_BACKEND="${PATH_CARME}/Carme-Scripts/backend"
 PATH_SCRIPTS_FRONTEND="${PATH_CARME}/Carme-Scripts/frontend"
@@ -122,7 +127,9 @@ mkdir -p ${PATH_SLURMCTLD_LOG}/prolog/
 mkdir -p ${PATH_SLURMCTLD_LOG}/epilog/
 
 # set ownership ---------------------------------------------------------------------------
-chown -R slurm:slurm ${PATH_SLURMCTLD_LOG}
+if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
+  chown -R slurm:slurm ${PATH_SLURMCTLD_LOG}
+fi
 
 # restart slurm ---------------------------------------------------------------------------
 if [[ ${CARME_SYSTEM} == "single" ]]; then

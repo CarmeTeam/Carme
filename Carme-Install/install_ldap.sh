@@ -63,6 +63,9 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
 
   if [[ ${CARME_SYSTEM} == "single" ]]; then
     MY_PKGS=(slapd ldapscripts libnss-ldapd)
+    if [[ $SYSTEM_DIST == "rocky" ]]; then
+      MY_PKGS=(openldap-servers openldap-clients nss-pam-ldapd)
+    fi
     MISSING_PKGS=""
 
     for MY_PKG in ${MY_PKGS[@]}; do
@@ -72,8 +75,8 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     done
 
     if [ ! -z "$MISSING_PKGS" ]; then
-      dpkg --configure -a
-      DEBIAN_FRONTEND=noninteractive apt install $MISSING_PKGS -y
+      reconfigure_packages
+      install_packages $MISSING_PKGS
     fi
 
     for MY_PKG in ${MY_PKGS[@]}; do
@@ -85,6 +88,9 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
 
     # head-node -----------------------------------
     HEAD_NODE_PKGS=(slapd ldapscripts libnss-ldapd)
+    if [[ $SYSTEM_DIST == "rocky" ]]; then
+      HEAD_NODE_PKGS=(openldap-servers openldap-clients)
+    fi
     MISSING_HEAD_NODE_PKGS=""
 
     for HEAD_NODE_PKG in ${HEAD_NODE_PKGS[@]}; do
@@ -94,8 +100,8 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
     done
 
     if [ ! -z "$MISSING_HEAD_NODE_PKGS" ]; then
-      dpkg --configure -a
-      DEBIAN_FRONTEND=noninteractive apt install $MISSING_HEAD_NODE_PKGS -y
+      reconfigure_packages
+      install_packages $MISSING_PKGS
     fi
 
     for HEAD_NODE_PKG in ${HEAD_NODE_PKGS[@]}; do
@@ -106,6 +112,9 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
 
     # compute-nodes -----------------------------
     COMPUTE_NODE_PKGS=(libnss-ldapd)
+    if [[ $SYSTEM_DIST == "rocky" ]]; then
+      COMPUTE_NODE_PKGS=(openldap-clients)
+    fi
     MISSING_COMPUTE_NODE_PKGS=""
 
     for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
@@ -115,8 +124,8 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
         fi
       done
       if [ ! -z "$MISSING_COMPUTE_NODE_PKGS" ]; then
-	ssh -t $COMPUTE_NODE "dpkg --configure -a"
-        ssh -t $COMPUTE_NODE "DEBIAN_FRONTEND=noninteractive apt install $MISSING_COMPUTE_NODE_PKGS -y"
+	reconfigure_packages_remote
+	install_packages_remote $COMPUTE_NODE $MISSING_COMPUTE_NODE_PKGS
       fi
       for COMPUTE_NODE_PKG in ${COMPUTE_NODE_PKGS[@]}; do
         if [[ $(installed $COMPUTE_NODE_PKG $COMPUTE_NODE) == "not installed" ]]; then

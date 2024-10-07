@@ -21,6 +21,8 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
 
+  SYSTEM_DIST=$(get_variable SYSTEM_DIST ${FILE_START_CONFIG})
+
   CARME_USER=$(get_variable CARME_USER ${FILE_START_CONFIG})
   CARME_GROUP=$(get_variable CARME_GROUP ${FILE_START_CONFIG})
   CARME_SLURM=$(get_variable CARME_SLURM ${FILE_START_CONFIG})
@@ -30,11 +32,14 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_DB_SLURM_USER=$(get_variable CARME_DB_SLURM_USER ${FILE_START_CONFIG})
   CARME_MUNGE_PATH_RUN=$(get_variable CARME_MUNGE_PATH_RUN ${FILE_START_CONFIG})
   CARME_MUNGE_FILE_KEY=$(get_variable CARME_MUNGE_FILE_KEY ${FILE_START_CONFIG})
+  CARME_PASSWORD_MYSQL=$(get_variable CARME_PASSWORD_MYSQL ${FILE_START_CONFIG})
   CARME_PASSWORD_SLURM=$(get_variable CARME_PASSWORD_SLURM ${FILE_START_CONFIG})
   CARME_SLURM_SLURMD_PORT=$(get_variable CARME_SLURM_SLURMD_PORT ${FILE_START_CONFIG})
   CARME_SLURM_CLUSTER_NAME=$(get_variable CARME_SLURM_CLUSTER_NAME ${FILE_START_CONFIG})
   CARME_SLURM_PARTITION_NAME=$(get_variable CARME_SLURM_PARTITION_NAME ${FILE_START_CONFIG})
   CARME_SLURM_SLURMCTLD_PORT=$(get_variable CARME_SLURM_SLURMCTLD_PORT ${FILE_START_CONFIG})
+
+  [[ -z ${SYSTEM_DIST} ]] && die "[install_database.sh]: SYSTEM_DIST not set."
 
   [[ -z ${CARME_USER} ]] && die "[install_slurm.sh]: CARME_USER not set."
   [[ -z ${CARME_GROUP} ]] && die "[install_slurm.sh]: CARME_GROUP not set."
@@ -77,6 +82,10 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
   # single device
   if [[ ${CARME_SYSTEM} == "single" ]]; then
     MY_PKGS=(slurmctld slurmd slurmdbd libpmix-dev)
+    if [[ $SYSTEM_DIST == "rocky" ]]; then
+      MY_PKGS=(slurm-slurmctld slurm-slurmd slurm-slurmdbd pmix-devel)
+    fi
+
     # libpmix-dev is required 
     # https://linux.debian.bugs.dist.narkive.com/wxMHknxm/bug-954272-slurmd-slurm-not-working-with-openmpi
     MISSING_PKGS=""
@@ -86,8 +95,8 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
       fi
     done
     if [ ! -z "$MISSING_PKGS" ]; then
-      dpkg --configure -a
-      apt install $MISSING_PKGS -y
+      reconfigure_packages
+      install_packages $MISSING_PKGS
     fi
     for MY_PKG in ${MY_PKGS[@]}; do
       if [[ $(installed $MY_PKG "single") == "not installed" ]]; then
@@ -99,6 +108,9 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
   elif [[ ${CARME_SYSTEM} == "multi" ]]; then
     # cluster head node 
     HEAD_NODE_PKGS=(slurmctld slurmdbd libpmix-dev)
+    if [[ $SYSTEM_DIST == "rocky" ]]; then
+      HEAD_NODE_PKGS=(slurm-slurmctld slurm-slurmdbd pmix-devel)
+    fi
     MISSING_HEAD_NODE_PKGS=""
     for HEAD_NODE_PKG in ${HEAD_NODE_PKGS[@]}; do
       if [[ $(installed $HEAD_NODE_PKG "single") == "not installed" ]]; then
@@ -106,8 +118,8 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
       fi
     done
     if [ ! -z "$MISSING_HEAD_NODE_PKGS" ]; then
-      dpkg --configure -a
-      apt install $MISSING_HEAD_NODE_PKGS -y
+      reconfigure_packages
+      install_packages $MISSING_HEAD_NODE_PKGS
     fi
     for HEAD_NODE_PKG in ${HEAD_NODE_PKGS[@]}; do
       if [[ $(installed $HEAD_NODE_PKG "single") == "not installed" ]]; then
@@ -116,6 +128,9 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
     done
     # cluster compute nodes
     COMPUTE_NODE_PKGS=(slurmd slurm-client libpmix-dev)
+    if [[ $SYSTEM_DIST == "rocky" ]]; then
+      COMPUTE_NODE_PKGS=(slurm-slurmd pmix-devel)
+    fi
     MISSING_COMPUTE_NODE_PKGS=""
     for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
       for COMPUTE_NODE_PKG in ${COMPUTE_NODE_PKGS[@]}; do
@@ -124,8 +139,8 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
         fi
       done
       if [ ! -z "$MISSING_COMPUTE_NODE_PKGS" ]; then
-	ssh -t $COMPUTE_NODE "dpkg --configure -a"
-        ssh -t $COMPUTE_NODE "apt install $MISSING_COMPUTE_NODE_PKGS -y"
+	reconfigure_packages_remote
+	install_packages_remote $COMPUTE_NODE $MISSING_COMPUTE_NODE_PKGS
       fi
       for COMPUTE_NODE_PKG in ${COMPUTE_NODE_PKGS[@]}; do
         if [[ $(installed $COMPUTE_NODE_PKG $COMPUTE_NODE) == "not installed" ]]; then
@@ -138,7 +153,12 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
 fi
 
 # install/configure variables -------------------------------------------------------------
-PATH_ETC_SLURM=$(dpkg -L slurmctld | grep '/etc/slurm' | head -n1)
+SLURM_PATHS_PACKAGE=slurmctld
+if [[ $SYSTEM_DIST == "rocky" ]]; then
+  SLURM_PATHS_PACKAGE=slurm
+fi
+
+PATH_ETC_SLURM=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/etc/slurm' | head -n1)
 PATH_ETC_MUNGE=$(dirname ${CARME_MUNGE_FILE_KEY})
 PATH_RUN_MUNGE=${CARME_MUNGE_PATH_RUN}
 
@@ -153,12 +173,17 @@ PORT_SLURMD=${CARME_SLURM_SLURMD_PORT}
 
 if [[ ${CARME_SLURM} == "yes" ]]; then
 
-  PATH_VAR_LOG_SLURM_SLURMD=$(dpkg -L slurmctld | grep '/var/log/slurm' | head -n1)
-  PATH_VAR_LOG_SLURM_SLURMDBD=$(dpkg -L slurmctld | grep '/var/log/slurm' | head -n1)
-  PATH_VAR_LOG_SLURM_SLURMCTLD=$(dpkg -L slurmctld | grep '/var/log/slurm' | head -n1)
+  PATH_VAR_LOG_SLURM_SLURMD=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/var/log/slurm' | head -n1)
+  PATH_VAR_LOG_SLURM_SLURMDBD=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/var/log/slurm' | head -n1)
+  PATH_VAR_LOG_SLURM_SLURMCTLD=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/var/log/slurm' | head -n1)
 
-  PATH_VAR_LIB_SLURM_SLURMD=$(dpkg -L slurmctld | grep '/var/lib/slurm' | head -n1)/slurmd
-  PATH_VAR_LIB_SLURM_SLURMCTLD=$(dpkg -L slurmctld | grep '/var/lib/slurm' | head -n1)/slurmctld
+  if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
+    PATH_VAR_LIB_SLURM_SLURMD=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/var/lib/slurm' | head -n1)/slurmd
+    PATH_VAR_LIB_SLURM_SLURMCTLD=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/var/lib/slurm' | head -n1)/slurmctld
+  elif [[ $SYSTEM_DIST == "rocky" ]]; then
+    PATH_VAR_LIB_SLURM_SLURMD=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/var/spool/slurm' | head -n1)/d
+    PATH_VAR_LIB_SLURM_SLURMCTLD=$(list_packages_files ${SLURM_PATHS_PACKAGE} | grep '/var/spool/slurm' | head -n1)/ctld
+  fi
 
   PATH_RUN_SLURM_SLURMD=/var/run
   PATH_RUN_SLURM_SLURMDBD=/var/run
@@ -329,6 +354,13 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
     SLURM_CONTROLLER_HOST=$(hostname -s | awk '{print $1}')
   fi
 
+  SLURM_USER=slurm
+  if [[ $SYSTEM_DIST == "rocky" ]]; then
+    SLURM_USER=root
+    CARME_DB_SLURM_USER=root
+    CARME_PASSWORD_SLURM="${CARME_PASSWORD_MYSQL}"
+  fi
+
   cat << EOF >> ${FILE_SLURM_CONFIG}
 # slurm.conf file 
 #
@@ -343,7 +375,7 @@ SlurmctldHost=${SLURM_CONTROLLER_HOST}
 #EpilogSlurmctld=# to be set with install_Script.sh
 #
 # SERVICES --------------------------------------------------------------------------------
-SlurmUser=slurm
+SlurmUser=${SLURM_USER}
 SlurmctldPort=${PORT_SLURMCTLD}
 SlurmdPort=${PORT_SLURMD}
 SlurmctldPidFile=${PATH_RUN_SLURM_SLURMCTLD}/slurmctld.pid
@@ -622,7 +654,9 @@ StorageUser=${CARME_DB_SLURM_USER}
 EOF
 
   chmod 600 "${FILE_SLURMDBD_CONFIG}" || die "[install_slurm.sh]: cannot change file permissions of ${FILE_SLURMDBD_CONFIG}."
-  chown ${CARME_DB_SLURM_USER}:${CARME_DB_SLURM_USER} "${FILE_SLURMDBD_CONFIG}"
+  if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
+    chown ${CARME_DB_SLURM_USER}:${CARME_DB_SLURM_USER} "${FILE_SLURMDBD_CONFIG}"
+  fi
 
 elif [[ ${CARME_SLURM} == "no" ]]; then
   log "checking slurm services..."
@@ -675,6 +709,13 @@ if [[ -f "${FILE_CARME_GPU_CONFIG}" && -z $(grep '[^[:space:]]' "${FILE_CARME_GP
   rm ${FILE_CARME_GPU_CONFIG}
 fi
 
+if [[ $SYSTEM_DIST == "rocky" ]]; then
+  if [[ ! -f "/etc/munge/munge.key" ]]; then
+    create-munge-key
+  fi
+  chmod +t /etc
+fi
+
 # copy munge.key, slurm.conf, and gres.conf to all compute nodes --------------------------
 if [[ ${CARME_SYSTEM} == "multi" ]]; then
 log "copying slurm files to compute-nodes..."
@@ -724,12 +765,16 @@ elif [[ ${CARME_SYSTEM} == "multi" ]]; then
 fi
 
 # restart mysql
-systemctl restart mysql
+DB_SERVICE="mysql"
+if [[ $SYSTEM_DIST == "rocky" ]]; then
+  DB_SERVICE="mysqld"
+fi
+systemctl restart ${DB_SERVICE}
 if [[ ${CARME_SYSTEM} == "single" ]]; then
-  systemctl is-active --quiet mysql && log "mysql service is running." \
+  systemctl is-active --quiet ${DB_SERVICE} && log "mysql service is running." \
 	                            || die "[install_slurm.sh]: mysql.service is not running."
 elif [[ ${CARME_SYSTEM} == "multi" ]]; then
-  systemctl is-active --quiet mysql && log "mysql service in head-node is running." \
+  systemctl is-active --quiet ${DB_SERVICE} && log "mysql service in head-node is running." \
 	                            || die "[install_slurm.sh]: mysql.service in head-node is not running."
 fi
 

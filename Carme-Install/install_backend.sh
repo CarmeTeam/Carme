@@ -266,10 +266,14 @@ else
   mamba activate carme-backend
 fi
 
-[[ ${SYSTEM_ARCH} == "amd64" && ${SYSTEM_DIST} == "ubuntu" ]] && 
-apt-get install libmysqlclient-dev -y ||
-apt-get install libmariadb-dev -y
-apt-get install gcc -y
+if [[ ${SYSTEM_ARCH} == "amd64" && ${SYSTEM_DIST} == "ubuntu" ]]; then
+  install_packages libmysqlclient-dev
+elif [[ ${SYSTEM_DIST} == "rocky" ]]; then
+  install_packages mysql-devel
+else
+  install_packages libmariadb-dev
+fi
+install_packages gcc
 
 pip install --force-reinstall ${PATH_BACKEND}/Python/dist/carme_backend*.whl --root-user-action=ignore
 mamba deactivate

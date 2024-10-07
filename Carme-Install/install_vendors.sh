@@ -53,8 +53,13 @@ log "starting vendors installation..."
 # install packages ------------------------------------------------------------------------
 log "installing packages..."
 
-apt-get install -y build-essential libseccomp-dev libglib2.0-dev \
-                   pkg-config squashfs-tools cryptsetup wget
+if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
+  apt-get install -y build-essential libseccomp-dev libglib2.0-dev \
+                     pkg-config squashfs-tools cryptsetup wget
+elif [[ $SYSTEM_DIST == "rocky" ]]; then
+  dnf groupinstall -y "Development Tools"
+  dnf install -y libseccomp-devel glib2-devel wget
+fi
 
 # create vendors directory ---------------------------------------------------------------- 
 log "creating vendors directory..."
@@ -84,7 +89,7 @@ if [[ ${GO_VERSION_OLD} != ${GO_VERSION} ]]; then
         if ! grep -Fxq "export PATH=\$PATH:${PATH_GO}/bin" ~/.bashrc; then
             echo "export PATH=\$PATH:${PATH_GO}/bin" >> ~/.bashrc
         fi
-        eval "$(cat ~/.bashrc | tail -n +10)"
+        eval "$(cat ~/.bashrc | tail -n 1)"
     fi
 else
     log "go ${GO_VERSION} is already installed."

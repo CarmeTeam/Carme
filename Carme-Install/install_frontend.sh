@@ -608,7 +608,10 @@ chown -R www-data:www-data /var/log/carme/apache
 log "building frontend image..."
 
 if [[ $(installed "debootstrap" "single") == "not installed" ]]; then
-  apt install debootstrap -y
+  install_packages debootstrap
+  if [[ $SYSTEM_DIST == "rocky" ]]; then
+    install_packages squashfs-tools
+  fi
 fi
 
 log "initializing build (please wait)..."

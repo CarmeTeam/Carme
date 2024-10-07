@@ -13,14 +13,23 @@ source ${PATH_CARME}/Carme-Install/basic_functions.sh
 # check compatibility ---------------------------------------------------------------------
 log "checking system..."
 
-SYSTEM_ARCH=$(dpkg --print-architecture)
-if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
-  die "[config.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
-fi
-
 SYSTEM_HDWR=$(uname -m)
 if ! [[ $SYSTEM_HDWR == "aarch64" || $SYSTEM_HDWR == "x86_64"  ]];then
   die "[config.sh]: aarch64 and x86_64 hardwares are supported. Yours is $SYSTEM_HDWR. Please contact us."
+fi
+
+if command -v "dpkg" >/dev/null 2>&1 ;then
+  SYSTEM_ARCH=$(dpkg --print-architecture)
+  if ! [[ $SYSTEM_ARCH == "arm64" || $SYSTEM_ARCH == "amd64"  ]];then
+    die "[config.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
+  fi
+else
+  SYSTEM_ARCH=$(uname -m)
+  if [[ ${SYSTEM_HDWR} == "x86_64" ]]; then
+    SYSTEM_ARCH="amd64"
+  else
+    die "[config.sh]: amd64 and arm64 architectures are supported. Yours is $SYSTEM_ARCH. Please contact us."
+  fi
 fi
 
 SYSTEM_OS=$(uname -s)
@@ -28,9 +37,9 @@ if ! [ ${SYSTEM_OS,} = "linux" ]; then
   die "[config.sh]: linux OS is supported. Yours is ${SYSTEM_OS,}. Please contact us."
 fi
 
-SYSTEM_DIST=$(awk -F= '$1=="ID" { print $2 ;}' /etc/os-release)
-if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian"  ]];then
-  die "[config.sh]: ubuntu and debian distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
+SYSTEM_DIST=$(awk -F= '$1=="ID" { gsub(/"/, "", $2); print $2 ;}' /etc/os-release)
+if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" || $SYSTEM_DIST == "rocky"  ]];then
+  die "[config.sh]: ubuntu, debian, and rocky distros are supported. Yours is ${SYSTEM_DIST}. Please contact us."
 fi
 
 # set the config file ---------------------------------------------------------------------
@@ -203,6 +212,8 @@ fi
 # set database ---------------------------------------------------------------------------
 REPLY=""
 if [[ ${SYSTEM_ARCH} == "amd64" && ${SYSTEM_DIST} == "ubuntu" ]]; then
+  CARME_DB_SERVER="mysql"
+elif [[ ${SYSTEM_ARCH} == "amd64" && ${SYSTEM_DIST} == "rocky" ]]; then
   CARME_DB_SERVER="mysql"
 else
   CARME_DB_SERVER="mariadb"

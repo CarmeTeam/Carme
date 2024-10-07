@@ -22,6 +22,8 @@ FILE_START_CONFIG="${PATH_CARME}/CarmeConfig.start"
 
 if [[ -f ${FILE_START_CONFIG} ]]; then
 
+  SYSTEM_DIST=$(get_variable SYSTEM_DIST ${FILE_START_CONFIG})
+
   CARME_DB=$(get_variable CARME_DB ${FILE_START_CONFIG})
   CARME_SYSTEM=$(get_variable CARME_SYSTEM ${FILE_START_CONFIG})
   CARME_DB_SERVER=$(get_variable CARME_DB_SERVER ${FILE_START_CONFIG})
@@ -33,6 +35,8 @@ if [[ -f ${FILE_START_CONFIG} ]]; then
   CARME_DB_DEFAULT_PORT=$(get_variable CARME_DB_DEFAULT_PORT ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_NAME=$(get_variable CARME_DB_DEFAULT_NAME ${FILE_START_CONFIG})
   CARME_DB_DEFAULT_USER=$(get_variable CARME_DB_DEFAULT_USER ${FILE_START_CONFIG})
+
+  [[ -z ${SYSTEM_DIST} ]] && die "[install_database.sh]: SYSTEM_DIST not set."
 
   [[ -z ${CARME_DB} ]] && die "[install_database.sh]: CARME_DB not set."
   [[ -z ${CARME_SYSTEM} ]] && die "[install_database.sh]: CARME_SYSTEM not set."
@@ -66,8 +70,13 @@ if [[ ${CARME_DB_SERVER} == "mariadb" ]]; then
   DB_SERVER="mariadb-server"
   DB_SERVICE="mariadb"
 elif [[ ${CARME_DB_SERVER} == "mysql" ]]; then 
-  DB_SERVER="mysql-server-8.0"
-  DB_SERVICE="mysql"
+  if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
+    DB_SERVER="mysql-server-8.0"
+    DB_SERVICE="mysql"
+  elif [[ $SYSTEM_DIST == "rocky" ]]; then
+    DB_SERVER="mysql-server"
+    DB_SERVICE="mysqld"
+  fi
 else
   die "[install_mysql.sh]: CARME_DB_SERVER=${CARME_DB_SERVER} in CarmeConfig.start is not set properly. It must be \`mariadb\` or \`mysql\`."
 fi
@@ -77,28 +86,36 @@ if [[ ${CARME_DB} == "yes" ]]; then
   if [[ $(installed "${DB_SERVER}" "single") == "installed" ]]; then
     log "${DB_SERVER} is already installed..."
     
-    MESSAGE_DB_START="Do you want to use the already existing ${DB_SERVICE}? Type No if you prefer to remove it [y/N]:"
+    MESSAGE_DB_START="Do you want to use the already existing ${DB_SERVICE}? Type No if you prefer to remove it [Y/n]:"
     read -rp "${MESSAGE_DB_START} " REPLY
     if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
       systemctl is-active --quiet ${DB_SERVICE} && log "${DB_SERVICE}.service is running." || systemctl start ${DB_SERVICE}.service
       systemctl is-active --quiet ${DB_SERVICE} || die "[install_mysql.sh]: ${DB_SERVICE}.service is not running. Your existing ${DB_SERVICE} won't start. Try removing it."
     elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
-      MESSAGE_DB_REMOVE="Are you sure that you want to remove the already existing ${DB_SERVICE} (all databases will be lost)? [y/N]:"
+      MESSAGE_DB_REMOVE="Are you sure that you want to remove the already existing ${DB_SERVICE} (all databases will be lost)? [y/n]:"
       read -rp "${MESSAGE_DB_REMOVE} " REPLY
       if [[ $REPLY =~ ^[Yy]$ || $REPLY == "Yes" || $REPLY == "yes" ]]; then
         log "removing ${DB_SERVER}..."
-	apt-get remove --purge ${DB_SERVICE}-server* -y
-        apt-get remove --purge mysql-\* -y
-        apt -y autoremove
-        apt autoclean
-        apt clean all
+	remove_packages ${DB_SERVICE}-server*
+        remove_packages mysql-\*
+	autoremove_packages
+        autoclean_packages
+        clean_packages
         rm -rf /etc/mysql/ /var/lib/mysql/ /var/log/mysql
-        apt clean
+        clean_packages
 
 	log "reinstalling ${DB_SERVER}..."
-        debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password password ${CARME_PASSWORD_MYSQL}"
-        debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password_again password ${CARME_PASSWORD_MYSQL}"
-        apt-get install ${DB_SERVER} -y
+        if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
+          debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password password ${CARME_PASSWORD_MYSQL}"
+          debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password_again password ${CARME_PASSWORD_MYSQL}"
+	fi
+
+        install_packages ${DB_SERVER}
+
+        if [[ $SYSTEM_DIST == "rocky" ]]; then
+          systemctl enable --now ${DB_SERVICE}
+          mysqladmin -u root password ${CARME_PASSWORD_MYSQL}
+        fi
       elif [[ $REPLY =~ ^[Nn]$ || $REPLY == "No" || $REPLY == "no"  ]]; then
         die "[install_mysql.sh]: You have cancelled the request. Please try again."
       else
@@ -108,11 +125,19 @@ if [[ ${CARME_DB} == "yes" ]]; then
   else
     log "installing ${DB_SERVER}..."
     
-    debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password password $CARME_PASSWORD_MYSQL"
-    debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password_again password $CARME_PASSWORD_MYSQL"
-    apt-get install ${DB_SERVER} -y
-    apt-get autoremove -y
-    apt-get clean
+    if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
+      debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password password $CARME_PASSWORD_MYSQL"
+      debconf-set-selections <<< "${DB_SERVER} mysql-server/root_password_again password $CARME_PASSWORD_MYSQL"
+    fi
+
+    install_packages ${DB_SERVER}
+    autoremove_packages
+    clean_packages
+
+    if [[ $SYSTEM_DIST == "rocky" ]]; then
+      systemctl enable --now ${DB_SERVICE}
+      mysqladmin -u root password ${CARME_PASSWORD_MYSQL}
+    fi
   fi
 
 elif  [[ ${CARME_DB} == "no" ]]; then
@@ -175,69 +200,47 @@ fi
 # configure my.cnf: memory restriction -----------------------------------------------------
 log "configuring my.cnf..."
 
+MY_CNF_PATH="/etc/mysql/my.cnf"
+CARME_CNF_DIR="/etc/mysql/carme.cnf.d"
+if [[ $SYSTEM_DIST == "rocky" ]]; then
+  MY_CNF_PATH="/etc/my.cnf"
+  CARME_CNF_DIR="/etc/carme.cnf.d"
+fi
 systemctl stop ${DB_SERVICE}.service
 
-if [[ "${CARME_DB_DEFAULT_PORT}" == "3306" ]]; then
-  MYCNF="
-\[mysqld\]
-innodb_buffer_pool_size=4096M
-innodb_log_file_size=64M
-innodb_lock_wait_timeout=900
-max_allowed_packet=16M"
-else
-  MYCNF="
-\[mysqld\]
-innodb_buffer_pool_size=4096M
-innodb_log_file_size=64M
-innodb_lock_wait_timeout=900
-max_allowed_packet=16M
-port=${CARME_DB_DEFAULT_PORT}"
+if ! grep -q "^!includedir ${CARME_CNF_DIR}$" "$MY_CNF_PATH"; then
+  printf "\n!includedir ${CARME_CNF_DIR}\n" >> $MY_CNF_PATH
 fi
 
-readarray -t <<< $MYCNF
+mkdir -p "${CARME_CNF_DIR}"
 
-NOT_FOUND_COUNTER=0
-for STRING in "${MAPFILE[@]}"; do
-  if ! grep -q "^$STRING$" /etc/mysql/my.cnf; then
-    NOT_FOUND_COUNTER=$((NOT_FOUND_COUNTER+1))
-  fi
-done
-
-if [[ ${NOT_FOUND_COUNTER} == 6 ]]; then
-  cat << EOF >> /etc/mysql/my.cnf
-
-# carme-innodb 
+if [[ "${CARME_DB_DEFAULT_PORT}" == "3306" ]]; then
+  cat << EOF > "${CARME_CNF_DIR}/innodb.cnf"
 [mysqld]
 innodb_buffer_pool_size=4096M
 innodb_log_file_size=64M
 innodb_lock_wait_timeout=900
 max_allowed_packet=16M
-port=${CARME_DB_DEFAULT_PORT}
 EOF
-
-elif [[ ${NOT_FOUND_COUNTER} == 5 && ${CARME_DB_DEFAULT_PORT} == "3306" ]]; then
-  cat << EOF >> /etc/mysql/my.cnf
-
-# carme-innodb 
-[mysqld]
-innodb_buffer_pool_size=4096M
-innodb_log_file_size=64M
-innodb_lock_wait_timeout=900
-max_allowed_packet=16M
-port=${CARME_DB_DEFAULT_PORT}
-EOF
-
-elif [[ ${NOT_FOUND_COUNTER} == 0 ]]; then
-  true
 else
-  die "[install_mysql.sh]: To proceed, you first need to add the following to \`/etc/mysql/my.cnf\`. Please add it and try again.
-  
+  cat << EOF > "${CARME_CNF_DIR}/innodb.cnf"
 [mysqld]
 innodb_buffer_pool_size=4096M
 innodb_log_file_size=64M
 innodb_lock_wait_timeout=900
 max_allowed_packet=16M
-port=${CARME_DB_DEFAULT_PORT}"
+port=${CARME_DB_DEFAULT_PORT}
+EOF
+fi
+
+if [[ $SYSTEM_DIST == "rocky" ]]; then
+  cat << EOF > "${CARME_CNF_DIR}/socket.cnf"
+[mysqld]
+socket=/run/mysqld/mysqld.sock
+
+[client]
+socket=/run/mysqld/mysqld.sock
+EOF
 fi
 
 # configure debian.cnf: password restriction in mariadb -----------------------------------
@@ -284,6 +287,7 @@ if [[ ${CARME_SYSTEM} == "multi" ]]; then
     fi
   fi
 fi
+# TODO: enable this on rocky
 
 # remove binlogs --------------------------------------------------------------------------
 if [[ $DB_SERVICE == "mysql" ]]; then
