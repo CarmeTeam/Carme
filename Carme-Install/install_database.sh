@@ -241,6 +241,7 @@ socket=/run/mysqld/mysqld.sock
 [client]
 socket=/run/mysqld/mysqld.sock
 EOF
+  ln -s /run/mysqld/mysqld.sock /var/lib/mysql/mysql.sock
 fi
 
 # configure debian.cnf: password restriction in mariadb -----------------------------------
