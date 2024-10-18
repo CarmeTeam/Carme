@@ -83,7 +83,7 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
   if [[ ${CARME_SYSTEM} == "single" ]]; then
     MY_PKGS=(slurmctld slurmd slurmdbd libpmix-dev)
     if [[ $SYSTEM_DIST == "rocky" ]]; then
-      MY_PKGS=(slurm-slurmctld slurm-slurmd slurm-slurmdbd pmix-devel)
+      MY_PKGS=(slurm-slurmctld slurm-slurmd slurm-slurmdbd pmix-devel iproute)
     fi
 
     # libpmix-dev is required 
@@ -109,7 +109,7 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
     # cluster head node 
     HEAD_NODE_PKGS=(slurmctld slurmdbd libpmix-dev)
     if [[ $SYSTEM_DIST == "rocky" ]]; then
-      HEAD_NODE_PKGS=(slurm-slurmctld slurm-slurmdbd pmix-devel)
+      HEAD_NODE_PKGS=(slurm-slurmctld slurm-slurmdbd pmix-devel iproute)
     fi
     MISSING_HEAD_NODE_PKGS=""
     for HEAD_NODE_PKG in ${HEAD_NODE_PKGS[@]}; do
@@ -129,7 +129,7 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
     # cluster compute nodes
     COMPUTE_NODE_PKGS=(slurmd slurm-client libpmix-dev)
     if [[ $SYSTEM_DIST == "rocky" ]]; then
-      COMPUTE_NODE_PKGS=(slurm-slurmd pmix-devel)
+      COMPUTE_NODE_PKGS=(slurm-slurmd pmix-devel iproute)
     fi
     MISSING_COMPUTE_NODE_PKGS=""
     for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
