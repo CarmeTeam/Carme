@@ -245,7 +245,7 @@ if [[ -d "${PATH_MAMBAFORGE}/envs/carme-backend-build" ]];then
     rm -r ${PATH_BACKEND}/Python/dist
   fi
 else
-  mamba create -n carme-backend-build python=3 -y
+  mamba create -n carme-backend-build python=3.12 -y
   mamba activate carme-backend-build
 fi
 
@@ -262,7 +262,7 @@ log "installing backend wheel..."
 if [[ -d "${PATH_MAMBAFORGE}/envs/carme-backend" ]];then
   mamba activate carme-backend
 else
-  mamba create -n carme-backend python=3 -y
+  mamba create -n carme-backend python=3.12 -y
   mamba activate carme-backend
 fi
 
