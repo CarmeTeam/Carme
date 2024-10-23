@@ -133,7 +133,7 @@ for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
           if (n == 3) {
             type = toks[1]
             name = toupper(toks[2])
-            num_per_node = toks[2]
+            num_per_node = toks[3]
           } else if (n == 2) {
             type = toks[1]
             name = toupper(type)
@@ -208,7 +208,7 @@ for (( i=0; i<${LEN_PARTITIONS}; i++ )); do
             if (n == 3) {
               type = toks[1]
               name = toupper(toks[2])
-              num_per_node = toks[2]
+              num_per_node = toks[3]
             } else if (n == 2) {
               type = toks[1]
               name = toupper(type)
