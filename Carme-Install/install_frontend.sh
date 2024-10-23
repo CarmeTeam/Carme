@@ -106,28 +106,25 @@ fi
 # cpu info (not used)
 #CPU_NAME=$(lscpu | sed -nr '/Model name/ s/.*:\s*//p' | sed 's/\s*@.*//' | sed 's/([^)]*)//g' | sed 's/CPU//g')
 #MAIN_MEM_NODE=$(grep "^MemTotal:" /proc/meminfo | awk '{print int($2/1024)}')
-#NUM_CPUS_NODE=$(grep -c ^processor /proc/cpuinfo)  
+#NUM_CPUS_NODE=$(grep -c ^processor /proc/cpuinfo)
 
-# set projects_accelerators DB 
+# set projects_accelerators DB
 # fields: name, type, num_per_node, num_cpus_per_node, main_mem_per_node (in MB), node_name, node_status
 ACCELERATOR_LIST=()
 for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
   if [[ ${COMPUTE_NODE} == "localhost" ]]; then
     COMPUTE_NODE="$(hostname -s | awk '{print $1}')"
-  fi 
+  fi
   COMPUTE_NODE_DATA=$(scontrol show nodes -o | grep "${COMPUTE_NODE}" | awk '
   {
     for (i = 1; i <= NF; i++) {
       split($i, pair, "=")
-      switch (pair[1]) {
-      case "NodeName":
+      if (pair[1] == "NodeName") {
         node_name = pair[2]
-        break
-      case "CPUTot":
+      } else if (pair[1] == "CPUTot") {
         num_cpus_per_node = pair[2]
-        break
-      case "Gres":
-        n = split(pair[2], toks, ":") 
+      } else if (pair[1] == "Gres") {
+        n = split(pair[2], toks, ":")
         if (toks[1] == "(null)" ){
           type = "cpu"
           name = toupper(type)
@@ -146,16 +143,13 @@ for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
             next
           }
         }
-        break
-      case "RealMemory":
+      } else if (pair[1] == "RealMemory") {
         main_mem_per_node = pair[2]
-        break
-      case "State":
+      } else if (pair[1] == "State") {
         node_status = 0
         if (pair[2] == "IDLE" || pair[2] == "MIX" || pair[2] == "ALLOC") {
           node_status = 1
         }
-        break
       }
     }
     print name, type, num_per_node, num_cpus_per_node, main_mem_per_node, node_name, node_status
@@ -200,15 +194,12 @@ for (( i=0; i<${LEN_PARTITIONS}; i++ )); do
     {
       for (i = 1; i <= NF; i++) {
         split($i, pair, "=")
-        switch (pair[1]) {
-        case "NodeName":
+        if (pair[1] == "NodeName") {
           node_name = pair[2]
-          break
-        case "CPUTot":
+        } else if (pair[1] == "CPUTot") {
           num_cpus_per_node = pair[2]
-          break
-        case "Gres":
-          n = split(pair[2], toks, ":") 
+        } else if (pair[1] == "Gres") {
+          n = split(pair[2], toks, ":")
           if (toks[1] == "(null)" ){
             type = "cpu"
             name = toupper(type)
@@ -227,16 +218,13 @@ for (( i=0; i<${LEN_PARTITIONS}; i++ )); do
               next
             }
           }
-          break
-        case "RealMemory":
+        } else if (pair[1] == "RealMemory") {
           main_mem_per_node = pair[2]
-          break
-        case "State":
+        } else if (pair[1] == "State") {
           node_status = 0
           if (pair[2] == "IDLE" || pair[2] == "MIX" || pair[2] == "ALLOC") {
             node_status = 1
           }
-          break
         }
       }
       print name, type, num_per_node, num_cpus_per_node, main_mem_per_node, node_name, node_status
