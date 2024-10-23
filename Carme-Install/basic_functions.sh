@@ -37,7 +37,7 @@ function update_packages () {
 
 function install_packages () {
   if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
-    apt install -y "${@}"
+    DEBIAN_FRONTEND=noninteractive apt install -y "${@}"
   elif [[ $SYSTEM_DIST == "rocky" ]]; then
     dnf install -y "${@}"
   fi
@@ -46,7 +46,7 @@ function install_packages () {
 function install_packages_remote () {
   COMPUTE_NODE="$1"; shift
   if [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" ]]; then
-    ssh -t $COMPUTE_NODE "apt install $@ -y"
+    ssh -t $COMPUTE_NODE "DEBIAN_FRONTEND=noninteractive apt install -y ${@}"
   elif [[ $SYSTEM_DIST == "rocky" ]]; then
     ssh -t $COMPUTE_NODE "dnf install $@ -y"
   fi
