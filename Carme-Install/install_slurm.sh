@@ -139,7 +139,7 @@ if [[ ${CARME_SLURM} == "yes" ]]; then
         fi
       done
       if [ ! -z "$MISSING_COMPUTE_NODE_PKGS" ]; then
-	reconfigure_packages_remote
+	reconfigure_packages_remote $COMPUTE_NODE
 	install_packages_remote $COMPUTE_NODE $MISSING_COMPUTE_NODE_PKGS
       fi
       for COMPUTE_NODE_PKG in ${COMPUTE_NODE_PKGS[@]}; do
