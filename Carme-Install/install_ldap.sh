@@ -101,7 +101,7 @@ if [[ ${CARME_LDAP} == "yes" ]]; then
 
     if [ ! -z "$MISSING_HEAD_NODE_PKGS" ]; then
       reconfigure_packages
-      install_packages $MISSING_PKGS
+      install_packages $MISSING_HEAD_NODE_PKGS
     fi
 
     for HEAD_NODE_PKG in ${HEAD_NODE_PKGS[@]}; do
