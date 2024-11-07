@@ -86,11 +86,11 @@ else
 fi
 
 # set path to scripts in slurm.conf -------------------------------------------------------
-if grep -q "Prolog=.*\*" "${PATH_SLURM}/slurm.conf"; then
-  OLD_DIR="$(grep -F "Prolog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+if grep -q "^Prolog=.*\*" "${PATH_SLURM}/slurm.conf"; then
+  OLD_DIR="$(grep "^Prolog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   cp "${FILE_SLURMD_PROLOG}" "${PATH_SLURM}/prolog.d"
-elif grep -q -F "Prolog=" "${PATH_SLURM}/slurm.conf"; then
-  OLD_SCRIPT="$(grep -F "Prolog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+elif grep -q "^Prolog=" "${PATH_SLURM}/slurm.conf"; then
+  OLD_SCRIPT="$(grep "^Prolog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   mkdir -p "${PATH_SLURM}/prolog.d"
   cp "${OLD_SCRIPT}" "${PATH_SLURM}/prolog.d"
   cp "${FILE_SLURMD_PROLOG}" "${PATH_SLURM}/prolog.d"
@@ -101,11 +101,11 @@ else
   die "[install_scripts.sh]: Prolog does not exist in ${PATH_SLURM}/slurm.conf. Please contact us."
 fi
 
-if grep -q "Epilog=.*\*" "${PATH_SLURM}/slurm.conf"; then
-  OLD_DIR="$(grep -F "Epilog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+if grep -q "^Epilog=.*\*" "${PATH_SLURM}/slurm.conf"; then
+  OLD_DIR="$(grep "^Epilog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   cp "${FILE_SLURMD_EPILOG}" "${PATH_SLURM}/epilog.d"
-elif grep -q -F "Epilog=" "${PATH_SLURM}/slurm.conf"; then
-  OLD_SCRIPT="$(grep -F "Epilog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+elif grep -q "^Epilog=" "${PATH_SLURM}/slurm.conf"; then
+  OLD_SCRIPT="$(grep "^Epilog=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   mkdir -p "${PATH_SLURM}/epilog.d"
   cp "${OLD_SCRIPT}" "${PATH_SLURM}/epilog.d"
   cp "${FILE_SLURMD_EPILOG}" "${PATH_SLURM}/epilog.d"
@@ -116,11 +116,11 @@ else
   die "[install_scripts.sh]: Epilog does not exist in ${PATH_SLURM}/slurm.conf. Please contact us."
 fi
 
-if grep -q "PrologSlurmctld=.*\*" "${PATH_SLURM}/slurm.conf"; then
-  OLD_DIR="$(grep -F "PrologSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+if grep -q "^PrologSlurmctld=.*\*" "${PATH_SLURM}/slurm.conf"; then
+  OLD_DIR="$(grep "^PrologSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   cp "${FILE_SLURMCTLD_PROLOG}" "${PATH_SLURM}/prologslurmctld.d"
-elif grep -q -F "PrologSlurmctld=" "${PATH_SLURM}/slurm.conf"; then
-  OLD_SCRIPT="$(grep -F "PrologSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+elif grep -q "^PrologSlurmctld=" "${PATH_SLURM}/slurm.conf"; then
+  OLD_SCRIPT="$(grep "^PrologSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   mkdir -p "${PATH_SLURM}/prologslurmctld.d"
   cp "${OLD_SCRIPT}" "${PATH_SLURM}/prologslurmctld.d"
   cp "${FILE_SLURMCTLD_PROLOG}" "${PATH_SLURM}/prologslurmctld.d"
@@ -131,11 +131,11 @@ else
   die "[install_scripts.sh]: PrologSlurmctld does not exist in ${PATH_SLURM}/slurm.conf. Please contact us."
 fi
 
-if grep -q "EpilogSlurmctld=.*\*" "${PATH_SLURM}/slurm.conf"; then
-  OLD_DIR="$(grep -F "EpilogSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+if grep -q "^EpilogSlurmctld=.*\*" "${PATH_SLURM}/slurm.conf"; then
+  OLD_DIR="$(grep "^EpilogSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   cp "${FILE_SLURMCTLD_EPILOG}" "${PATH_SLURM}/epilogslurmctld.d"
-elif grep -q -F "EpilogSlurmctld=" "${PATH_SLURM}/slurm.conf"; then
-  OLD_SCRIPT="$(grep -F "EpilogSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
+elif grep -q "^EpilogSlurmctld=" "${PATH_SLURM}/slurm.conf"; then
+  OLD_SCRIPT="$(grep "^EpilogSlurmctld=" "${PATH_SLURM}/slurm.conf" | cut -d= -f2)"
   mkdir -p "${PATH_SLURM}/epilogslurmctld.d"
   cp "${OLD_SCRIPT}" "${PATH_SLURM}/epilogslurmctld.d"
   cp "${FILE_SLURMCTLD_EPILOG}" "${PATH_SLURM}/epilogslurmctld.d"
