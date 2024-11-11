@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------------------------------#
 
 # show version -------------------------------------------------------------------------------------
-CARME_VERSION="v0.99"
+CARME_VERSION="v1.0"
 
 SYSTEM_DIST=$(awk -F= '$1=="ID" { gsub(/"/, "", $2); print $2 ;}' /etc/os-release)
 if ! [[ $SYSTEM_DIST == "ubuntu" || $SYSTEM_DIST == "debian" || $SYSTEM_DIST == "rocky"  ]];then

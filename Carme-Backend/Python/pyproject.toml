@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "carme_backend"
-version = "0.9.9"
+version = "1.0"
 authors = [
 	{ name = "Carme Team", email = "carme@itwm.fraunhofer.de" },
 ]
