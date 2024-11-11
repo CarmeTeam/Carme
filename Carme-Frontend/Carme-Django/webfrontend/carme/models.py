@@ -57,7 +57,7 @@ class SlurmJob(models.Model):
     name = models.CharField(max_length=128, default='unknown')
     frontend = models.CharField(max_length=64, default='main')
     gpu_type = models.CharField(max_length=64, default='none')
-    node_name = models.CharField(max_length=128, default='none')
+    #node_name = models.CharField(max_length=128, default='none')
 
 class Image(models.Model):
     """ available software images """
@@ -120,8 +120,8 @@ class CarmeJobTable(models.Model):
     time_start = models.BigIntegerField()
     time_end = models.BigIntegerField()
     time_suspended = models.BigIntegerField()
-    gres_req = models.TextField()
-    gres_alloc = models.TextField()
+    #gres_req = models.TextField()
+    #gres_alloc = models.TextField()
     gres_used = models.TextField()
     wckey = models.TextField()
     track_steps = models.IntegerField()

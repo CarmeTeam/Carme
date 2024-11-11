@@ -1,21 +1,19 @@
 #from django.conf.urls import url
-from django.contrib import admin
-from django.contrib.auth import views as auth_views
-from django.views.generic.base import TemplateView
-from django.urls import include, path, re_path
-from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib import admin
+#from django.contrib.auth import views as auth_views
+#from django.views.generic.base import TemplateView
+from django.urls import include, path #, re_path
+from django.conf.urls.static import static
 from two_factor.urls import urlpatterns as tf_urls
 
 urlpatterns = [
-    re_path(r'^', include('carme.urls'), name='home'),
+    path('', include('carme.urls'), name='home'),
     path('', include(tf_urls)),
-    #url(r'^login/$', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    re_path(r'^logout/$', include('carme.urls'), name='logout'),
+    path('logout/', include('carme.urls'), name='logout'),
     path('carme/', include('carme.urls')),
-    re_path(r'^notifications/', include('django_nyt.urls')),
-    #re_path(r'^wiki/', include('wiki.urls')),
-    #path('todo/', include('todo.urls', namespace="todo")),
+    path('notifications/', include('django_nyt.urls')), # not used
+    path('wiki/', include('wiki.urls')),
     path('admin/', admin.site.urls),
     path('projects/',include('projects.urls',namespace='projects')),
 ]

@@ -8,28 +8,42 @@ _or in our case..._
 
 an open source framework to manage resources for **multiple users** running **interactive jobs** on a **Cluster** of (GPU) compute nodes.
 
-## **Follow us on Twitter**
+This documentation is divided in the following sections:
 
-&rarr; [#OpenCarme](https://twitter.com/open_carme)
+#### Introduction
 
-## **Presentations**
+- [Carme Presentation](#carme-presentation)
+- [Core Idea](#core-idea)
+- [Key features](#key-features)
 
-### Marketing Slides
-[CARME slides (05/2022)](Slides/[2022-05]--carme--pr-slides.pdf)
+#### Documentation
 
-### Selected Conference Presentations
+- [How to install Carme](#how-to-install-carme)
+- [How to use Carme](#how-to-use-carme)
+- [Roadmap](#roadmap)
+- [Releases](#releases)
 
-* [Slides from our talk at ISC18 06/2018](https://www.researchgate.net/publication/325967129_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
-* [Slides from our talk at LRZ 10/2018](https://www.researchgate.net/publication/328161743_Carme-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
-* [Slides from ISC 06/2019](https://www.researchgate.net/publication/334319039_Carme_-An_Open_Source_Framework_for_Multi-User_Interactive_Machine_Learning_on_Distributed_GPU-Systems)
+#### Team
+- [Authors](#authors)
+- [Contact](#contact)
+- [Sponsors](#sponsors)
 
-## **Core Idea**
+
+
+
+## Carme Presentation
+
+Refer to our marketing slides: 
+
+- [CARME slides (06/2024)](Slides/[2024-06]--carme--pr-slides.pdf)
+
+## Core Idea
 
 _We combine established open source ML and DS tools with HPC backends and use therefore_
 
 * [Singularity containers](https://sylabs.io)
 * [Anaconda environments](https://www.anaconda.com/distribution)
-* web based GUI frontends e.g. [Theia-IDE](https://theia-ide.org) and [JupyterLab](https://github.com/jupyterlab/jupyterlab)
+* web–based GUI frontends e.g. [Code-Server](https://github.com/coder/code-server) and [JupyterLab](https://github.com/jupyterlab/jupyterlab)
 * completely web frontend based  
   (OS independent, no installation on user side needed)
 * HPC job management and schedulers ([SLURM](https://slurm.schedmd.com))
@@ -43,8 +57,8 @@ _Job submission scheme_
 ## **Key Features**
 
 * **Open source**
-  * we use only opensource components that allow commercial usage
-  * *Carme* is open source, allowing commercial usage
+  * we use only open source components that allow commercial usage
+  * Carme is open source, allowing commercial usage
 * **Seamless integration with available HPC tools**
   * Job scheduling via **SLURM**
   * Native **LDAP** support for user authentication
@@ -55,38 +69,51 @@ _Job submission scheme_
   * Full user **information** (running jobs, cluster usage, news /  messages)
   * **Start/Stop jobs** within the web-interface
 * **Interactive jobs**
-  * **Flexible access to GPUs**
-  * Access via **web driven GUIs** like Theia-IDE or JupyterLab
+  * **Flexible access to accelerators**
+  * Access via **web driven GUIs** like code server or JupyterLab
   * Job specific **monitoring information** in the web-interface  
-    (GPU/CPU utilization, memory usage, access to TensorBoard)
+    (GPU/FPGA/CPU utilization, memory usage, access to TensorBoard)
 * **Distributed multi-node and/or multi-gpu jobs**
   * **Easy** and **intuitive** job scheduling
   * Directly use **GPI**, **GPI-Space**, **MPI**, **HP-DLF** and **Horovod** within the jobs
 * **Full control about accounting and resource management**
-  * Job scheduling according to **user specific roles**
-  * **Compute resources** are **user exclusive**
+  * Job scheduling according to **user/project specific roles**
+  * **Compute resources** are **user/project exclusive**
 * **User maintained, containerized environments**
   * **Singularity containers**  
-    (runs as normal user, GPU, Ethernet and Infiband support)
+    (runs as normal user, GPU, Ethernet and Infiniband support)
   * **Anaconda Environments**  
     (easy updates, project / user specific environments)
   * **Built-in matching between GPU driver and ML/DL tools**
 
+## How to install Carme
+
+Refer to our [installation documentation](https://docs.open-carme.org/InstallDoc).
+
+## How to use Carme
+
+Refer to our [documentation](https://docs.open-carme.org).
+
 ## **Roadmap**
 
-* **11/2022: SC release**
-  * improvements
-    * web-frontend redesign
-  * planed features
-    * full batch job support
-    * FPGA support
-    * CPU only jobs
-    * new job monitoring (for users)
-    * batch job support (beta)
+#### Current release:
+* **06/2024**
+  * Carme-demo 0.9.9: Installation script to test Carme in single-devices and clusters. Refer to our [installation documentation](https://docs.open-carme.org/InstallDoc).
+  * Carme r0.9.9: Automatically syncs slurm.conf with Carme database.
+  * Documentation is extended.
 
+#### Next release: 
+* **10/2024**
+  * Carme-demo 1.0: 
+    * Adapted to GPU clusters with pre-set SLURM.
+    * Adapted to RedHat (currently is Debian-based).
+    * Adapted to multi-users (currently is single-user).
+  * Carme r1.0:
+    * Carme runs in AWS (Amazon Web Services).
+    
 ## Releases
 
-* 04/2018: _Carme prototype_ at ITWM
+* 04/2018: Carme prototype at ITWM
 
 * 03/2019: r0.3.0 (first public release)
 
@@ -104,29 +131,27 @@ _Job submission scheme_
 
 * 05/2022: r0.9.5
 
-* 09/2022: **r0.9.6** (latest)
+* 09/2022: r0.9.6
 
+* 08/2023: r0.9.7
 
-## **Documentation**
+* 12/2023: r0.9.8
 
-Visit our documentation at [github](https://carmeteam.github.io/Carme-Docu/).
+* 06/2024: **r0.9.9 (latest)**
 
+## Authors
 
-## **Who is behind Carme?**
-
-_Carme_ is developed at the [machine learning group](http://itwm.fraunhofer.de/ml) of the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
+Carme is developed by the [Competence Center for High Performance Computing](https://www.itwm.fraunhofer.de/en/departments/hpc.html) at [Fraunhofer ITWM](https://www.itwm.fraunhofer.de).
 
 <img src="Images/logo-itwm.png" width="200">
 
-_NOTE:_ We are open for contributions!
+## Contact
 
-## **Contact**
+&rarr; [christian.ortiz@itwm.fraunhofer.de](christian.ortiz@itwm.fraunhofer.de)
 
-&rarr; dominik.strassel@itwm.fraunhofer.de
+## Sponsors
 
-## **Sponsors**
-
-**The development of *Carme* is financed by research grants from**
+**The development of Carme is financed by research grants from**
 
 <img src="Images/logo-bmbf.png" width="200" height="100">  
 

@@ -45,7 +45,7 @@ class ImageAdmin(admin.ModelAdmin):
 """
 class SlurmJobAdmin(admin.ModelAdmin):
     list_display = ('frontend','image_name', 'user', 'num_nodes', 'num_gpus', 'slurm_id',
-                    'status', 'ip', 'url_suffix', 'nb_port', 'tb_port', 'ta_port', 'gpu_ids','gpu_type','node_name')
+                    'status', 'ip', 'url_suffix', 'nb_port', 'tb_port', 'ta_port', 'gpu_ids','gpu_type')
     list_display_links = ('image_name', 'user')
     search_fields = ('image_name', 'user', 'slurm_id', 'status')
     list_per_page = 25

@@ -34,17 +34,17 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) .tree-node.children {
+  .tree-node.children {
     background-image: url(disclosure-down-white.png);
   }
-  html:not([data-theme="light"]) .tree-node.closed {
+  .tree-node.closed {
     background-image: url(disclosure-right-white.png);
   }
-  html:not([data-theme="light"]) .drag-handle {
+  .drag-handle {
     background-image: url(arrow-move-white.png);
   }
 
-  html:not([data-theme="light"]) #result_list tbody tr:focus {
+  #result_list tbody tr:focus {
     background-color: var(--selected-row, #00363a) !important;
     outline: 0px;
   }

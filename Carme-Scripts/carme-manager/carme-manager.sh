@@ -177,6 +177,7 @@ Arguments:
   --slurm-add-user                              add a user to the SLURM DB (interactive)
   --slurm-modify-user                           modify entries of a specific SLURM user (interactive)
   --slurm-delete-user                           delete a user from the SLURM DB (interactive)
+  --slurm-import-cluster-info                   import cluster information from SLURM to the CARME DB
 
   --create-mgmt-certs                           create new certificates for backend, frontend and slurm communication
   --create-user-certs                           create new user certificates for carme (interactive)
@@ -192,7 +193,7 @@ Arguments:
 
 # define argument list for bash completion -----------------------------------------------------------------------------------------
 function print_arglist () {
-  arg_list=( "-h" "--help" "--version" "--reset-config-file" "--create-config-files" "--deploy-config-files" "--copy-files-to-compute-nodes" "--start-backend-service" "--stop-backend-service" "--status-backend-service" "--build-frontend-image" "--copy-frontend-image" "--start-frontend-service" "--stop-frontend-service" "--status-frontend-service" "--build-proxy-image" "--copy-proxy-image" "--start-proxy-service" "--stop-proxy-service" "--status-proxy-service" "--carme-restart" "--carme-full-restart" "--ldap-add-user" "--ldap-change-user-pw" "--ldap-reset-user-pw" "--slurm-add-user" "--slurm-modify-user" "--slurm-delete-user" "--create-mgmt-certs" "--create-user-certs" "--create-single-user-cert" "--show-frontend-django-log" "--show-frontend-apache-log" "--show-proxy-log" "--list-slurmd-prolog-logs" "--list-slurmd-epilog-logs" "--show-slurmd-prolog-log" "--show-slurmd-epilog-log" "--list-slurmctld-prolog-logs" "--show-slurmctld-prolog-log" "--list-slurmctld-epilog-logs" "--show-slurmctld-epilog-log")
+  arg_list=( "-h" "--help" "--version" "--reset-config-file" "--create-config-files" "--deploy-config-files" "--copy-files-to-compute-nodes" "--start-backend-service" "--stop-backend-service" "--status-backend-service" "--build-frontend-image" "--copy-frontend-image" "--start-frontend-service" "--stop-frontend-service" "--status-frontend-service" "--build-proxy-image" "--copy-proxy-image" "--start-proxy-service" "--stop-proxy-service" "--status-proxy-service" "--carme-restart" "--carme-full-restart" "--ldap-add-user" "--ldap-change-user-pw" "--ldap-reset-user-pw" "--slurm-add-user" "--slurm-modify-user" "--slurm-delete-user" "--slurm-import-cluster-info" "--create-mgmt-certs" "--create-user-certs" "--create-single-user-cert" "--show-frontend-django-log" "--show-frontend-apache-log" "--show-proxy-log" "--list-slurmd-prolog-logs" "--list-slurmd-epilog-logs" "--show-slurmd-prolog-log" "--show-slurmd-epilog-log" "--list-slurmctld-prolog-logs" "--show-slurmctld-prolog-log" "--list-slurmctld-epilog-logs" "--show-slurmctld-epilog-log")
 
   echo "${arg_list[@]}"
 
@@ -580,6 +581,15 @@ function slurm_delete_user () {
 }
 
 
+function slurm_import_cluster_info () {
+# import cluster information from SLURM to the CARME DB
+
+  bash "${CARME_SCRIPTS_PATH}/slurm/mgmt-scripts/carme-slurm-import-cluster-info.sh"
+
+  return 0
+}
+
+
 function create_mgmt_certs () {
 # create new certificates for backend, frontend and slurm communication
 
@@ -792,6 +802,10 @@ else
      ;;
      --slurm-delete-user)
        slurm_delete_user
+       shift
+     ;;
+     --slurm-import-cluster-info)
+       slurm_import_cluster_info
        shift
      ;;
      --create-mgmt-certs)
