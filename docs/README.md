@@ -97,7 +97,7 @@ Refer to our [documentation](https://docs.open-carme.org).
 ## **Roadmap**
 
 #### Current release:
-* **06/2024**
+* **11/2024**
   * Carme-demo 1.0: 
     * Installation script to test Carme in Debian and RedHat based systems. Refer to our [installation documentation](https://docs.open-carme.org/InstallDoc).
     * Adapted to GPU clusters with pre-set SLURM and MySQL.
@@ -141,7 +141,7 @@ Refer to our [documentation](https://docs.open-carme.org).
 
 * 06/2024: r0.9.9
 
-* 11/2025: **r1.0 (latest)**
+* 11/2024: **r1.0 (latest)**
 
 ## Authors
 
