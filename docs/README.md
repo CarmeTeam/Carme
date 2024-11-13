@@ -98,17 +98,19 @@ Refer to our [documentation](https://docs.open-carme.org).
 
 #### Current release:
 * **06/2024**
-  * Carme-demo 0.9.9: Installation script to test Carme in single-devices and clusters. Refer to our [installation documentation](https://docs.open-carme.org/InstallDoc).
-  * Carme r0.9.9: Automatically syncs slurm.conf with Carme database.
-  * Documentation is extended.
+  * Carme-demo 1.0: 
+    * Installation script to test Carme in Debian and RedHat based systems. Refer to our [installation documentation](https://docs.open-carme.org/InstallDoc).
+    * Adapted to GPU clusters with pre-set SLURM and MySQL.
+    * Adapted to multi-users in Debian based systems.
+    * Adapted to single-users in RedHat based systems.
+  * Carme r1.0:  
+    * Jupyter notebooks start in the Home directory.
 
 #### Next release: 
-* **10/2024**
-  * Carme-demo 1.0: 
-    * Adapted to GPU clusters with pre-set SLURM.
-    * Adapted to RedHat (currently is Debian-based).
-    * Adapted to multi-users (currently is single-user).
-  * Carme r1.0:
+* **04/2025**
+  * Carme-demo 1.1: 
+    * Adapted to systems with pre-existing LDAP. 
+  * Carme r1.1:
     * Carme runs in AWS (Amazon Web Services).
     
 ## Releases
@@ -137,7 +139,9 @@ Refer to our [documentation](https://docs.open-carme.org).
 
 * 12/2023: r0.9.8
 
-* 06/2024: **r0.9.9 (latest)**
+* 06/2024: r0.9.9
+
+* 11/2025: **r1.0 (latest)**
 
 ## Authors
 

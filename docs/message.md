@@ -2,8 +2,7 @@
 
 Latest news:
 
-- Carme will be part of <a href="https://sc24.supercomputing.org/" target="_blank">SC 2024</a>. 
-- New release: Oct 2024.
+- Carme next release: April 2025.
 
 If you have any questions, contact us:
 
