@@ -33,7 +33,12 @@ This documentation is divided in the following sections:
 
 ## Carme Presentation
 
-Refer to our marketing slides: 
+Carme is simple and easy to use. Take a look at our Dashboard page.
+
+<img src="Images/dashboard-carme.png" width="740">
+
+With 2 clicks you are already working in your project using HPC resources. 
+Refer to our marketing slides for more: 
 
 - [CARME slides (06/2024)](Slides/[2024-06]--carme--pr-slides.pdf)
 
