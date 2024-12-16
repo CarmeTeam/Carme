@@ -156,7 +156,7 @@ Carme is developed by the [Competence Center for High Performance Computing](htt
 
 ## Contact
 
-&rarr; [christian.ortiz@itwm.fraunhofer.de](christian.ortiz@itwm.fraunhofer.de)
+&rarr; [carme@itwm.fraunhofer.de](carme@itwm.fraunhofer.de)
 
 ## Sponsors
 
