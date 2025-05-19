@@ -66,6 +66,8 @@ cat << EOF >> ${FILE_PROXY_STATIC}
 # static.toml
 [http.routers]
   [http.routers.dashboard]
+    entryPoints = ["dashboard"]
+    rule = "Host(\`localhost\`)"
     service = "api@internal"
 
   [http.routers.carme]
