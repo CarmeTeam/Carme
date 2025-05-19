@@ -1,2 +1,0 @@
-[console_scripts]
-carme-backend = carme_backend.server:start

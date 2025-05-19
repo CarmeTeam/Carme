@@ -36,3 +36,5 @@ Carme-Scripts/SSL
 Carme-Backend/SSL
 Carme-Backend/Python/dist
 
+# Python packaging
+*.egg-info/
