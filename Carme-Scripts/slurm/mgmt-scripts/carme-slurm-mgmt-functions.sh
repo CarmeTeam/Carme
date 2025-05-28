@@ -59,7 +59,7 @@ function read_and_check_slurm_limitations () {
   # determine the slurm account to add the user to ----------------------------------------------
   echo "determine account for '${1}'"
 
-  SLURM_ACCOUNTS_AVAIL=( "$(sacctmgr -n list account format=Account)" )
+  SLURM_ACCOUNTS_AVAIL=( "$(sacctmgr -n list account format="Account%100")" )
   helper_array=()
 
   for value in ${SLURM_ACCOUNTS_AVAIL[*]};do
