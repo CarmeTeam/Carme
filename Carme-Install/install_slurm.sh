@@ -520,10 +520,10 @@ Type a short name to identify this GPU. [short name]: "
   elif [[ ${CARME_SYSTEM} == "multi" ]]; then
     
     for COMPUTE_NODE in ${CARME_NODE_LIST[@]}; do
-      ssh ${COMPUTE_NODE} 'nvidia-smi --query-gpu=gpu_name --format=csv >/dev/null 2>&1'
+      RESULT=$(ssh ${COMPUTE_NODE} 'nvidia-smi --query-gpu=gpu_name --format=csv >/dev/null 2>&1; echo $?')
 
       # set cluster compute node as cpu or gpu
-      if [ $? -eq 0 ]; then
+      if [ "$RESULT" = "0" ]; then
         REPLY=""
         CHECK_DEVICE_MESSAGE=$"
 Do you want compute node ${COMPUTE_NODE} to be a CPU or GPU node (both are not allowed)?
